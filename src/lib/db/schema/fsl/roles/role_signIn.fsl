@@ -1,0 +1,5 @@
+role role_signIn {
+  privileges signInOrSignUpWithSocialProvider {
+    call
+  }
+}

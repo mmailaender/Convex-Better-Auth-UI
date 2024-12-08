@@ -1,0 +1,10 @@
+@role(server)
+function createAccessAndRefreshToken(user: User): { access: Token, refresh: Token } {
+  let refreshToken = createRefreshToken(user)
+  let accessToken = createAccessToken(user, refreshToken)
+
+  {
+    access: accessToken,
+    refresh: refreshToken,
+  }
+}

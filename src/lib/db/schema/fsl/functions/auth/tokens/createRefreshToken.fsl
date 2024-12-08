@@ -1,0 +1,14 @@
+@role(server)
+function createRefreshToken(user: User): Token {
+  let REFRESH_TOKEN_LIFETIME_SECONDS = 28800; // 8 hours
+
+  Token.create({
+    document: user,
+    data: {
+      type: "refresh",
+    },
+    ttl: Time.now().add(REFRESH_TOKEN_LIFETIME_SECONDS,
+"seconds"
+    ),
+  })
+}

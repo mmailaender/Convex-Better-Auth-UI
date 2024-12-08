@@ -1,0 +1,4 @@
+@role(server)
+function verifyUserExists(email: String): Boolean {
+  User.firstWhere(.email == email).exists()
+};

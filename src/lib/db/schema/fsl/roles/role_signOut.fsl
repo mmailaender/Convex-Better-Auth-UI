@@ -1,0 +1,8 @@
+role role_signOut {
+  privileges signOut {
+    call
+  }
+  membership User {
+    predicate ( (doc) => isCalledWithAccessToken() )
+  }
+}

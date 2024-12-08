@@ -1,0 +1,19 @@
+// Before calling this function, the user needs to have completed the social provider sign-in to receive all user information from the provider.
+// @param socialProvider - The normalized results from the social provider storing the user information
+@role(server)
+function signInOrSignUpWithSocialProvider(socialProvider) {
+  let email = socialProvider.email
+  let providerAccountId = socialProvider.userId
+  let provider = socialProvider.provider
+
+  if(!verifySocialAccountExists(providerAccountId, provider)) {
+    let firstName = socialProvider.firstName
+    let lastName = socialProvider.lastName
+    let image = socialProvider.image
+    
+    createSocialProviderAccount(firstName, lastName, email, image, provider, providerAccountId)
+    signInWithSocialProvider(provider, providerAccountId)
+  } else {
+    signInWithSocialProvider(provider, providerAccountId)
+  }
+}

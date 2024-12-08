@@ -1,0 +1,7 @@
+collection Account {
+    user: Ref<User>
+    provider: "Github" | "Google" | "Facebook" | "Passkey"
+    providerAccountId: String
+
+    unique [.user, .provider]
+}

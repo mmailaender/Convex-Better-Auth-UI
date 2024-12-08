@@ -1,0 +1,46 @@
+@role(server)
+function createSocialProviderAccount(firstName: String, lastName: String, email: String, image: String, provider: "Github" | "Facebook" | "Passkey" | "Google", providerAccountId: String): Account {
+  let user = User.firstWhere(.email == email)
+  
+  if(user == null) {
+    let accountId = newId()
+
+    Account.create({
+      id: accountId,
+      provider: provider,
+      providerAccountId: providerAccountId,
+      user: User.create({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        image: image,
+        emailVerified: Time.now(),
+        accounts: [Account.byId(accountId)]
+      })
+    })
+  } else {
+    let account = Account.firstWhere(.user == user && .provider == provider)
+
+    let account = if(account == null) {
+      let account = Account.create({
+        provider: provider,
+        providerAccountId: providerAccountId,
+        user: user!
+      })
+      
+      let accounts = if(user!.accounts != null) {
+        user!.accounts!.append(account)
+      } else {
+        [account]
+      }
+    
+      user!.update({
+        accounts: accounts 
+      })
+
+      account
+    } 
+
+    account!
+  }
+}

@@ -1,0 +1,10 @@
+@role(server)
+function signOut() {
+  let accessToken = Query.token()
+  let user = Query.identity()
+
+  // Delete Refresh Token
+  accessToken!.data!.refresh.delete()
+  // Delete Access Token
+  accessToken!.delete()
+}

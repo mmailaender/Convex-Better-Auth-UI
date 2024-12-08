@@ -1,0 +1,21 @@
+@role(server)
+function signInWithSocialProvider(provider: "Github" | "Facebook" | "Passkey" | "Google", providerAccountId: String): { user: User, tokens: { access: Token, refresh: Token }} {
+
+  let user = Account.firstWhere(
+    .providerAccountId == providerAccountId && .provider == provider
+  )?.user
+  
+  if(user != null) {
+    let tokens = createAccessAndRefreshToken(user!)
+
+    {
+      user: user!,
+      tokens: tokens,
+    }
+  } else {
+    abort({
+      code: "account_not_found",
+      message: "No account or user found."
+    })
+  }
+}

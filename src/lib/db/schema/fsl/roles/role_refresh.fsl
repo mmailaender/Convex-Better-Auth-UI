@@ -1,0 +1,8 @@
+role role_refreshAccessToken {
+  privileges refreshAccessToken {
+    call
+  }
+  membership User {
+    predicate ( (doc) => isCalledWithRefreshToken() )
+  }
+}

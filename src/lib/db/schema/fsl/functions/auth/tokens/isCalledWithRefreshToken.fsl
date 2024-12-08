@@ -1,0 +1,5 @@
+@role(server)
+function isCalledWithRefreshToken() {
+  let token = Query.token()
+  token != null && token?.data != null && token?.data?.type == "refresh"
+}

@@ -1,0 +1,13 @@
+@role(server)
+function refreshAccessToken() {
+  let identity: Any = Query.identity()!
+  let user: User = identity
+  
+  // Delete Token to prevent reuse
+  Query.token()!.delete()
+  
+  {
+    user: user,
+    token: createAccessAndRefreshToken(user)
+  } 
+}
