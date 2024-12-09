@@ -1,13 +1,15 @@
 @role(server)
-function refreshAccessToken() {
+function refreshAccessToken(): { access: Token, refresh: Token } {
   let identity: Any = Query.identity()!
   let user: User = identity
+ 
+  let refreshToken = Query.token()!
+  
+  // Delete AccessToken if a new AccessToken was requested, before the old one was expired.
+  Token.firstWhere(.data?.refresh == refreshToken)?.delete()
   
   // Delete Token to prevent reuse
-  Query.token()!.delete()
+  refreshToken.delete()
   
-  {
-    user: user,
-    token: createAccessAndRefreshToken(user)
-  } 
+  createAccessAndRefreshToken(user) 
 }

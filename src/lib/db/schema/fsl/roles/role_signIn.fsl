@@ -1,5 +1,8 @@
 role role_signIn {
-  privileges signInOrSignUpWithSocialProvider {
+  privileges signUpWithSocialProvider {
+    call
+  }
+  privileges signInWithSocialProvider {
     call
   }
 }

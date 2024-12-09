@@ -6,7 +6,7 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
     let accountId = newId()
     let userId = newId()
 
-    let account = Account.create({
+    Account.create({
       id: accountId,
       provider: provider,
       providerAccountId: providerAccountId,
@@ -14,19 +14,12 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
         id: userId,
         firstName: firstName,
         lastName: lastName,
+        image: image,
         email: email,
         emailVerified: Time.now(),
         accounts: [Account.byId(accountId)]
       })
     })
-    
-    if(image != null) {
-      User.byId(userId)!.update({
-        image: image
-      })
-    }
-    
-    account
   } else {
     let account = Account.firstWhere(.user == user && .provider == provider)
 
@@ -37,18 +30,20 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
         user: user!
       })
       
-      let accounts = if(user!.accounts != null) {
+      let userAccounts = if(user!.accounts != null) {
         user!.accounts!.append(account)
       } else {
         [account]
       }
     
       user!.update({
-        accounts: accounts 
+        accounts: userAccounts 
       })
 
       account
-    } 
+    } else { 
+      account
+    }
 
     account!
   }
