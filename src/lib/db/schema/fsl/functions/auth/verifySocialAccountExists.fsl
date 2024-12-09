@@ -3,5 +3,5 @@ function verifySocialAccountExists(providerAccountId, provider) {
   Account.firstWhere((account) => {
     account.providerAccountId == providerAccountId
 && account.provider == provider
-  }).exists()
+  }) != null
 };

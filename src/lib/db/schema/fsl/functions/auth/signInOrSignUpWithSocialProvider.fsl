@@ -1,7 +1,7 @@
 // Before calling this function, the user needs to have completed the social provider sign-in to receive all user information from the provider.
 // @param socialProvider - The normalized results from the social provider storing the user information
 @role(server)
-function signInOrSignUpWithSocialProvider(socialProvider) {
+function signInOrSignUpWithSocialProvider(socialProvider: {email: String, userId: String, provider: "Github" | "Facebook" | "Passkey" | "Google" , firstName: String, lastName: String, image: String | Null}): { user: User, tokens: { access: Token, refresh: Token }} {
   let email = socialProvider.email
   let providerAccountId = socialProvider.userId
   let provider = socialProvider.provider
