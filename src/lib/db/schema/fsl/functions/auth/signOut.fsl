@@ -1,4 +1,3 @@
-@role(server)
 function signOut() {
   let accessToken = Query.token()
   let user = Query.identity()

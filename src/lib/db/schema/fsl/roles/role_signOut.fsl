@@ -2,6 +2,9 @@ role role_signOut {
   privileges signOut {
     call
   }
+  privileges signOutFromAllDevices {
+    call
+  }
   membership User {
     predicate ( (doc) => isCalledWithAccessToken() )
   }

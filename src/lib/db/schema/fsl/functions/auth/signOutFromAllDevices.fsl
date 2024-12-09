@@ -1,0 +1,5 @@
+function signOutFromAllDevices() {
+  let user = Query.identity()
+  
+  Token.all().where(.data?.user == user).forEach(.delete())
+}
