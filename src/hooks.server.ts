@@ -1,9 +1,10 @@
 import { TokenBucket } from "$lib/auth/rate-limit";
-import { validateSessionToken, setSessionTokenCookie, deleteSessionTokenCookie } from "$lib/auth/sign-in/session";
+import { refreshAccessToken, setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/sign-in/session";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import type { Handle } from '@sveltejs/kit';
 import { i18n } from '$lib/i18n';
+import { getUser } from "$lib/auth/sign-in/user";
 
 
 const handleParaglide: Handle = i18n.handle();
@@ -31,21 +32,21 @@ const rateLimitHandle: Handle = async ({ event, resolve }) => {
 };
 
 const authHandle: Handle = async ({ event, resolve }) => {
-    const token = event.cookies.get("session") ?? null;
-	if (token === null) {
-        event.locals.user = null;
-		event.locals.session = null;
-		return resolve(event);
+    const accessToken = event.cookies.get("access_token") ?? null;
+	if (accessToken === null) {
+		const refreshToken = event.cookies.get("refresh_token") ?? null;
+		if (refreshToken === null) {
+			event.locals.user = null;
+			// event.locals.session = null;
+			return resolve(event);
+		} else {
+			const {access, refresh} = await refreshAccessToken(refreshToken);
+			setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
+			setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+		}
 	}
     
-	const { session, user } = await validateSessionToken(token);
-	if (session !== null) {
-        setSessionTokenCookie(event, token, session.expiresAt);
-	} else {
-        deleteSessionTokenCookie(event);
-	}
-    
-	event.locals.session = session;
+	const user = await getUser(event.cookies.get("access_token")!);
 	event.locals.user = user;
 	return resolve(event);
 };

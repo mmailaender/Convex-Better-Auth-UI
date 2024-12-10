@@ -1,0 +1,23 @@
+role role_user {
+  privileges User {
+    read {
+      predicate (doc => 
+        doc == Query.identity()
+      )
+    }
+    write {
+      predicate ((oldDoc, newDoc) => 
+        oldDoc == Query.identity()
+      )
+    }
+  }
+  privileges signOut {
+    call
+  }
+  privileges signOutFromAllDevices {
+    call
+  }
+  membership User {
+    predicate ( (doc) => isCalledWithAccessToken() )
+  }
+}

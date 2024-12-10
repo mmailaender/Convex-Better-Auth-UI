@@ -1,5 +1,5 @@
 @role(server)
-function verifySocialAccountExists(providerAccountId, provider) {
+function verifySocialAccountExists(provider, providerAccountId) {
   Account.firstWhere((account) => {
     account.providerAccountId == providerAccountId
 && account.provider == provider

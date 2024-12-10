@@ -5,4 +5,10 @@ role role_signIn {
   privileges signInWithSocialProvider {
     call
   }
+  privileges verifyUserExists {
+    call
+  }
+  privileges verifySocialAccountExists {
+    call
+  }
 }

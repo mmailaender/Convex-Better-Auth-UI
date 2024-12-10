@@ -1,40 +1,84 @@
-import { db } from "./db";
+import { sClient, uClient } from '$lib/db/client';
+import { fql, TimeStub, type Document } from 'fauna';
 
-export function createUser(githubId: number, email: string, username: string): User {
-	const row = db.queryOne("INSERT INTO user (github_id, email, username) VALUES (?, ?, ?) RETURNING user.id", [
-		githubId,
-		email,
-		username
-	]);
-	if (row === null) {
-		throw new Error("Unexpected error");
-	}
-	const user: User = {
-		id: row.number(0),
-		githubId,
-		email,
-		username
-	};
-	return user;
+export async function signUpWithSocialProvider(
+	githubId: string,
+	email: string,
+	username: string
+): Promise<Tokens> {
+	const response = await sClient.query<Tokens>(
+		fql`signUpWithSocialProvider({ email: ${email}, userId: ${githubId}, provider: "Github", firstName: ${username}, lastName: ${username} })`
+	);
+
+	console.log("response: ", response)
+
+	return response.data;
 }
 
-export function getUserFromGitHubId(githubId: number): User | null {
-	const row = db.queryOne("SELECT id, github_id, email, username FROM user WHERE github_id = ?", [githubId]);
-	if (row === null) {
-		return null;
-	}
-	const user: User = {
-		id: row.number(0),
-		githubId: row.number(1),
-		email: row.string(2),
-		username: row.string(3)
-	};
-	return user;
+export async function signInWithSocialProvider(provider: Provider, providerAccountId: string): Promise<Tokens> {
+	const response = await sClient.query<Tokens>(
+		fql`signInWithSocialProvider(${provider}, ${providerAccountId})`
+	);
+
+	return response.data
 }
 
-export interface User {
-	id: number;
+/**
+ * 
+ * @returns Returns the current user based on the access token
+ */
+export async function getUser(accessToken: string): Promise<User> {
+	const response = await uClient(accessToken).query<User>(fql`Query.identity()`);
+	return response.data
+}
+
+export async function verifyUserExists(email: string): Promise<boolean> {
+	const response = await sClient.query<boolean>(fql`verifyUserExists(${email})`);
+	return response.data
+}
+
+export async function verifySocialAccountExists(provider: Provider, providerAccountId: string): Promise<boolean> {
+	console.log("provider: ", provider)
+	console.log("providerAccountId: ", providerAccountId)
+	const response = await sClient.query<boolean>(fql`verifySocialAccountExists(${provider}, ${providerAccountId})`);
+	return response.data
+}
+
+export type User = Document & {
+	firstName: string;
+	lastName: string;
 	email: string;
-	githubId: number;
-	username: string;
-}
+	emailVerified: TimeStub;
+	image: string | null;
+	accounts: Account[];
+};
+
+export type Account = Document & {
+	user: User;
+	provider: Provider;
+	providerAccountId: string;
+};
+
+export type Provider = 'Github' | 'Google' | 'Facebook' | 'Passkey';
+
+export type Tokens = {
+	access: AccessToken;
+	refresh: RefreshToken;
+};
+
+export type AccessToken = Document & {
+	document: User;
+	secret: string | null;
+	data: {
+		type: 'access';
+		refresh: RefreshToken;
+	};
+};
+
+export type RefreshToken = Document & {
+	document: User;
+	secret: string | null;
+	data: {
+		type: 'refresh';
+	};
+};
