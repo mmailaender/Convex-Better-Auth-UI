@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Email from './email.svelte';
-	import SocialProvider from './social-provider.svelte';
+	import SocialProvider from '../social/provider.svelte';
 </script>
 
 <div class="card flex w-full max-w-md flex-col gap-6 border p-6 text-center border-surface-200-800">

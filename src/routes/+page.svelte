@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { User } from '$lib/auth/sign-in/user';
+	import type { User } from '$lib/auth/user';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

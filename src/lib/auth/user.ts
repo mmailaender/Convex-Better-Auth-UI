@@ -38,8 +38,6 @@ export async function verifyUserExists(email: string): Promise<boolean> {
 }
 
 export async function verifySocialAccountExists(provider: Provider, providerAccountId: string): Promise<boolean> {
-	console.log("provider: ", provider)
-	console.log("providerAccountId: ", providerAccountId)
 	const response = await sClient.query<boolean>(fql`verifySocialAccountExists(${provider}, ${providerAccountId})`);
 	return response.data
 }

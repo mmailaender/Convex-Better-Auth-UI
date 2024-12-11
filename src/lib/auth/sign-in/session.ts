@@ -1,4 +1,4 @@
-import type { Tokens, User } from './user';
+import type { Tokens, User } from '../user';
 import type { RequestEvent } from '@sveltejs/kit';
 import { uClient } from '$lib/db/client';
 import { fql } from 'fauna';

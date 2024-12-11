@@ -4,7 +4,7 @@ import { sequence } from "@sveltejs/kit/hooks";
 
 import type { Handle } from '@sveltejs/kit';
 import { i18n } from '$lib/i18n';
-import { getUser } from "$lib/auth/sign-in/user";
+import { getUser } from "$lib/auth/user";
 
 
 const handleParaglide: Handle = i18n.handle();

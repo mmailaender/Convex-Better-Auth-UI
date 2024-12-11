@@ -1,5 +1,5 @@
 <script>
-	import { Github,Google, Facebook, Apple } from '../social/icons';
+	import { Github,Google, Facebook, Apple } from './icons';
 
 	const handleGoogleLogin = () => {
 		// Add your Google login logic here
