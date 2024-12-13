@@ -1,4 +1,4 @@
-import { TokenBucket } from "$lib/auth/rate-limit";
+import { RefillingTokenBucket } from "$lib/auth/rate-limit";
 import { refreshAccessToken, setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/sign-in/session";
 import { sequence } from "@sveltejs/kit/hooks";
 
@@ -9,7 +9,7 @@ import { getUser } from "$lib/auth/user";
 
 const handleParaglide: Handle = i18n.handle();
 
-const bucket = new TokenBucket<string>(100, 1);
+const bucket = new RefillingTokenBucket<string>(100, 1);
 
 const rateLimitHandle: Handle = async ({ event, resolve }) => {
     // Note: Assumes X-Forwarded-For will always be defined.

@@ -1,4 +1,4 @@
-import { github } from '$lib/auth/sign-in/oauth';
+import { github } from '$lib/auth/social/oauth';
 import { ObjectParser } from '@pilcrowjs/object-parser';
 import {
 	signUpWithSocialProvider,

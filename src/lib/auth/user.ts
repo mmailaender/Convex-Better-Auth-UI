@@ -1,5 +1,6 @@
 import { sClient, uClient } from '$lib/db/client';
 import { fql, TimeStub, type Document } from 'fauna';
+import type { WebAuthnUserCredential } from './server/webauthn';
 
 export async function signUpWithSocialProvider(
 	githubId: string,
@@ -10,7 +11,18 @@ export async function signUpWithSocialProvider(
 		fql`signUpWithSocialProvider({ email: ${email}, userId: ${githubId}, provider: "Github", firstName: ${username}, lastName: ${username} })`
 	);
 
-	console.log("response: ", response)
+	return response.data;
+}
+
+export async function signUpWithPasskey(
+	credential: WebAuthnUserCredential,
+	firstName: string,
+	lastName: string,
+	email: string
+): Promise<Tokens> {
+	const response = await sClient.query<Tokens>(
+		fql`signUpWithPasskey(${credential}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`
+	);
 
 	return response.data;
 }
@@ -18,6 +30,15 @@ export async function signUpWithSocialProvider(
 export async function signInWithSocialProvider(provider: Provider, providerAccountId: string): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
 		fql`signInWithSocialProvider(${provider}, ${providerAccountId})`
+	);
+
+	return response.data
+}
+
+
+export async function signInWithPasskey(providerAccountId: string): Promise<Tokens> {
+	const response = await sClient.query<Tokens>(
+		fql`signInWithPassKey(${providerAccountId})`
 	);
 
 	return response.data

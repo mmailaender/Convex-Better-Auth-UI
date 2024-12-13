@@ -1,0 +1,48 @@
+@role(server)
+function createPasskeyAccount(credential: {id: String, algorithmId: Long, publicKey: Array<Int>}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): Account {
+  let user = User.firstWhere(.email == userData.email)
+  let accountId = ID(credential.id)
+  
+  if(user == null) {
+    Account.create({
+      id: accountId,
+      provider: "Passkey",
+      publicKey: credential.publicKey,
+      algorithmId: credential.algorithmId,
+      user: User.create({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        image: userData.image,
+        email: userData.email,
+        emailVerified: Time.now(),
+        accounts: [Account.byId(accountId)]
+      })
+    })
+  } else {
+    let account = Account.firstWhere(.user == user && .provider == "Passkey")
+
+    let account = if(account == null) {
+      let account = Account.create({
+        id: accountId,
+        provider: "Passkey",
+        publicKey: credential.publicKey,
+        algorithmId: credential.algorithmId,
+        user: user!
+      })
+      
+      let userAccounts = if(user!.accounts != null) {
+        user!.accounts!.append(account)
+      } else {
+        [account]
+      }
+    
+      user!.update({
+        accounts: userAccounts 
+      })
+
+      account
+    } 
+
+    account!
+  }
+}

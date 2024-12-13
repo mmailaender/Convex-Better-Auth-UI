@@ -1,0 +1,17 @@
+/**
+ * @param {accountId} - The id of the Account associated with the passkey. Stored also in the authenticator of the user as `credential.id`
+ */
+@role(server)
+function signInWithPasskey(accountId: String): { access: Token, refresh: Token } {
+
+  let user = Account.byId(ID(accountId))!.user
+  
+  if(user != null) {
+    createAccessAndRefreshToken(user!)
+  } else {
+    abort({
+      code: "account_not_found",
+      message: "No account or user found."
+    })
+  }
+}
