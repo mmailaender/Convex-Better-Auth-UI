@@ -2,7 +2,7 @@ collection Account {
     user: Ref<User>
     provider: "Github" | "Google" | "Facebook" | "Passkey"
     providerAccountId: String | Null
-    publicKey: Array<Int> | Null
+    publicKey: Bytes | Null
     algorithmId: Long | Null
 
     unique [.user, .provider]

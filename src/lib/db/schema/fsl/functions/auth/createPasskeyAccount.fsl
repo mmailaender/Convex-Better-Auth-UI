@@ -1,5 +1,5 @@
 @role(server)
-function createPasskeyAccount(credential: {id: String, algorithmId: Long, publicKey: Array<Int>}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): Account {
+function createPasskeyAccount(credential: {id: String, algorithmId: Long, publicKey: Bytes}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): Account {
   let user = User.firstWhere(.email == userData.email)
   let accountId = ID(credential.id)
   

@@ -186,6 +186,8 @@ async function action(event: RequestEvent) {
 			});
 		}
 		const encodedPublicKey = new ECDSAPublicKey(p256, cosePublicKey.x, cosePublicKey.y).encodeSEC1Uncompressed();
+		console.log("\nsign-in/passkey/register/+page.server.ts\n", "authenticatorData.credential.id: ", authenticatorData.credential.id);
+		console.log("\nsign-in/passkey/register/+page.server.ts\n", "bigEndian.uint64(authenticatorData.credential.id,0).toString(): ", bigEndian.uint64(authenticatorData.credential.id,0).toString());
 		credential = {
 			id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
 			// userId: event.locals.user.id,
