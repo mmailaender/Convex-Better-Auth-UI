@@ -21,14 +21,7 @@ export async function signUpWithPasskey(
 	lastName: string,
 	email: string
 ): Promise<Tokens> {
-	// const query = fql`signUpWithPasskey(${credential}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
 	const query = fql`signUpWithPasskey({ id: ${encodeBase64(credential.id)}, userId: ${credential.userId}, algorithmId: ${credential.algorithmId}, publicKey: ${encodeBase64(credential.publicKey)}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
-	// console.log('\nuser.ts \n', 'signUpWithPasskey query: ', query.encode());
-	console.log(
-		'\nuser.ts \n',
-		'signUpWithPasskey query: ',
-		`signUpWithPasskey({${encodeBase64(credential.id)}, ${credential.userId}, ${credential.algorithmId}, ${encodeBase64(credential.publicKey)}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`
-	);
 
 	const response = await sClient.query<Tokens>(query);
 

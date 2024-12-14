@@ -30,6 +30,7 @@ import type { Actions, RequestEvent } from "./$types";
 import { signUpWithPasskey } from "$lib/auth/user";
 import { sClient } from "$lib/db/client";
 import { fql } from "fauna";
+import { setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/sign-in/session";
 
 export async function load(event: RequestEvent) {
 	// 	if (event.locals.session === null || event.locals.user === null) {
@@ -232,7 +233,9 @@ async function action(event: RequestEvent) {
 
 	console.log("sign-in/passkey/register/+page.server.ts \n credential: ", credential);
 
-	signUpWithPasskey(credential, firstName, lastName, email);
+	const {access, refresh} = await signUpWithPasskey(credential, firstName, lastName, email);
+	setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
+	setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 	// try {
 	// 	createPasskeyCredential(credential);
 	// } catch (e) {
