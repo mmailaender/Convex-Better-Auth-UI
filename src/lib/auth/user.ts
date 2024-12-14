@@ -1,6 +1,7 @@
 import { sClient, uClient } from '$lib/db/client';
 import { fql, TimeStub, type Document } from 'fauna';
 import type { WebAuthnUserCredential } from './server/webauthn';
+import { encodeBase64 } from '@oslojs/encoding';
 
 export async function signUpWithSocialProvider(
 	githubId: string,
@@ -21,12 +22,12 @@ export async function signUpWithPasskey(
 	email: string
 ): Promise<Tokens> {
 	// const query = fql`signUpWithPasskey(${credential}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
-	const query = fql`signUpWithPasskey({[${credential.id}], ${credential.userId}, ${credential.algorithmId}, [${credential.publicKey}]}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
+	const query = fql`signUpWithPasskey({${encodeBase64(credential.id)}, ${credential.userId}, ${credential.algorithmId}, ${encodeBase64(credential.publicKey)}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
 	// console.log('\nuser.ts \n', 'signUpWithPasskey query: ', query.encode());
 	console.log(
 		'\nuser.ts \n',
 		'signUpWithPasskey query: ',
-		`signUpWithPasskey({${credential.id}, ${credential.userId}, ${credential.algorithmId}, ${credential.publicKey}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`
+		`signUpWithPasskey({${encodeBase64(credential.id)}, ${credential.userId}, ${credential.algorithmId}, encodeBase64(${credential.publicKey})}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`
 	);
 
 	const response = await sClient.query<Tokens>(query);
