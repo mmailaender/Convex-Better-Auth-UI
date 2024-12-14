@@ -11,7 +11,10 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"vercel:link": "cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie\"",
+		"vercel:pull": "cross-env-shell \"vercel env pull --token $VERCEL_TOKEN --scope etesie\"",
+		"init:repo": "pnpm config set auto-install-peers true && pnpm install && cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie && vercel env pull --token $VERCEL_TOKEN --scope etesie\" && pnpm dev"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.4",
@@ -20,7 +23,9 @@
 		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/kit": "^2.11.1",
 		"@sveltejs/vite-plugin-svelte": "^5.0.2",
+		"@types/node": "^22.10.2",
 		"autoprefixer": "^10.4.20",
+		"cross-env": "^7.0.3",
 		"eslint": "^9.17.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.46.1",
