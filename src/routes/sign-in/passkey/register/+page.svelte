@@ -64,8 +64,10 @@
 
 		// Step 4: Populate the form and submit it
 		const formElement = event.target as HTMLFormElement;
-		formElement.attestation_object.value = attestationObject;
-		formElement.client_data_json.value = clientDataJSON;
+
+		formElement.userId.value = data.userId;
+		formElement.attestationObject.value = attestationObject;
+		formElement.clientDataJSON.value = clientDataJSON;
 
 		formElement.submit(); // Submit the form programmatically
 	}
@@ -146,8 +148,9 @@
 
 	<!-- <input type="hidden" name="attestation_object" value={encodedAttestationObject} />
 	<input type="hidden" name="client_data_json" value={encodedClientDataJSON} /> -->
-	<input type="hidden" name="attestation_object" />
-	<input type="hidden" name="client_data_json" />
+	<input type="hidden" name="userId" />
+	<input type="hidden" name="attestationObject" />
+	<input type="hidden" name="clientDataJSON" />
 
 	<!-- <button disabled={encodedAttestationObject === null && encodedClientDataJSON === null}>Continue</button> -->
 	<button class="btn preset-filled">Create Passkey and Sign Up</button>

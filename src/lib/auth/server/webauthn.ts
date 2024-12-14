@@ -143,9 +143,9 @@ export function deleteUserPasskeyCredential(userId: number, credentialId: Uint8A
 // }
 
 export interface WebAuthnUserCredential {
-	// id: Uint8Array;
-	id: string;
-	userId?: string;
+	id: Uint8Array;
+	// id: string;
+	userId: string;
 	// name: string;
 	algorithmId: number;
 	publicKey: Uint8Array;

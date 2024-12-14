@@ -44,16 +44,17 @@ export async function load(event: RequestEvent) {
 				
 				// 	const credentials = getUserPasskeyCredentials(event.locals.user.id);
 				
-	const newId = (await sClient.query<string>(fql`newId()`)).data
+	const userId = (await sClient.query<string>(fql`newId()`)).data
 	const credentialUserId = new Uint8Array(8);
-	bigEndian.putUint64(credentialUserId, BigInt(newId), 0);
+	bigEndian.putUint64(credentialUserId, BigInt(userId), 0);
 
-	console.log("\nsign-in/passkey/register/+page.server.ts \n", "newId: ", newId);
+	console.log("\nsign-in/passkey/register/+page.server.ts \n", "newId: ", userId);
 	console.log("\nsign-in/passkey/register/+page.server.ts \n", "credentialUserId: ", credentialUserId);
 	console.log("\nsign-in/passkey/register/+page.server.ts \n", "credentialUserId: ", bigEndian.uint64(credentialUserId,0).toString());
 	
 	return {
 		// credentials,
+		userId,
 		credentialUserId
 		// user: event.locals.user
 	};
@@ -84,12 +85,14 @@ async function action(event: RequestEvent) {
 	const firstName = formData.get("firstName");
 	const lastName = formData.get("lastName");
 	const email = formData.get("email");
-	const encodedAttestationObject = formData.get("attestation_object");
-	const encodedClientDataJSON = formData.get("client_data_json");
+	const userId = formData.get("userId");
+	const encodedAttestationObject = formData.get("attestationObject");
+	const encodedClientDataJSON = formData.get("clientDataJSON");
 	if (
 		typeof firstName !== "string" ||
 		typeof lastName !== "string" ||
 		typeof email !== "string" ||
+		typeof userId !== "string" ||
 		typeof encodedAttestationObject !== "string" ||
 		typeof encodedClientDataJSON !== "string"
 	) {
@@ -189,8 +192,9 @@ async function action(event: RequestEvent) {
 		console.log("\nsign-in/passkey/register/+page.server.ts\n", "authenticatorData.credential.id: ", authenticatorData.credential.id);
 		console.log("\nsign-in/passkey/register/+page.server.ts\n", "bigEndian.uint64(authenticatorData.credential.id,0).toString(): ", bigEndian.uint64(authenticatorData.credential.id,0).toString());
 		credential = {
-			id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
-			// userId: event.locals.user.id,
+			// id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
+			id: authenticatorData.credential.id,
+			userId: userId,
 			algorithmId: coseAlgorithmES256,
 			// name: PUBLIC_APP_NAME + "-Passkey",
 			publicKey: encodedPublicKey
@@ -206,8 +210,8 @@ async function action(event: RequestEvent) {
 		}
 		const encodedPublicKey = new RSAPublicKey(cosePublicKey.n, cosePublicKey.e).encodePKCS1();
 		credential = {
-			id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
-			// userId: event.locals.user.id,
+			id: authenticatorData.credential.id,
+			userId: userId,
 			algorithmId: coseAlgorithmRS256,
 			// name: PUBLIC_APP_NAME + "-Passkey",
 			publicKey: encodedPublicKey
