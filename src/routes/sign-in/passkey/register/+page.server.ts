@@ -15,8 +15,8 @@ import { decodeBase64 } from "@oslojs/encoding";
 import { verifyWebAuthnChallenge} from "$lib/auth/server/webauthn";
 import { RSAPublicKey } from "@oslojs/crypto/rsa";
 
-import { VERCEL_URL } from '$env/dynamic/private' 
-import { PUBLIC_APP_NAME } from '$env/static/public' 
+import { env } from '$env/dynamic/private' 
+// import { PUBLIC_APP_NAME } from '$env/static/public' 
 
 import type { WebAuthnUserCredential } from "$lib/auth/server/webauthn";
 import type {
@@ -124,7 +124,7 @@ async function action(event: RequestEvent) {
 			message: "Invalid data"
 		});
 	}
-	if (!authenticatorData.verifyRelyingPartyIdHash(VERCEL_URL ? VERCEL_URL : "localhost")) {
+	if (!authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : "localhost")) {
 		return fail(400, {
 			message: "Invalid data"
 		});
@@ -159,7 +159,7 @@ async function action(event: RequestEvent) {
 			message: "Invalid data"
 		});
 	}
-	if (clientData.origin !== (VERCEL_URL ? "https://" + VERCEL_URL : "http://localhost:5173")) {
+	if (clientData.origin !== (env.VERCEL_URL ? "https://" + env.VERCEL_URL : "http://localhost:5173")) {
 		return fail(400, {
 			message: "Invalid data"
 		});

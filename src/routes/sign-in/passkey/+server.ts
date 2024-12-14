@@ -17,7 +17,7 @@ import type { RequestEvent } from "./$types";
 import type { ClientData, AuthenticatorData } from "@oslojs/webauthn";
 // import type { SessionFlags } from "$lib/server/session";
 
-import { VERCEL_URL } from '$env/dynamic/private' 
+import { env } from '$env/dynamic/private' 
 import { setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/sign-in/session";
 import { signInWithPasskey } from "$lib/auth/user";
 
@@ -62,7 +62,7 @@ export async function POST(context: RequestEvent): Promise<Response> {
 			status: 400
 		});
 	}
-	if (!authenticatorData.verifyRelyingPartyIdHash(VERCEL_URL ? VERCEL_URL : "localhost")) {
+	if (!authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : "localhost")) {
 		return new Response("Invalid data", {
 			status: 400
 		});
@@ -92,7 +92,7 @@ export async function POST(context: RequestEvent): Promise<Response> {
 			status: 400
 		});
 	}
-	if (clientData.origin !== (VERCEL_URL ? "https://" + VERCEL_URL : "http://localhost:5173")) {
+	if (clientData.origin !== (env.VERCEL_URL ? "https://" + env.VERCEL_URL : "http://localhost:5173")) {
 		return new Response("Invalid data", {
 			status: 400
 		});

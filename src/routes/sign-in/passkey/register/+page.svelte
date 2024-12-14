@@ -5,7 +5,7 @@
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
 	import type { ActionData, PageData } from './$types';
-	import type { WebAuthnUserCredential } from '$lib/auth/server/webauthn';
+	// import type { WebAuthnUserCredential } from '$lib/auth/server/webauthn';
 
 	export let data: PageData;
 	export let form: ActionData;
