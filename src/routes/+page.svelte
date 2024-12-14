@@ -13,5 +13,6 @@
 	{:else}
 		Secret things ahead!
         <a class="btn preset-filled-primary-500" href="/sign-in">Sign in</a>
+        <a class="btn preset-filled-primary-500" href="/sign-in/passkey/register">Sign in with Passkey</a>
 	{/if}
 </div>
