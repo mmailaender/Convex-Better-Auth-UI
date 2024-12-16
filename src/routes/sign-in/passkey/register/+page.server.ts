@@ -152,7 +152,6 @@ async function action(event: RequestEvent) {
 	}
 	if (
 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
-		// REMOVE !authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : 'localhost')) {
 	) {
 		console.log('\nsign-in/passkey/register/+page.server.ts\n', 'verifyRelyingPartyIdHash failed:');
 		return fail(400, {
@@ -191,7 +190,6 @@ async function action(event: RequestEvent) {
 	}
 	if (
 		!allowedUrls.includes(clientData.origin)
-		// clientData.origin !== (env.VERCEL_URL ? 'https://' + env.VERCEL_URL : 'http://localhost:5173')
 	) {
 		console.log(
 			'\nsign-in/passkey/register/+page.server.ts\n',
@@ -260,7 +258,6 @@ async function action(event: RequestEvent) {
 			id: authenticatorData.credential.id,
 			userId: userId,
 			algorithmId: coseAlgorithmRS256,
-			// name: PUBLIC_APP_NAME + "-Passkey",
 			publicKey: encodedPublicKey
 		};
 	} else {
@@ -268,14 +265,6 @@ async function action(event: RequestEvent) {
 			message: 'Unsupported algorithm'
 		});
 	}
-
-	// We don't have to worry about race conditions since queries are synchronous
-	// const credentials = getUserPasskeyCredentials(event.locals.user.id);
-	// if (credentials.length >= 5) {
-	// 	return fail(400, {
-	// 		message: "Too many credentials"
-	// 	});
-	// }
 
 	console.log('sign-in/passkey/register/+page.server.ts \n credential: ', credential);
 
@@ -289,25 +278,5 @@ async function action(event: RequestEvent) {
 			message: 'Invalid data'
 		});
 	}
-	// try {
-	// 	createPasskeyCredential(credential);
-	// } catch (e) {
-	// 	if (e instanceof SqliteError && e.code === "SQLITE_CONSTRAINT_PRIMARYKEY") {
-	// 		return fail(400, {
-	// 			message: "Invalid data"
-	// 		});
-	// 	}
-	// 	return fail(500, {
-	// 		message: "Internal error"
-	// 	});
-	// }
-
-	// if (!event.locals.session.twoFactorVerified) {
-	// 	setSessionAs2FAVerified(event.locals.session.id);
-	// }
-
-	// if (!event.locals.user.registered2FA) {
-	// 	return redirect(302, "/recovery-code");
-	// }
 	return redirect(302, '/');
 }
