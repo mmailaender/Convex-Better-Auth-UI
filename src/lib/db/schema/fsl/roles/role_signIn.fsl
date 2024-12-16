@@ -5,16 +5,22 @@ role role_signIn {
   privileges signInWithSocialProvider {
     call
   }
+
   privileges signUpWithPasskey {
     call
   }
   privileges signInWithPasskey {
     call
   }
+
   privileges verifyUserExists {
     call
   }
   privileges verifySocialAccountExists {
+    call
+  }
+
+  privileges getPasskeyCredential {
     call
   }
 }
