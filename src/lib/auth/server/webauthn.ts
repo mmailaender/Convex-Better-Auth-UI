@@ -14,6 +14,7 @@ export function createWebAuthnChallenge(): Uint8Array {
 
 export function verifyWebAuthnChallenge(challenge: Uint8Array): boolean {
 	const encoded = encodeHexLowerCase(challenge);
+	console.log("\nserver/webauth.ts - verifyWebAuthnChallenge\n", "challengeBucket: ", challengeBucket);
 	return challengeBucket.delete(encoded);
 }
 
