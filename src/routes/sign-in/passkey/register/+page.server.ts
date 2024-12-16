@@ -44,6 +44,8 @@ if (env.CUSTOM_DOMAINS) {
 	allowedUrls.push(...customDomains);
 }
 
+console.log('\nsign-in/passkey/register/+page.server.ts \n', 'allowedUrls: ', allowedUrls);
+
 export async function load(event: RequestEvent) {
 	// 	if (event.locals.session === null || event.locals.user === null) {
 	// 		return redirect(302, "/login");
@@ -148,14 +150,8 @@ async function action(event: RequestEvent) {
 			message: 'Invalid data'
 		});
 	}
-	console.log('\nsign-in/passkey/register/+page.server.ts \n', 'env.VERCEL_URL: ', env.VERCEL_URL);
-	console.log(
-		'\nsign-in/passkey/register/+page.server.ts \n',
-		'env.VERCEL_BRANCH_URL: ',
-		env.VERCEL_BRANCH_URL
-	);
 	if (
-		allowedUrls.some((url) => !authenticatorData.verifyRelyingPartyIdHash(url))
+		!allowedUrls.some((url) => !authenticatorData.verifyRelyingPartyIdHash(url))
 		// REMOVE !authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : 'localhost')) {
 	) {
 		return fail(400, {
