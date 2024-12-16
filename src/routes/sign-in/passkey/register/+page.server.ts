@@ -142,12 +142,12 @@ async function action(event: RequestEvent) {
 		authenticatorData = attestationObject.authenticatorData;
 	} catch {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 1'
 		});
 	}
 	if (attestationStatement.format !== AttestationStatementFormat.None) {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 2'
 		});
 	}
 	if (
@@ -156,17 +156,17 @@ async function action(event: RequestEvent) {
 	) {
 		console.log('\nsign-in/passkey/register/+page.server.ts\n', 'verifyRelyingPartyIdHash failed:');
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 3'
 		});
 	}
 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 4'
 		});
 	}
 	if (authenticatorData.credential === null) {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 5'
 		});
 	}
 
@@ -175,18 +175,18 @@ async function action(event: RequestEvent) {
 		clientData = parseClientDataJSON(clientDataJSON);
 	} catch {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 6'
 		});
 	}
 	if (clientData.type !== ClientDataType.Create) {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 7'
 		});
 	}
 
 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 8'
 		});
 	}
 	if (
@@ -199,12 +199,12 @@ async function action(event: RequestEvent) {
 			clientData.origin
 		);
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 9'
 		});
 	}
 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
 		return fail(400, {
-			message: 'Invalid data'
+			message: 'Invalid data 10'
 		});
 	}
 
@@ -215,7 +215,7 @@ async function action(event: RequestEvent) {
 			cosePublicKey = authenticatorData.credential.publicKey.ec2();
 		} catch {
 			return fail(400, {
-				message: 'Invalid data'
+				message: 'Invalid data 11'
 			});
 		}
 		if (cosePublicKey.curve !== coseEllipticCurveP256) {
