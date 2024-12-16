@@ -1,4 +1,4 @@
-import { encodeHexLowerCase } from "@oslojs/encoding";
+import { decodeBase64, encodeBase64, encodeHexLowerCase } from "@oslojs/encoding";
 // import { db } from "./db";
 import { sClient } from "$lib/db/client";
 import { fql } from "fauna";
@@ -37,9 +37,18 @@ export function getUserPasskeyCredentials(userId: number): WebAuthnUserCredentia
 }
 
 export async function getPasskeyCredential(credentialId: Uint8Array): Promise<WebAuthnUserCredential | null> {
-	// TODO: Create function or adjust function name
-    const response = await sClient.query<WebAuthnUserCredential>(fql`getPasskeyCredential(${credentialId})`);
+    const response = await sClient.query<WebAuthnUserCredentialEncoded>(fql`getPasskeyCredential(${encodeBase64(credentialId)})`);
 
+	if (response.data === null) {
+		return null;
+	}
+
+	return {
+		id: decodeBase64(response.data.id),
+		userId: response.data.userId,
+		algorithmId: response.data.algorithmId,
+		publicKey: decodeBase64(response.data.publicKey)
+	}
 	// const row = db.queryOne("SELECT id, user_id, name, algorithm, public_key FROM passkey_credential WHERE id = ?", [
 	// 	credentialId
 	// ]);
@@ -53,7 +62,7 @@ export async function getPasskeyCredential(credentialId: Uint8Array): Promise<We
 	// 	algorithmId: row.number(3),
 	// 	publicKey: row.bytes(4)
 	// };
-	return response.data;
+	// return response.data;
 }
 
 export function getUserPasskeyCredential(userId: number, credentialId: Uint8Array): WebAuthnUserCredential | null {
@@ -74,16 +83,21 @@ export function getUserPasskeyCredential(userId: number, credentialId: Uint8Arra
 	return credential;
 }
 
-export function createPasskeyCredential(credential: WebAuthnUserCredential): void {
-	sClient.query(fql`signUpWithPasskey(${credential})`);
-	// db.execute("INSERT INTO passkey_credential (id, user_id, name, algorithm, public_key) VALUES (?, ?, ?, ?, ?)", [
-	// 	credential.id,
-	// 	credential.userId,
-	// 	credential.name,
-	// 	credential.algorithmId,
-	// 	credential.publicKey
-	// ]);
-}
+// export function createPasskeyCredential(credential: WebAuthnUserCredential): void {
+// 	const credentialId = encodeBase64(credential.id);
+// 	const userId = credential.userId;
+// 	const algorithmId = credential.algorithmId;
+// 	const publicKey = encodeBase64(credential.publicKey);
+
+// 	sClient.query(fql`signUpWithPasskey({ id: ${credentialId}, userId: ${userId}, algorithmId: ${algorithmId}, publicKey: ${publicKey} })`);
+// 	// db.execute("INSERT INTO passkey_credential (id, user_id, name, algorithm, public_key) VALUES (?, ?, ?, ?, ?)", [
+// 	// 	credential.id,
+// 	// 	credential.userId,
+// 	// 	credential.name,
+// 	// 	credential.algorithmId,
+// 	// 	credential.publicKey
+// 	// ]);
+// }
 
 export function deleteUserPasskeyCredential(userId: number, credentialId: Uint8Array): boolean {
 	const result = db.execute("DELETE FROM passkey_credential WHERE id = ? AND user_id = ?", [credentialId, userId]);
@@ -149,4 +163,11 @@ export interface WebAuthnUserCredential {
 	// name: string;
 	algorithmId: number;
 	publicKey: Uint8Array;
+}
+
+type WebAuthnUserCredentialEncoded = {
+	id: string;
+	userId: string;
+	algorithmId: number;
+	publicKey: string;
 }
