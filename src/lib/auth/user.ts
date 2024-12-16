@@ -39,8 +39,8 @@ export async function signInWithSocialProvider(
 	return response.data;
 }
 
-export async function signInWithPasskey(providerAccountId: string): Promise<Tokens> {
-	const response = await sClient.query<Tokens>(fql`signInWithPassKey(${providerAccountId})`);
+export async function signInWithPasskey(passkeyId: string): Promise<Tokens> {
+	const response = await sClient.query<Tokens>(fql`signInWithPasskey(${passkeyId})`);
 
 	return response.data;
 }
