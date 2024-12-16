@@ -8,7 +8,7 @@ import {
 } from "@oslojs/webauthn";
 import { decodePKIXECDSASignature, decodeSEC1PublicKey, p256, verifyECDSASignature } from "@oslojs/crypto/ecdsa";
 import { ObjectParser } from "@pilcrowjs/object-parser";
-import { decodeBase64 } from "@oslojs/encoding";
+import { decodeBase64, encodeBase64 } from "@oslojs/encoding";
 import { verifyWebAuthnChallenge, getPasskeyCredential } from "$lib/auth/server/webauthn";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { decodePKCS1RSAPublicKey, sha256ObjectIdentifier, verifyRSASSAPKCS1v15Signature } from "@oslojs/crypto/rsa";
@@ -135,7 +135,7 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	// 	twoFactorVerified: true
 	// };
 
-	const {access, refresh} = await signInWithPasskey(credential.userId!);
+	const {access, refresh} = await signInWithPasskey(encodeBase64(credential.id!));
 	setAccessTokenCookie(context, access.secret!, access.ttl!.toDate());
 	setRefreshTokenCookie(context, refresh.secret!, refresh.ttl!.toDate());
 	// const sessionToken = generateSessionToken();
