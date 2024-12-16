@@ -34,13 +34,13 @@ import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/sign-in/s
 
 const allowedUrls = [] as string[];
 if (env.VERCEL_URL) {
-	allowedUrls.push(`${env.VERCEL_URL}`);
+	allowedUrls.push(`https://${env.VERCEL_URL}`);
 }
 if (env.VERCEL_BRANCH_URL) {
-	allowedUrls.push(`${env.VERCEL_BRANCH_URL}`);
+	allowedUrls.push(`https://${env.VERCEL_BRANCH_URL}`);
 }
 if (env.CUSTOM_DOMAINS) {
-	const customDomains = env.CUSTOM_DOMAINS.split(',').map((domain) => domain.trim());
+	const customDomains = env.CUSTOM_DOMAINS.split(',').map((domain) => "https://".concat(domain.trim()));
 	allowedUrls.push(...customDomains);
 }
 
@@ -151,7 +151,7 @@ async function action(event: RequestEvent) {
 		});
 	}
 	if (
-		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(url))
+		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
 		// REMOVE !authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : 'localhost')) {
 	) {
 		console.log('\nsign-in/passkey/register/+page.server.ts\n', 'verifyRelyingPartyIdHash failed:');
