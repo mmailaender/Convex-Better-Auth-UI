@@ -24,7 +24,6 @@ export async function signUpWithPasskey(
 	const query = fql`signUpWithPasskey({ id: ${encodeBase64(credential.id)}, userId: ${credential.userId}, algorithmId: ${credential.algorithmId}, publicKey: ${encodeBase64(credential.publicKey)}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
 
 	const response = await sClient.query<Tokens>(query);
-
 	return response.data;
 }
 

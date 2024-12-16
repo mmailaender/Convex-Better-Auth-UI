@@ -21,7 +21,9 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
         accounts: [Account.byId(accountId)]
       })
     })
-  } else {
+  } else if (user == Query.identity()){
+    // If an user with this email is already existing, the user needs to be signed it to add a new account.
+    
     let account = Account.firstWhere(.user == user && .provider == "Passkey")
 
     let account = if(account == null) {
@@ -48,5 +50,11 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
     }
 
     account!
+  }
+else {
+    abort({
+      code: "USER_ALREADY_EXISTS",
+      message: "User already exists. Sign in first to add another Account."
+    });
   }
 }

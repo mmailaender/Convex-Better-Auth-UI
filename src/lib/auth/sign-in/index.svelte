@@ -1,16 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import SocialProvider from '../social/provider.svelte';
-	import { createChallenge } from "$lib/auth/passkeys/webauthn";
-	import { encodeBase64 } from "@oslojs/encoding";
-	import { goto } from "$app/navigation";
+	import { createChallenge } from '$lib/auth/passkeys/webauthn';
+	import { encodeBase64 } from '@oslojs/encoding';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
-	let passkeyErrorMessage = "";
 	let showPasskeyPrompt = false;
+	let errorMessage = '';
 
 	// Check if a user-verifying platform authenticator (passkey) is available on page load
 	onMount(async () => {
-		if (window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()) {
+		const urlParams = new URLSearchParams($page.url.searchParams);
+		errorMessage = urlParams.get('error') || '';
+
+		if (errorMessage) {
+			errorMessage = decodeURIComponent(errorMessage);
+		}
+
+		if (
+			window.PublicKeyCredential &&
+			(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())
+		) {
 			// Passkey available, ask user if they want to sign in with it
 			showPasskeyPrompt = true;
 		}
@@ -23,21 +34,21 @@
 			const credential = await navigator.credentials.get({
 				publicKey: {
 					challenge,
-					userVerification: "required"
+					userVerification: 'required'
 				}
 			});
 
 			if (!(credential instanceof PublicKeyCredential)) {
-				passkeyErrorMessage = "Failed to retrieve credential.";
+				errorMessage = 'Failed to retrieve credential.';
 				return;
 			}
 			if (!(credential.response instanceof AuthenticatorAssertionResponse)) {
-				passkeyErrorMessage = "Unexpected error: invalid credential response.";
+				errorMessage = 'Unexpected error: invalid credential response.';
 				return;
 			}
 
-			const response = await fetch("/sign-in/passkey", {
-				method: "POST",
+			const response = await fetch('/sign-in/passkey', {
+				method: 'POST',
 				body: JSON.stringify({
 					credential_id: encodeBase64(new Uint8Array(credential.rawId)),
 					signature: encodeBase64(new Uint8Array(credential.response.signature)),
@@ -47,12 +58,12 @@
 			});
 
 			if (response.ok) {
-				goto("/");
+				goto('/');
 			} else {
-				passkeyErrorMessage = await response.text();
+				errorMessage = await response.text();
 			}
 		} catch (err: any) {
-			passkeyErrorMessage = err?.message ?? "An unknown error occurred.";
+			errorMessage = err?.message ?? 'An unknown error occurred.';
 		}
 	}
 
@@ -82,8 +93,12 @@
 	{#if showPasskeyPrompt}
 		<div class="flex flex-col items-center gap-2">
 			<p>A passkey is available. Would you like to sign in with it?</p>
-			<button class="btn w-full preset-filled" on:click={signInWithPasskey}>Sign in with passkey</button>
-			<button class="btn w-full preset-ghost" on:click={() => showPasskeyPrompt = false}>Use another method</button>
+			<button class="btn w-full preset-filled" on:click={signInWithPasskey}
+				>Sign in with passkey</button
+			>
+			<button class="preset-ghost btn w-full" on:click={() => (showPasskeyPrompt = false)}
+				>Use another method</button
+			>
 		</div>
 	{:else}
 		<!-- If user chose not to use passkey or no passkey is available, show normal login flow -->
@@ -103,7 +118,7 @@
 		<a href="#" class="anchor">Privacy Policy</a>.
 	</p>
 
-	{#if passkeyErrorMessage}
-		<p class="text-red-500">{passkeyErrorMessage}</p>
+	{#if errorMessage}
+		<p class="text-error-500">{errorMessage}</p>
 	{/if}
 </div>

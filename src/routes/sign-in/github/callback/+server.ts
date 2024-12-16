@@ -16,13 +16,21 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	const state = event.url.searchParams.get('state');
 
 	if (storedState === null || code === null || state === null) {
-		return new Response('Please restart the process.', {
-			status: 400
+		const errorMessage = encodeURIComponent('Please restart the process.');
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: `/sign-in?error=${errorMessage}`
+			}
 		});
 	}
 	if (storedState !== state) {
-		return new Response('Please restart the process.', {
-			status: 400
+		const errorMessage = encodeURIComponent('Please restart the process.');
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: `/sign-in?error=${errorMessage}`
+			}
 		});
 	}
 
@@ -30,8 +38,12 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	try {
 		tokens = await github.validateAuthorizationCode(code);
 	} catch (e) {
-		return new Response('Please restart the process.', {
-			status: 400
+		const errorMessage = encodeURIComponent('Please restart the process.');
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: `/sign-in?error=${errorMessage}`
+			}
 		});
 	}
 
@@ -66,8 +78,12 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	const emailListResponse = await fetch(emailListRequest);
 	const emailListResult: unknown = await emailListResponse.json();
 	if (!Array.isArray(emailListResult) || emailListResult.length < 1) {
-		return new Response('Please restart the process.', {
-			status: 400
+		const errorMessage = encodeURIComponent('Please restart the process.');
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: `/sign-in?error=${errorMessage}`
+			}
 		});
 	}
 	let email: string | null = null;
@@ -80,14 +96,30 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		}
 	}
 	if (email === null) {
-		return new Response('Please verify your GitHub email address.', {
-			status: 400
+		const errorMessage = encodeURIComponent('Please verify your GitHub email address.');
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: `/sign-in?error=${errorMessage}`
+			}
 		});
 	}
 
-	const { access, refresh } = await signUpWithSocialProvider(githubUserId, email, username);
-	setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
-	setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+	try {
+		const { access, refresh } = await signUpWithSocialProvider(githubUserId, email, username);
+		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
+		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+		
+	} catch (error) {
+		console.log("error: ", error);
+		const errorMessage = encodeURIComponent('User with this email already exists. Please sign in with your initial used Account.');
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: `/sign-in?error=${errorMessage}`
+			}
+		});
+	}
 
 	return new Response(null, {
 		status: 302,

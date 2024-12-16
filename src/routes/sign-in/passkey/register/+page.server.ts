@@ -234,9 +234,17 @@ async function action(event: RequestEvent) {
 
 	console.log("sign-in/passkey/register/+page.server.ts \n credential: ", credential);
 
-	const {access, refresh} = await signUpWithPasskey(credential, firstName, lastName, email);
-	setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
-	setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+	try {
+		const {access, refresh} = await signUpWithPasskey(credential, firstName, lastName, email);
+		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
+		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+		
+	} catch (error) {
+		console.log("sign-in/passkey/register/+page.server.ts \n error: ", error);
+		return fail(400, {
+			message: "Invalid data"
+		});
+	}
 	// try {
 	// 	createPasskeyCredential(credential);
 	// } catch (e) {
