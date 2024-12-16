@@ -2,8 +2,10 @@ collection Account {
     user: Ref<User>
     provider: "Github" | "Google" | "Facebook" | "Passkey"
     providerAccountId: String | Null
-    publicKey: Bytes | Null
+    publicKey: String | Null
     algorithmId: Long | Null
+    passkeyId: String | Null
 
     unique [.user, .provider]
+    unique [.passkeyId]
 }

@@ -1,5 +1,5 @@
 @role(server)
-function signUpWithPasskey(credential: {id: String, algorithmId: Long, publicKey: Bytes}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): { access: Token, refresh: Token } {
+function signUpWithPasskey(credential: {id: String, userId: String, algorithmId: Long, publicKey: String}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): { access: Token, refresh: Token } {
     
   createPasskeyAccount(credential, userData)
   signInWithPasskey(credential.id)
