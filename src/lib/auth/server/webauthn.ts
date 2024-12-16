@@ -43,12 +43,18 @@ export async function getPasskeyCredential(credentialId: Uint8Array): Promise<We
 		return null;
 	}
 
-	return {
+	console.log("\nserver/webauth.ts - getPasskeyCredential\n", "WebAuthnUserCredentialEncoded: ", response.data);
+	
+	const responseDecoded = {
 		id: decodeBase64(response.data.id),
 		userId: response.data.userId,
 		algorithmId: response.data.algorithmId,
 		publicKey: decodeBase64(response.data.publicKey)
 	}
+
+	console.log("\nserver/webauth.ts - getPasskeyCredential\n", "WebAuthnUserCredential: ", responseDecoded);
+
+	return responseDecoded
 	// const row = db.queryOne("SELECT id, user_id, name, algorithm, public_key FROM passkey_credential WHERE id = ?", [
 	// 	credentialId
 	// ]);
