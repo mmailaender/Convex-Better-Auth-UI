@@ -7,6 +7,7 @@
 	import { page } from '$app/stores';
 
 	let showPasskeyPrompt = false;
+	let passkeyAvailable = false;
 	let errorMessage = '';
 
 	// Check if a user-verifying platform authenticator (passkey) is available on page load
@@ -18,14 +19,42 @@
 			errorMessage = decodeURIComponent(errorMessage);
 		}
 
-		if (
-			window.PublicKeyCredential &&
-			(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())
-		) {
-			// Passkey available, ask user if they want to sign in with it
-			showPasskeyPrompt = true;
-		}
+		checkForPasskey();
+
+		// if (
+		// 	window.PublicKeyCredential &&
+		// 	(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())
+		// ) {
+		// 	// Passkey available, ask user if they want to sign in with it
+		// 	showPasskeyPrompt = true;
+		// }
 	});
+
+	async function checkForPasskey() {
+		try {
+			// Generate a dummy challenge
+			const challenge = new Uint8Array(32).fill(0);
+
+			// Attempt to get a passkey without requiring user interaction
+			await navigator.credentials.get({
+				publicKey: {
+					challenge,
+					userVerification: "required",
+					allowCredentials: [] // Allows authenticators to use resident credentials
+				}
+			});
+
+			// If no error, a credential exists
+			passkeyAvailable = true;
+		} catch (err: any) {
+			// If no credential is found, handle the expected error
+			if (err.name === "NotAllowedError") {
+				passkeyAvailable = false; // No credential available
+			} else {
+				console.error("Error checking passkey availability:", err);
+			}
+		}
+	}
 
 	async function signInWithPasskey() {
 		try {
@@ -90,7 +119,7 @@
 	</div>
 
 	<!-- Prompt for Passkey if available -->
-	{#if showPasskeyPrompt}
+	{#if passkeyAvailable}
 		<div class="flex flex-col items-center gap-2">
 			<p>A passkey is available. Would you like to sign in with it?</p>
 			<button class="btn w-full preset-filled" on:click={signInWithPasskey}
