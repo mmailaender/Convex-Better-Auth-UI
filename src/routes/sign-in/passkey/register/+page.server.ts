@@ -151,9 +151,10 @@ async function action(event: RequestEvent) {
 		});
 	}
 	if (
-		!allowedUrls.some((url) => !authenticatorData.verifyRelyingPartyIdHash(url))
+		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(url))
 		// REMOVE !authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : 'localhost')) {
 	) {
+		console.log('\nsign-in/passkey/register/+page.server.ts\n', 'verifyRelyingPartyIdHash failed:');
 		return fail(400, {
 			message: 'Invalid data'
 		});
@@ -195,7 +196,8 @@ async function action(event: RequestEvent) {
 		console.log(
 			'\nsign-in/passkey/register/+page.server.ts\n',
 			'clientData.origin failed: ',
-			clientData.origin)
+			clientData.origin
+		);
 		return fail(400, {
 			message: 'Invalid data'
 		});
