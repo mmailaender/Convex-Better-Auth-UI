@@ -128,6 +128,7 @@ async function action(event: RequestEvent) {
 			message: "Invalid data"
 		});
 	}
+	console.log("\nsign-in/passkey/register/+page.server.ts \n", "env.VERCEL_URL: ", env.VERCEL_URL);
 	if (!authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : "localhost")) {
 		return fail(400, {
 			message: "Invalid data"
