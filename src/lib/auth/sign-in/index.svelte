@@ -6,7 +6,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
-	let showPasskeyPrompt = false;
 	let passkeyAvailable = false;
 	let errorMessage = '';
 
@@ -19,42 +18,14 @@
 			errorMessage = decodeURIComponent(errorMessage);
 		}
 
-		checkForPasskey();
-
-		// if (
-		// 	window.PublicKeyCredential &&
-		// 	(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())
-		// ) {
-		// 	// Passkey available, ask user if they want to sign in with it
-		// 	showPasskeyPrompt = true;
-		// }
-	});
-
-	async function checkForPasskey() {
-		try {
-			// Generate a dummy challenge
-			const challenge = new Uint8Array(32).fill(0);
-
-			// Attempt to get a passkey without requiring user interaction
-			await navigator.credentials.get({
-				publicKey: {
-					challenge,
-					userVerification: "required",
-					allowCredentials: [] // Allows authenticators to use resident credentials
-				}
-			});
-
-			// If no error, a credential exists
+		if (
+			window.PublicKeyCredential &&
+			(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())
+		) {
+			// Passkey available, ask user if they want to sign in with it
 			passkeyAvailable = true;
-		} catch (err: any) {
-			// If no credential is found, handle the expected error
-			if (err.name === "NotAllowedError") {
-				passkeyAvailable = false; // No credential available
-			} else {
-				console.error("Error checking passkey availability:", err);
-			}
 		}
-	}
+	});
 
 	async function signInWithPasskey() {
 		try {
@@ -96,8 +67,13 @@
 		}
 	}
 
-	const handleEmailLogin = () => {
-		// Implement email-based login or other methods if desired
+	// TODO: Call backend to verify if user with email exists
+	// If yes, ask user to sign in with passkey
+	// If no, verify email with email verifier if email is valid
+	// If email is not valid, show error message
+	// If email is valid, send an email to user with a OTP so he can verify his ownership
+
+	const verifyEmail = () => {
 	};
 </script>
 
@@ -125,21 +101,12 @@
 			<button class="btn w-full preset-filled" on:click={signInWithPasskey}
 				>Sign in with passkey</button
 			>
-			<button class="preset-ghost btn w-full" on:click={() => (showPasskeyPrompt = false)}
-				>Use another method</button
-			>
 		</div>
 	{:else}
-		<!-- If user chose not to use passkey or no passkey is available, show normal login flow -->
-		<div id="auth_passkey-login" class="flex flex-col gap-4">
-			<label class="label flex flex-col items-start">
-				<span class="label-text">Email</span>
-				<input type="email" placeholder="example@gmail.com" class="input w-full" />
-			</label>
-			<button class="btn w-full preset-filled" on:click={handleEmailLogin}>Continue</button>
-			<!-- If you'd like, you can also place a passkey sign-in button here as a fallback -->
-			<!-- <button class="btn w-full" on:click={signInWithPasskey}>Sign in with passkey</button> -->
-		</div>
+		<label class="label flex flex-col items-start">
+			<span class="label-text">Email</span>
+			<input type="email" placeholder="example@gmail.com" class="input w-full" />
+		</label>
 	{/if}
 
 	<p class="text-center text-xs">
