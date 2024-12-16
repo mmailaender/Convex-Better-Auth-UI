@@ -47,39 +47,13 @@ if (env.CUSTOM_DOMAINS) {
 console.log('\nsign-in/passkey/register/+page.server.ts \n', 'allowedUrls: ', allowedUrls);
 
 export async function load(event: RequestEvent) {
-	// 	if (event.locals.session === null || event.locals.user === null) {
-	// 		return redirect(302, "/login");
-	// 	}
-	// 	if (!event.locals.user.emailVerified) {
-	// 		return redirect(302, "/verify-email");
-	// 	}
-	// 	if (event.locals.user.registered2FA && !event.locals.session.twoFactorVerified) {
-	// 		return redirect(302, get2FARedirect(event.locals.user));
-	// 	}
-
-	// 	const credentials = getUserPasskeyCredentials(event.locals.user.id);
-
 	const userId = (await sClient.query<string>(fql`newId()`)).data;
 	const credentialUserId = new Uint8Array(8);
 	bigEndian.putUint64(credentialUserId, BigInt(userId), 0);
 
-	console.log('\nsign-in/passkey/register/+page.server.ts \n', 'newId: ', userId);
-	console.log(
-		'\nsign-in/passkey/register/+page.server.ts \n',
-		'credentialUserId: ',
-		credentialUserId
-	);
-	console.log(
-		'\nsign-in/passkey/register/+page.server.ts \n',
-		'credentialUserId: ',
-		bigEndian.uint64(credentialUserId, 0).toString()
-	);
-
 	return {
-		// credentials,
 		userId,
 		credentialUserId
-		// user: event.locals.user
 	};
 }
 
@@ -88,22 +62,6 @@ export const actions: Actions = {
 };
 
 async function action(event: RequestEvent) {
-	// if (event.locals.session === null || event.locals.user === null) {
-	// 	return fail(401, {
-	// 		message: "Not authenticated"
-	// 	});
-	// }
-	// if (!event.locals.user.emailVerified) {
-	// 	return fail(403, {
-	// 		message: "Forbidden"
-	// 	});
-	// }
-	// if (event.locals.user.registered2FA && !event.locals.session.twoFactorVerified) {
-	// 	return fail(403, {
-	// 		message: "Forbidden"
-	// 	});
-	// }
-
 	const formData = await event.request.formData();
 	const firstName = formData.get('firstName');
 	const lastName = formData.get('lastName');
@@ -153,7 +111,6 @@ async function action(event: RequestEvent) {
 	if (
 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
 	) {
-		console.log('\nsign-in/passkey/register/+page.server.ts\n', 'verifyRelyingPartyIdHash failed:');
 		return fail(400, {
 			message: 'Invalid data 3'
 		});
@@ -191,11 +148,6 @@ async function action(event: RequestEvent) {
 	if (
 		!allowedUrls.includes(clientData.origin)
 	) {
-		console.log(
-			'\nsign-in/passkey/register/+page.server.ts\n',
-			'clientData.origin failed: ',
-			clientData.origin
-		);
 		return fail(400, {
 			message: 'Invalid data 9'
 		});

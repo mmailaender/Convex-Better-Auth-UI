@@ -5,21 +5,44 @@ import {
 	parseAuthenticatorData,
 	createAssertionSignatureMessage,
 	coseAlgorithmRS256
-} from "@oslojs/webauthn";
-import { decodePKIXECDSASignature, decodeSEC1PublicKey, p256, verifyECDSASignature } from "@oslojs/crypto/ecdsa";
-import { ObjectParser } from "@pilcrowjs/object-parser";
-import { decodeBase64, encodeBase64 } from "@oslojs/encoding";
-import { verifyWebAuthnChallenge, getPasskeyCredential } from "$lib/auth/server/webauthn";
-import { sha256 } from "@oslojs/crypto/sha2";
-import { decodePKCS1RSAPublicKey, sha256ObjectIdentifier, verifyRSASSAPKCS1v15Signature } from "@oslojs/crypto/rsa";
+} from '@oslojs/webauthn';
+import {
+	decodePKIXECDSASignature,
+	decodeSEC1PublicKey,
+	p256,
+	verifyECDSASignature
+} from '@oslojs/crypto/ecdsa';
+import { ObjectParser } from '@pilcrowjs/object-parser';
+import { decodeBase64, encodeBase64 } from '@oslojs/encoding';
+import { verifyWebAuthnChallenge, getPasskeyCredential } from '$lib/auth/server/webauthn';
+import { sha256 } from '@oslojs/crypto/sha2';
+import {
+	decodePKCS1RSAPublicKey,
+	sha256ObjectIdentifier,
+	verifyRSASSAPKCS1v15Signature
+} from '@oslojs/crypto/rsa';
 
-import type { RequestEvent } from "./$types";
-import type { ClientData, AuthenticatorData } from "@oslojs/webauthn";
+import type { RequestEvent } from './$types';
+import type { ClientData, AuthenticatorData } from '@oslojs/webauthn';
 // import type { SessionFlags } from "$lib/server/session";
 
-import { env } from '$env/dynamic/private' 
-import { setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/sign-in/session";
-import { signInWithPasskey } from "$lib/auth/user";
+import { env } from '$env/dynamic/private';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/sign-in/session';
+import { signInWithPasskey } from '$lib/auth/user';
+
+const allowedUrls = [] as string[];
+if (env.VERCEL_URL) {
+	allowedUrls.push(`https://${env.VERCEL_URL}`);
+}
+if (env.VERCEL_BRANCH_URL) {
+	allowedUrls.push(`https://${env.VERCEL_BRANCH_URL}`);
+}
+if (env.CUSTOM_DOMAINS) {
+	const customDomains = env.CUSTOM_DOMAINS.split(',').map((domain) =>
+		'https://'.concat(domain.trim())
+	);
+	allowedUrls.push(...customDomains);
+}
 
 // Stricter rate limiting can be omitted here since creating challenges are rate-limited
 export async function POST(context: RequestEvent): Promise<Response> {
@@ -30,12 +53,12 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	let encodedCredentialId: string;
 	let encodedSignature: string;
 	try {
-		encodedAuthenticatorData = parser.getString("authenticator_data");
-		encodedClientDataJSON = parser.getString("client_data_json");
-		encodedCredentialId = parser.getString("credential_id");
-		encodedSignature = parser.getString("signature");
+		encodedAuthenticatorData = parser.getString('authenticator_data');
+		encodedClientDataJSON = parser.getString('client_data_json');
+		encodedCredentialId = parser.getString('credential_id');
+		encodedSignature = parser.getString('signature');
 	} catch {
-		return new Response("Invalid or missing fields", {
+		return new Response('Invalid or missing fields', {
 			status: 400
 		});
 	}
@@ -49,7 +72,7 @@ export async function POST(context: RequestEvent): Promise<Response> {
 		credentialId = decodeBase64(encodedCredentialId);
 		signatureBytes = decodeBase64(encodedSignature);
 	} catch {
-		return new Response("Invalid or missing fields", {
+		return new Response('Invalid or missing fields', {
 			status: 400
 		});
 	}
@@ -58,17 +81,19 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	try {
 		authenticatorData = parseAuthenticatorData(authenticatorDataBytes);
 	} catch {
-		return new Response("Invalid data", {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
-	if (!authenticatorData.verifyRelyingPartyIdHash(env.VERCEL_URL ? env.VERCEL_URL : "localhost")) {
-		return new Response("Invalid data", {
+	if (
+		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
+	) {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
-		return new Response("Invalid data", {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
@@ -77,35 +102,37 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	try {
 		clientData = parseClientDataJSON(clientDataJSON);
 	} catch {
-		return new Response("Invalid data", {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (clientData.type !== ClientDataType.Get) {
-		return new Response("Invalid data", {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 
 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
-		return new Response("Invalid data", {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
-	if (clientData.origin !== (env.VERCEL_URL ? "https://" + env.VERCEL_URL : "http://localhost:5173")) {
-		return new Response("Invalid data", {
+	if (
+		!allowedUrls.includes(clientData.origin)
+	) {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
-		return new Response("Invalid data", {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 
 	const credential = await getPasskeyCredential(credentialId);
 	if (credential === null) {
-		return new Response("Invalid credential", {
+		return new Response('Invalid credential', {
 			status: 400
 		});
 	}
@@ -119,15 +146,20 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	} else if (credential.algorithmId === coseAlgorithmRS256) {
 		const rsaPublicKey = decodePKCS1RSAPublicKey(credential.publicKey);
 		const hash = sha256(createAssertionSignatureMessage(authenticatorDataBytes, clientDataJSON));
-		validSignature = verifyRSASSAPKCS1v15Signature(rsaPublicKey, sha256ObjectIdentifier, hash, signatureBytes);
+		validSignature = verifyRSASSAPKCS1v15Signature(
+			rsaPublicKey,
+			sha256ObjectIdentifier,
+			hash,
+			signatureBytes
+		);
 	} else {
-		return new Response("Internal error", {
+		return new Response('Internal error', {
 			status: 500
 		});
 	}
 
 	if (!validSignature) {
-		return new Response("Invalid signature", {
+		return new Response('Invalid signature', {
 			status: 400
 		});
 	}
@@ -135,7 +167,7 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	// 	twoFactorVerified: true
 	// };
 
-	const {access, refresh} = await signInWithPasskey(encodeBase64(credential.id!));
+	const { access, refresh } = await signInWithPasskey(encodeBase64(credential.id!));
 	setAccessTokenCookie(context, access.secret!, access.ttl!.toDate());
 	setRefreshTokenCookie(context, refresh.secret!, refresh.ttl!.toDate());
 	// const sessionToken = generateSessionToken();
