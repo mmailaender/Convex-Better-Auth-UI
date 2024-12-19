@@ -67,12 +67,6 @@
 		}
 	}
 
-	// TODO: Call backend to verify if user with email exists
-	// If yes, ask user to sign in with passkey
-	// If no, verify email with email verifier if email is valid
-	// If email is not valid, show error message
-	// If email is valid, send an email to user with a OTP so he can verify his ownership
-
 	const verifyEmail = () => {
 	};
 </script>
