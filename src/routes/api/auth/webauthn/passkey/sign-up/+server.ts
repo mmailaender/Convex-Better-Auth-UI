@@ -207,5 +207,6 @@ export async function POST(event: RequestEvent) {
 			message: 'Invalid data'
 		});
 	}
-	return redirect(302, '/');
+	
+	return new Response('OK', { status: 200 });
 }

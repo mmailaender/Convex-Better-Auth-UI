@@ -101,6 +101,7 @@ async function action(event: RequestEvent) {
 		});
 	}
 
+	return redirect(302, '/');
 }
 
 // async function action(event: RequestEvent) {
