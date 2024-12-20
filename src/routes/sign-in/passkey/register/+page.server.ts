@@ -79,7 +79,9 @@ async function action(event: RequestEvent) {
 			message: 'Invalid or missing fields'
 		});
 	}
-	const response = await fetch('/api/auth/webauthn/passkey/sign-up', {
+	
+	const url = new URL('/api/auth/webauthn/passkey/sign-up', event.url.origin);
+	const response = await fetch(url, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'

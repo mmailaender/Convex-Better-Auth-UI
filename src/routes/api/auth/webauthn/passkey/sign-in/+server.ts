@@ -170,9 +170,6 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	const { access, refresh } = await signInWithPasskey(encodeBase64(credential.id!));
 	setAccessTokenCookie(context, access.secret!, access.ttl!.toDate());
 	setRefreshTokenCookie(context, refresh.secret!, refresh.ttl!.toDate());
-	// const sessionToken = generateSessionToken();
-	// const session = createSession(sessionToken, credential.userId, sessionFlags);
-	// setSessionTokenCookie(context, sessionToken, session.expiresAt);
 	return new Response(null, {
 		status: 204
 	});
