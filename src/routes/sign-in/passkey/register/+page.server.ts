@@ -96,6 +96,7 @@ async function action(event: RequestEvent) {
 	});
 
 	if (!response.ok) {
+		console.log('sign-in/passkey/register/+page.server.ts \n response: ', response);
 		return fail(response.status, {
 			message: 'Failed to sign up with passkey'
 		});
