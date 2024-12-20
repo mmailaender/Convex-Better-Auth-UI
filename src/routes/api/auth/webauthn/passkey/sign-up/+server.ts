@@ -1,6 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
-// import { get2FARedirect } from "$lib/server/2fa";
-import { bigEndian } from '@oslojs/binary';
+import { fail } from '@sveltejs/kit';
 import {
 	parseAttestationObject,
 	AttestationStatementFormat,
@@ -16,7 +14,6 @@ import { verifyWebAuthnChallenge } from '$lib/auth/server/webauthn';
 import { RSAPublicKey } from '@oslojs/crypto/rsa';
 
 import { env } from '$env/dynamic/private';
-// import { PUBLIC_APP_NAME } from '$env/static/public'
 
 import type { WebAuthnUserCredential } from '$lib/auth/server/webauthn';
 import type {
@@ -155,22 +152,10 @@ export async function POST(event: RequestEvent) {
 			cosePublicKey.x,
 			cosePublicKey.y
 		).encodeSEC1Uncompressed();
-		console.log(
-			'\nsign-in/passkey/register/+page.server.ts\n',
-			'authenticatorData.credential.id: ',
-			authenticatorData.credential.id
-		);
-		console.log(
-			'\nsign-in/passkey/register/+page.server.ts\n',
-			'bigEndian.uint64(authenticatorData.credential.id,0).toString(): ',
-			bigEndian.uint64(authenticatorData.credential.id, 0).toString()
-		);
 		credential = {
-			// id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
 			id: authenticatorData.credential.id,
 			userId: userId,
 			algorithmId: coseAlgorithmES256,
-			// name: PUBLIC_APP_NAME + "-Passkey",
 			publicKey: encodedPublicKey
 		};
 	} else if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmRS256) {
@@ -195,7 +180,7 @@ export async function POST(event: RequestEvent) {
 		});
 	}
 
-	console.log('sign-in/passkey/register/+page.server.ts \n credential: ', credential);
+	console.log('/src/routes/api/auth/webauthn/passkey/sign-up/+page.server.ts \n credential: ', credential);
 
 	try {
 		const { access, refresh } = await signUpWithPasskey(credential, firstName, lastName, email);
