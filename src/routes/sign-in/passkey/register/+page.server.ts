@@ -44,9 +44,7 @@ if (env.CUSTOM_DOMAINS) {
 	allowedUrls.push(...customDomains);
 }
 
-console.log('\nsign-in/passkey/register/+page.server.ts \n', 'allowedUrls: ', allowedUrls);
-
-export async function load(event: RequestEvent) {
+export async function load() {
 	const userId = (await sClient.query<string>(fql`newId()`)).data;
 	const credentialUserId = new Uint8Array(8);
 	bigEndian.putUint64(credentialUserId, BigInt(userId), 0);
@@ -81,154 +79,197 @@ async function action(event: RequestEvent) {
 			message: 'Invalid or missing fields'
 		});
 	}
+	const response = await fetch('/api/auth/webauthn/passkey/sign-up', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			firstName,
+			lastName,
+			email,
+			userId,
+			encodedAttestationObject,
+			encodedClientDataJSON
+		})
+	});
 
-	let attestationObjectBytes: Uint8Array, clientDataJSON: Uint8Array;
-	try {
-		attestationObjectBytes = decodeBase64(encodedAttestationObject);
-		clientDataJSON = decodeBase64(encodedClientDataJSON);
-	} catch {
-		return fail(400, {
-			message: 'Invalid or missing fields'
-		});
-	}
-
-	let attestationStatement: AttestationStatement;
-	let authenticatorData: AuthenticatorData;
-	try {
-		const attestationObject = parseAttestationObject(attestationObjectBytes);
-		attestationStatement = attestationObject.attestationStatement;
-		authenticatorData = attestationObject.authenticatorData;
-	} catch {
-		return fail(400, {
-			message: 'Invalid data 1'
-		});
-	}
-	if (attestationStatement.format !== AttestationStatementFormat.None) {
-		return fail(400, {
-			message: 'Invalid data 2'
-		});
-	}
-	if (
-		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
-	) {
-		return fail(400, {
-			message: 'Invalid data 3'
-		});
-	}
-	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
-		return fail(400, {
-			message: 'Invalid data 4'
-		});
-	}
-	if (authenticatorData.credential === null) {
-		return fail(400, {
-			message: 'Invalid data 5'
+	if (!response.ok) {
+		return fail(response.status, {
+			message: 'Failed to sign up with passkey'
 		});
 	}
 
-	let clientData: ClientData;
-	try {
-		clientData = parseClientDataJSON(clientDataJSON);
-	} catch {
-		return fail(400, {
-			message: 'Invalid data 6'
-		});
-	}
-	if (clientData.type !== ClientDataType.Create) {
-		return fail(400, {
-			message: 'Invalid data 7'
-		});
-	}
-
-	if (!verifyWebAuthnChallenge(clientData.challenge)) {
-		return fail(400, {
-			message: 'Invalid data 8'
-		});
-	}
-	if (
-		!allowedUrls.includes(clientData.origin)
-	) {
-		return fail(400, {
-			message: 'Invalid data 9'
-		});
-	}
-	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
-		return fail(400, {
-			message: 'Invalid data 10'
-		});
-	}
-
-	let credential: WebAuthnUserCredential;
-	if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmES256) {
-		let cosePublicKey: COSEEC2PublicKey;
-		try {
-			cosePublicKey = authenticatorData.credential.publicKey.ec2();
-		} catch {
-			return fail(400, {
-				message: 'Invalid data 11'
-			});
-		}
-		if (cosePublicKey.curve !== coseEllipticCurveP256) {
-			return fail(400, {
-				message: 'Unsupported algorithm'
-			});
-		}
-		const encodedPublicKey = new ECDSAPublicKey(
-			p256,
-			cosePublicKey.x,
-			cosePublicKey.y
-		).encodeSEC1Uncompressed();
-		console.log(
-			'\nsign-in/passkey/register/+page.server.ts\n',
-			'authenticatorData.credential.id: ',
-			authenticatorData.credential.id
-		);
-		console.log(
-			'\nsign-in/passkey/register/+page.server.ts\n',
-			'bigEndian.uint64(authenticatorData.credential.id,0).toString(): ',
-			bigEndian.uint64(authenticatorData.credential.id, 0).toString()
-		);
-		credential = {
-			// id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
-			id: authenticatorData.credential.id,
-			userId: userId,
-			algorithmId: coseAlgorithmES256,
-			// name: PUBLIC_APP_NAME + "-Passkey",
-			publicKey: encodedPublicKey
-		};
-	} else if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmRS256) {
-		let cosePublicKey: COSERSAPublicKey;
-		try {
-			cosePublicKey = authenticatorData.credential.publicKey.rsa();
-		} catch {
-			return fail(400, {
-				message: 'Invalid data'
-			});
-		}
-		const encodedPublicKey = new RSAPublicKey(cosePublicKey.n, cosePublicKey.e).encodePKCS1();
-		credential = {
-			id: authenticatorData.credential.id,
-			userId: userId,
-			algorithmId: coseAlgorithmRS256,
-			publicKey: encodedPublicKey
-		};
-	} else {
-		return fail(400, {
-			message: 'Unsupported algorithm'
-		});
-	}
-
-	console.log('sign-in/passkey/register/+page.server.ts \n credential: ', credential);
-
-	try {
-		const { access, refresh } = await signUpWithPasskey(credential, firstName, lastName, email);
-		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
-		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
-	} catch (error) {
-		console.log('sign-in/passkey/register/+page.server.ts \n error: ', error);
-		return fail(400, {
-			message: 'Invalid data'
-		});
-	}
-	return redirect(302, '/');
 }
+
+// async function action(event: RequestEvent) {
+// 	const formData = await event.request.formData();
+// 	const firstName = formData.get('firstName');
+// 	const lastName = formData.get('lastName');
+// 	const email = formData.get('email');
+// 	const userId = formData.get('userId');
+// 	const encodedAttestationObject = formData.get('attestationObject');
+// 	const encodedClientDataJSON = formData.get('clientDataJSON');
+// 	if (
+// 		typeof firstName !== 'string' ||
+// 		typeof lastName !== 'string' ||
+// 		typeof email !== 'string' ||
+// 		typeof userId !== 'string' ||
+// 		typeof encodedAttestationObject !== 'string' ||
+// 		typeof encodedClientDataJSON !== 'string'
+// 	) {
+// 		return fail(400, {
+// 			message: 'Invalid or missing fields'
+// 		});
+// 	}
+
+// 	let attestationObjectBytes: Uint8Array, clientDataJSON: Uint8Array;
+// 	try {
+// 		attestationObjectBytes = decodeBase64(encodedAttestationObject);
+// 		clientDataJSON = decodeBase64(encodedClientDataJSON);
+// 	} catch {
+// 		return fail(400, {
+// 			message: 'Invalid or missing fields'
+// 		});
+// 	}
+
+// 	let attestationStatement: AttestationStatement;
+// 	let authenticatorData: AuthenticatorData;
+// 	try {
+// 		const attestationObject = parseAttestationObject(attestationObjectBytes);
+// 		attestationStatement = attestationObject.attestationStatement;
+// 		authenticatorData = attestationObject.authenticatorData;
+// 	} catch {
+// 		return fail(400, {
+// 			message: 'Invalid data 1'
+// 		});
+// 	}
+// 	if (attestationStatement.format !== AttestationStatementFormat.None) {
+// 		return fail(400, {
+// 			message: 'Invalid data 2'
+// 		});
+// 	}
+// 	if (
+// 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
+// 	) {
+// 		return fail(400, {
+// 			message: 'Invalid data 3'
+// 		});
+// 	}
+// 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
+// 		return fail(400, {
+// 			message: 'Invalid data 4'
+// 		});
+// 	}
+// 	if (authenticatorData.credential === null) {
+// 		return fail(400, {
+// 			message: 'Invalid data 5'
+// 		});
+// 	}
+
+// 	let clientData: ClientData;
+// 	try {
+// 		clientData = parseClientDataJSON(clientDataJSON);
+// 	} catch {
+// 		return fail(400, {
+// 			message: 'Invalid data 6'
+// 		});
+// 	}
+// 	if (clientData.type !== ClientDataType.Create) {
+// 		return fail(400, {
+// 			message: 'Invalid data 7'
+// 		});
+// 	}
+
+// 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
+// 		return fail(400, {
+// 			message: 'Invalid data 8'
+// 		});
+// 	}
+// 	if (
+// 		!allowedUrls.includes(clientData.origin)
+// 	) {
+// 		return fail(400, {
+// 			message: 'Invalid data 9'
+// 		});
+// 	}
+// 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
+// 		return fail(400, {
+// 			message: 'Invalid data 10'
+// 		});
+// 	}
+
+// 	let credential: WebAuthnUserCredential;
+// 	if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmES256) {
+// 		let cosePublicKey: COSEEC2PublicKey;
+// 		try {
+// 			cosePublicKey = authenticatorData.credential.publicKey.ec2();
+// 		} catch {
+// 			return fail(400, {
+// 				message: 'Invalid data 11'
+// 			});
+// 		}
+// 		if (cosePublicKey.curve !== coseEllipticCurveP256) {
+// 			return fail(400, {
+// 				message: 'Unsupported algorithm'
+// 			});
+// 		}
+// 		const encodedPublicKey = new ECDSAPublicKey(
+// 			p256,
+// 			cosePublicKey.x,
+// 			cosePublicKey.y
+// 		).encodeSEC1Uncompressed();
+// 		console.log(
+// 			'\nsign-in/passkey/register/+page.server.ts\n',
+// 			'authenticatorData.credential.id: ',
+// 			authenticatorData.credential.id
+// 		);
+// 		console.log(
+// 			'\nsign-in/passkey/register/+page.server.ts\n',
+// 			'bigEndian.uint64(authenticatorData.credential.id,0).toString(): ',
+// 			bigEndian.uint64(authenticatorData.credential.id, 0).toString()
+// 		);
+// 		credential = {
+// 			// id: bigEndian.uint64(authenticatorData.credential.id,0).toString(),
+// 			id: authenticatorData.credential.id,
+// 			userId: userId,
+// 			algorithmId: coseAlgorithmES256,
+// 			// name: PUBLIC_APP_NAME + "-Passkey",
+// 			publicKey: encodedPublicKey
+// 		};
+// 	} else if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmRS256) {
+// 		let cosePublicKey: COSERSAPublicKey;
+// 		try {
+// 			cosePublicKey = authenticatorData.credential.publicKey.rsa();
+// 		} catch {
+// 			return fail(400, {
+// 				message: 'Invalid data'
+// 			});
+// 		}
+// 		const encodedPublicKey = new RSAPublicKey(cosePublicKey.n, cosePublicKey.e).encodePKCS1();
+// 		credential = {
+// 			id: authenticatorData.credential.id,
+// 			userId: userId,
+// 			algorithmId: coseAlgorithmRS256,
+// 			publicKey: encodedPublicKey
+// 		};
+// 	} else {
+// 		return fail(400, {
+// 			message: 'Unsupported algorithm'
+// 		});
+// 	}
+
+// 	console.log('sign-in/passkey/register/+page.server.ts \n credential: ', credential);
+
+// 	try {
+// 		const { access, refresh } = await signUpWithPasskey(credential, firstName, lastName, email);
+// 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
+// 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+// 	} catch (error) {
+// 		console.log('sign-in/passkey/register/+page.server.ts \n error: ', error);
+// 		return fail(400, {
+// 			message: 'Invalid data'
+// 		});
+// 	}
+// 	return redirect(302, '/');
+// }
