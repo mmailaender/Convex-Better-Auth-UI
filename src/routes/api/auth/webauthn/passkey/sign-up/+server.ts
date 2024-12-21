@@ -190,7 +190,7 @@ export async function POST(event: RequestEvent) {
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 	} catch (error) {
-		console.log('sign-in/passkey/register/+page.server.ts \n error: ', error);
+		console.log('src/routes/api/auth/webauthn/passkey/sign-up/+page.server.ts \n error: ', error);
 		return fail(400, {
 			message: 'Invalid data'
 		});
