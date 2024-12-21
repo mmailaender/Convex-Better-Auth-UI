@@ -3,7 +3,6 @@
  */
 @role(server)
 function signInWithPasskey(passkeyId: String): { access: Token, refresh: Token } {
-
   let user = Account.firstWhere(.passkeyId == passkeyId)!.user
   
   if(user != null) {

@@ -11,23 +11,28 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
       });
     }
     
-    let accountId = newId()
+    let userId = newId()
 
     let newAccount = Account.create({
-      id: accountId,
       provider: "Passkey",
       publicKey: credential.publicKey,
       algorithmId: credential.algorithmId,
       passkeyId: credential.id,
-      user: User.create({
+      user: User.byId(userId)
+    })
+    
+    let newUser = User.create({
         id: ID(credential.userId),
         firstName: userData.firstName,
         lastName: userData.lastName,
         image: userData.image,
         email: userData.email,
         emailVerified: Time.now(),
-        accounts: [Account.byId(accountId)]
+        accounts: [newAccount]
       })
+    
+    newAccount.update({
+      user: newUser
     })
     
     registration!.delete()
