@@ -157,7 +157,8 @@ export async function POST(event: RequestEvent) {
 			id: authenticatorData.credential.id,
 			userId: userId,
 			algorithmId: coseAlgorithmES256,
-			publicKey: encodedPublicKey
+			publicKey: encodedPublicKey,
+			otp: otp
 		};
 	} else if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmRS256) {
 		let cosePublicKey: COSERSAPublicKey;
