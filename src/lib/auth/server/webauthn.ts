@@ -80,11 +80,10 @@ export async function getPasskeyCredential(credentialId: Uint8Array): Promise<We
 
 export interface WebAuthnUserCredential {
 	id: Uint8Array;
-	// id: string;
 	userId: string;
-	// name: string;
 	algorithmId: number;
 	publicKey: Uint8Array;
+	otp?: string;
 }
 
 type WebAuthnUserCredentialEncoded = {
@@ -92,4 +91,5 @@ type WebAuthnUserCredentialEncoded = {
 	userId: string;
 	algorithmId: number;
 	publicKey: string;
+	otp?: string;
 }

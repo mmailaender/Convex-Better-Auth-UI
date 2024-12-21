@@ -1,11 +1,19 @@
 @role(server)
-function createPasskeyAccount(credential: {id: String, userId: String, algorithmId: Long, publicKey: String}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): Account {
+function createPasskeyAccount(credential: {id: String, userId: String, algorithmId: Long, publicKey: String, otp: String}, userData: {firstName: String, lastName: String, email: String, image: String | Null}): Account {
   let user = User.firstWhere(.email == userData.email)
 
   if(user == null) {
+    let registration = Registration.all().firstWhere(.email == userData.email && .otp == credential.otp)
+    if(registration == null) {
+      abort({
+        code: "NO_VALID_REGISTRATION",
+        message: "Please restart the registration process"
+      });
+    }
+    
     let accountId = newId()
 
-    Account.create({
+    let newAccount = Account.create({
       id: accountId,
       provider: "Passkey",
       publicKey: credential.publicKey,
@@ -21,6 +29,10 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
         accounts: [Account.byId(accountId)]
       })
     })
+    
+    registration!.delete()
+    
+    newAccount
   } else if (user == Query.identity()){
     // If an user with this email is already existing, the user needs to be signed it to add a new account.
     

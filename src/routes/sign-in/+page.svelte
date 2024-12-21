@@ -18,6 +18,7 @@
 	let email = $state('');
 	let firstName = $state('');
 	let lastName = $state('');
+	let otp = $state('');
 
 	let userExists: boolean | null = $state(null); // null means we haven't checked yet
 
@@ -144,6 +145,7 @@
 					firstName,
 					lastName,
 					email,
+					otp,
 					userId: data.userId,
 					encodedAttestationObject: attestationObject,
 					encodedClientDataJSON: clientDataJSON
@@ -208,6 +210,7 @@
 			<form class="flex flex-col gap-3" onsubmit={signUpWithPasskey} autocomplete="off">
 				<input class="input" type="text" bind:value={firstName} placeholder="First name" required />
 				<input class="input" type="text" bind:value={lastName} placeholder="Last name" required />
+				<input class="input" type="text" bind:value={otp} placeholder="One time password" required />
 				<!-- email is already known, but let's keep it for clarity -->
 				<input class="input disabled:bg-surface-100-900" type="email" bind:value={email} placeholder="Email" disabled required />
 

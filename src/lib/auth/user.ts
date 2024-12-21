@@ -68,6 +68,11 @@ export async function verifySocialAccountExists(
 	return response.data;
 }
 
+export async function createRegistration(email: string): Promise<string> {
+	const response = await sClient.query<string>(fql`createRegistration(${email})`);
+	return response.data;
+}
+
 export type User = Document & {
 	firstName: string;
 	lastName: string;

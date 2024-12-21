@@ -1,4 +1,4 @@
-import { verifyUserExists } from '$lib/auth/user';
+import { createRegistration, verifyUserExists } from '$lib/auth/user';
 import type { RequestEvent, RequestHandler } from './$types';
 
 export const POST: RequestHandler = async (event: RequestEvent) => {
@@ -9,6 +9,15 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
 	}
 
 	const exists = await verifyUserExists(email);
+
+	if(exists == false) {
+		// TODO: Add code to validate email through reoon
+
+
+		const otp = await createRegistration(email);
+
+		// TODO: send email with OTP
+	}
 
 	return new Response(JSON.stringify({ exists }), { status: 200 });
 };

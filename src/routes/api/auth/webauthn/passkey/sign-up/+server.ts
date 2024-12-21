@@ -42,13 +42,14 @@ if (env.CUSTOM_DOMAINS) {
 }
 
 export async function POST(event: RequestEvent) {
-	const { firstName, lastName, email, userId, encodedAttestationObject, encodedClientDataJSON } =
+	const { firstName, lastName, email, otp, userId, encodedAttestationObject, encodedClientDataJSON } =
 		await event.request.json();
 
 	if (
 		typeof firstName !== 'string' ||
 		typeof lastName !== 'string' ||
 		typeof email !== 'string' ||
+		typeof otp !== 'string' ||
 		typeof userId !== 'string' ||
 		typeof encodedAttestationObject !== 'string' ||
 		typeof encodedClientDataJSON !== 'string'
@@ -172,7 +173,8 @@ export async function POST(event: RequestEvent) {
 			id: authenticatorData.credential.id,
 			userId: userId,
 			algorithmId: coseAlgorithmRS256,
-			publicKey: encodedPublicKey
+			publicKey: encodedPublicKey,
+			otp: otp
 		};
 	} else {
 		return fail(400, {
