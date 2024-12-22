@@ -31,10 +31,10 @@
 	});
 
 	$effect(() => {
-		if(userExists) {
+		if (userExists) {
 			signInWithPasskey();
 		}
-	})
+	});
 
 	async function verifyEmail() {
 		try {
@@ -44,8 +44,9 @@
 				body: JSON.stringify({ email })
 			});
 			if (!res.ok) {
-				res.statusText
-				throw new Error(res.statusText);
+				return res.text().then((errorMessage) => {
+					throw new Error(errorMessage); 
+				});
 			}
 			const { exists } = await res.json();
 			userExists = exists;
@@ -107,7 +108,7 @@
 						name: email
 					},
 					rp: {
-						name: "Your App Name"
+						name: 'Your App Name'
 					},
 					pubKeyCredParams: [
 						{
@@ -166,7 +167,9 @@
 </script>
 
 <div class="flex min-h-screen items-center justify-center">
-	<div class="card flex w-full max-w-md flex-col gap-6 border p-6 text-center border-surface-200-800">
+	<div
+		class="card flex w-full max-w-md flex-col gap-6 border p-6 text-center border-surface-200-800"
+	>
 		<!-- Title -->
 		<div id="auth_sign-in_title" class="flex flex-col gap-3">
 			<h2 class="h3 text-center">Sign in or create account</h2>
@@ -192,7 +195,7 @@
 					bind:value={email}
 					placeholder="Enter your email"
 					required
-					/>
+				/>
 				<button class="btn w-full preset-filled" type="submit">Continue</button>
 			</form>
 		{/if}
@@ -211,13 +214,24 @@
 			<form class="flex flex-col gap-3" onsubmit={signUpWithPasskey} autocomplete="off">
 				<input class="input" type="text" bind:value={firstName} placeholder="First name" required />
 				<input class="input" type="text" bind:value={lastName} placeholder="Last name" required />
-				<input class="input" type="text" bind:value={otp} placeholder="One time password" required />
+				<input
+					class="input"
+					type="text"
+					bind:value={otp}
+					placeholder="One time password"
+					required
+				/>
 				<!-- email is already known, but let's keep it for clarity -->
-				<input class="input disabled:bg-surface-100-900" type="email" bind:value={email} placeholder="Email" disabled required />
+				<input
+					class="input disabled:bg-surface-100-900"
+					type="email"
+					bind:value={email}
+					placeholder="Email"
+					disabled
+					required
+				/>
 
-				<button class="btn w-full preset-filled" type="submit">
-					Create Passkey and Sign Up
-				</button>
+				<button class="btn w-full preset-filled" type="submit"> Create Passkey and Sign Up </button>
 			</form>
 		{/if}
 
