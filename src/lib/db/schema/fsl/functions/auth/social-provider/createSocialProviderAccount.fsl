@@ -3,23 +3,28 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
   let user = User.firstWhere(.email == email)
   
   if(user == null) {
-    let accountId = newId()
     let userId = newId()
 
-    Account.create({
-      id: accountId,
+    let newAccount = Account.create({
       provider: provider,
       providerAccountId: providerAccountId,
-      user: User.create({
+      user: User.byId(userId)
+    })
+    
+    let newUser = User.create({
         id: userId,
         firstName: firstName,
         lastName: lastName,
         image: image,
         email: email,
         emailVerified: Time.now(),
-        accounts: [Account.byId(accountId)]
-      })
+        accounts: [newAccount]
     })
+    
+    newAccount.update({
+      user: newUser
+    })
+    
   } else if (user == Query.identity()){
     // If an user with this email is already existing, the user needs to be signed it to add a new account.
   
