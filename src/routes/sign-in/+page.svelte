@@ -44,7 +44,7 @@
 				body: JSON.stringify({ email })
 			});
 			if (!res.ok) {
-				return res.text().then((errorMessage) => {
+				res.text().then((errorMessage) => {
 					throw new Error(errorMessage); 
 				});
 			}
