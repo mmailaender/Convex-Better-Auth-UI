@@ -44,7 +44,8 @@
 				body: JSON.stringify({ email })
 			});
 			if (!res.ok) {
-				throw new Error('Failed to check email.');
+				res.statusText
+				throw new Error(res.statusText);
 			}
 			const { exists } = await res.json();
 			userExists = exists;
