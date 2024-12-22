@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { User } from '$lib/auth/user';
+	import  { type User, signOut } from '$lib/auth/user';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -10,9 +10,9 @@
 <div class="flex flex-col min-h-screen items-center justify-center gap-6">
 	{#if user}
 		Hello {user.email}
+		<a class="btn preset-filled-primary-500" href="/sign-out">Sign out</a>
 	{:else}
 		Secret things ahead!
         <a class="btn preset-filled-primary-500" href="/sign-in">Sign in</a>
-        <a class="btn preset-filled-primary-500" href="/sign-in/passkey/register">Sign in with Passkey</a>
 	{/if}
 </div>

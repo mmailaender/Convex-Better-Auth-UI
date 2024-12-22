@@ -2,6 +2,8 @@ import { sClient, uClient } from '$lib/db/client';
 import { fql, TimeStub, type Document } from 'fauna';
 import type { WebAuthnUserCredential } from './server/webauthn';
 import { encodeBase64 } from '@oslojs/encoding';
+import { deleteAccessTokenCookie, deleteRefreshTokenCookie, invalidateSession } from './sign-in/session';
+import type { RequestEvent } from '@sveltejs/kit';
 
 export async function signUpWithSocialProvider(
 	githubId: string,
@@ -72,6 +74,23 @@ export async function createRegistration(email: string): Promise<string> {
 	const response = await sClient.query<string>(fql`createRegistration(${email})`);
 	return response.data;
 }
+
+export async function signOut(event: RequestEvent): Promise<boolean> {
+	const accessToken = event.cookies.get('access_token');
+	if (accessToken) {
+		try {
+			await invalidateSession(accessToken);
+			deleteAccessTokenCookie(event);
+			deleteRefreshTokenCookie(event);
+			return true; // Sign-out successful
+		} catch (error) {
+			console.error('Failed to sign out:', error);
+			return false; // Sign-out failed
+		}
+	}
+	return false; // No access token found, treat as failure
+}
+
 
 export type User = Document & {
 	firstName: string;
