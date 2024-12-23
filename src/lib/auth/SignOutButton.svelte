@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 
 	interface Props {
 		redirectUrl?: string;
@@ -7,7 +8,7 @@
 		children?: import('svelte').Snippet;
 	}
 
-	let { redirectUrl = '/', className = 'btn preset-filled-primary-500', children }: Props = $props();
+	let { redirectUrl, className = 'btn preset-filled', children }: Props = $props();
 
 	let buttonText: string = 'Sign Out';
 
@@ -15,8 +16,11 @@
 		try {
 			const response = await fetch('/api/auth/sign-out');
 			if (response.ok) {
-				// Redirect after successful sign-out
-				goto(redirectUrl);
+                invalidateAll();
+
+				if (redirectUrl) {
+					goto(redirectUrl);
+				}
 			} else {
 				console.error('Sign-out failed');
 			}
