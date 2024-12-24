@@ -1,6 +1,7 @@
 import { decodeBase64, encodeBase64, encodeHexLowerCase } from "@oslojs/encoding";
 import { sClient } from "$lib/db/client";
 import { fql } from "fauna";
+import type { WebAuthnUserCredential, WebAuthnUserCredentialEncoded } from "./types";
 
 const challengeBucket = new Set<string>();
 
@@ -78,18 +79,3 @@ export async function getPasskeyCredential(credentialId: Uint8Array): Promise<We
 // 	return response.data;
 // }
 
-export interface WebAuthnUserCredential {
-	id: Uint8Array;
-	userId: string;
-	algorithmId: number;
-	publicKey: Uint8Array;
-	otp?: string;
-}
-
-type WebAuthnUserCredentialEncoded = {
-	id: string;
-	userId: string;
-	algorithmId: number;
-	publicKey: string;
-	otp?: string;
-}
