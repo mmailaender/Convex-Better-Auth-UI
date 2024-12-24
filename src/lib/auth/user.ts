@@ -1,8 +1,8 @@
 import { sClient, uClient } from '$lib/db/client';
 import { fql, TimeStub, type Document } from 'fauna';
-import type { WebAuthnUserCredential } from './server/webauthn';
+import type { WebAuthnUserCredential } from './passkeys/server';
 import { encodeBase64 } from '@oslojs/encoding';
-import { deleteAccessTokenCookie, deleteRefreshTokenCookie, invalidateSession } from './sign-in/session';
+import { deleteAccessTokenCookie, deleteRefreshTokenCookie, invalidateSession } from './session';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export async function signUpWithSocialProvider(

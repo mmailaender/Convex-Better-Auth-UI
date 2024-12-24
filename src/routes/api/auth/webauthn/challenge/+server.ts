@@ -1,4 +1,4 @@
-import { createWebAuthnChallenge } from "$lib/auth/server/webauthn";
+import { createWebAuthnChallenge } from "$lib/auth/passkeys/server";
 import { encodeBase64 } from "@oslojs/encoding";
 import { RefillingTokenBucket } from "$lib/auth/rate-limit";
 

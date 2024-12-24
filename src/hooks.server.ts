@@ -1,5 +1,5 @@
 import { RefillingTokenBucket } from "$lib/auth/rate-limit";
-import { refreshAccessToken, setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/sign-in/session";
+import { refreshAccessToken, setAccessTokenCookie, setRefreshTokenCookie } from "$lib/auth/session";
 import { sequence } from "@sveltejs/kit/hooks";
 
 import type { Handle } from '@sveltejs/kit';

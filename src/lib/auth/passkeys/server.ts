@@ -14,7 +14,7 @@ export function createWebAuthnChallenge(): Uint8Array {
 
 export function verifyWebAuthnChallenge(challenge: Uint8Array): boolean {
 	const encoded = encodeHexLowerCase(challenge);
-	console.log("\nserver/webauth.ts - verifyWebAuthnChallenge\n", "challengeBucket: ", challengeBucket);
+	console.log("\nlib/auth/passkeys/server.ts - verifyWebAuthnChallenge\n", "challengeBucket: ", challengeBucket);
 	return challengeBucket.delete(encoded);
 }
 
@@ -25,7 +25,7 @@ export async function getPasskeyCredential(credentialId: Uint8Array): Promise<We
 		return null;
 	}
 
-	console.log("\nserver/webauth.ts - getPasskeyCredential\n", "WebAuthnUserCredentialEncoded: ", response.data);
+	console.log("\nlib/auth/passkeys/server.ts - getPasskeyCredential\n", "WebAuthnUserCredentialEncoded: ", response.data);
 	
 	const responseDecoded = {
 		id: decodeBase64(response.data.id),
@@ -34,7 +34,7 @@ export async function getPasskeyCredential(credentialId: Uint8Array): Promise<We
 		publicKey: decodeBase64(response.data.publicKey)
 	}
 
-	console.log("\nserver/webauth.ts - getPasskeyCredential\n", "WebAuthnUserCredential: ", responseDecoded);
+	console.log("\nlib/auth/passkeys/server.ts - getPasskeyCredential\n", "WebAuthnUserCredential: ", responseDecoded);
 
 	return responseDecoded
 }

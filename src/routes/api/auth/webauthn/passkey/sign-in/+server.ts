@@ -14,7 +14,7 @@ import {
 } from '@oslojs/crypto/ecdsa';
 import { ObjectParser } from '@pilcrowjs/object-parser';
 import { decodeBase64, encodeBase64 } from '@oslojs/encoding';
-import { verifyWebAuthnChallenge, getPasskeyCredential } from '$lib/auth/server/webauthn';
+import { verifyWebAuthnChallenge, getPasskeyCredential } from '$lib/auth/passkeys/server';
 import { sha256 } from '@oslojs/crypto/sha2';
 import {
 	decodePKCS1RSAPublicKey,
@@ -26,7 +26,7 @@ import type { RequestEvent } from './$types';
 import type { ClientData, AuthenticatorData } from '@oslojs/webauthn';
 
 import { env } from '$env/dynamic/private';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/sign-in/session';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 import { signInWithPasskey } from '$lib/auth/user';
 
 const allowedUrls = [] as string[];

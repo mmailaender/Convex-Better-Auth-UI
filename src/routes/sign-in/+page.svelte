@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import SocialProvider from '$lib/auth/social/provider.svelte';
-	import { createChallenge } from '$lib/auth/passkeys/webauthn';
+	import { createChallenge } from '$lib/auth/passkeys/client';
 	import { encodeBase64 } from '@oslojs/encoding';
 	interface Props {
 		data: { userId: string; credentialUserId: Uint8Array };

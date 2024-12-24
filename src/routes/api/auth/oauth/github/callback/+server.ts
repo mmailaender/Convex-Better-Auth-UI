@@ -5,7 +5,7 @@ import {
 	signInWithSocialProvider,
 	verifySocialAccountExists
 } from '$lib/auth/user';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/sign-in/session';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 
 import type { OAuth2Tokens } from 'arctic';
 import type { RequestEvent } from './$types';

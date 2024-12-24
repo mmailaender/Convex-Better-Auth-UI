@@ -10,12 +10,12 @@ import {
 } from '@oslojs/webauthn';
 import { ECDSAPublicKey, p256 } from '@oslojs/crypto/ecdsa';
 import { decodeBase64 } from '@oslojs/encoding';
-import { verifyWebAuthnChallenge } from '$lib/auth/server/webauthn';
+import { verifyWebAuthnChallenge } from '$lib/auth/passkeys/server';
 import { RSAPublicKey } from '@oslojs/crypto/rsa';
 
 import { env } from '$env/dynamic/private';
 
-import type { WebAuthnUserCredential } from '$lib/auth/server/webauthn';
+import type { WebAuthnUserCredential } from '$lib/auth/passkeys/server';
 import type {
 	AttestationStatement,
 	AuthenticatorData,
@@ -25,7 +25,7 @@ import type {
 } from '@oslojs/webauthn';
 import type { RequestEvent } from './$types';
 import { signUpWithPasskey } from '$lib/auth/user';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/sign-in/session';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 
 const allowedUrls = [] as string[];
 if (env.VERCEL_URL) {
