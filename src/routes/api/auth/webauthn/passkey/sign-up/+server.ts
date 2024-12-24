@@ -77,29 +77,29 @@ export async function POST(event: RequestEvent) {
 		authenticatorData = attestationObject.authenticatorData;
 	} catch {
 		return fail(400, {
-			message: 'Invalid data 1'
+			message: 'Invalid data'
 		});
 	}
 	if (attestationStatement.format !== AttestationStatementFormat.None) {
 		return fail(400, {
-			message: 'Invalid data 2'
+			message: 'Invalid data'
 		});
 	}
 	if (
 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
 	) {
 		return fail(400, {
-			message: 'Invalid data 3'
+			message: 'Invalid data'
 		});
 	}
 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
 		return fail(400, {
-			message: 'Invalid data 4'
+			message: 'Invalid data'
 		});
 	}
 	if (authenticatorData.credential === null) {
 		return fail(400, {
-			message: 'Invalid data 5'
+			message: 'Invalid data'
 		});
 	}
 
@@ -108,28 +108,28 @@ export async function POST(event: RequestEvent) {
 		clientData = parseClientDataJSON(clientDataJSON);
 	} catch {
 		return fail(400, {
-			message: 'Invalid data 6'
+			message: 'Invalid data'
 		});
 	}
 	if (clientData.type !== ClientDataType.Create) {
 		return fail(400, {
-			message: 'Invalid data 7'
+			message: 'Invalid data'
 		});
 	}
 
 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
 		return fail(400, {
-			message: 'Invalid data 8'
+			message: 'Invalid data'
 		});
 	}
 	if (!allowedUrls.includes(clientData.origin)) {
 		return fail(400, {
-			message: 'Invalid data 9'
+			message: 'Invalid data'
 		});
 	}
 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
 		return fail(400, {
-			message: 'Invalid data 10'
+			message: 'Invalid data'
 		});
 	}
 
@@ -140,7 +140,7 @@ export async function POST(event: RequestEvent) {
 			cosePublicKey = authenticatorData.credential.publicKey.ec2();
 		} catch {
 			return fail(400, {
-				message: 'Invalid data 11'
+				message: 'Invalid data'
 			});
 		}
 		if (cosePublicKey.curve !== coseEllipticCurveP256) {
@@ -183,18 +183,17 @@ export async function POST(event: RequestEvent) {
 		});
 	}
 
-	console.log('/src/routes/api/auth/webauthn/passkey/sign-up/+page.server.ts \n credential: ', credential);
-
 	try {
 		const { access, refresh } = await signUpWithPasskey(credential, firstName, lastName, email);
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 	} catch (error) {
-		console.log('src/routes/api/auth/webauthn/passkey/sign-up/+page.server.ts \n error: ', error);
 		return fail(400, {
 			message: 'Invalid data'
 		});
 	}
 	
-	return new Response('OK', { status: 200 });
+	return new Response(null, {
+		status: 204
+	});
 }

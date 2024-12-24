@@ -54,44 +54,58 @@
 		}
 	}
 
-	async function signInWithPasskey() {
-		try {
-			const challenge = await createChallenge();
-			const credential = await navigator.credentials.get({
-				publicKey: {
-					challenge,
-					userVerification: 'required'
-				}
-			});
+	function getFriendlyErrorMessage(error: any): string {
+        switch (error.name) {
+            case 'NotAllowedError':
+                return 'Authentication was canceled or timed out. Please try again.';
+            case 'InvalidStateError':
+                return 'There was an issue with the authentication state. Please refresh the page and try again.';
+            case 'AbortError':
+                return 'Authentication was aborted. Please try again.';
+            default:
+                return error.message || 'An unexpected error occurred. Please try again.';
+        }
+    }
 
-			if (!(credential instanceof PublicKeyCredential)) {
-				errorMessage = 'Failed to retrieve credential.';
-				return;
-			}
-			if (!(credential.response instanceof AuthenticatorAssertionResponse)) {
-				errorMessage = 'Unexpected error: invalid credential response.';
-				return;
-			}
+    async function signInWithPasskey() {
+        try {
+            const challenge = await createChallenge();
+            const credential = await navigator.credentials.get({
+                publicKey: {
+                    challenge,
+                    userVerification: 'required'
+                }
+            });
 
-			const response = await fetch('/api/auth/webauthn/passkey/sign-in', {
-				method: 'POST',
-				body: JSON.stringify({
-					credential_id: encodeBase64(new Uint8Array(credential.rawId)),
-					signature: encodeBase64(new Uint8Array(credential.response.signature)),
-					authenticator_data: encodeBase64(new Uint8Array(credential.response.authenticatorData)),
-					client_data_json: encodeBase64(new Uint8Array(credential.response.clientDataJSON))
-				})
-			});
+            if (!(credential instanceof PublicKeyCredential)) {
+                errorMessage = 'Failed to retrieve credential.';
+                return;
+            }
+            if (!(credential.response instanceof AuthenticatorAssertionResponse)) {
+                errorMessage = 'Unexpected error: invalid credential response.';
+                return;
+            }
 
-			if (response.ok) {
-				goto('/');
-			} else {
-				errorMessage = await response.text();
-			}
-		} catch (err: any) {
-			errorMessage = err?.message ?? 'An unknown error occurred.';
-		}
-	}
+            const response = await fetch('/api/auth/webauthn/passkey/sign-in', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    credential_id: encodeBase64(new Uint8Array(credential.rawId)),
+                    signature: encodeBase64(new Uint8Array(credential.response.signature)),
+                    authenticator_data: encodeBase64(new Uint8Array(credential.response.authenticatorData)),
+                    client_data_json: encodeBase64(new Uint8Array(credential.response.clientDataJSON))
+                })
+            });
+
+            if (response.ok) {
+                goto('/');
+            } else {
+                errorMessage = await response.text();
+            }
+        } catch (err: any) {
+            errorMessage = getFriendlyErrorMessage(err);
+        }
+    }
 
 	async function signUpWithPasskey(event: SubmitEvent) {
 		event.preventDefault();

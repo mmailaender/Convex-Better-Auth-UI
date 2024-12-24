@@ -24,7 +24,6 @@ import {
 
 import type { RequestEvent } from './$types';
 import type { ClientData, AuthenticatorData } from '@oslojs/webauthn';
-// import type { SessionFlags } from "$lib/server/session";
 
 import { env } from '$env/dynamic/private';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/sign-in/session';
@@ -81,19 +80,19 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	try {
 		authenticatorData = parseAuthenticatorData(authenticatorDataBytes);
 	} catch {
-		return new Response('Invalid data 1', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (
 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
 	) {
-		return new Response('Invalid data 2', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
-		return new Response('Invalid data 3', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
@@ -102,30 +101,30 @@ export async function POST(context: RequestEvent): Promise<Response> {
 	try {
 		clientData = parseClientDataJSON(clientDataJSON);
 	} catch {
-		return new Response('Invalid data 4', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (clientData.type !== ClientDataType.Get) {
-		return new Response('Invalid data 5', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 
 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
-		return new Response('Invalid data 6', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (
 		!allowedUrls.includes(clientData.origin)
 	) {
-		return new Response('Invalid data 7', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
-		return new Response('Invalid data 8', {
+		return new Response('Invalid data', {
 			status: 400
 		});
 	}
@@ -163,9 +162,6 @@ export async function POST(context: RequestEvent): Promise<Response> {
 			status: 400
 		});
 	}
-	// const sessionFlags: SessionFlags = {
-	// 	twoFactorVerified: true
-	// };
 
 	const { access, refresh } = await signInWithPasskey(encodeBase64(credential.id!));
 	setAccessTokenCookie(context, access.secret!, access.ttl!.toDate());
