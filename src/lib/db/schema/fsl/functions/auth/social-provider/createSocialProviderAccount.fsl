@@ -17,7 +17,6 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
         lastName: lastName,
         image: image,
         email: email,
-        emailVerified: Time.now(),
         accounts: [newAccount]
     })
     

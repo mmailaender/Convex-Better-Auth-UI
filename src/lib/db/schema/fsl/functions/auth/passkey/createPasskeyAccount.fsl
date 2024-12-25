@@ -27,7 +27,6 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
         lastName: userData.lastName,
         image: userData.image,
         email: userData.email,
-        emailVerified: Time.now(),
         accounts: [newAccount]
       })
     

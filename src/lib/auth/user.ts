@@ -180,7 +180,6 @@ export type User = Document & {
 	firstName: string;
 	lastName: string;
 	email: string;
-	emailVerified: TimeStub;
 	image: string | null;
 	accounts: Account[];
 };

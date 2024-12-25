@@ -1,5 +1,5 @@
-default=Dev
+default=dev
 
-[environment.Dev]
+[environment.dev]
 endpoint=cloud-eu
 database=PlanCreator/Development_v2

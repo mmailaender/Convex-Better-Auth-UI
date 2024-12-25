@@ -2,7 +2,6 @@ collection User {
     firstName: String
     lastName: String
     email: String
-    emailVerified: Time | Null
     image: String | Null
     accounts: Array<Ref<Account>>
 
@@ -16,4 +15,8 @@ collection User {
 
     unique [.email]
     unique [mva(.accounts)]
+
+    migrations {
+      drop .emailVerified
+    }
 }
