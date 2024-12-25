@@ -19,11 +19,13 @@ import type { OAuth2Tokens } from 'arctic';
 import type { RequestEvent } from './$types';
 
 export async function GET(event: RequestEvent): Promise<Response> {
+	console.log('GitHub OAuth callback initiated');
 	const storedState = event.cookies.get('github_oauth_state') ?? null;
 	const code = event.url.searchParams.get('code');
 	const state = event.url.searchParams.get('state');
 
 	if (storedState === null || code === null || state === null || storedState !== state) {
+		console.warn('State validation failed or missing parameters');
 		const errorMessage = encodeURIComponent('Please restart the process.');
 		return new Response(null, {
 			status: 302,
@@ -35,8 +37,10 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	let tokens: OAuth2Tokens;
 	try {
+		console.log('Validating authorization code with GitHub');
 		tokens = await github.validateAuthorizationCode(code);
-	} catch {
+	} catch (error) {
+		console.error('Error validating authorization code:', error);
 		const errorMessage = encodeURIComponent('Please restart the process.');
 		return new Response(null, {
 			status: 302,
@@ -49,6 +53,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	const githubAccessToken = tokens.accessToken();
 
 	// Fetch GitHub user information
+	console.log('Fetching GitHub user information');
 	const userRequest = new Request('https://api.github.com/user');
 	userRequest.headers.set('Authorization', `Bearer ${githubAccessToken}`);
 	const userResponse = await fetch(userRequest);
@@ -57,10 +62,13 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	const githubUserId = userParser.getNumber('id').toString();
 	const username = userParser.getString('login');
+	console.log('GitHub user information fetched:', { githubUserId, username });
 
 	// Check if the user already exists
+	console.log('Checking if the GitHub user already exists');
 	const userExists = await verifySocialAccountExists('Github', githubUserId);
 	if (userExists) {
+		console.log('User exists, signing in');
 		const { access, refresh } = await signInWithSocialProvider('Github', githubUserId);
 
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
@@ -75,11 +83,13 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	}
 
 	// Fetch verified email address from GitHub
+	console.log('Fetching verified email address from GitHub');
 	const emailListRequest = new Request('https://api.github.com/user/emails');
 	emailListRequest.headers.set('Authorization', `Bearer ${githubAccessToken}`);
 	const emailListResponse = await fetch(emailListRequest);
 	const emailListResult: unknown = await emailListResponse.json();
 	if (!Array.isArray(emailListResult) || emailListResult.length < 1) {
+		console.warn('No verified email addresses found');
 		const errorMessage = encodeURIComponent('Please restart the process.');
 		return new Response(null, {
 			status: 302,
@@ -99,6 +109,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	}
 
 	if (email === null) {
+		console.warn('No primary verified email address found');
 		const errorMessage = encodeURIComponent('Please verify your GitHub email address.');
 		return new Response(null, {
 			status: 302,
@@ -109,10 +120,12 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	}
 
 	try {
+		console.log('Creating new user with GitHub account');
 		const { access, refresh } = await signUpWithSocialProvider(githubUserId, email, username);
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
-	} catch {
+	} catch (error) {
+		console.error('Error during user sign-up:', error);
 		const errorMessage = encodeURIComponent('User with this email already exists. Please sign in with your initial used account.');
 		return new Response(null, {
 			status: 302,
@@ -122,6 +135,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		});
 	}
 
+	console.log('GitHub OAuth process completed successfully');
 	return new Response(null, {
 		status: 302,
 		headers: {
