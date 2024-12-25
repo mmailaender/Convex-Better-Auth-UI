@@ -18,6 +18,44 @@ import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 import type { OAuth2Tokens } from 'arctic';
 import type { RequestEvent } from './$types';
 
+/**
+ * Splits a full name into first name and last name.
+ *
+ * @param fullName - The full name string to be split.
+ * @returns An object containing `firstName` and `lastName`.
+ */
+function splitFullName(fullName: string): { firstName: string; lastName: string } {
+    // Trim the input to remove leading and trailing whitespace
+    const trimmedName = fullName.trim();
+
+    // Replace multiple spaces with a single space
+    const normalizedName = trimmedName.replace(/\s+/g, ' ');
+
+    // Split the name into parts based on space
+    const nameParts = normalizedName.split(' ');
+
+    // Initialize firstName and lastName
+    let firstName = '';
+    let lastName = '';
+
+    if (nameParts.length === 0) {
+        // Empty string case
+        firstName = '';
+        lastName = '';
+    } else if (nameParts.length === 1) {
+        // Only one name part, assign to firstName
+        firstName = nameParts[0];
+        lastName = '';
+    } else {
+        // More than one name part
+        // Assign last part to lastName and the rest to firstName
+        lastName = nameParts[nameParts.length - 1];
+        firstName = nameParts.slice(0, -1).join(' ');
+    }
+
+    return { firstName, lastName };
+}
+
 export async function GET(event: RequestEvent): Promise<Response> {
 	console.log('GitHub OAuth callback initiated');
 	const storedState = event.cookies.get('github_oauth_state') ?? null;
@@ -62,7 +100,9 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	const githubUserId = userParser.getNumber('id').toString();
 	const username = userParser.getString('login');
-	console.log('GitHub user information fetched:', { githubUserId, username });
+	const fullName = userParser.getString('name');
+	const { firstName, lastName } = splitFullName(fullName);
+	console.log('GitHub user information fetched:', { githubUserId, username, firstName, lastName });
 
 	// Check if the user already exists
 	console.log('Checking if the GitHub user already exists');
@@ -121,7 +161,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	try {
 		console.log('Creating new user with GitHub account');
-		const { access, refresh } = await signUpWithSocialProvider(githubUserId, email, username);
+		const { access, refresh } = await signUpWithSocialProvider(githubUserId, email, firstName || username, lastName || '');
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 	} catch (error) {

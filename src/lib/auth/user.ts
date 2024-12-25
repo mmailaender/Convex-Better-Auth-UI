@@ -2,7 +2,12 @@ import { sClient, uClient } from '$lib/db/client';
 import { fql, TimeStub, type Document } from 'fauna';
 import type { WebAuthnUserCredential } from './passkeys/types';
 import { encodeBase64 } from '@oslojs/encoding';
-import { deleteAccessTokenCookie, deleteRefreshTokenCookie, invalidateSession, invalidateUserSessions } from './session';
+import {
+	deleteAccessTokenCookie,
+	deleteRefreshTokenCookie,
+	invalidateSession,
+	invalidateUserSessions
+} from './session';
 import type { RequestEvent } from '@sveltejs/kit';
 
 /**
@@ -10,16 +15,18 @@ import type { RequestEvent } from '@sveltejs/kit';
  *
  * @param {string} githubId - The user's GitHub ID.
  * @param {string} email - The user's email address.
- * @param {string} username - The user's username.
+ * @param {string} firstName - The user's first name.
+ * @param {string} lastName - The user's last name.
  * @returns {Promise<Tokens>} The authentication tokens for the user.
  */
 export async function signUpWithSocialProvider(
 	githubId: string,
 	email: string,
-	username: string
+	firstName: string,
+	lastName: string
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
-		fql`signUpWithSocialProvider({ email: ${email}, userId: ${githubId}, provider: "Github", firstName: ${username}, lastName: ${username} })`
+		fql`signUpWithSocialProvider({ email: ${email}, userId: ${githubId}, provider: "Github", firstName: ${firstName}, lastName: ${lastName} })`
 	);
 
 	return response.data;
