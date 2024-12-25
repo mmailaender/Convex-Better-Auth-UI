@@ -1,3 +1,10 @@
+/**
+ * Handles the WebAuthn sign-in process by verifying the provided client and authenticator data.
+ * Validates user credentials, checks the challenge, and verifies the signature.
+ *
+ * @param {RequestEvent} context - The incoming request event.
+ * @returns {Promise<Response>} A response indicating success (204) or the specific error (400 or 500).
+ */
 import {
 	parseClientDataJSON,
 	coseAlgorithmES256,
@@ -43,8 +50,9 @@ if (env.CUSTOM_DOMAINS) {
 	allowedUrls.push(...customDomains);
 }
 
-// Stricter rate limiting can be omitted here since creating challenges are rate-limited
 export async function POST(context: RequestEvent): Promise<Response> {
+	console.log('POST request received for sign-in');
+
 	const data: unknown = await context.request.json();
 	const parser = new ObjectParser(data);
 	let encodedAuthenticatorData: string;
@@ -56,11 +64,12 @@ export async function POST(context: RequestEvent): Promise<Response> {
 		encodedClientDataJSON = parser.getString('client_data_json');
 		encodedCredentialId = parser.getString('credential_id');
 		encodedSignature = parser.getString('signature');
-	} catch {
-		return new Response('Invalid or missing fields', {
-			status: 400
-		});
+		console.log('Parsed request payload successfully');
+	} catch (error) {
+		console.error('Invalid or missing fields in request payload:', error);
+		return new Response('Invalid or missing fields', { status: 400 });
 	}
+
 	let authenticatorDataBytes: Uint8Array;
 	let clientDataJSON: Uint8Array;
 	let credentialId: Uint8Array;
@@ -70,70 +79,66 @@ export async function POST(context: RequestEvent): Promise<Response> {
 		clientDataJSON = decodeBase64(encodedClientDataJSON);
 		credentialId = decodeBase64(encodedCredentialId);
 		signatureBytes = decodeBase64(encodedSignature);
-	} catch {
-		return new Response('Invalid or missing fields', {
-			status: 400
-		});
+		console.log('Decoded request fields successfully');
+	} catch (error) {
+		console.error('Error decoding request fields:', error);
+		return new Response('Invalid or missing fields', { status: 400 });
 	}
 
 	let authenticatorData: AuthenticatorData;
 	try {
 		authenticatorData = parseAuthenticatorData(authenticatorDataBytes);
-	} catch {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.log('Parsed authenticator data successfully');
+	} catch (error) {
+		console.error('Error parsing authenticator data:', error);
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (
 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
 	) {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.error('Relying party ID hash verification failed');
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.error('User not present or verified');
+		return new Response('Invalid data', { status: 400 });
 	}
 
 	let clientData: ClientData;
 	try {
 		clientData = parseClientDataJSON(clientDataJSON);
-	} catch {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.log('Parsed client data JSON successfully');
+	} catch (error) {
+		console.error('Error parsing client data JSON:', error);
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (clientData.type !== ClientDataType.Get) {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.error('Invalid client data type:', clientData.type);
+		return new Response('Invalid data', { status: 400 });
 	}
 
 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.error('WebAuthn challenge verification failed');
+		return new Response('Invalid data', { status: 400 });
 	}
-	if (
-		!allowedUrls.includes(clientData.origin)
-	) {
-		return new Response('Invalid data', {
-			status: 400
-		});
+
+	if (!allowedUrls.includes(clientData.origin)) {
+		console.error('Client data origin not allowed:', clientData.origin);
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
-		return new Response('Invalid data', {
-			status: 400
-		});
+		console.error('Cross-origin requests are not allowed');
+		return new Response('Invalid data', { status: 400 });
 	}
 
 	const credential = await getPasskeyCredential(credentialId);
 	if (credential === null) {
-		return new Response('Invalid credential', {
-			status: 400
-		});
+		console.error('Credential not found');
+		return new Response('Invalid credential', { status: 400 });
 	}
 
 	let validSignature: boolean;
@@ -152,21 +157,25 @@ export async function POST(context: RequestEvent): Promise<Response> {
 			signatureBytes
 		);
 	} else {
-		return new Response('Internal error', {
-			status: 500
-		});
+		console.error('Unsupported credential algorithm');
+		return new Response('Internal error', { status: 500 });
 	}
 
 	if (!validSignature) {
-		return new Response('Invalid signature', {
-			status: 400
-		});
+		console.error('Invalid signature');
+		return new Response('Invalid signature', { status: 400 });
 	}
 
-	const { access, refresh } = await signInWithPasskey(encodeBase64(credential.id!));
-	setAccessTokenCookie(context, access.secret!, access.ttl!.toDate());
-	setRefreshTokenCookie(context, refresh.secret!, refresh.ttl!.toDate());
-	return new Response(null, {
-		status: 204
-	});
+	try {
+		const { access, refresh } = await signInWithPasskey(encodeBase64(credential.id!));
+		console.log('Sign-in with passkey succeeded');
+		setAccessTokenCookie(context, access.secret!, access.ttl!.toDate());
+		setRefreshTokenCookie(context, refresh.secret!, refresh.ttl!.toDate());
+	} catch (error) {
+		console.error('Error during sign-in with passkey:', error);
+		return new Response('Internal error', { status: 500 });
+	}
+
+	console.log('POST request for sign-in completed successfully');
+	return new Response(null, { status: 204 });
 }

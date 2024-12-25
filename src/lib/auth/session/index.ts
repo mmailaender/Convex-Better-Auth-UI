@@ -3,14 +3,35 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { uClient } from '$lib/db/client';
 import { fql } from 'fauna';
 
+/**
+ * Invalidates the current session for the user.
+ * Ensures the user is signed out from the current device.
+ *
+ * @param {string} secret - The session secret token.
+ * @returns {Promise<void>} Resolves when the session is invalidated.
+ */
 export async function invalidateSession(secret: string): Promise<void> {
-	await uClient(secret).query(fql`signOut()`)
+	await uClient(secret).query(fql`signOut()`);
 }
 
+/**
+ * Invalidates all sessions for the user across all devices.
+ * Useful for enforcing a complete logout from all logged-in locations.
+ *
+ * @param {string} secret - The session secret token.
+ * @returns {Promise<void>} Resolves when all sessions are invalidated.
+ */
 export async function invalidateUserSessions(secret: string): Promise<void> {
-	await uClient(secret).query(fql`signOutFromAllDevices()`)
+	await uClient(secret).query(fql`signOutFromAllDevices()`);
 }
 
+/**
+ * Sets an access token as an HTTP-only cookie.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ * @param {string} token - The access token to set.
+ * @param {Date} expiresAt - The expiration date of the cookie.
+ */
 export function setAccessTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
 	event.cookies.set('access_token', token, {
 		httpOnly: true,
@@ -20,30 +41,53 @@ export function setAccessTokenCookie(event: RequestEvent, token: string, expires
 	});
 }
 
+/**
+ * Sets a refresh token as an HTTP-only cookie.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ * @param {string} token - The refresh token to set.
+ * @param {Date} expiresAt - The expiration date of the cookie.
+ */
 export function setRefreshTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
 	event.cookies.set('refresh_token', token, {
 		httpOnly: true,
-		sameSite: 'strict', // Consider 'strict' for added security
+		sameSite: 'strict',
 		expires: expiresAt,
 		path: '/',
 	});
 }
 
+/**
+ * Deletes the access token cookie.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ */
 export function deleteAccessTokenCookie(event: RequestEvent): void {
 	event.cookies.delete('access_token', {
-		path: '/', 
+		path: '/',
 	});
 }
 
+/**
+ * Deletes the refresh token cookie.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ */
 export function deleteRefreshTokenCookie(event: RequestEvent): void {
 	event.cookies.delete('refresh_token', {
-		path: '/', 
+		path: '/',
 	});
 }
 
+/**
+ * Refreshes the access token using the provided refresh token.
+ *
+ * @param {string} refreshToken - The refresh token to exchange for a new access token.
+ * @returns {Promise<Tokens>} The new set of tokens.
+ */
 export async function refreshAccessToken(refreshToken: string): Promise<Tokens> {
-	const response = await uClient(refreshToken).query(fql`refreshAccessToken()`)
-	return response.data
+	const response = await uClient(refreshToken).query(fql`refreshAccessToken()`);
+	return response.data;
 }
 
 export type SessionValidationResult =

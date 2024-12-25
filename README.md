@@ -1,38 +1,15 @@
-# sv
+## Upgrade localhost to https
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+1. installing a local certificate authority with mkcert on my WSL | mkcert -install
+2. creating a certificate in my project | mkdir cert && mkcert -key-file cert/key.pem -cert-file cert/cert.pem localhost
 
-## Creating a project
+### On Windows:
+3. installed the certificate also on windows side with certlm
+3.1. Get the root certification location | mkcert -CAROOT
+3.2. Open the tool Certmgr.exe (Certificate Manager Tool) on windows (if not available it needs to be first activated)
+3.3. Go to Trusted Root Certification Authorities > Certificates
+3.4. Scroll to the end of the list and right click on some white space > All taks > import and then import the rootCA.pem from the root certification location
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Init your project
 
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+`pnpm init:repo`

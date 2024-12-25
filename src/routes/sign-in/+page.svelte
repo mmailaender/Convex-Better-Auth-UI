@@ -174,7 +174,7 @@
 
 			goto('/');
 		} catch (err: any) {
-			errorMessage = err?.message ?? 'An unknown error occurred during sign-up.';
+			errorMessage = getFriendlyErrorMessage(err);
 		}
 	}
 </script>

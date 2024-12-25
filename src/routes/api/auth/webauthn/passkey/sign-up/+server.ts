@@ -1,4 +1,10 @@
-import { fail } from '@sveltejs/kit';
+/**
+ * Handles the WebAuthn sign-up process by verifying the provided attestation and client data.
+ * Validates user credentials, parses attestation data, and ensures the challenge matches expectations.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ * @returns {Promise<Response>} A response indicating success (204) or the specific error (400).
+ */
 import {
 	parseAttestationObject,
 	AttestationStatementFormat,
@@ -15,7 +21,6 @@ import { RSAPublicKey } from '@oslojs/crypto/rsa';
 
 import { env } from '$env/dynamic/private';
 
-import type { WebAuthnUserCredential } from '$lib/auth/passkeys/server';
 import type {
 	AttestationStatement,
 	AuthenticatorData,
@@ -26,6 +31,7 @@ import type {
 import type { RequestEvent } from './$types';
 import { signUpWithPasskey } from '$lib/auth/user';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
+import type { WebAuthnUserCredential } from '$lib/auth/passkeys/types';
 
 const allowedUrls = [] as string[];
 if (env.VERCEL_URL) {
@@ -42,8 +48,18 @@ if (env.CUSTOM_DOMAINS) {
 }
 
 export async function POST(event: RequestEvent) {
-	const { firstName, lastName, email, otp, userId, encodedAttestationObject, encodedClientDataJSON } =
-		await event.request.json();
+	console.log('POST request received');
+
+	const {
+		firstName,
+		lastName,
+		email,
+		otp,
+		userId,
+		encodedAttestationObject,
+		encodedClientDataJSON
+	} = await event.request.json();
+	console.log('Request payload:', { firstName, lastName, email, userId });
 
 	if (
 		typeof firstName !== 'string' ||
@@ -54,83 +70,79 @@ export async function POST(event: RequestEvent) {
 		typeof encodedAttestationObject !== 'string' ||
 		typeof encodedClientDataJSON !== 'string'
 	) {
-		return fail(400, {
-			message: 'Invalid or missing fields'
-		});
+		console.error('Invalid or missing fields');
+		return new Response('Invalid or missing fields', { status: 400 });
 	}
 
 	let attestationObjectBytes: Uint8Array, clientDataJSON: Uint8Array;
 	try {
 		attestationObjectBytes = decodeBase64(encodedAttestationObject);
 		clientDataJSON = decodeBase64(encodedClientDataJSON);
-	} catch {
-		return fail(400, {
-			message: 'Invalid or missing fields'
-		});
+	} catch (error) {
+		console.error('Error decoding attestation or client data JSON:', error);
+		return new Response('Invalid or missing fields', { status: 400 });
 	}
 
-	let attestationStatement: AttestationStatement;
-	let authenticatorData: AuthenticatorData;
+	let attestationStatement: AttestationStatement, authenticatorData: AuthenticatorData;
 	try {
 		const attestationObject = parseAttestationObject(attestationObjectBytes);
 		attestationStatement = attestationObject.attestationStatement;
 		authenticatorData = attestationObject.authenticatorData;
-	} catch {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.log('Parsed attestation object successfully');
+	} catch (error) {
+		console.error('Error parsing attestation object:', error);
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (attestationStatement.format !== AttestationStatementFormat.None) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Invalid attestation format');
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (
 		!allowedUrls.some((url) => authenticatorData.verifyRelyingPartyIdHash(new URL(url).hostname))
 	) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Relying party ID hash verification failed');
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (!authenticatorData.userPresent || !authenticatorData.userVerified) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('User not present or not verified');
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (authenticatorData.credential === null) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Authenticator data credential is null');
+		return new Response('Invalid data', { status: 400 });
 	}
 
 	let clientData: ClientData;
 	try {
 		clientData = parseClientDataJSON(clientDataJSON);
-	} catch {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.log('Parsed client data JSON successfully');
+	} catch (error) {
+		console.error('Error parsing client data JSON:', error);
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (clientData.type !== ClientDataType.Create) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Invalid client data type:', clientData.type);
+		return new Response('Invalid data', { status: 400 });
 	}
 
 	if (!verifyWebAuthnChallenge(clientData.challenge)) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('WebAuthn challenge verification failed');
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (!allowedUrls.includes(clientData.origin)) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Client data origin not allowed:', clientData.origin);
+		return new Response('Invalid data', { status: 400 });
 	}
+
 	if (clientData.crossOrigin !== null && clientData.crossOrigin) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Cross-origin requests are not allowed');
+		return new Response('Invalid data', { status: 400 });
 	}
 
 	let credential: WebAuthnUserCredential;
@@ -138,15 +150,14 @@ export async function POST(event: RequestEvent) {
 		let cosePublicKey: COSEEC2PublicKey;
 		try {
 			cosePublicKey = authenticatorData.credential.publicKey.ec2();
-		} catch {
-			return fail(400, {
-				message: 'Invalid data'
-			});
+			console.log('Parsed EC2 public key successfully');
+		} catch (error) {
+			console.error('Error parsing EC2 public key:', error);
+			return new Response('Invalid data', { status: 400 });
 		}
 		if (cosePublicKey.curve !== coseEllipticCurveP256) {
-			return fail(400, {
-				message: 'Unsupported algorithm'
-			});
+			console.error('Unsupported EC2 curve:', cosePublicKey.curve);
+			return new Response('Unsupported algorithm', { status: 400 });
 		}
 		const encodedPublicKey = new ECDSAPublicKey(
 			p256,
@@ -164,10 +175,10 @@ export async function POST(event: RequestEvent) {
 		let cosePublicKey: COSERSAPublicKey;
 		try {
 			cosePublicKey = authenticatorData.credential.publicKey.rsa();
-		} catch {
-			return fail(400, {
-				message: 'Invalid data'
-			});
+			console.log('Parsed RSA public key successfully');
+		} catch (error) {
+			console.error('Error parsing RSA public key:', error);
+			return new Response('Invalid data', { status: 400 });
 		}
 		const encodedPublicKey = new RSAPublicKey(cosePublicKey.n, cosePublicKey.e).encodePKCS1();
 		credential = {
@@ -178,22 +189,20 @@ export async function POST(event: RequestEvent) {
 			otp: otp
 		};
 	} else {
-		return fail(400, {
-			message: 'Unsupported algorithm'
-		});
+		console.error('Unsupported public key algorithm');
+		return new Response('Unsupported algorithm', { status: 400 });
 	}
 
 	try {
 		const { access, refresh } = await signUpWithPasskey(credential, firstName, lastName, email);
+		console.log('Sign-up with passkey succeeded');
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 	} catch (error) {
-		return fail(400, {
-			message: 'Invalid data'
-		});
+		console.error('Error during sign-up with passkey:', error);
+		return new Response('Invalid data', { status: 400 });
 	}
-	
-	return new Response(null, {
-		status: 204
-	});
+
+	console.log('POST request completed successfully');
+	return new Response(null, { status: 204 });
 }
