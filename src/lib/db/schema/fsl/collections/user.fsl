@@ -15,8 +15,4 @@ collection User {
 
     unique [.email]
     unique [mva(.accounts)]
-
-    migrations {
-      drop .emailVerified
-    }
 }
