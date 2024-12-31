@@ -2,7 +2,7 @@ collection User {
     firstName: String
     lastName: String
     email: String
-    image: String?
+    avatar: String?
     accounts: Array<Ref<Account>>
 
     check isValidRegistration ((user) => {

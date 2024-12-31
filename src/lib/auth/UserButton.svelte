@@ -36,7 +36,7 @@
 		contentBase="card bg-surface-200-800 max-w-[320px]"
 	>
 		{#snippet trigger()}<Avatar
-				src={user.image}
+				src={user.avatar}
 				name={user.firstName + ' ' + user.lastName}
 			/>{/snippet}
 		{#snippet content()}
@@ -44,7 +44,7 @@
 				<li>
 					<div class="flex gap-x-3 rounded-md p-4 text-sm/6 font-semibold text-surface-700-300">
 						<Avatar
-							src={user.image}
+							src={user.avatar}
 							name={user.firstName + ' ' + user.lastName}
 							size="size-10"
 						/>
