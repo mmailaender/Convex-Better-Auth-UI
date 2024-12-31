@@ -1,10 +1,10 @@
 collection Account {
     user: Ref<User>
     provider: "Github" | "Google" | "Facebook" | "Passkey"
-    providerAccountId: String | Null
-    publicKey: String | Null
-    algorithmId: Long | Null
-    passkeyId: String | Null
+    providerAccountId: String?
+    publicKey: String?
+    algorithmId: Long?
+    passkeyId: String?
 
     unique [.user, .provider]
     unique [.passkeyId]

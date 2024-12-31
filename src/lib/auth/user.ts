@@ -1,5 +1,5 @@
 import { sClient, uClient } from '$lib/db/client';
-import { fql, TimeStub, type Document } from 'fauna';
+import { fql, type Document } from 'fauna';
 import type { WebAuthnUserCredential } from './passkeys/types';
 import { encodeBase64 } from '@oslojs/encoding';
 import {

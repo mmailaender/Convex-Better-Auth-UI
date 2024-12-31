@@ -3,11 +3,11 @@
 
 	interface Props {
 		redirectUrl?: string;
-		className?: string;
+		class?: string;
 		children?: import('svelte').Snippet;
 	}
 
-	let { redirectUrl, className = 'btn preset-filled', children }: Props = $props();
+	let { redirectUrl, class: className = 'btn preset-filled', children }: Props = $props();
 
 	let buttonText: string = 'Sign Out';
 
