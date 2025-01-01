@@ -2,31 +2,22 @@ import { type TimeStub, type DateStub, type DocumentReference } from 'fauna';
 
 type Account = {
 	user: User;
-	provider: "Github" | "Google" | "Facebook" | "Passkey";
-	providerAccountId?: string;
-	publicKey?: string;
-	algorithmId?: number;
-	passkeyId?: string;
+	socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+	passkey?: { publicKey: string; algorithmId: number; id: string };
 };
 
 type Account_Create = {
 	user: User | DocumentReference;
-	provider: "Github" | "Google" | "Facebook" | "Passkey";
-	providerAccountId?: string;
-	publicKey?: string;
-	algorithmId?: number;
-	passkeyId?: string;
+	socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+	passkey?: { publicKey: string; algorithmId: number; id: string };
 };
 type Account_Replace = Account_Create;
 type Account_Update = Partial<Account_Create>;
 
 type Account_FaunaCreate = {
 	user: DocumentReference;
-	provider: "Github" | "Google" | "Facebook" | "Passkey";
-	providerAccountId?: string;
-	publicKey?: string;
-	algorithmId?: number;
-	passkeyId?: string;
+	socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+	passkey?: { publicKey: string; algorithmId: number; id: string };
 };
 type Account_FaunaReplace = Account_FaunaCreate;
 type Account_FaunaUpdate = Partial<Account_FaunaCreate>;
@@ -35,7 +26,7 @@ type User = {
 	firstName: string;
 	lastName: string;
 	email: string;
-	image?: string;
+	avatar?: string;
 	accounts: Array<Account>;
 };
 
@@ -43,7 +34,7 @@ type User_Create = {
 	firstName: string;
 	lastName: string;
 	email: string;
-	image?: string;
+	avatar?: string;
 	accounts: Array<Account | DocumentReference>;
 };
 type User_Replace = User_Create;
@@ -53,7 +44,7 @@ type User_FaunaCreate = {
 	firstName: string;
 	lastName: string;
 	email: string;
-	image?: string;
+	avatar?: string;
 	accounts: Array<DocumentReference>;
 };
 type User_FaunaReplace = User_FaunaCreate;

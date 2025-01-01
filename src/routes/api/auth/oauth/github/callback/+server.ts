@@ -161,7 +161,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	try {
 		console.log('Creating new user with GitHub account');
-		const { access, refresh } = await signUpWithSocialProvider(githubUserId, email, firstName || username, lastName || '');
+		const { access, refresh } = await signUpWithSocialProvider(firstName || username, lastName || '', email, githubUserId, email);
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 	} catch (error) {

@@ -14,11 +14,12 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
     let userId = newId()
 
     let newAccount = Account.create({
-      provider: "Passkey",
-      publicKey: credential.publicKey,
-      algorithmId: credential.algorithmId,
-      passkeyId: credential.id,
-      user: User.byId(userId)
+      user: User.byId(userId),
+      passkey: {
+        publicKey: credential.publicKey,
+        algorithmId: credential.algorithmId,
+        id: credential.id,
+      }
     })
     
     let newUser = User.create({
@@ -37,17 +38,20 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
     registration!.delete()
     
     newAccount
+
+    // If an user with this email is already existing, the user needs to be signed in to add a new account.
   } else if (user == Query.identity()){
-    // If an user with this email is already existing, the user needs to be signed it to add a new account.
     
-    let account = Account.firstWhere(.user == user && .provider == "Passkey")
+    let account = Account.firstWhere(.user == user && .passkey != null)
 
     let account = if(account == null) {
       let account = Account.create({
-        provider: "Passkey",
-        publicKey: credential.publicKey,
-        algorithmId: credential.algorithmId,
-        user: user!
+        user: user!,
+        passkey: {
+          publicKey: credential.publicKey,
+          algorithmId: credential.algorithmId,
+          id: credential.id,
+        }
       })
       
       let userAccounts = if(user!.accounts != null) {

@@ -6,7 +6,7 @@ collection User {
     accounts: Array<Ref<Account>>
 
     check isValidRegistration ((user) => {
-      if (user.accounts!.any((account) => account!.provider == "Passkey")) {
+      if (user.accounts!.any((account) => account!.passkey != null)) {
           Registration.all().any((registration) => registration.email == user.email)
       } else {
           true

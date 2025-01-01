@@ -13,20 +13,22 @@ import type { RequestEvent } from '@sveltejs/kit';
 /**
  * Signs up a user using a social provider.
  *
- * @param {string} githubId - The user's GitHub ID.
- * @param {string} email - The user's email address.
  * @param {string} firstName - The user's first name.
  * @param {string} lastName - The user's last name.
+ * @param {string} email - The user's email address.
+ * @param {string} providerUserId - The user's social provider ID.
+ * @param {string} providerUserEmail - The user's social provider email.
  * @returns {Promise<Tokens>} The authentication tokens for the user.
  */
 export async function signUpWithSocialProvider(
-	githubId: string,
-	email: string,
 	firstName: string,
-	lastName: string
+	lastName: string,
+	email: string,
+	providerUserId: string,
+	providerUserEmail: string
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
-		fql`signUpWithSocialProvider({ email: ${email}, userId: ${githubId}, provider: "Github", firstName: ${firstName}, lastName: ${lastName} })`
+		fql`signUpWithSocialProvider({ firstName: ${firstName}, lastName: ${lastName}, email: ${email}, providerUserId: ${providerUserId}, providerName: "Github", providerEmail: ${providerUserEmail} })`
 	);
 
 	return response.data;
@@ -56,16 +58,16 @@ export async function signUpWithPasskey(
 /**
  * Signs in a user using a social provider.
  *
- * @param {Provider} provider - The social provider name (e.g., GitHub, Google).
- * @param {string} providerAccountId - The user's provider account ID.
+ * @param {Provider} providerName - The social provider name (e.g., GitHub, Google).
+ * @param {string} providerUserId - The user's provider account ID.
  * @returns {Promise<Tokens>} The authentication tokens for the user.
  */
 export async function signInWithSocialProvider(
-	provider: Provider,
-	providerAccountId: string
+	providerName: Provider,
+	providerUserId: string
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
-		fql`signInWithSocialProvider(${provider}, ${providerAccountId})`
+		fql`signInWithSocialProvider(${providerName}, ${providerUserId})`
 	);
 
 	return response.data;
