@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
-	import { LogOut, Plus } from 'lucide-svelte';
+	import { LogOut, Plus, X } from 'lucide-svelte';
 	import SignOutButton from './SignOutButton.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import type { User } from '$lib/db/schema/types/custom';
 	import type { Document } from '$lib/db/schema/types/system';
+	import UserProfile from './UserProfile.svelte';
 
 	import { page } from '$app/state';
 
@@ -26,6 +28,12 @@
 	]);
 
 	let openState = $state(false);
+	let showUserProfile = $state(false);
+
+	function toggleUserProfile() {
+		openState = false;
+		showUserProfile = !showUserProfile;
+	}
 </script>
 
 {#if user}
@@ -35,26 +43,23 @@
 		triggerBase="btn"
 		contentBase="card bg-surface-200-800 max-w-[320px]"
 	>
-		{#snippet trigger()}<Avatar
-				src={user.avatar}
-				name={user.firstName + ' ' + user.lastName}
-			/>{/snippet}
+		{#snippet trigger()}
+			<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-10" />
+		{/snippet}
 		{#snippet content()}
 			<ul role="list" class="space-y-1">
 				<li>
 					<div class="flex gap-x-3 rounded-md p-4 text-sm/6 font-semibold text-surface-700-300">
-						<Avatar
-							src={user.avatar}
-							name={user.firstName + ' ' + user.lastName}
-							size="size-10"
-						/>
+						<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-10" />
 						<div class="flex flex-col gap-3">
 							<div class="flex-1">
 								<p class="font-medium">{user.firstName + ' ' + user.lastName}</p>
 								<p class="text-sm">{user.email}</p>
 							</div>
 							<div class="flex space-x-2">
-								<button class="btn preset-outlined-surface-500"> Manage account </button>
+								<button class="btn preset-outlined-surface-500" onclick={toggleUserProfile}
+									>Manage account</button
+								>
 								<SignOutButton class="btn preset-outlined-surface-500" />
 							</div>
 						</div>
@@ -92,7 +97,7 @@
 			  (although he has already an active session) -->
 				{#if userAccounts.length > 1}
 					<button
-						class="flex items-center w-full gap-x-6 rounded-md p-4 pl-7 text-sm/6 font-semibold text-surface-700-300 hover:bg-gray-50 hover:text-primary-600-400"
+						class="flex w-full items-center gap-x-6 rounded-md p-4 pl-7 text-sm/6 font-semibold text-surface-700-300 hover:bg-gray-50 hover:text-primary-600-400"
 					>
 						<LogOut class="size-4" /> Sign out from all accounts
 					</button>
@@ -100,6 +105,22 @@
 			</ul>
 		{/snippet}
 	</Popover>
+	{#if showUserProfile}
+		<Modal
+			open={showUserProfile}
+			onclick={toggleUserProfile}
+			triggerBase="hidden"
+			contentBase="card shadow-xl max-w-screen-sm w-full relative"
+			backdropClasses="backdrop-blur-sm"
+		>
+			{#snippet content()}
+				<UserProfile />
+				<button type="button" class="btn absolute top-0 right-0" onclick={toggleUserProfile}>
+					<X />
+				</button>
+			{/snippet}
+		</Modal>
+	{/if}
 {:else}
-	<a href="/sign-in" class="btn preset-filled-primary-500 "> Sign in </a>
+	<a href="/sign-in" class="btn preset-filled-primary-500"> Sign in </a>
 {/if}

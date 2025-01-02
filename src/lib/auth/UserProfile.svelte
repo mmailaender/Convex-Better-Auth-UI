@@ -28,15 +28,15 @@
 		<div class="w-full p-6 md:w-3/4">
 			<div class="mb-6 flex items-center justify-between">
 				<h2 class="text-lg font-bold text-surface-800-200">Profile details</h2>
-				<button class="btn text-sm text-primary-500 hover:underline">Update profile</button>
 			</div>
-
+			
 			<!-- Profile Info -->
 			<div class="mb-6 flex items-center gap-4">
 				<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-16" />
 				<div>
 					<p class="font-medium text-surface-800-200">{user.firstName + ' ' + user.lastName}</p>
 				</div>
+				<button class="btn text-sm text-primary-500 hover:underline">Update profile</button>
 			</div>
 
 			<!-- Email Addresses -->

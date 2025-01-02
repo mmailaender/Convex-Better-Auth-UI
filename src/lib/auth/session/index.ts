@@ -77,6 +77,8 @@ export function deleteRefreshTokenCookie(event: RequestEvent): void {
 	event.cookies.delete('refresh_token', {
 		path: '/',
 	});
+
+	// console.log("After deletion:", event.cookies.getAll());
 }
 
 /**

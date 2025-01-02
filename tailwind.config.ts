@@ -9,7 +9,13 @@ export default {
 	content: ['./src/**/*.{html,js,svelte,ts}', contentPath(import.meta.url, 'svelte')],
 
 	theme: {
-		extend: {}
+		extend: {
+			spacing: {
+				128: '512px',
+				160: '640px',
+				192: '768px'
+			}
+		}
 	},
 
 	darkMode: 'media',
