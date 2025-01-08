@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type User } from '$lib/auth/user';
+	import type { User } from '$lib/db/schema/types/custom';
 	import { page } from '$app/state';
 	import UserProfile from '$lib/auth/UserProfile.svelte';
 
@@ -8,7 +8,7 @@
 
 <div class="flex min-h-screen flex-col items-center justify-center gap-6">
 	{#if user}
-		Hello {user.email}
+		Hello {user.primaryEmail}
 	{/if}
 
 	

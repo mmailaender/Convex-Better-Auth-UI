@@ -2,13 +2,131 @@
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	import type { User } from '$lib/db/schema/types/custom';
 	import type { Document } from '$lib/db/schema/types/system';
-    import socialIcons, { type SocialIcons } from './social/icons';
+	import socialIcons, { type SocialIcons } from './social/icons';
+	import { enhance } from '$app/forms';
 
 	import { page } from '$app/state';
+	import type { ActionResult } from '@sveltejs/kit';
 
 	let getSocialIcon = ({ name }: { name: keyof SocialIcons }) => socialIcons[name];
 
-	let user: Document<User> | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
+	let user: Document<User> | null = $state(page.data.user ? JSON.parse(page.data.user) : null);
+	// let user: Document<User> | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
+
+	// Local state
+	let isEditingUsername = $state(false);
+	let isAddingNewEmail = $state(false);
+
+	/**
+	 * Form: handle user profile info (first/last name, avatar, etc.)
+	 */
+	function handleUserDataSubmit() {
+		return async ({ result }: { result: ActionResult }) => {
+			if (result.type === 'success') {
+				isEditingUsername = false;
+			}
+		};
+	}
+
+	/**
+	 * Submit form to add a new email (and start its verification).
+	 * This might call your existing `verifyEmail` action
+	 * or a new action (depending on how you want to set it up).
+	 */
+	async function handleAddEmailSubmit() {
+		return async ({ result }: { result: ActionResult }) => {
+			if (result.type === 'success') {
+				if (user?.activeVerifications) {
+					user.activeVerifications.push(result.data?.newEmail);
+				} else {
+					user!.activeVerifications = [result.data?.newEmail];
+				}
+				isAddingNewEmail = false;
+			}
+		};
+	}
+
+	/**
+	 * Make an existing email the new primary.
+	 */
+	async function handleMakePrimary(email: string) {
+		try {
+			// Typically you’d call a server action here, e.g. `updateUser`,
+			// or a dedicated endpoint that sets user.primaryEmail.
+			// For example:
+			await fetch('/user-profile?/profileData', {
+				method: 'POST',
+				body: JSON.stringify({ primaryEmail: email }),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			// If successful, you might refresh or update local user data...
+			user.primaryEmail = email;
+		} catch (error) {
+			console.error('Error making primary:', error);
+		}
+	}
+
+	/**
+	 * Delete an existing email (cannot delete if it's primary).
+	 */
+	async function handleDeleteEmail(email: string) {
+		try {
+			// For instance, call your `updateUser` with an updated emails array
+			const updatedEmails = user.emails.filter((e) => e !== email);
+			await fetch('/user-profile?/profileData', {
+				method: 'POST',
+				body: JSON.stringify({ emails: updatedEmails }),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			// If successful, remove from local state
+			user.emails = updatedEmails;
+		} catch (error) {
+			console.error('Error deleting email:', error);
+		}
+	}
+
+	/**
+	 * Resend verification for an active verification email.
+	 */
+	async function handleResendVerification(email: string) {
+		try {
+			await fetch('/user-profile?/verifyEmail', {
+				method: 'POST',
+				body: JSON.stringify({ email }),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			// Possibly show a notification or toast on success
+		} catch (error) {
+			console.error('Error resending verification:', error);
+		}
+	}
+
+	/**
+	 * Cancel verification process for an active verification email.
+	 * You’d need to define how to handle “cancel” on the back end.
+	 */
+	async function handleCancelVerification(email: string) {
+		try {
+			// Possibly you have an endpoint or function to remove email from activeVerifications.
+			await fetch('/user-profile?/cancelVerification', {
+				method: 'POST',
+				body: JSON.stringify({ email }),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			// Then remove from local state
+			user.activeVerifications = user.activeVerifications.filter((e) => e !== email);
+		} catch (error) {
+			console.error('Error canceling verification:', error);
+		}
+	}
 </script>
 
 {#if user}
@@ -16,7 +134,9 @@
 		class="mx-auto flex w-full max-w-4xl flex-col rounded-container shadow-lg bg-surface-100-900 md:flex-row"
 	>
 		<!-- Sidebar -->
-		<aside class="w-full border-r p-6 bg-surface-200-800 border-surface-400-600 md:w-1/4">
+		<aside
+			class="w-full rounded-l-container border-r p-6 bg-surface-200-800 border-surface-400-600 md:w-1/4"
+		>
 			<ul>
 				<li class="mb-4 font-semibold text-surface-800-200">Account</li>
 				<li class="text-surface-600-400">Profile</li>
@@ -29,26 +149,137 @@
 			<div class="mb-6 flex items-center justify-between">
 				<h2 class="text-lg font-bold text-surface-800-200">Profile details</h2>
 			</div>
-			
+
 			<!-- Profile Info -->
 			<div class="mb-6 flex items-center gap-4">
 				<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-16" />
-				<div>
-					<p class="font-medium text-surface-800-200">{user.firstName + ' ' + user.lastName}</p>
-				</div>
-				<button class="btn text-sm text-primary-500 hover:underline">Update profile</button>
+				{#if !isEditingUsername}
+					<button onclick={() => (isEditingUsername = true)}>
+						<span class="font-medium text-surface-800-200">{user.firstName}</span>
+						<span class="font-medium text-surface-800-200">{user.lastName}</span>
+					</button>
+				{:else}
+					<form
+						action="/user-profile?/profileData"
+						method="POST"
+						use:enhance={handleUserDataSubmit}
+					>
+						<div class="flex flex-col gap-2">
+							<div class="flex gap-2">
+								<input type="text" name="firstName" class="input" bind:value={user.firstName} />
+								<input type="text" name="lastName" class="input" bind:value={user.lastName} />
+							</div>
+							<div class="flex gap-2">
+								<button type="submit" class="variant-filled btn">Save</button>
+								<button
+									type="button"
+									class="variant-ghost btn"
+									onclick={() => (isEditingUsername = false)}
+								>
+									Cancel
+								</button>
+							</div>
+						</div>
+					</form>
+				{/if}
 			</div>
 
 			<!-- Email Addresses -->
 			<div class="mb-6">
-				<h3 class="mb-4 font-bold text-surface-800-200">Email address</h3>
-				<ul>
-					<li class="mb-2 flex items-center justify-between">
-						<span class="text-surface-800-200">{user.email}</span>
-					</li>
+				<h3 class="mb-4 font-bold text-surface-800-200">Email addresses</h3>
+
+				<!-- List of existing emails -->
+				<ul class="mb-4 flex flex-col gap-2">
+					{#each user.emails as email}
+						<li class="flex items-center justify-between">
+							<div class="text-surface-800-200">
+								{email}
+								{#if email === user.primaryEmail}
+									<span class="ml-2 text-sm font-semibold text-primary-500"> Primary </span>
+								{/if}
+							</div>
+							<!-- Actions for non-primary emails -->
+							{#if email !== user.primaryEmail}
+								<div class="flex gap-2">
+									<button
+										class="variant-ghost btn text-sm"
+										onclick={() => handleMakePrimary(email)}
+									>
+										Make Primary
+									</button>
+									<button
+										class="variant-outlined btn text-sm"
+										onclick={() => handleDeleteEmail(email)}
+									>
+										Delete
+									</button>
+								</div>
+							{/if}
+						</li>
+					{/each}
 				</ul>
-				<button class="mt-2 text-primary-500 hover:underline">Update email address</button>
+
+				<!-- Form to add a new email -->
+				{#if !isAddingNewEmail}
+					<button class="btn" onclick={() => (isAddingNewEmail = true)}>
+						Add a new email
+					</button>
+				{:else}
+					<form
+						action="/user-profile?/verifyEmail"
+						method="POST"
+						use:enhance={handleAddEmailSubmit}
+						class="flex gap-2"
+					>
+						<input
+							type="email"
+							name="email"
+							placeholder="Add a new email address"
+							class="input"
+							required
+						/>
+						<input
+							type="text"
+							name="userId"
+							value={user.id}
+							required
+							hidden
+						/>
+						<button type="submit" class="btn"> Add </button>
+						<button type="button" class="btn" onclick={() => (isAddingNewEmail = false)}>
+							Cancel
+						</button>
+					</form>
+				{/if}
 			</div>
+
+			<!-- Emails in active verification process -->
+			{#if user.activeVerifications && user.activeVerifications.length > 0}
+				<div class="mb-6">
+					<h4 class="mb-2 font-semibold text-surface-800-200">Pending verifications</h4>
+					<ul class="flex flex-col gap-2">
+						{#each user.activeVerifications as verifyingEmail}
+							<li class="flex items-center justify-between">
+								<span class="text-surface-800-200">{verifyingEmail}</span>
+								<div class="flex gap-2">
+									<button
+										class="variant-ghost btn text-sm"
+										onclick={() => handleResendVerification(verifyingEmail)}
+									>
+										Resend
+									</button>
+									<button
+										class="variant-outlined btn text-sm"
+										onclick={() => handleCancelVerification(verifyingEmail)}
+									>
+										Cancel
+									</button>
+								</div>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 
 			<!-- Connected Accounts -->
 			<div>
@@ -58,7 +289,7 @@
 						{#if account.socialProvider}
 							<li class="mb-2 flex items-center justify-between">
 								<span class="flex items-center text-surface-800-200">
-                                    {getSocialIcon(account.socialProvider.name)}
+									{getSocialIcon(account.socialProvider.name)}
 									{account.socialProvider.name} • {account.socialProvider.email}
 								</span>
 							</li>

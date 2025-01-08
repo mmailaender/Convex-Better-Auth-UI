@@ -1,5 +1,5 @@
 import { sClient, uClient } from '$lib/db/client';
-import { fql, type Document } from 'fauna';
+import { fql } from 'fauna';
 import type { WebAuthnUserCredential } from './passkeys/types';
 import { encodeBase64 } from '@oslojs/encoding';
 import {
@@ -9,6 +9,8 @@ import {
 	invalidateUserSessions
 } from './session';
 import type { RequestEvent } from '@sveltejs/kit';
+import type { User, User_FaunaUpdate } from '$lib/db/schema/types/custom';
+import type { Document, Document_Update } from '$lib/db/schema/types/system';
 
 /**
  * Signs up a user using a social provider.
@@ -58,12 +60,12 @@ export async function signUpWithPasskey(
 /**
  * Signs in a user using a social provider.
  *
- * @param {Provider} providerName - The social provider name (e.g., GitHub, Google).
+ * @param {SocialProvider} providerName - The social provider name (e.g., GitHub, Google).
  * @param {string} providerUserId - The user's provider account ID.
  * @returns {Promise<Tokens>} The authentication tokens for the user.
  */
 export async function signInWithSocialProvider(
-	providerName: Provider,
+	providerName: SocialProvider,
 	providerUserId: string
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
@@ -88,10 +90,10 @@ export async function signInWithPasskey(passkeyId: string): Promise<Tokens> {
  * Retrieves the current user based on the provided access token.
  *
  * @param {string} accessToken - The user's access token.
- * @returns {Promise<User>} The user object.
+ * @returns {Promise<Document<User>>} The user object.
  */
-export async function getUser(accessToken: string): Promise<User> {
-	const response = await uClient(accessToken).query<User>(fql`Query.identity()`);
+export async function getUser(accessToken: string): Promise<Document<User>> {
+	const response = await uClient(accessToken).query<Document<User>>(fql`Query.identity()`);
 	return response.data;
 }
 
@@ -109,12 +111,12 @@ export async function verifyUserExists(email: string): Promise<boolean> {
 /**
  * Verifies if a social account exists for a given provider and account ID.
  *
- * @param {Provider} provider - The social provider name.
+ * @param {SocialProvider} provider - The social provider name.
  * @param {string} providerAccountId - The account ID on the provider.
  * @returns {Promise<boolean>} True if the social account exists, false otherwise.
  */
 export async function verifySocialAccountExists(
-	provider: Provider,
+	provider: SocialProvider,
 	providerAccountId: string
 ): Promise<boolean> {
 	const response = await sClient.query<boolean>(
@@ -124,14 +126,20 @@ export async function verifySocialAccountExists(
 }
 
 /**
- * Creates a registration entry for a user.
+ * Creates a verification entry for a user.
  *
  * @param {string} email - The user's email address.
- * @returns {Promise<string>} A registration token.
+ * @returns {Promise<string>} A verification token.
  */
-export async function createRegistration(email: string): Promise<string> {
-	const response = await sClient.query<string>(fql`createRegistration(${email})`);
-	return response.data;
+export async function createVerification(email: string, userId?: string): Promise<string> {
+	console.log(`Creating email verification for: ${email} with userId: ${userId}`);
+	try {
+		const response = await sClient.query<string>(fql`createVerification(${email}, ${userId ? userId : null})`);
+		return response.data;
+	} catch (error) {
+		console.error('Error creating email verification:', error);
+		throw error;
+	}
 }
 
 /**
@@ -178,28 +186,96 @@ export async function signOutFromAllDevices(event: RequestEvent): Promise<boolea
 	return false;
 }
 
-export type User = Document & {
-	firstName: string;
-	lastName: string;
-	email: string;
-	image: string | null;
-	accounts: Account[];
-};
+export async function updateUser(
+	accessToken: string,
+	user: Document_Update<User_FaunaUpdate>
+): Promise<Document<User>> {
+	const response = await uClient(accessToken).query<Document<User>>(
+		fql`Query.identity()!.update({${user}})`
+	);
+	return response.data;
+}
 
-export type Account = Document & {
-	user: User;
-	provider: Provider;
-	providerAccountId: string;
-};
+export async function addEmail(
+	accessToken: string,
+	email: string,
+	verificationOTP: string
+): Promise<Document<User>> {
+	try {
+		const response = await uClient(accessToken).query<Document<User>>(
+			fql`addEmail({ email: ${email}, verificationOTP: ${verificationOTP} })`
+		);
+		return response.data;
+	} catch (err: any) {
+		return err?.message ?? 'Error updating email.';
+	}
+}
 
-export type Provider = 'Github' | 'Google' | 'Facebook' | 'Passkey';
+/**
+ * Creates an email verification entry.
+ *
+ * @param {string} accessToken - The user's access token.
+ * @param {string} email - The user's email address.
+ * @param {string} [userId] - The user's ID. Only relevant during update email.
+ * @returns {Promise<boolean>} True if the email verification was created successfully, false otherwise.
+ *
+ * @throws {Error} If the email verification fails.
+ */
+export async function createEmailVerification(
+	accessToken: string,
+	email: string,
+	fetch: (input: string | URL | globalThis.Request, init?: RequestInit) => Promise<Response>,
+	userId?: string,
+): Promise<boolean> {
+	if (!accessToken) {
+		console.warn('Access token is missing');
+		return false;
+	}
+
+	try {
+		console.log(`Verifying email: ${email}`);
+		const res = await fetch(`/api/auth/webauthn/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' }
+		});
+		
+		if (!res.ok) {
+			const errorMessage = await res.text();
+			console.error('Failed to verify email:', errorMessage);
+			throw new Error(errorMessage);
+		}
+
+		const { exists } = await res.json();
+		console.log(`Email ${email} successfuly verified: ${exists}`);
+		return exists;
+	} catch (err: any) {
+		console.error('Error creating email verification:', err);
+		return err?.message ?? 'Error creating email verification.';
+	}
+}
+
+export async function getUserAndAccounts(accessToken: string): Promise<Document<User>> {
+	const response = await uClient(accessToken).query<Document<User>>(
+		fql`Query.identity() {
+			id,
+			coll,
+			firstName,
+			lastName,
+			email,
+			accounts
+		  }`
+	);
+	return response.data;
+}
+
+export type SocialProvider = 'Github' | 'Google' | 'Facebook';
 
 export type Tokens = {
-	access: AccessToken;
-	refresh: RefreshToken;
+	access: Document<AccessToken>;
+	refresh: Document<RefreshToken>;
 };
 
-export type AccessToken = Document & {
+export type AccessToken = {
 	document: User;
 	secret: string | null;
 	data: {
@@ -208,7 +284,7 @@ export type AccessToken = Document & {
 	};
 };
 
-export type RefreshToken = Document & {
+export type RefreshToken = {
 	document: User;
 	secret: string | null;
 	data: {

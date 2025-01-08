@@ -1,13 +1,13 @@
 @role(server)
 function createPasskeyAccount(credential: {id: String, userId: String, algorithmId: Long, publicKey: String, otp: String}, userData: {firstName: String, lastName: String, email: String, avatar: String | Null}): Account {
-  let user = User.firstWhere(.email == userData.email)
+  let user = User.firstWhere(.emails!.includes(userData.email))
 
   if(user == null) {
-    let registration = Registration.all().firstWhere(.email == userData.email && .otp == credential.otp)
-    if(registration == null) {
+    let verification = Verification.all().firstWhere(.email == userData.email && .otp == credential.otp)
+    if(verification == null) {
       abort({
-        code: "NO_VALID_REGISTRATION",
-        message: "Please restart the registration process"
+        code: "NO_VALID_VERIFICATION",
+        message: "Please restart the verification process"
       });
     }
     
@@ -27,7 +27,8 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
         firstName: userData.firstName,
         lastName: userData.lastName,
         avatar: userData.avatar,
-        email: userData.email,
+        primaryEmail: userData.email,
+        emails: [userData.email],
         accounts: [newAccount]
       })
     
@@ -35,7 +36,7 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
       user: newUser
     })
     
-    registration!.delete()
+    verification!.delete()
     
     newAccount
 

@@ -25,15 +25,18 @@ type Account_FaunaUpdate = Partial<Account_FaunaCreate>;
 type User = {
 	firstName: string;
 	lastName: string;
-	email: string;
+	primaryEmail: string;
+	emails: Array<string>;
 	avatar?: string;
 	accounts: Array<Account>;
+	activeVerifications: Array<string>;
 };
 
 type User_Create = {
 	firstName: string;
 	lastName: string;
-	email: string;
+	primaryEmail: string;
+	emails: Array<string>;
 	avatar?: string;
 	accounts: Array<Account | DocumentReference>;
 };
@@ -43,31 +46,35 @@ type User_Update = Partial<User_Create>;
 type User_FaunaCreate = {
 	firstName: string;
 	lastName: string;
-	email: string;
+	primaryEmail: string;
+	emails: Array<string>;
 	avatar?: string;
 	accounts: Array<DocumentReference>;
 };
 type User_FaunaReplace = User_FaunaCreate;
 type User_FaunaUpdate = Partial<User_FaunaCreate>;
 
-type Registration = {
+type Verification = {
 	email: string;
 	otp: string;
+	user?: User;
 };
 
-type Registration_Create = {
+type Verification_Create = {
 	email: string;
 	otp: string;
+	user?: User | DocumentReference;
 };
-type Registration_Replace = Registration_Create;
-type Registration_Update = Partial<Registration_Create>;
+type Verification_Replace = Verification_Create;
+type Verification_Update = Partial<Verification_Create>;
 
-type Registration_FaunaCreate = {
+type Verification_FaunaCreate = {
 	email: string;
 	otp: string;
+	user?: DocumentReference;
 };
-type Registration_FaunaReplace = Registration_FaunaCreate;
-type Registration_FaunaUpdate = Partial<Registration_FaunaCreate>;
+type Verification_FaunaReplace = Verification_FaunaCreate;
+type Verification_FaunaUpdate = Partial<Verification_FaunaCreate>;
 
 interface UserCollectionsTypeMapping {
 	Account: {
@@ -82,11 +89,11 @@ interface UserCollectionsTypeMapping {
 		replace: User_Replace;
 		update: User_Update;
 	};
-	Registration: {
-		main: Registration;
-		create: Registration_Create;
-		replace: Registration_Replace;
-		update: Registration_Update;
+	Verification: {
+		main: Verification;
+		create: Verification_Create;
+		replace: Verification_Replace;
+		update: Verification_Update;
 	};
 }
 
@@ -105,12 +112,12 @@ export type {
 	User_FaunaCreate,
 	User_FaunaUpdate,
 	User_FaunaReplace,
-	Registration,
-	Registration_Create,
-	Registration_Update,
-	Registration_Replace,
-	Registration_FaunaCreate,
-	Registration_FaunaUpdate,
-	Registration_FaunaReplace,
+	Verification,
+	Verification_Create,
+	Verification_Update,
+	Verification_Replace,
+	Verification_FaunaCreate,
+	Verification_FaunaUpdate,
+	Verification_FaunaReplace,
 	UserCollectionsTypeMapping
 };

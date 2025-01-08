@@ -54,7 +54,7 @@
 						<div class="flex flex-col gap-3">
 							<div class="flex-1">
 								<p class="font-medium">{user.firstName + ' ' + user.lastName}</p>
-								<p class="text-sm">{user.email}</p>
+								<p class="text-sm">{user.primaryEmail}</p>
 							</div>
 							<div class="flex space-x-2">
 								<button class="btn preset-outlined-surface-500" onclick={toggleUserProfile}

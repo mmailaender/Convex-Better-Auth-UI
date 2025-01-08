@@ -1,6 +1,6 @@
 @role(server)
 function createSocialProviderAccount(firstName: String, lastName: String, email: String, avatar: String?, providerName: "Github" | "Facebook" | "Google", providerUserId: String, providerEmail: String): Account {
-  let user = User.firstWhere(.email == email)
+  let user = User.firstWhere(.emails!.includes(email))
   
   if(user == null) {
     let userId = newId()
@@ -19,7 +19,8 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
         firstName: firstName,
         lastName: lastName,
         avatar: avatar,
-        email: email,
+        primaryEmail: email,
+        emails: [email],
         accounts: [newAccount]
     })
     

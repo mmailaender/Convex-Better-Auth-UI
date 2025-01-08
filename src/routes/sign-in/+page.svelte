@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from 'svelte/legacy';
-
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -36,12 +34,12 @@
 		}
 	});
 
-	async function verifyEmail() {
+	async function verifyEmail(event: SubmitEvent) {
+		event.preventDefault();
 		try {
-			const res = await fetch('/api/auth/webauthn/check-email', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email })
+			const res = await fetch(`/api/auth/webauthn/verify-email?email=${encodeURIComponent(email)}`, {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' }
 			});
 			if (!res.ok) {
 				const errorMessage = await res.text();
@@ -50,7 +48,7 @@
 			const { exists } = await res.json();
 			userExists = exists;
 		} catch (err: any) {
-			errorMessage = err?.message ?? 'Error checking email.';
+			errorMessage = err?.message ?? 'Error verifying email.';
 		}
 	}
 
@@ -201,7 +199,7 @@
 
 		<!-- If user existence not checked or if user doesn't exist yet, show email form -->
 		{#if userExists === null}
-			<form class="flex flex-col gap-3" onsubmit={preventDefault(verifyEmail)}>
+			<form class="flex flex-col gap-3" onsubmit={verifyEmail}>
 				<input
 					class="input"
 					type="email"

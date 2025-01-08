@@ -11,6 +11,8 @@ collection Account {
         id: String
     }?
 
-    // unique [.user, .socialProvider?.name]
-    // unique [.passkey?.id]
+    compute userAndSocialProviderName: Boolean = (doc => doc.user != null && doc.socialProvider?.name != null)
+    compute passkeyId: Boolean = (doc => doc.passkey?.id != null)
+    unique [.userAndSocialProviderName]
+    unique [.passkeyId]
 }

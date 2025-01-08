@@ -1,0 +1,16 @@
+@role(server)
+function addEmail(email: string, verificationOTP: string): User {
+    let verification = Verification.all().firstWhere((verification) => verification.email == email && verification.otp == verificationOTP)
+
+    if(verification == null) {
+      abort({
+        code: "NO_VALID_VERIFICATION",
+        message: "Please restart the verification process"
+      });
+    }
+
+    let user = Query.identity()
+    user!.update({emails: user!.emails!.append(email)})
+    
+
+}
