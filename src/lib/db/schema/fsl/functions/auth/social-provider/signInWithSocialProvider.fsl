@@ -1,8 +1,8 @@
 @role(server)
-function signInWithSocialProvider(provider: "Github" | "Facebook" | "Passkey" | "Google", providerAccountId: String): { access: Token, refresh: Token } {
+function signInWithSocialProvider(providerName: "Github" | "Facebook" | "Google", providerUserId: String): { access: Token, refresh: Token } {
 
   let user = Account.firstWhere(
-    .providerAccountId == providerAccountId && .provider == provider
+    .socialProvider?.userId == providerUserId && .socialProvider?.name == providerName
   )?.user
   
   if(user != null) {

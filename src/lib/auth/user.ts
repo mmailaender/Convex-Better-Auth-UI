@@ -1,63 +1,118 @@
 import { sClient, uClient } from '$lib/db/client';
-import { fql, TimeStub, type Document } from 'fauna';
-import type { WebAuthnUserCredential } from './server/webauthn';
+import { fql, type Document } from 'fauna';
+import type { WebAuthnUserCredential } from './passkeys/types';
 import { encodeBase64 } from '@oslojs/encoding';
+import {
+	deleteAccessTokenCookie,
+	deleteRefreshTokenCookie,
+	invalidateSession,
+	invalidateUserSessions
+} from './session';
+import type { RequestEvent } from '@sveltejs/kit';
 
+/**
+ * Signs up a user using a social provider.
+ *
+ * @param {string} firstName - The user's first name.
+ * @param {string} lastName - The user's last name.
+ * @param {string} email - The user's email address.
+ * @param {string} providerUserId - The user's social provider ID.
+ * @param {string} providerUserEmail - The user's social provider email.
+ * @returns {Promise<Tokens>} The authentication tokens for the user.
+ */
 export async function signUpWithSocialProvider(
-	githubId: string,
+	firstName: string,
+	lastName: string,
 	email: string,
-	username: string
+	providerUserId: string,
+	providerUserEmail: string
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
-		fql`signUpWithSocialProvider({ email: ${email}, userId: ${githubId}, provider: "Github", firstName: ${username}, lastName: ${username} })`
+		fql`signUpWithSocialProvider({ firstName: ${firstName}, lastName: ${lastName}, email: ${email}, providerUserId: ${providerUserId}, providerName: "Github", providerEmail: ${providerUserEmail} })`
 	);
 
 	return response.data;
 }
 
+/**
+ * Signs up a user using a WebAuthn passkey.
+ *
+ * @param {WebAuthnUserCredential} credential - The user's WebAuthn credential.
+ * @param {string} firstName - The user's first name.
+ * @param {string} lastName - The user's last name.
+ * @param {string} email - The user's email address.
+ * @returns {Promise<Tokens>} The authentication tokens for the user.
+ */
 export async function signUpWithPasskey(
 	credential: WebAuthnUserCredential,
 	firstName: string,
 	lastName: string,
 	email: string
 ): Promise<Tokens> {
-	const query = fql`signUpWithPasskey({ id: ${encodeBase64(credential.id)}, userId: ${credential.userId}, algorithmId: ${credential.algorithmId}, publicKey: ${encodeBase64(credential.publicKey)}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
+	const query = fql`signUpWithPasskey({ id: ${encodeBase64(credential.id)}, userId: ${credential.userId}, algorithmId: ${credential.algorithmId}, publicKey: ${encodeBase64(credential.publicKey)}, otp: ${credential.otp!}}, { firstName: ${firstName}, lastName: ${lastName}, email: ${email} })`;
 
 	const response = await sClient.query<Tokens>(query);
 	return response.data;
 }
 
+/**
+ * Signs in a user using a social provider.
+ *
+ * @param {Provider} providerName - The social provider name (e.g., GitHub, Google).
+ * @param {string} providerUserId - The user's provider account ID.
+ * @returns {Promise<Tokens>} The authentication tokens for the user.
+ */
 export async function signInWithSocialProvider(
-	provider: Provider,
-	providerAccountId: string
+	providerName: Provider,
+	providerUserId: string
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
-		fql`signInWithSocialProvider(${provider}, ${providerAccountId})`
+		fql`signInWithSocialProvider(${providerName}, ${providerUserId})`
 	);
 
 	return response.data;
 }
 
+/**
+ * Signs in a user using a WebAuthn passkey.
+ *
+ * @param {string} passkeyId - The user's passkey ID.
+ * @returns {Promise<Tokens>} The authentication tokens for the user.
+ */
 export async function signInWithPasskey(passkeyId: string): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(fql`signInWithPasskey(${passkeyId})`);
-
 	return response.data;
 }
 
 /**
+ * Retrieves the current user based on the provided access token.
  *
- * @returns Returns the current user based on the access token
+ * @param {string} accessToken - The user's access token.
+ * @returns {Promise<User>} The user object.
  */
 export async function getUser(accessToken: string): Promise<User> {
 	const response = await uClient(accessToken).query<User>(fql`Query.identity()`);
 	return response.data;
 }
 
+/**
+ * Verifies if a user exists based on their email address.
+ *
+ * @param {string} email - The user's email address.
+ * @returns {Promise<boolean>} True if the user exists, false otherwise.
+ */
 export async function verifyUserExists(email: string): Promise<boolean> {
 	const response = await sClient.query<boolean>(fql`verifyUserExists(${email})`);
 	return response.data;
 }
 
+/**
+ * Verifies if a social account exists for a given provider and account ID.
+ *
+ * @param {Provider} provider - The social provider name.
+ * @param {string} providerAccountId - The account ID on the provider.
+ * @returns {Promise<boolean>} True if the social account exists, false otherwise.
+ */
 export async function verifySocialAccountExists(
 	provider: Provider,
 	providerAccountId: string
@@ -68,11 +123,65 @@ export async function verifySocialAccountExists(
 	return response.data;
 }
 
+/**
+ * Creates a registration entry for a user.
+ *
+ * @param {string} email - The user's email address.
+ * @returns {Promise<string>} A registration token.
+ */
+export async function createRegistration(email: string): Promise<string> {
+	const response = await sClient.query<string>(fql`createRegistration(${email})`);
+	return response.data;
+}
+
+/**
+ * Signs out a user by invalidating their session and removing cookies.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ * @returns {Promise<boolean>} True if the sign-out was successful, false otherwise.
+ */
+export async function signOut(event: RequestEvent): Promise<boolean> {
+	const accessToken = event.cookies.get('access_token');
+	if (accessToken) {
+		try {
+			await invalidateSession(accessToken);
+			deleteAccessTokenCookie(event);
+			deleteRefreshTokenCookie(event);
+			return true;
+		} catch (error) {
+			console.error('Failed to sign out:', error);
+			return false;
+		}
+	}
+	return false;
+}
+
+/**
+ * Signs out a user from all devices by invalidating all sessions and removing cookies.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ * @returns {Promise<boolean>} True if the sign-out was successful, false otherwise.
+ */
+export async function signOutFromAllDevices(event: RequestEvent): Promise<boolean> {
+	const accessToken = event.cookies.get('access_token');
+	if (accessToken) {
+		try {
+			await invalidateUserSessions(accessToken);
+			deleteAccessTokenCookie(event);
+			deleteRefreshTokenCookie(event);
+			return true;
+		} catch (error) {
+			console.error('Failed to sign out from all devices:', error);
+			return false;
+		}
+	}
+	return false;
+}
+
 export type User = Document & {
 	firstName: string;
 	lastName: string;
 	email: string;
-	emailVerified: TimeStub;
 	image: string | null;
 	accounts: Account[];
 };

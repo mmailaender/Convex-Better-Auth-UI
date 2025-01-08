@@ -1,0 +1,11 @@
+/**
+ * If a new user wants to sign-up, his selected email will be stored here after validation together with an OTP. The user receives the OTP to his email and can finish his sign-up with this code.
+ * @return {String} otp
+ */
+@role(server)
+function createRegistration(email: String): String {
+  Registration.create({
+    email: email,
+    otp: newId().toString()
+  }).otp
+};

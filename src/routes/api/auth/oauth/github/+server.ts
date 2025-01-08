@@ -1,3 +1,11 @@
+/**
+ * Handles the GitHub OAuth authorization request.
+ * Generates a state token, creates an authorization URL, and sets a cookie with the state.
+ * Redirects the user to the GitHub authorization page.
+ *
+ * @param {RequestEvent} event - The incoming request event.
+ * @returns {Response} A redirect response to the GitHub authorization URL.
+ */
 import { github } from "$lib/auth/social/oauth";
 import { generateState } from "arctic";
 

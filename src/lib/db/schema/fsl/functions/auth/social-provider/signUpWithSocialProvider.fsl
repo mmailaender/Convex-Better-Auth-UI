@@ -1,8 +1,6 @@
-// Before calling this function, the user needs to have completed the social provider sign-in to receive all user information from the provider.
-// @param sp - The normalized results from the social provider storing the user information
 @role(server)
-function signUpWithSocialProvider(sp: {email: String, userId: String, provider: "Github" | "Facebook" | "Passkey" | "Google" , firstName: String, lastName: String, image: String | Null}): { access: Token, refresh: Token } {
+function signUpWithSocialProvider(sp: {firstName: String, lastName: String, email: String, avatar: String?, providerUserId: String, providerName: "Github" | "Facebook" | "Google", providerEmail: String}): { access: Token, refresh: Token } {
     
-  createSocialProviderAccount(sp.firstName, sp.lastName, sp.email, sp.image, sp.provider, sp.userId)
-  signInWithSocialProvider(sp.provider, sp.userId)
+  createSocialProviderAccount(sp.firstName, sp.lastName, sp.email, sp.avatar, sp.providerName, sp.providerUserId, sp.providerEmail)
+  signInWithSocialProvider(sp.providerName, sp.providerUserId)
 }

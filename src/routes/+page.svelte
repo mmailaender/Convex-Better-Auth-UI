@@ -1,18 +1,16 @@
 <script lang="ts">
-	import type { User } from '$lib/auth/user';
-	import type { PageData } from './$types';
+	import { type User } from '$lib/auth/user';
+	import { page } from '$app/state';
+	import UserProfile from '$lib/auth/UserProfile.svelte';
 
-	let { data }: { data: PageData } = $props();
-
-	let user: User = data.user ? JSON.parse(data.user) : null;
+	let user: User | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
 </script>
 
-<div class="flex flex-col min-h-screen items-center justify-center gap-6">
+<div class="flex min-h-screen flex-col items-center justify-center gap-6">
 	{#if user}
 		Hello {user.email}
-	{:else}
-		Secret things ahead!
-        <a class="btn preset-filled-primary-500" href="/sign-in">Sign in</a>
-        <a class="btn preset-filled-primary-500" href="/sign-in/passkey/register">Sign in with Passkey</a>
 	{/if}
+
+	
+	<UserProfile />
 </div>

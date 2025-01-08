@@ -23,4 +23,8 @@ role role_signIn {
   privileges getPasskeyCredential {
     call
   }
+
+  privileges createRegistration {
+    call
+  }
 }

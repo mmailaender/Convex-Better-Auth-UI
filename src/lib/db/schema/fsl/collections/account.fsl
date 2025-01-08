@@ -1,11 +1,16 @@
 collection Account {
     user: Ref<User>
-    provider: "Github" | "Google" | "Facebook" | "Passkey"
-    providerAccountId: String | Null
-    publicKey: String | Null
-    algorithmId: Long | Null
-    passkeyId: String | Null
+    socialProvider: {
+        name: "Github" | "Google" | "Facebook"
+        userId: String
+        email: String
+    }?
+    passkey: {
+        publicKey: String
+        algorithmId: Long
+        id: String
+    }?
 
-    unique [.user, .provider]
-    unique [.passkeyId]
+    // unique [.user, .socialProvider?.name]
+    // unique [.passkey?.id]
 }
