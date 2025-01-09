@@ -82,7 +82,22 @@ export async function addEmail(
 ): Promise<Document<User>> {
 	try {
 		const response = await uClient(accessToken).query<Document<User>>(
-			fql`addEmail({ email: ${email}, verificationOTP: ${verificationOTP} })`
+			fql`addEmail(${email}, ${verificationOTP})`
+		); 
+		return response.data;
+	} catch (err: unknown) {
+		if (err instanceof Error) {
+			throw new Error(err.message);
+		}
+		throw new Error('Error updating email.');
+	}
+}
+
+
+export async function deleteEmail(accessToken: string, email: string): Promise<Document<User>> {
+	try {
+		const response = await uClient(accessToken).query<Document<User>>(
+			fql`deleteEmail(${email})`
 		);
 		return response.data;
 	} catch (err: unknown) {
@@ -96,7 +111,7 @@ export async function addEmail(
 export async function setPrimaryEmail(accessToken: string, email: string): Promise<Document<User>> {
 	try {
 		const response = await uClient(accessToken).query<Document<User>>(
-			fql`Query.identity()!.update({ primaryEmail = ${email} })`
+			fql`Query.identity()!.update({ primaryEmail: ${email} })`
 		);
 		return response.data;
 	} catch (err: unknown) {

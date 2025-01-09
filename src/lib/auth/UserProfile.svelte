@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
-	import type { User } from '$lib/db/schema/types/custom';
-	import type { Document } from '$lib/db/schema/types/system';
-	import socialIcons, { type SocialIcons } from './social/icons';
-	import { enhance } from '$app/forms';
-
 	import { page } from '$app/state';
 	import type { ActionResult } from '@sveltejs/kit';
-	import { cancelEmailVerification, setPrimaryEmail } from './user';
+	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
+
+	import type { User } from '$lib/db/schema/types/custom';
+	import type { Document } from '$lib/db/schema/types/system';
+
+	import { cancelEmailVerification, addEmail, deleteEmail, setPrimaryEmail } from './user';
+	import socialIcons, { type SocialIcons } from './social/icons';
+	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 
 	let getSocialIcon = ({ name }: { name: keyof SocialIcons }) => socialIcons[name];
 
@@ -34,7 +36,7 @@
 	 * This might call your existing `verifyEmail` action
 	 * or a new action (depending on how you want to set it up).
 	 */
-	async function handleAddEmailSubmit() {
+	async function handleVerifyEmail() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type === 'success') {
 				user!.emailVerification = result.data?.newEmail;
@@ -60,17 +62,9 @@
 	 */
 	async function handleDeleteEmail(email: string) {
 		try {
-			// For instance, call your `updateUser` with an updated emails array
-			const updatedEmails = user.emails.filter((e) => e !== email);
-			await fetch('/user-profile?/profileData', {
-				method: 'POST',
-				body: JSON.stringify({ emails: updatedEmails }),
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-			// If successful, remove from local state
-			user.emails = updatedEmails;
+			const {emails} = await deleteEmail(page.data.accessToken, email);
+
+			user.emails = emails;
 		} catch (error) {
 			console.error('Error deleting email:', error);
 		}
@@ -107,6 +101,29 @@
 			console.error('Error canceling verification:', error);
 		}
 	}
+
+	onMount(async () => {
+		// Read the "otp" parameter from the URL
+		const otp = page.url.searchParams.get('otp');
+		if (otp && user?.emailVerification) {
+			try {
+				// Call addEmail() with the current user's verification email + the OTP
+				// “accessToken” is retrieved from page.data where you saved it in +page.server.ts
+				const updatedUser = await addEmail(page.data.accessToken, user.emailVerification, otp);
+
+				// Update local user data with the response
+				user.emails = updatedUser.emails;
+				user.emailVerification = updatedUser.emailVerification;
+
+				// Remove the `otp` param from the URL to clean things up
+				const url = new URL(window.location.href);
+				url.searchParams.delete('otp');
+				history.replaceState({}, '', url.toString());
+			} catch (error) {
+				console.error('Error verifying email with OTP:', error);
+			}
+		}
+	});
 </script>
 
 {#if user}
@@ -205,7 +222,7 @@
 						<form
 							action="/user-profile?/verifyEmail"
 							method="POST"
-							use:enhance={handleAddEmailSubmit}
+							use:enhance={handleVerifyEmail}
 							class="flex gap-2"
 						>
 							<input

@@ -33,12 +33,17 @@ role role_user {
       predicate (userId => Query.identity()!.id == userId)
     }
   }
-  privileges addEmail {
-    call
-  }
   privileges deleteEmailVerification {
     call {
       predicate (email => Query.identity()!.emailVerification == email)
+    }
+  }
+  privileges addEmail {
+    call
+  }
+  privileges deleteEmail {
+    call {
+      predicate (email => Query.identity()!.emails.includes(email))
     }
   }
 
