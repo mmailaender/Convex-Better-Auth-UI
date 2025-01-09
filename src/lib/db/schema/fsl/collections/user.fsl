@@ -3,7 +3,7 @@ collection User {
     lastName: String
     primaryEmail: String
     emails: Array<String>
-    compute activeVerifications: Array<String> = doc => { getVerificationEmails()}
+    compute emailVerification: String? = doc => { getVerificationEmail(doc.id)}
     avatar: String?
     accounts: Array<Ref<Account>>
 

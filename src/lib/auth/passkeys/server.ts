@@ -1,5 +1,5 @@
 import { decodeBase64, encodeBase64, encodeHexLowerCase } from "@oslojs/encoding";
-import { sClient } from "$lib/db/client";
+import sClient from "$lib/db/serverClient";
 import { fql } from "fauna";
 import type { WebAuthnUserCredential, WebAuthnUserCredentialEncoded } from "./types";
 

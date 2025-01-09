@@ -4,6 +4,8 @@ type Account = {
 	user: User;
 	socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
 	passkey?: { publicKey: string; algorithmId: number; id: string };
+	userAndSocialProviderName: boolean;
+	passkeyId: boolean;
 };
 
 type Account_Create = {
@@ -29,7 +31,7 @@ type User = {
 	emails: Array<string>;
 	avatar?: string;
 	accounts: Array<Account>;
-	activeVerifications: Array<string>;
+	emailVerification?: string;
 };
 
 type User_Create = {

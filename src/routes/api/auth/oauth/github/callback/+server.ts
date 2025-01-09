@@ -12,7 +12,7 @@ import {
 	signUpWithSocialProvider,
 	signInWithSocialProvider,
 	verifySocialAccountExists
-} from '$lib/auth/user';
+} from '$lib/auth/user.server';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 
 import type { OAuth2Tokens } from 'arctic';

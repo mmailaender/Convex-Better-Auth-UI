@@ -1,7 +1,0 @@
-/**
- * @returns all active verifications for the current user
- */
-@role(server)
-function getVerificationEmails(): Array<String> {
-    Verification.all().where(.user == Query.identity()).map(.email).toArray()
-}

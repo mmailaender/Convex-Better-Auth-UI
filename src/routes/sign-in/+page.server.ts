@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
-import { sClient } from '$lib/db/client';
+import sClient from '$lib/db/serverClient';
 import { fql } from 'fauna';
 import { bigEndian } from '@oslojs/binary';
 

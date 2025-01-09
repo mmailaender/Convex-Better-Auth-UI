@@ -1,0 +1,4 @@
+@role(server)
+function deleteEmailVerification(email: String): NullCollectionDef {
+    Verification.firstWhere(.email == email)!.delete()
+}

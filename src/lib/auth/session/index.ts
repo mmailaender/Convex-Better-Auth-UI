@@ -1,7 +1,8 @@
-import type { Tokens, User } from '../user';
+import type { Tokens } from '../user';
 import type { RequestEvent } from '@sveltejs/kit';
-import { uClient } from '$lib/db/client';
+import uClient from '$lib/db/userClient';
 import { fql } from 'fauna';
+import type { User } from '$lib/db/schema/types/custom';
 
 /**
  * Invalidates the current session for the user.

@@ -7,6 +7,7 @@
 
 	import { page } from '$app/state';
 	import type { ActionResult } from '@sveltejs/kit';
+	import { cancelEmailVerification, setPrimaryEmail } from './user';
 
 	let getSocialIcon = ({ name }: { name: keyof SocialIcons }) => socialIcons[name];
 
@@ -36,11 +37,7 @@
 	async function handleAddEmailSubmit() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type === 'success') {
-				if (user?.activeVerifications) {
-					user.activeVerifications.push(result.data?.newEmail);
-				} else {
-					user!.activeVerifications = [result.data?.newEmail];
-				}
+				user!.emailVerification = result.data?.newEmail;
 				isAddingNewEmail = false;
 			}
 		};
@@ -51,18 +48,8 @@
 	 */
 	async function handleMakePrimary(email: string) {
 		try {
-			// Typically you’d call a server action here, e.g. `updateUser`,
-			// or a dedicated endpoint that sets user.primaryEmail.
-			// For example:
-			await fetch('/user-profile?/profileData', {
-				method: 'POST',
-				body: JSON.stringify({ primaryEmail: email }),
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-			// If successful, you might refresh or update local user data...
-			user.primaryEmail = email;
+			const { primaryEmail } = await setPrimaryEmail(page.data.accessToken, email);
+			user.primaryEmail = primaryEmail;
 		} catch (error) {
 			console.error('Error making primary:', error);
 		}
@@ -113,16 +100,9 @@
 	 */
 	async function handleCancelVerification(email: string) {
 		try {
-			// Possibly you have an endpoint or function to remove email from activeVerifications.
-			await fetch('/user-profile?/cancelVerification', {
-				method: 'POST',
-				body: JSON.stringify({ email }),
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-			// Then remove from local state
-			user.activeVerifications = user.activeVerifications.filter((e) => e !== email);
+			console.log("AccessToken: ", page.data.accessToken)
+			await cancelEmailVerification(page.data.accessToken, email);
+			user.emailVerification = undefined;
 		} catch (error) {
 			console.error('Error canceling verification:', error);
 		}
@@ -196,87 +176,77 @@
 								{email}
 								{#if email === user.primaryEmail}
 									<span class="ml-2 text-sm font-semibold text-primary-500"> Primary </span>
+								{:else}
+									<div class="flex gap-2">
+										<button
+											class="variant-ghost btn text-sm"
+											onclick={() => handleMakePrimary(email)}
+										>
+											Make Primary
+										</button>
+										<button
+											class="variant-outlined btn text-sm"
+											onclick={() => handleDeleteEmail(email)}
+										>
+											Delete
+										</button>
+									</div>
 								{/if}
 							</div>
-							<!-- Actions for non-primary emails -->
-							{#if email !== user.primaryEmail}
-								<div class="flex gap-2">
-									<button
-										class="variant-ghost btn text-sm"
-										onclick={() => handleMakePrimary(email)}
-									>
-										Make Primary
-									</button>
-									<button
-										class="variant-outlined btn text-sm"
-										onclick={() => handleDeleteEmail(email)}
-									>
-										Delete
-									</button>
-								</div>
-							{/if}
 						</li>
 					{/each}
 				</ul>
 
 				<!-- Form to add a new email -->
-				{#if !isAddingNewEmail}
-					<button class="btn" onclick={() => (isAddingNewEmail = true)}>
-						Add a new email
-					</button>
-				{:else}
-					<form
-						action="/user-profile?/verifyEmail"
-						method="POST"
-						use:enhance={handleAddEmailSubmit}
-						class="flex gap-2"
-					>
-						<input
-							type="email"
-							name="email"
-							placeholder="Add a new email address"
-							class="input"
-							required
-						/>
-						<input
-							type="text"
-							name="userId"
-							value={user.id}
-							required
-							hidden
-						/>
-						<button type="submit" class="btn"> Add </button>
-						<button type="button" class="btn" onclick={() => (isAddingNewEmail = false)}>
-							Cancel
-						</button>
-					</form>
+				{#if !user.emailVerification}
+					{#if !isAddingNewEmail}
+						<button class="btn" onclick={() => (isAddingNewEmail = true)}> Add a new email </button>
+					{:else}
+						<form
+							action="/user-profile?/verifyEmail"
+							method="POST"
+							use:enhance={handleAddEmailSubmit}
+							class="flex gap-2"
+						>
+							<input
+								type="email"
+								name="email"
+								placeholder="Add a new email address"
+								class="input"
+								required
+							/>
+							<input type="text" name="userId" value={user.id} required hidden />
+							<button type="submit" class="btn"> Add </button>
+							<button type="button" class="btn" onclick={() => (isAddingNewEmail = false)}>
+								Cancel
+							</button>
+						</form>
+					{/if}
 				{/if}
 			</div>
 
 			<!-- Emails in active verification process -->
-			{#if user.activeVerifications && user.activeVerifications.length > 0}
+			{#if user.emailVerification}
 				<div class="mb-6">
 					<h4 class="mb-2 font-semibold text-surface-800-200">Pending verifications</h4>
 					<ul class="flex flex-col gap-2">
-						{#each user.activeVerifications as verifyingEmail}
 							<li class="flex items-center justify-between">
-								<span class="text-surface-800-200">{verifyingEmail}</span>
+								<span class="text-surface-800-200">{user.emailVerification}</span>
 								<div class="flex gap-2">
 									<button
 										class="variant-ghost btn text-sm"
-										onclick={() => handleResendVerification(verifyingEmail)}
+										onclick={() => handleResendVerification(user.emailVerification!)}
 									>
 										Resend
 									</button>
 									<button
 										class="variant-outlined btn text-sm"
-										onclick={() => handleCancelVerification(verifyingEmail)}
+										onclick={() => handleCancelVerification(user.emailVerification!)}
 									>
 										Cancel
 									</button>
 								</div>
 							</li>
-						{/each}
 					</ul>
 				</div>
 			{/if}

@@ -34,7 +34,7 @@ import type { ClientData, AuthenticatorData } from '@oslojs/webauthn';
 
 import { env } from '$env/dynamic/private';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
-import { signInWithPasskey } from '$lib/auth/user';
+import { signInWithPasskey } from '$lib/auth/user.server';
 
 const allowedUrls = [] as string[];
 if (env.VERCEL_URL) {

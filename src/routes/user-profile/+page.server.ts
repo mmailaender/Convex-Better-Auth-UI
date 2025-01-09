@@ -1,4 +1,5 @@
-import { createEmailVerification, getUserAndAccounts, addEmail, updateUser } from '$lib/auth/user';
+import { getUserAndAccounts, addEmail, updateUser } from '$lib/auth/user';
+import { createEmailVerification } from '$lib/auth/user.server';
 import type { Actions } from './$types';
 
 import type { PageServerLoad } from './$types';
@@ -11,7 +12,8 @@ export const load = (async ({ cookies }) => {
 	const user = await getUserAndAccounts(accessToken);
 	const stringifiedUser = user ? JSON.stringify(user) : null;
 	console.log('user: ', stringifiedUser);
-	return { user: stringifiedUser };
+	console.log('accessToken load function: ', accessToken);
+	return { user: stringifiedUser, accessToken };
 }) satisfies PageServerLoad;
 
 export const actions = {

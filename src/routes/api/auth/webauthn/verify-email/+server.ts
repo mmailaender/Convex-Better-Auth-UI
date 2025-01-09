@@ -1,4 +1,4 @@
-import { createVerification, verifyUserExists } from '$lib/auth/user';
+import { createVerification, verifyUserExists } from '$lib/auth/user.server';
 import type { RequestEvent, RequestHandler } from './$types';
 import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
 

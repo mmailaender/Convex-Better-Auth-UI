@@ -29,7 +29,7 @@ import type {
 	COSERSAPublicKey
 } from '@oslojs/webauthn';
 import type { RequestEvent } from './$types';
-import { signUpWithPasskey } from '$lib/auth/user';
+import { signUpWithPasskey } from '$lib/auth/user.server';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 import type { WebAuthnUserCredential } from '$lib/auth/passkeys/types';
 

@@ -15,9 +15,9 @@ role role_user {
   }
   privileges Account {
     read {
-      predicate (doc =>
+      predicate ((doc) => {
         doc.user == Query.identity()
-      )
+      })
     }
   }
 
@@ -28,11 +28,18 @@ role role_user {
     call
   }
 
-  privileges getVerificationEmails {
-    call
+  privileges getVerificationEmail {
+    call {
+      predicate (userId => Query.identity()!.id == userId)
+    }
   }
   privileges addEmail {
     call
+  }
+  privileges deleteEmailVerification {
+    call {
+      predicate (email => Query.identity()!.emailVerification == email)
+    }
   }
 
   membership User {
