@@ -187,7 +187,7 @@
 
 				<!-- List of existing emails -->
 				<ul class="mb-4 flex flex-col gap-2">
-					{#each user.emails as email}
+					{#each [user.primaryEmail, ...user.emails.filter(email => email !== user.primaryEmail)] as email}
 						<li class="flex items-center justify-between">
 							<div class="text-surface-800-200">
 								{email}
