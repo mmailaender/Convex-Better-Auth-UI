@@ -121,13 +121,10 @@ export async function verifySocialAccountExists(
  */
 export async function createVerification(email: string, userId?: string): Promise<string> {
 	console.log(`Creating email verification for: ${email} with userId: ${userId}`);
-	try {
-		const response = await sClient.query<string>(fql`createVerification(${email}, ${userId ? userId : null})`);
-		return response.data;
-	} catch (error) {
-		console.error('Error creating email verification:', error);
-		throw error;
-	}
+	const res = await sClient.query<string>(
+		fql`createVerification({email: ${email}, userId: ${userId ? userId : null}})`
+	);
+	return res.data
 }
 
 /**
@@ -188,7 +185,7 @@ export async function createEmailVerification(
 	accessToken: string,
 	email: string,
 	fetch: (input: string | URL | globalThis.Request, init?: RequestInit) => Promise<Response>,
-	userId?: string,
+	userId?: string
 ): Promise<boolean> {
 	if (!accessToken) {
 		console.warn('Access token is missing');
@@ -197,11 +194,14 @@ export async function createEmailVerification(
 
 	try {
 		console.log(`Verifying email: ${email}`);
-		const res = await fetch(`/api/auth/webauthn/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' }
-		});
-		
+		const res = await fetch(
+			`/api/auth/webauthn/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`,
+			{
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' }
+			}
+		);
+
 		if (!res.ok) {
 			const errorMessage = await res.text();
 			console.error('Failed to verify email:', errorMessage);
@@ -211,11 +211,11 @@ export async function createEmailVerification(
 		const { exists } = await res.json();
 		console.log(`Email ${email} successfuly verified: ${exists}`);
 		return exists;
-    } catch (err: unknown) {
+	} catch (err: unknown) {
 		console.error('Error creating email verification:', err);
 		if (err instanceof Error) {
 			throw new Error(err.message);
 		}
 		throw new Error('Error creating email verification.');
-	}    
+	}
 }
