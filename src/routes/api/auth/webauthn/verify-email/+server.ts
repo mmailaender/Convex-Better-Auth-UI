@@ -2,7 +2,7 @@ import { createVerification, verifyUserExists } from '$lib/auth/user.server';
 import type { RequestEvent, RequestHandler } from './$types';
 import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
 
-export const GET: RequestHandler = async (event: RequestEvent) => {
+export const GET: RequestHandler = async (event: RequestEvent ) => {
 	const url = new URL(event.request.url);
 	const email = url.searchParams.get('email');
 	const userId = url.searchParams.get('userId');
@@ -29,7 +29,11 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 
 			const otp = await createVerification(email, userId ? userId : undefined);
 
-			// TODO: send email with OTP
+			await event.fetch(`/api/auth/emails/registration`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ OTP: otp, emailTo: email }),
+			})
 
 			console.log(`check-email: Successfully verified email ${email}`);
 		} catch (err) {

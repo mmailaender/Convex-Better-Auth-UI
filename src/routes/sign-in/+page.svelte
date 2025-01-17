@@ -247,8 +247,8 @@
 		{/if}
 
 		<p class="text-center text-xs">
-			By continuing, you agree to our <a href="#" class="anchor">Terms of Service</a> and
-			<a href="#" class="anchor">Privacy Policy</a>.
+			By continuing, you agree to our <a href="/terms" class="anchor">Terms of Service</a> and
+			<a href="/privacy-policy" class="anchor">Privacy Policy</a>.
 		</p>
 
 		{#if errorMessage}
