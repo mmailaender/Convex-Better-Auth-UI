@@ -80,12 +80,18 @@ export async function addEmail(
 	email: string,
 	verificationOTP: string
 ): Promise<Document<User>> {
+	console.log('addEmail() props: ', accessToken, email, verificationOTP);
+
 	try {
 		const response = await uClient(accessToken).query<Document<User>>(
 			fql`addEmail(${email}, ${verificationOTP})`
 		); 
+		if(!response.data) {
+			throw new Error(response.summary);
+		}
 		return response.data;
 	} catch (err: unknown) {
+		console.log("addEmail() error: ", err);
 		if (err instanceof Error) {
 			throw new Error(err.message);
 		}

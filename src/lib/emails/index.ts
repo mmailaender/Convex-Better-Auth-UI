@@ -76,4 +76,4 @@ const getVerificationEmail = async (OTP: string) => {
 	return await render(Verification, componentProps);
 };
 
-export { send, getVerificationEmail };
+export { send as sendEmail, getVerificationEmail };

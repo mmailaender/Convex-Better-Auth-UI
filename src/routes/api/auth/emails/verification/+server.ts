@@ -1,6 +1,6 @@
 import type { RequestEvent, RequestHandler } from './$types';
 
-import { getVerificationEmail, send } from '$lib/emails';
+import { getVerificationEmail, sendEmail } from '$lib/emails';
 
 export const POST: RequestHandler = async (event: RequestEvent) => {
 	const { OTP, emailTo } = await event.request.json();
@@ -8,7 +8,7 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
 
 	const { html } = await getVerificationEmail(OTP);
 
-	const { data, error } = await send({
+	const { data, error } = await sendEmail({
 		from: 'verifications@etesie.dev',
 		to: emailTo,
 		subject: `${OTP} is your verification code`,

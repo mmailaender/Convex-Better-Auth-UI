@@ -1,7 +1,7 @@
 import { createVerification, verifyUserExists } from '$lib/auth/user.server';
 import type { RequestEvent, RequestHandler } from './$types';
 import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
-import { getVerificationEmail, send } from '$lib/emails';
+import { getVerificationEmail, sendEmail } from '$lib/emails';
 
 export const GET: RequestHandler = async (event: RequestEvent) => {
 	const url = new URL(event.request.url);
@@ -32,7 +32,7 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 
 			const { html } = await getVerificationEmail(otp);
 
-			const { data, error } = await send({
+			const { data, error } = await sendEmail({
 				from: 'verifications@etesie.dev',
 				to: email,
 				subject: `${otp} is your verification code`,
@@ -42,11 +42,6 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 			if (error) {
 				return new Response(error.message, { status: 400 });
 			}
-			// await event.fetch(`/api/auth/emails/registration`, {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify({ OTP: otp, emailTo: email }),
-			// })
 
 			console.log(`check-email: Successfully verified email ${email}, data: ${data}`);
 		} catch (err) {

@@ -19,6 +19,7 @@
 	// Local state
 	let isEditingUsername = $state(false);
 	let isAddingNewEmail = $state(false);
+	let otp = $state('');
 
 	/**
 	 * Form: handle user profile info (first/last name, avatar, etc.)
@@ -33,8 +34,6 @@
 
 	/**
 	 * Submit form to add a new email (and start its verification).
-	 * This might call your existing `verifyEmail` action
-	 * or a new action (depending on how you want to set it up).
 	 */
 	async function handleVerifyEmail() {
 		return async ({ result }: { result: ActionResult }) => {
@@ -43,6 +42,15 @@
 				isAddingNewEmail = false;
 			}
 		};
+	}
+
+	async function handleVerifyOtp() {
+		console.log('accessToken: ', page.data.accessToken);
+		const updatedUser = await addEmail(page.data.accessToken, user.emailVerification, otp);
+
+		// Update local user data with the response
+		user.emails = updatedUser.emails;
+		user.emailVerification = updatedUser.emailVerification;
 	}
 
 	/**
@@ -62,7 +70,7 @@
 	 */
 	async function handleDeleteEmail(email: string) {
 		try {
-			const {emails} = await deleteEmail(page.data.accessToken, email);
+			const { emails } = await deleteEmail(page.data.accessToken, email);
 
 			user.emails = emails;
 		} catch (error) {
@@ -94,36 +102,13 @@
 	 */
 	async function handleCancelVerification(email: string) {
 		try {
-			console.log("AccessToken: ", page.data.accessToken)
+			console.log('AccessToken: ', page.data.accessToken);
 			await cancelEmailVerification(page.data.accessToken, email);
 			user.emailVerification = undefined;
 		} catch (error) {
 			console.error('Error canceling verification:', error);
 		}
 	}
-
-	onMount(async () => {
-		// Read the "otp" parameter from the URL
-		const otp = page.url.searchParams.get('otp');
-		if (otp && user?.emailVerification) {
-			try {
-				// Call addEmail() with the current user's verification email + the OTP
-				// “accessToken” is retrieved from page.data where you saved it in +page.server.ts
-				const updatedUser = await addEmail(page.data.accessToken, user.emailVerification, otp);
-
-				// Update local user data with the response
-				user.emails = updatedUser.emails;
-				user.emailVerification = updatedUser.emailVerification;
-
-				// Remove the `otp` param from the URL to clean things up
-				const url = new URL(window.location.href);
-				url.searchParams.delete('otp');
-				history.replaceState({}, '', url.toString());
-			} catch (error) {
-				console.error('Error verifying email with OTP:', error);
-			}
-		}
-	});
 </script>
 
 {#if user}
@@ -187,7 +172,7 @@
 
 				<!-- List of existing emails -->
 				<ul class="mb-4 flex flex-col gap-2">
-					{#each [user.primaryEmail, ...user.emails.filter(email => email !== user.primaryEmail)] as email}
+					{#each [user.primaryEmail, ...user.emails.filter((email) => email !== user.primaryEmail)] as email}
 						<li class="flex items-center justify-between">
 							<div class="text-surface-800-200">
 								{email}
@@ -245,26 +230,42 @@
 			<!-- Emails in active verification process -->
 			{#if user.emailVerification}
 				<div class="mb-6">
-					<h4 class="mb-2 font-semibold text-surface-800-200">Pending verifications</h4>
-					<ul class="flex flex-col gap-2">
-							<li class="flex items-center justify-between">
-								<span class="text-surface-800-200">{user.emailVerification}</span>
-								<div class="flex gap-2">
-									<button
-										class="variant-ghost btn text-sm"
-										onclick={() => handleResendVerification(user.emailVerification!)}
-									>
-										Resend
-									</button>
-									<button
-										class="variant-outlined btn text-sm"
-										onclick={() => handleCancelVerification(user.emailVerification!)}
-									>
-										Cancel
-									</button>
-								</div>
-							</li>
-					</ul>
+					<div>
+						<span class="text-surface-800-200">{user.emailVerification}</span>
+						<span class="badge preset-tonal-surface">Unverified</span>
+					</div>
+					<div class="w-full max-w-sm rounded-lg border p-6 shadow-md border-surface-300-700">
+						<h2 class="text-lg font-semibold text-surface-900-100">Verify email address</h2>
+						<p class="mt-1 text-sm text-surface-600-400">
+							Enter the verification code sent to <span class="font-medium text-surface-900-100"
+								>{user.emailVerification}</span
+							>
+						</p>
+
+						<div class="mt-4 flex justify-between space-x-1">
+							<input type="text" class="input" bind:value={otp} />
+						</div>
+
+						<div class="mt-4">
+							<button
+								class="anchor text-sm"
+								onclick={() => handleResendVerification(user.emailVerification!)}
+							>
+								Didn't receive a code? Resend
+							</button>
+						</div>
+
+						<div class="mt-6 flex justify-end text-sm">
+							<button
+								class="btn hover:preset-tonal-surface"
+								onclick={() => handleCancelVerification(user.emailVerification!)}
+							>
+								Cancel
+							</button>
+							<button class="btn preset-filled-primary-500" onclick={handleVerifyOtp}>Verify</button
+							>
+						</div>
+					</div>
 				</div>
 			{/if}
 
