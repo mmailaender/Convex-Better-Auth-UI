@@ -1,8 +1,9 @@
 import { createVerification, verifyUserExists } from '$lib/auth/user.server';
 import type { RequestEvent, RequestHandler } from './$types';
 import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
+import { getVerificationEmail, send } from '$lib/emails';
 
-export const GET: RequestHandler = async (event: RequestEvent ) => {
+export const GET: RequestHandler = async (event: RequestEvent) => {
 	const url = new URL(event.request.url);
 	const email = url.searchParams.get('email');
 	const userId = url.searchParams.get('userId');
@@ -29,13 +30,25 @@ export const GET: RequestHandler = async (event: RequestEvent ) => {
 
 			const otp = await createVerification(email, userId ? userId : undefined);
 
-			await event.fetch(`/api/auth/emails/registration`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ OTP: otp, emailTo: email }),
-			})
+			const { html } = await getVerificationEmail(otp);
 
-			console.log(`check-email: Successfully verified email ${email}`);
+			const { data, error } = await send({
+				from: 'verifications@etesie.dev',
+				to: email,
+				subject: `${otp} is your verification code`,
+				html: html
+			});
+
+			if (error) {
+				return new Response(error.message, { status: 400 });
+			}
+			// await event.fetch(`/api/auth/emails/registration`, {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ OTP: otp, emailTo: email }),
+			// })
+
+			console.log(`check-email: Successfully verified email ${email}, data: ${data}`);
 		} catch (err) {
 			console.error(`check-email: Error verifying email ${email}`, err);
 			return new Response('Internal Server Error', { status: 500 });

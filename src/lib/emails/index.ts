@@ -4,8 +4,10 @@ import { render as maizzleRender, type Config } from '@maizzle/framework';
 import tailwindcssPresetEmail from 'tailwindcss-preset-email';
 import tailwindConfig from '../../../tailwind.config';
 
-import Registration from './Registration.svelte';
 import Verification from './Verification.svelte';
+
+import { RESEND_API_KEY } from '$env/static/private';
+import { Resend } from 'resend';
 
 const maizzleConfig = (input: string) => {
 	return {
@@ -48,22 +50,30 @@ const render = async <T extends Record<string, unknown>>(component: Component<T>
 	return await maizzleRender(html, maizzleConfig(html));
 };
 
-const getRegistrationEmail = async (OTP: string) => {
-	const componentProps: ComponentProps<typeof Registration> = {
-		OTP
-	};
+export interface SendEmailInput {
+	from: string;
+	to: string;
+	subject: string;
+	html: string;
+}
 
-	return await render(Registration, componentProps);
+const send = async ({ from, to, subject, html }: SendEmailInput) => {
+	const resend = new Resend(RESEND_API_KEY);
+
+	return await resend.emails.send({
+		from: from,
+		to: to,
+		subject: subject,
+		html: html
+	});
 };
 
-const getVerificationEmail = async (firstName: string, OTP: string, baseURL: string) => {
+const getVerificationEmail = async (OTP: string) => {
 	const componentProps: ComponentProps<typeof Verification> = {
-		firstName,
-		OTP,
-		baseURL
+		OTP
 	};
 
 	return await render(Verification, componentProps);
 };
 
-export { getRegistrationEmail, getVerificationEmail };
+export { send, getVerificationEmail };

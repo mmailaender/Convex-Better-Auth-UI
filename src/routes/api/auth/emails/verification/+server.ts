@@ -1,30 +1,18 @@
 import type { RequestEvent, RequestHandler } from './$types';
 
-import { render } from 'svelte/server';
-import type { ComponentProps } from 'svelte';
-import Verification from '$lib/emails/Verification.svelte';
-import { RESEND_API_KEY } from '$env/static/private';
-import { Resend } from 'resend';
+import { getVerificationEmail, send } from '$lib/emails';
 
 export const POST: RequestHandler = async (event: RequestEvent) => {
-	const { firstName, OTP, emailTo } = await event.request.json();
-	const baseURL = new URL(event.request.url).origin;
+	const { OTP, emailTo } = await event.request.json();
+	// const baseURL = new URL(event.request.url).origin;
 
-	const componentProps: ComponentProps<typeof Verification> = {
-		firstName,
-		OTP,
-		baseURL
-	};
+	const { html } = await getVerificationEmail(OTP);
 
-	const { html } = render(Verification, { props: componentProps });
-
-	const resend = new Resend(RESEND_API_KEY);
-
-	const { data, error } = await resend.emails.send({
-		from: 'support@etesie.dev',
+	const { data, error } = await send({
+		from: 'verifications@etesie.dev',
 		to: emailTo,
-		subject: 'OTP verification',
-		html: html,
+		subject: `${OTP} is your verification code`,
+		html: html
 	});
 
 	if (error) {

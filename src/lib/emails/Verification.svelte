@@ -1,17 +1,14 @@
 <script>
 	/**
 	 * @typedef {Object} Props
-	 * @property {string} [firstName]
 	 * @property {string} OTP
-	 * @property {string} baseURL
 	 */
 
 	/** @type {Props} */
-	let { firstName = 'World', OTP, baseURL } = $props();
+	let { OTP } = $props();
 </script>
 
-<p class="text-[24px] md:text-[18px]">
-	Hello, {firstName}!
-</p>
-<hr class="border-0 bg-surface-500 text-surface-500 h-px">
-<a href={`${baseURL}/user-profile?otp=${OTP}`}>Verify your email</a>
+<h1 class="h2">Verification code</h1>
+<p>Enter the following verification code when prompted:</p>
+<p class="h1">{OTP}</p>
+<p>To protect your account, do not share this code.</p>
