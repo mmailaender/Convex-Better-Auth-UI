@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
-	import { LogOut, Plus, X } from 'lucide-svelte';
+	import { LogOut, Plus } from 'lucide-svelte';
 	import SignOutButton from './SignOutButton.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import type { User } from '$lib/db/schema/types/custom';
 	import type { Document } from '$lib/db/schema/types/system';
-	import UserProfile from './UserProfile.svelte';
 
 	import { page } from '$app/state';
 
@@ -57,8 +55,10 @@
 								<p class="text-sm">{user.primaryEmail}</p>
 							</div>
 							<div class="flex space-x-2">
-								<button class="btn preset-outlined-surface-500" onclick={toggleUserProfile}
-									>Manage account</button
+								<a
+									href="/user-profile"
+									class="btn preset-outlined-surface-500"
+									onclick={toggleUserProfile}>Manage account</a
 								>
 								<SignOutButton class="btn preset-outlined-surface-500" />
 							</div>
@@ -105,22 +105,6 @@
 			</ul>
 		{/snippet}
 	</Popover>
-	{#if showUserProfile}
-		<Modal
-			open={showUserProfile}
-			onclick={toggleUserProfile}
-			triggerBase="hidden"
-			contentBase="card shadow-xl max-w-screen-sm w-full relative"
-			backdropClasses="backdrop-blur-sm"
-		>
-			{#snippet content()}
-				<UserProfile />
-				<button type="button" class="btn absolute top-0 right-0" onclick={toggleUserProfile}>
-					<X />
-				</button>
-			{/snippet}
-		</Modal>
-	{/if}
 {:else}
 	<a href="/sign-in" class="btn preset-filled-primary-500"> Sign in </a>
 {/if}
