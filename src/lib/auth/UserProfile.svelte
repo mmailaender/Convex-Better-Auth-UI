@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { ActionResult } from '@sveltejs/kit';
-	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-
+	import type { ActionResult } from '@sveltejs/kit';
 	import type { User } from '$lib/db/schema/types/custom';
 	import type { Document } from '$lib/db/schema/types/system';
 
-	import { cancelEmailVerification, addEmail, deleteEmail, setPrimaryEmail } from './user';
-	import socialIcons, { type SocialIcons } from './social/icons';
+	// Skeleton UI
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
+
+	// Custom imports
+	import socialIcons, { type SocialIcons } from './social/icons';
+	import { cancelEmailVerification, addEmail, deleteEmail, setPrimaryEmail } from './user';
 
 	let getSocialIcon = ({ name }: { name: keyof SocialIcons }) => socialIcons[name];
 
+	// Pull the user from SSR data:
 	let user: Document<User> | null = $state(page.data.user ? JSON.parse(page.data.user) : null);
-	// let user: Document<User> | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
 
 	// Local state
 	let isEditingUsername = $state(false);
@@ -22,7 +23,7 @@
 	let otp = $state('');
 
 	/**
-	 * Form: handle user profile info (first/last name, avatar, etc.)
+	 * Handle updating basic user info (first name, last name, etc.).
 	 */
 	function handleUserDataSubmit() {
 		return async ({ result }: { result: ActionResult }) => {
@@ -33,9 +34,10 @@
 	}
 
 	/**
-	 * Submit form to add a new email (and start its verification).
+	 * Submit form to start verification of a newly added email.
+	 * On success, we store the verification email in `user.emailVerification`.
 	 */
-	async function handleVerifyEmail() {
+	function handleVerifyEmail() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type === 'success') {
 				user!.emailVerification = result.data?.newEmail;
@@ -44,13 +46,19 @@
 		};
 	}
 
+	/**
+	 * Once the user gets an OTP via email, we confirm it here.
+	 */
 	async function handleVerifyOtp() {
-		console.log('accessToken: ', page.data.accessToken);
-		const updatedUser = await addEmail(page.data.accessToken, user.emailVerification, otp);
+		try {
+			const updatedUser = await addEmail(page.data.accessToken, user.emailVerification, otp);
 
-		// Update local user data with the response
-		user.emails = updatedUser.emails;
-		user.emailVerification = updatedUser.emailVerification;
+			// Update local user data
+			user.emails = updatedUser.emails;
+			user.emailVerification = updatedUser.emailVerification;
+		} catch (error) {
+			console.error('Error verifying OTP:', error);
+		}
 	}
 
 	/**
@@ -66,12 +74,11 @@
 	}
 
 	/**
-	 * Delete an existing email (cannot delete if it's primary).
+	 * Delete an existing email (not allowed if it's already the primary).
 	 */
 	async function handleDeleteEmail(email: string) {
 		try {
 			const { emails } = await deleteEmail(page.data.accessToken, email);
-
 			user.emails = emails;
 		} catch (error) {
 			console.error('Error deleting email:', error);
@@ -79,30 +86,40 @@
 	}
 
 	/**
-	 * Resend verification for an active verification email.
+	 * Resend the verification code to the email currently in user.emailVerification.
+	 * Sends form-encoded data including email and userId.
 	 */
 	async function handleResendVerification(email: string) {
 		try {
-			await fetch('/user-profile?/verifyEmail', {
+			const formData = new URLSearchParams();
+			formData.append('email', email);
+			formData.append('userId', user.id);
+
+			const response = await fetch('/user-profile?/verifyEmail', {
 				method: 'POST',
-				body: JSON.stringify({ email }),
+				body: formData.toString(),
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/x-www-form-urlencoded'
 				}
 			});
-			// Possibly show a notification or toast on success
+
+			if (!response.ok) {
+				throw new Error(`Error resending verification: ${response.statusText}`);
+			}
+
+			// TODO: Optionally, show a success notification here
+			console.log('Verification email resent successfully.');
 		} catch (error) {
 			console.error('Error resending verification:', error);
+			// Optionally, show an error notification here
 		}
 	}
 
 	/**
-	 * Cancel verification process for an active verification email.
-	 * You’d need to define how to handle “cancel” on the back end.
+	 * Cancel the verification process for the active unverified email.
 	 */
 	async function handleCancelVerification(email: string) {
 		try {
-			console.log('AccessToken: ', page.data.accessToken);
 			await cancelEmailVerification(page.data.accessToken, email);
 			user.emailVerification = undefined;
 		} catch (error) {
@@ -136,11 +153,13 @@
 			<div class="mb-6 flex items-center gap-4">
 				<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-16" />
 				{#if !isEditingUsername}
+					<!-- Display Names -->
 					<button onclick={() => (isEditingUsername = true)}>
 						<span class="font-medium text-surface-800-200">{user.firstName}</span>
 						<span class="font-medium text-surface-800-200">{user.lastName}</span>
 					</button>
 				{:else}
+					<!-- Edit Names Form -->
 					<form
 						action="/user-profile?/profileData"
 						method="POST"
@@ -170,24 +189,24 @@
 			<div class="mb-6">
 				<h3 class="mb-4 font-bold text-surface-800-200">Email addresses</h3>
 
-				<!-- List of existing emails -->
+				<!-- List of existing emails: primary first, then others -->
 				<ul class="mb-4 flex flex-col gap-2">
 					{#each [user.primaryEmail, ...user.emails.filter((email) => email !== user.primaryEmail)] as email}
 						<li class="flex items-center justify-between">
 							<div class="text-surface-800-200">
 								{email}
 								{#if email === user.primaryEmail}
-									<span class="ml-2 text-sm font-semibold text-primary-500"> Primary </span>
+									<span class="ml-2 text-sm font-semibold text-primary-500">Primary</span>
 								{:else}
 									<div class="flex gap-2">
 										<button
-											class="variant-ghost btn text-sm"
+											class="btn text-sm hover:preset-tonal-surface"
 											onclick={() => handleMakePrimary(email)}
 										>
 											Make Primary
 										</button>
 										<button
-											class="variant-outlined btn text-sm"
+											class="btn text-sm hover:preset-tonal-surface"
 											onclick={() => handleDeleteEmail(email)}
 										>
 											Delete
@@ -199,7 +218,7 @@
 					{/each}
 				</ul>
 
-				<!-- Form to add a new email -->
+				<!-- If there's no ongoing verification, let user add a new email -->
 				{#if !user.emailVerification}
 					{#if !isAddingNewEmail}
 						<button class="btn" onclick={() => (isAddingNewEmail = true)}> Add a new email </button>
@@ -218,7 +237,7 @@
 								required
 							/>
 							<input type="text" name="userId" value={user.id} required hidden />
-							<button type="submit" class="btn"> Add </button>
+							<button type="submit" class="btn">Add</button>
 							<button type="button" class="btn" onclick={() => (isAddingNewEmail = false)}>
 								Cancel
 							</button>
@@ -227,7 +246,7 @@
 				{/if}
 			</div>
 
-			<!-- Emails in active verification process -->
+			<!-- If there's an email waiting to be verified, show the verification flow -->
 			{#if user.emailVerification}
 				<div class="mb-6">
 					<div>
@@ -237,9 +256,8 @@
 					<div class="w-full max-w-sm rounded-lg border p-6 shadow-md border-surface-300-700">
 						<h2 class="text-lg font-semibold text-surface-900-100">Verify email address</h2>
 						<p class="mt-1 text-sm text-surface-600-400">
-							Enter the verification code sent to <span class="font-medium text-surface-900-100"
-								>{user.emailVerification}</span
-							>
+							Enter the verification code sent to
+							<span class="font-medium text-surface-900-100">{user.emailVerification}</span>
 						</p>
 
 						<div class="mt-4 flex justify-between space-x-1">
@@ -262,8 +280,9 @@
 							>
 								Cancel
 							</button>
-							<button class="btn preset-filled-primary-500" onclick={handleVerifyOtp}>Verify</button
-							>
+							<button class="btn preset-filled-primary-500" onclick={handleVerifyOtp}>
+								Verify
+							</button>
 						</div>
 					</div>
 				</div>
@@ -284,7 +303,7 @@
 						{/if}
 					{/each}
 				</ul>
-				<button class="mt-2 text-primary-500 hover:underline">+ Connect account</button>
+				<button class="mt-2 text-primary-500 hover:underline"> + Connect account </button>
 			</div>
 		</div>
 	</div>
