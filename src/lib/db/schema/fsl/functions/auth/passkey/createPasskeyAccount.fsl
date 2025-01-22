@@ -1,18 +1,44 @@
+/**
+ * Creates a passkey account for a user. If the user doesn't exist, they are created along with an account.
+ * If the user exists and is authenticated, a new account is added for them.
+ *
+ * @role server
+ * @function createPasskeyAccount
+ * @param {Object} credential - The credential object containing passkey details.
+ * @param {String} credential.id - Unique identifier for the passkey.
+ * @param {String} credential.userId - User ID associated with the passkey.
+ * @param {Long} credential.algorithmId - Algorithm identifier for the passkey.
+ * @param {String} credential.publicKey - Public key of the passkey.
+ * @param {String} credential.otp - One-time password for verification.
+ * @param {Object} userData - The user's personal details.
+ * @param {String} userData.firstName - First name of the user.
+ * @param {String} userData.lastName - Last name of the user.
+ * @param {String} userData.email - Primary email address of the user.
+ * @param {String|null} [userData.avatar] - URL of the user's avatar image, optional.
+ * @returns {Account} - The created or updated account.
+ */
 @role(server)
 function createPasskeyAccount(credential: {id: String, userId: String, algorithmId: Long, publicKey: String, otp: String}, userData: {firstName: String, lastName: String, email: String, avatar: String | Null}): Account {
+  // Check if a user with the provided email already exists
   let user = User.firstWhere(.emails!.includes(userData.email))
 
-  if(user == null) {
-    let verification = Verification.all().firstWhere(.email == userData.email && .otp == credential.otp)
-    if(verification == null) {
+  if (user == null) {
+    // Validate OTP for new user creation
+    let verification = Verification.all().firstWhere(
+      .email == userData.email && .otp == credential.otp
+    )
+
+    if (verification == null) {
       abort({
         code: "NO_VALID_VERIFICATION",
         message: "Please restart the verification process"
       });
     }
-    
+
+    // Create a new user and associated account
     let userId = newId()
 
+    // Create a new account linked to the passkey
     let newAccount = Account.create({
       user: User.byId(userId),
       passkey: {
@@ -21,31 +47,31 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
         id: credential.id,
       }
     })
-    
+
+    // Create a new user document
     let newUser = User.create({
-        id: ID(credential.userId),
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        avatar: userData.avatar,
-        primaryEmail: userData.email,
-        emails: [userData.email],
-        accounts: [newAccount]
-      })
-    
-    newAccount.update({
-      user: newUser
-    })
-    
-    verification!.delete()
-    
-    newAccount
+      id: ID(credential.userId),
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      avatar: userData.avatar,
+      primaryEmail: userData.email,
+      emails: [userData.email],
+      accounts: [newAccount]
+    });
 
-    // If an user with this email is already existing, the user needs to be signed in to add a new account.
-  } else if (user == Query.identity()){
-    
-    let account = Account.firstWhere(.user == user && .passkey != null)
+    // Link the new account to the new user
+    newAccount.update({ user: newUser });
 
-    let account = if(account == null) {
+    // Remove the verification document
+    verification!.delete();
+
+    newAccount;
+  } else if (user == Query.identity()) {
+    // Check for an existing account with a passkey for the user
+    let account = Account.firstWhere(.user == user && .passkey != null);
+
+    let account = if (account == null) {
+      // Create a new account for the user
       let account = Account.create({
         user: user!,
         passkey: {
@@ -54,28 +80,25 @@ function createPasskeyAccount(credential: {id: String, userId: String, algorithm
           id: credential.id,
         }
       })
-      
+
+      // Update user's accounts array with the new account
       let userAccounts = if(user!.accounts != null) {
         user!.accounts!.append(account)
       } else {
         [account]
       }
-    
-      user!.update({
-        accounts: userAccounts 
-      })
 
+      user!.update({ accounts: userAccounts })
       account
     } else { 
       account
     }
 
     account!
-  }
-else {
+  } else {
     abort({
       code: "USER_ALREADY_EXISTS",
-      message: "User already exists. Sign in first to add another Account."
-    });
+      message: "User already exists. Sign in first to add another account."
+    })
   }
 }
