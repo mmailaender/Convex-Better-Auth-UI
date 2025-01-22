@@ -10,5 +10,14 @@ export type SocialIcons = {
 	Github: typeof Github;
 };
 
-export { Apple, Facebook, Google, Github };
+const socialIcons: SocialIcons = {
+	Apple,
+	Facebook,
+	Google,
+	Github,
+};
+
+const getSocialIcon = (name: keyof SocialIcons) => socialIcons[name];
+
+export { Apple, Facebook, Google, Github, getSocialIcon };
 export default { Apple, Facebook, Google, Github };

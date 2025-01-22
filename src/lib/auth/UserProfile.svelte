@@ -9,10 +9,10 @@
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 
 	// Custom imports
-	import socialIcons, { type SocialIcons } from './social/icons';
+	import { getSocialIcon } from './social/icons';
 	import { cancelEmailVerification, addEmail, deleteEmail, setPrimaryEmail } from './user';
 
-	let getSocialIcon = ({ name }: { name: keyof SocialIcons }) => socialIcons[name];
+
 
 	// Pull the user from SSR data:
 	let user: Document<User> | null = $state(page.data.user ? JSON.parse(page.data.user) : null);
@@ -294,9 +294,12 @@
 				<ul>
 					{#each user.accounts as account}
 						{#if account.socialProvider}
+							{@const SocialIcon = getSocialIcon(account.socialProvider.name)}
 							<li class="mb-2 flex items-center justify-between">
 								<span class="flex items-center text-surface-800-200">
-									{getSocialIcon(account.socialProvider.name)}
+									<SocialIcon
+										class="size-5 fill-surface-950-50 mr-2"
+									/>
 									{account.socialProvider.name} • {account.socialProvider.email}
 								</span>
 							</li>
