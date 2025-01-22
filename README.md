@@ -1,3 +1,17 @@
+1. Add Social Provider
+  2. Add for every social provider you want to use the environment variables `<socialprovider>_CLIENT_ID` and `<socialprovider>_CLIENT_SECRET`
+  3. uncomment the social provider you want in `src/lib/auth/social/oauth.ts`
+2. Emails
+  1. If you want to verify emails if they are temporary/invalid mails go to `src/routes/api/auth/webauthn/verify-email/+server.ts` and adjust the emailverifier.reoon to the one that you want to use. If you're happy with reoon, simply add to your environment variables the `REOON_EMAIL_VERIFIER_TOKEN` variables.
+  2. We're using for sending emails `resend`. If you want to keep it, simply add your `RESEND_API_KEY` as environment variable. If you prefer another service, go to `src/lib/emails/index.ts` and change the `send` function to your email provider.
+  3. Update your company image (Used e.g. for sending emails)
+3. Add CUSTOM_DOMAINS as environment variables. That is on production your custom urls e.g. in our case etesie.dev. on .env.local it will be your localhost server with port - probably `localhost:5173,127.0.0.1:5173`
+4. Create in your fauna dashboard for your database the key `FAUNA_SIGNIN_KEY`with the role `role_signIn` and add it the value to your environment variables
+5. Changing/storie avatars: Add cloudflare key 
+
+
+
+
 ## Upgrade localhost to https
 
 1. installing a local certificate authority with mkcert on my WSL | mkcert -install
