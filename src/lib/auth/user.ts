@@ -7,8 +7,9 @@ import {
 	invalidateUserSessions
 } from './session';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { User, User_FaunaUpdate } from '$lib/db/schema/types/custom';
+import type { Account, User, User_FaunaUpdate } from '$lib/db/schema/types/custom';
 import type { Document, Document_Update } from '$lib/db/schema/types/system';
+import type { WebAuthnUserCredentialEncoded } from './passkeys/types';
 
 /**
  * Retrieves the current user based on the provided access token.
@@ -154,6 +155,16 @@ export async function getUserAndAccounts(accessToken: string): Promise<Document<
 			accounts
 		  }`
 	);
+	return response.data;
+}
+
+export async function createPasskeyAccount(accessToken: string, credential: WebAuthnUserCredentialEncoded): Promise<Account> {
+	const response = await uClient(accessToken).query<Account>(fql`createPasskeyAccount(${credential}, null)`);
+	return response.data;
+}
+
+export async function deletePasskeyAccount(accessToken: string, accountId: string): Promise<boolean> {
+	const response = await uClient(accessToken).query<boolean>(fql`deletePasskeyAccount(${accountId})`);
 	return response.data;
 }
 

@@ -1,0 +1,4 @@
+@role(server)
+function deletePasskeyAccount(accountId: String): NullAccount {
+    Account.byId(ID(accountId))?.delete()
+}

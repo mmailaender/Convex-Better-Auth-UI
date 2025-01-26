@@ -1,8 +1,12 @@
-import { getUserAndAccounts, addEmail, updateUser } from '$lib/auth/user';
+import { validatePasskeyData } from '$lib/auth/passkeys/server/validatePasskey';
+import type { WebAuthnUserCredentialEncoded } from '$lib/auth/passkeys/types';
+import { getUserAndAccounts, addEmail, updateUser, createPasskeyAccount } from '$lib/auth/user';
 import { createEmailVerification } from '$lib/auth/user.server';
+import { encodeBase64 } from '@oslojs/encoding';
 import type { Actions } from './$types';
 
 import type { PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
 
 export const load = (async ({ cookies }) => {
 	const accessToken = cookies.get('access_token');
@@ -34,7 +38,7 @@ export const actions = {
 			(avatar !== undefined && typeof avatar !== 'string')
 		) {
 			console.error('Invalid fields: must be strings or undefined');
-			return new Response('Invalid fields: must be strings or undefined', { status: 400 });
+			return { message: 'Invalid fields: must be strings or undefined' };
 		}
 
 		const updateData = {
@@ -45,10 +49,10 @@ export const actions = {
 
 		try {
 			await updateUser(accessToken, updateData);
-			return { success: true, message: 'Profile updated successfully' };
+			return { message: 'Profile updated successfully' };
 		} catch (error) {
 			console.error('Error updating user:', error);
-			return { success: false, message: 'Failed to update profile' };
+			return { message: 'Failed to update profile' };
 		}
 	},
 
@@ -57,7 +61,7 @@ export const actions = {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
 			console.warn('No access token found');
-			return { success: false, message: 'Please reload the page' };
+			return { message: 'Please reload the page' };
 		}
 
 		const formData = await request.formData();
@@ -65,39 +69,96 @@ export const actions = {
 		const userId = formData.get('userId');
 		if (typeof email !== 'string' || typeof userId !== 'string') {
 			console.error('Invalid or missing email in formData');
-			return new Response('Invalid or missing email', { status: 400 });
+			return fail(400, { message: 'Invalid or missing email' });
 		}
 
 		try {
 			console.log(`Attempting to create email verification for: ${email}`);
 			await createEmailVerification(accessToken, email, fetch, userId);
 			console.log('Email verification created successfully');
-			return { success: true, message: 'Email updated successfully', newEmail: email };
+			return { message: 'Email updated successfully', newEmail: email };
 		} catch (error) {
 			console.error('Error updating user:', error);
-			return { success: false, message: 'Failed to update email' };
+			return { message: 'Failed to update email' };
 		}
 	},
 
 	addEmail: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return { success: false, message: 'Please reload the page' };
+			return { message: 'Please reload the page' };
 		}
 
 		const formData = await request.formData();
 		const email = formData.get('email');
 		const verificationOTP = formData.get('verificationOTP');
 		if (typeof email !== 'string' || typeof verificationOTP !== 'string') {
-			return new Response('Invalid or missing email', { status: 400 });
+			return fail(400, { message: 'Invalid or missing email' });
 		}
 
 		try {
 			await addEmail(accessToken, email, verificationOTP);
-			return { success: true, message: 'Email updated successfully' };
+			return { message: 'Email updated successfully' };
 		} catch (error) {
 			console.error('Error updating user:', error);
-			return { success: false, message: 'Failed to update email' };
+			return { message: 'Failed to update email' };
+		}
+	},
+
+	createPasskeyAccount: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		if (!accessToken) {
+			return fail(400, { message: 'Please reload the page' });
+		}
+
+		const formData = await request.formData();
+		const userId = formData.get('userId');
+		const encodedAttestationObject = formData.get('encodedAttestationObject');
+		const encodedClientDataJSON = formData.get('encodedClientDataJSON');
+
+		if (
+			typeof userId !== 'string' ||
+			typeof encodedAttestationObject !== 'string' ||
+			typeof encodedClientDataJSON !== 'string'
+		) {
+			console.error('Invalid or missing fields');
+			return fail(400, { message: 'Invalid or missing fields' });
+		}
+
+		try {
+			console.log(
+				`Attempting to create passkey account for user: ${userId} with data:`,
+				{
+					encodedAttestationObject,
+					encodedClientDataJSON
+				}
+			);
+
+			const credential = await validatePasskeyData({
+				userId,
+				encodedAttestationObject,
+				encodedClientDataJSON
+			});
+
+			const encodedCredential: WebAuthnUserCredentialEncoded = {
+				id: encodeBase64(credential.id),
+				userId,
+				algorithmId: credential.algorithmId,
+				publicKey: encodeBase64(credential.publicKey)
+			};
+
+			console.log(`Attempting to create passkey account with credential:`, encodedCredential);
+
+			const response = await createPasskeyAccount(accessToken, encodedCredential);
+
+			console.log('Passkey account created successfully');
+
+			const account = JSON.stringify(response);
+
+			return { message: 'Passkey account created successfully', account };
+		} catch (error) {
+			console.error('Error creating passkey account:', error);
+			return fail(400, { message: 'Failed to create passkey account' });
 		}
 	}
 } satisfies Actions;

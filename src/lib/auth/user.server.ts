@@ -36,6 +36,24 @@ export async function signUpWithSocialProvider(
 }
 
 /**
+ * Signs in a user using a social provider.
+ *
+ * @param {SocialProvider} providerName - The social provider name (e.g., GitHub, Google).
+ * @param {string} providerUserId - The user's provider account ID.
+ * @returns {Promise<Tokens>} The authentication tokens for the user.
+ */
+export async function signInWithSocialProvider(
+	providerName: SocialProvider,
+	providerUserId: string
+): Promise<Tokens> {
+	const response = await sClient.query<Tokens>(
+		fql`signInWithSocialProvider(${providerName}, ${providerUserId})`
+	);
+
+	return response.data;
+}
+
+/**
  * Signs up a user using a WebAuthn passkey.
  *
  * @param {WebAuthnUserCredential} credential - The user's WebAuthn credential.
@@ -57,24 +75,6 @@ export async function signUpWithPasskey(
 }
 
 /**
- * Signs in a user using a social provider.
- *
- * @param {SocialProvider} providerName - The social provider name (e.g., GitHub, Google).
- * @param {string} providerUserId - The user's provider account ID.
- * @returns {Promise<Tokens>} The authentication tokens for the user.
- */
-export async function signInWithSocialProvider(
-	providerName: SocialProvider,
-	providerUserId: string
-): Promise<Tokens> {
-	const response = await sClient.query<Tokens>(
-		fql`signInWithSocialProvider(${providerName}, ${providerUserId})`
-	);
-
-	return response.data;
-}
-
-/**
  * Signs in a user using a WebAuthn passkey.
  *
  * @param {string} passkeyId - The user's passkey ID.
@@ -84,6 +84,7 @@ export async function signInWithPasskey(passkeyId: string): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(fql`signInWithPasskey(${passkeyId})`);
 	return response.data;
 }
+
 
 /**
  * Verifies if a user exists based on their email address.
@@ -124,7 +125,7 @@ export async function createVerification(email: string, userId?: string): Promis
 	const res = await sClient.query<string>(
 		fql`createVerification({email: ${email}, userId: ${userId ? userId : null}})`
 	);
-	return res.data
+	return res.data;
 }
 
 /**

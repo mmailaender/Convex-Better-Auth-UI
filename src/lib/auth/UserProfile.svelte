@@ -9,10 +9,12 @@
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 
 	// Custom imports
-	import { getSocialIcon } from './social/icons';
-	import { cancelEmailVerification, addEmail, deleteEmail, setPrimaryEmail } from './user';
-
-
+	import { getSocialIcon, Github } from './social/icons';
+	import { cancelEmailVerification, addEmail, deleteEmail, setPrimaryEmail, deletePasskeyAccount } from './user';
+	import { createCredentials } from './passkeys/client';
+	import { encodeBase64 } from '@oslojs/encoding';
+	import { bigEndian } from '@oslojs/binary';
+	import { Fingerprint } from 'lucide-svelte';
 
 	// Pull the user from SSR data:
 	let user: Document<User> | null = $state(page.data.user ? JSON.parse(page.data.user) : null);
@@ -21,6 +23,8 @@
 	let isEditingUsername = $state(false);
 	let isAddingNewEmail = $state(false);
 	let otp = $state('');
+
+	let showConnectOptions = $state(false);
 
 	/**
 	 * Handle updating basic user info (first name, last name, etc.).
@@ -124,6 +128,56 @@
 			user.emailVerification = undefined;
 		} catch (error) {
 			console.error('Error canceling verification:', error);
+		}
+	}
+
+	async function handleCreatePasskeyAccount() {
+		try {
+			const credentialUserId = new Uint8Array(8);
+			bigEndian.putUint64(credentialUserId, BigInt(user.id), 0);
+
+			const credentials = await createCredentials(
+				user.firstName,
+				user.lastName,
+				user.primaryEmail,
+				credentialUserId
+			);
+
+			const formData = new URLSearchParams({
+				userId: user.id,
+				encodedAttestationObject: encodeBase64(new Uint8Array(credentials.attestationObject)),
+				encodedClientDataJSON: encodeBase64(new Uint8Array(credentials.clientDataJSON))
+			});
+
+			const response = await fetch('/user-profile?/createPasskeyAccount', {
+				method: 'POST',
+				body: formData.toString(),
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			});
+			const responseJson = await response.json();
+
+			if (responseJson.status !== 200) {
+				throw new Error(`Error creating passkey account: ${response.statusText}`);
+			}
+
+			const account = JSON.parse(JSON.parse(responseJson.data).at(-1));
+
+			user.accounts.push(account);
+			showConnectOptions = false;
+			console.log('Passkey account created successfully.');
+		} catch (error) {
+			console.error('Error creating account:', error);
+		}
+	}
+
+	async function handleDeletePasskeyAccount(accountId: string) {
+		try {
+			await deletePasskeyAccount(page.data.accessToken, accountId);
+			user.accounts = user.accounts.filter((account) => account.id !== accountId);
+		} catch (error) {
+			console.error('Error deleting account:', error);
 		}
 	}
 </script>
@@ -297,16 +351,57 @@
 							{@const SocialIcon = getSocialIcon(account.socialProvider.name)}
 							<li class="mb-2 flex items-center justify-between">
 								<span class="flex items-center text-surface-800-200">
-									<SocialIcon
-										class="size-5 fill-surface-950-50 mr-2"
-									/>
+									<SocialIcon class="mr-2 size-5 fill-surface-950-50" />
 									{account.socialProvider.name} • {account.socialProvider.email}
 								</span>
 							</li>
 						{/if}
+						{#if account.passkey}
+							<li class="mb-2 flex items-center justify-between">
+								<span class="flex items-center text-surface-800-200">
+									<Fingerprint class="mr-2 size-5" />
+									Passkey
+								</span>
+								<button
+									class="btn text-sm hover:preset-tonal-surface"
+									onclick={() => handleDeletePasskeyAccount(account.id)}
+								>
+									Delete
+								</button>
+							</li>
+						{/if}
 					{/each}
 				</ul>
-				<button class="mt-2 text-primary-500 hover:underline"> + Connect account </button>
+
+				{#if !(user.accounts.some((acc) => acc.passkey) && user.accounts.some((acc) => acc.socialProvider?.name === 'Github'))}
+					<button
+						class="mt-2 text-primary-500 hover:underline"
+						onclick={() => (showConnectOptions = !showConnectOptions)}
+					>
+						+ Connect account
+					</button>
+				{/if}
+
+				{#if showConnectOptions}
+					<div class="card mt-2 max-w-72 border border-surface-300-700">
+						<div class="flex flex-col gap-2">
+							{#if !user.accounts.some((acc) => acc.passkey)}
+								<button class="btn hover:preset-tonal-surface" onclick={handleCreatePasskeyAccount}>
+									Passkey
+								</button>
+							{/if}
+							{#if !user.accounts.some((acc) => acc.socialProvider?.name === 'Github')}
+								<a
+									class="btn flex items-center gap-2 hover:preset-tonal-surface"
+									href="/api/auth/oauth/github"
+								>
+									<Github class="size-5 fill-surface-950-50" />
+									GitHub
+								</a>
+							{/if}
+						</div>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

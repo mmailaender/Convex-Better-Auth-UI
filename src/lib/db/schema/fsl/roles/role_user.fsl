@@ -47,6 +47,15 @@ role role_user {
     }
   }
 
+  privileges createPasskeyAccount {
+    call
+  }
+  privileges deletePasskeyAccount {
+    call {
+      predicate (accountId => Account.byId(ID(accountId))?.user == Query.identity())
+    }
+  }
+
   membership User {
     predicate ( (doc) => isCalledWithAccessToken() )
   }
