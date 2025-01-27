@@ -9,15 +9,13 @@ import type { PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 
 export const load = (async ({ cookies }) => {
-	const accessToken = cookies.get('access_token');
-	if (!accessToken) {
-		return { user: null };
-	}
-	const user = await getUserAndAccounts(accessToken);
-	const stringifiedUser = user ? JSON.stringify(user) : null;
-	console.log('user: ', stringifiedUser);
-	console.log('accessToken load function: ', accessToken);
-	return { user: stringifiedUser, accessToken };
+    const accessToken = cookies.get('access_token')!;
+
+    const user = await getUserAndAccounts(accessToken);
+    const stringifiedUser = JSON.stringify(user);
+    
+    console.log('user: ', stringifiedUser);
+    return { user: stringifiedUser, accessToken };
 }) satisfies PageServerLoad;
 
 export const actions = {

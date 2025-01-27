@@ -32,6 +32,10 @@
 		openState = false;
 		showUserProfile = !showUserProfile;
 	}
+
+	function handleSignOut() {
+		openState = false;
+	}
 </script>
 
 {#if user}
@@ -60,7 +64,7 @@
 									class="btn preset-outlined-surface-500"
 									onclick={toggleUserProfile}>Manage account</a
 								>
-								<SignOutButton class="btn preset-outlined-surface-500" />
+								<SignOutButton class="btn preset-outlined-surface-500" onSignOut={handleSignOut} />
 							</div>
 						</div>
 					</div>

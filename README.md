@@ -8,8 +8,38 @@
 3. Add CUSTOM_DOMAINS as environment variables. That is on production your custom urls e.g. in our case etesie.dev. on .env.local it will be your localhost server with port - probably `localhost:5173,127.0.0.1:5173`
 4. Create in your fauna dashboard for your database the key `FAUNA_SIGNIN_KEY`with the role `role_signIn` and add it the value to your environment variables
 5. Changing/storie avatars: Add cloudflare key 
+6. Add protected routes
 
 
+## Protected routes
+
+Named path parameters wrapped with a square bracket (e.g., [id], [slug], [any]). 
+Wildcard token, *, which matches the remainder of the path, or everything in the middle or at the beginning.
+
+| /orgs/acmecorp       |  ✅    | acmecorp         |
+Example 1 
+`/orgs/[slug]` 
+| URL |	Matches |	[slug] value | 
+| ---- | ---------- | ------------ |
+| /orgs/acmecorp |	✅ |	acmecorp | 
+| /orgs | ❌ |	n/a | 
+| /orgs/acmecorp/settings | ❌ | n/a |
+
+Example 2
+
+`/app/[any]/orgs/[id]`
+| URL | Matches | [id] value | 
+| ---- | ---------- | ------------ |
+| /app/petstore/orgs/org_123 | ✅ | org_123 |
+| /app/dogstore/v2/orgs/org_123 | ❌ | n/a |
+
+Example 3
+
+`/personal-account/*` 
+| URL |	Matches |
+| ---- | ----------- | 
+| /personal-account/settings |	✅ |
+| /personal-account |	❌ |
 
 
 ## Upgrade localhost to https
