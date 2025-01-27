@@ -57,3 +57,18 @@ Example 3
 ## Init your project
 
 `pnpm init:repo`
+
+## Virtual authenticator
+
+To use the Virtual Authenticator as part of the Chrome DevTools for testing passkeys in your development environment, follow these steps:
+
+1. Open Chrome and navigate to the DevTools by pressing `Ctrl+Shift+I` (or `Cmd+Option+I` on macOS).
+2. Click on the "WebAuthn" tab. If it's not visible, click on the ">>" icon to find it.
+3. Click on "Enable virtual authenticator environment" to create a new authenticator. 
+  - Protocol: CTAP2, 
+  - Transport: usb, 
+  - Supports resident keys: ✅,
+  - Supports user verification: ✅,
+  - Support large blox: ❌
+5. Once the virtual authenticator is configured, you can use it to register or sign-in via passkeys on the development environment
+
