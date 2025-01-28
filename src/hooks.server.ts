@@ -66,11 +66,6 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			if (refreshToken === null) {
 				console.info('No refresh token present\n');
 				event.locals.user = null;
-				// const response = await resolve(event);
-				// response.headers.append(
-				// 	'Set-Cookie',
-				// 	'access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=lax'
-				// );
 
 				deleteAccessTokenCookie(event);
 
@@ -91,31 +86,11 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				const user = await getUser(access.secret!);
 				event.locals.user = user;
 
-				// const response = await resolve(event);
-				// response.headers.append(
-				// 	'Set-Cookie',
-				// 	`access_token=${access.secret!}; Path=/; Expires=${access.ttl!.toDate().toUTCString()}; HttpOnly; Secure; SameSite=lax`
-				// );
-				// response.headers.append(
-				// 	'Set-Cookie',
-				// 	`refresh_token=${refresh.secret!}; Path=/; Expires=${refresh.ttl!.toDate().toUTCString()}; HttpOnly; Secure; SameSite=lax`
-				// );
-				// return response;
-
 				setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 				setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
 				return resolve(event);
 			} catch (error) {
 				console.info('Failed to refresh access token: ', error);
-				// const response = await resolve(event);
-				// response.headers.append(
-				// 	'Set-Cookie',
-				// 	'refresh_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=lax'
-				// );
-				// response.headers.append(
-				// 	'Set-Cookie',
-				// 	'access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; SameSite=lax'
-				// );
 
 				deleteRefreshTokenCookie(event);
 				deleteAccessTokenCookie(event);
