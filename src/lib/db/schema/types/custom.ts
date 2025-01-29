@@ -1,30 +1,31 @@
-import type { TimeStub, DateStub, DocumentReference } from 'fauna';
-import type { Document, Document_Create, Document_Replace, Document_Update } from './system';
+
+import { type TimeStub, type DateStub, type DocumentReference } from 'fauna';
+import type { Document, Document_Create, Document_Update, Document_Replace } from './system';
 
 type Account = {
   user: Document<User>;
-  socialProvider: { name: "Github" | "Google" | "Facebook"; userId: string; email: string } | null;
-  passkey: { publicKey: string; algorithmId: number; id: string } | null;
-  _socialProviderName: string | null;
-  _passkeyId: string | null;
+  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+  passkey?: { publicKey: string; algorithmId: number; id: string };
+  _socialProviderName?: string;
+  _passkeyId?: string;
 };
 
 type Account_Create = {
-  user: Document_Create<User_Create>;
-  socialProvider: { name: "Github" | "Google" | "Facebook"; userId: string; email: string } | null;
-  passkey: { publicKey: string; algorithmId: number; id: string } | null;
+  user: DocumentReference;
+  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+  passkey?: { publicKey: string; algorithmId: number; id: string };
 };
 
 type Account_Replace = {
-  user: Document_Replace<User_Replace>;
-  socialProvider: { name: "Github" | "Google" | "Facebook"; userId: string; email: string } | null;
-  passkey: { publicKey: string; algorithmId: number; id: string } | null;
+  user: DocumentReference;
+  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+  passkey?: { publicKey: string; algorithmId: number; id: string };
 };
 
 type Account_Update = Partial<{
-  user: Document_Update<User_Update>;
-  socialProvider: { name: "Github" | "Google" | "Facebook"; userId: string; email: string } | null;
-  passkey: { publicKey: string; algorithmId: number; id: string } | null;
+  user: DocumentReference;
+  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
+  passkey?: { publicKey: string; algorithmId: number; id: string };
 }>;
 
 type User = {
@@ -32,9 +33,9 @@ type User = {
   lastName: string;
   primaryEmail: string;
   emails: Array<string>;
-  avatar: string | null;
+  avatar?: string;
   accounts: Array<Document<Account>>;
-  emailVerification: string | null;
+  emailVerification?: string;
 };
 
 type User_Create = {
@@ -42,8 +43,8 @@ type User_Create = {
   lastName: string;
   primaryEmail: string;
   emails: Array<string>;
-  avatar: string | null;
-  accounts: Array<Document_Create<Account_Create>>;
+  avatar?: string;
+  accounts: Array<DocumentReference>;
 };
 
 type User_Replace = {
@@ -51,8 +52,8 @@ type User_Replace = {
   lastName: string;
   primaryEmail: string;
   emails: Array<string>;
-  avatar: string | null;
-  accounts: Array<Document_Replace<Account_Replace>>;
+  avatar?: string;
+  accounts: Array<DocumentReference>;
 };
 
 type User_Update = Partial<{
@@ -60,32 +61,32 @@ type User_Update = Partial<{
   lastName: string;
   primaryEmail: string;
   emails: Array<string>;
-  avatar: string | null;
-  accounts: Array<Document_Update<Account_Update>>;
+  avatar?: string;
+  accounts: Array<DocumentReference>;
 }>;
 
 type Verification = {
   email: string;
   otp: string;
-  user: Document<User> | undefined;
+  user?: Document<User>;
 };
 
 type Verification_Create = {
   email: string;
   otp: string;
-  user: Document_Create<User_Create> | undefined;
+  user?: DocumentReference;
 };
 
 type Verification_Replace = {
   email: string;
   otp: string;
-  user: Document_Replace<User_Replace> | undefined;
+  user?: DocumentReference;
 };
 
 type Verification_Update = Partial<{
   email: string;
   otp: string;
-  user: Document_Update<User_Update> | undefined;
+  user?: DocumentReference;
 }>;
 
 interface UserCollectionsTypeMapping {
