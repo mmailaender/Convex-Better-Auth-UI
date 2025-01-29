@@ -1,4 +1,23 @@
 @role(server)
-function deletePasskeyAccount(accountId: String): NullAccount {
-    Account.byId(ID(accountId))?.delete()
+function deleteAccount(accountId: String): NullAccount {
+    let account = Account.byId(ID(accountId))
+
+    // If no account found for the provided accountId, return null
+    if(account == null) {
+        null
+    }
+
+    let numberOfUserAccounts = Account.all().where(.user == account!.user).count()
+    if(numberOfUserAccounts > 1) {
+        let user = account!.user
+        let newAccounts = user!.accounts.filter(a => a.id != accountId)
+        user!.update({accounts: newAccounts})
+        account!.delete()
+
+    } else {
+        abort({
+            code: "AT_LEAST_ONE_ACCOUNT_REQUIRED",
+            message: "Can't delete the account. The user needs to have at least one account to still be able to sign-in."
+        })
+    }
 }

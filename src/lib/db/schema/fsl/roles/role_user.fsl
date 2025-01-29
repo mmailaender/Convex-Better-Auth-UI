@@ -50,7 +50,7 @@ role role_user {
   privileges createPasskeyAccount {
     call
   }
-  privileges deletePasskeyAccount {
+  privileges deleteAccount {
     call {
       predicate (accountId => Account.byId(ID(accountId))?.user == Query.identity())
     }

@@ -9,13 +9,13 @@
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 
 	// Custom imports
-	import { getSocialIcon, Github } from './social/icons';
+	import { getAccountIcon, Github } from './social/icons';
 	import {
 		cancelEmailVerification,
 		addEmail,
 		deleteEmail,
 		setPrimaryEmail,
-		deletePasskeyAccount
+		deleteAccount
 	} from './user';
 	import { createCredentials } from './passkeys/client';
 	import { encodeBase64 } from '@oslojs/encoding';
@@ -61,7 +61,7 @@
 	 */
 	async function handleVerifyOtp() {
 		try {
-			const updatedUser = await addEmail(page.data.accessToken, user.emailVerification, otp);
+			const updatedUser = await addEmail(page.data.accessToken, user.emailVerification!, otp);
 
 			// Update local user data
 			user.emails = updatedUser.emails;
@@ -178,9 +178,9 @@
 		}
 	}
 
-	async function handleDeletePasskeyAccount(accountId: string) {
+	async function handleDeleteAccount(accountId: string) {
 		try {
-			await deletePasskeyAccount(page.data.accessToken, accountId);
+			await deleteAccount(page.data.accessToken, accountId);
 			user.accounts = user.accounts.filter((account) => account.id !== accountId);
 		} catch (error) {
 			console.error('Error deleting account:', error);
@@ -347,30 +347,30 @@
 		<div>
 			<h3 class="mb-4 font-bold text-surface-800-200">Connected accounts</h3>
 			<ul>
-				{#each user.accounts as account}
-					{#if account.socialProvider}
-						{@const SocialIcon = getSocialIcon(account.socialProvider.name)}
-						<li class="mb-2 flex items-center justify-between">
-							<span class="flex items-center text-surface-800-200">
-								<SocialIcon class="mr-2 size-5 fill-surface-950-50" />
+				{#each user.accounts as account, index}
+					{@const AccountIcon = getAccountIcon(
+						account.socialProvider ? account.socialProvider.name : 'Passkey'
+					)}
+					<li class="mb-2 flex items-center justify-between">
+						<span class="flex items-center text-surface-800-200">
+							<AccountIcon
+								class={['mr-2 size-5', account.socialProvider && 'fill-surface-950-50']}
+							/>
+							{#if account.socialProvider}
 								{account.socialProvider.name} • {account.socialProvider.email}
-							</span>
-						</li>
-					{/if}
-					{#if account.passkey}
-						<li class="mb-2 flex items-center justify-between">
-							<span class="flex items-center text-surface-800-200">
-								<Fingerprint class="mr-2 size-5" />
+							{:else}
 								Passkey
-							</span>
+							{/if}
+						</span>
+						{#if user.accounts.length > 1}
 							<button
 								class="btn text-sm hover:preset-tonal-surface"
-								onclick={() => handleDeletePasskeyAccount(account.id)}
+								onclick={() => handleDeleteAccount(account.id)}
 							>
 								Delete
 							</button>
-						</li>
-					{/if}
+						{/if}
+					</li>
 				{/each}
 			</ul>
 

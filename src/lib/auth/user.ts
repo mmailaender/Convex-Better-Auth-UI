@@ -163,8 +163,8 @@ export async function createPasskeyAccount(accessToken: string, credential: WebA
 	return response.data;
 }
 
-export async function deletePasskeyAccount(accessToken: string, accountId: string): Promise<boolean> {
-	const response = await uClient(accessToken).query<boolean>(fql`deletePasskeyAccount(${accountId})`);
+export async function deleteAccount(accessToken: string, accountId: string): Promise<boolean> {
+	const response = await uClient(accessToken).query<boolean>(fql`deleteAccount(${accountId})`);
 	return response.data;
 }
 
