@@ -196,7 +196,7 @@ export async function createEmailVerification(
 	try {
 		console.log(`Verifying email: ${email}`);
 		const res = await fetch(
-			`/api/auth/webauthn/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`,
+			`/api/auth/passkey/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`,
 			{
 				method: 'GET',
 				headers: { 'Content-Type': 'application/json' }

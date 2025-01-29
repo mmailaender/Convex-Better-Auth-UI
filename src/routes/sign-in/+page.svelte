@@ -38,7 +38,7 @@
 		event.preventDefault();
 		try {
 			const res = await fetch(
-				`/api/auth/webauthn/verify-email?email=${encodeURIComponent(email)}`,
+				`/api/auth/passkey/verify-email?email=${encodeURIComponent(email)}`,
 				{
 					method: 'GET',
 					headers: { 'Content-Type': 'application/json' }

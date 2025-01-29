@@ -24,7 +24,7 @@ function getFriendlyErrorMessage(error: any): string {
 }
 
 export async function createChallenge(): Promise<Uint8Array> {
-	const response = await fetch('/api/auth/webauthn/challenge', { method: 'POST' });
+	const response = await fetch('/api/auth/passkey/challenge', { method: 'POST' });
 	if (!response.ok) {
 		throw new Error('Failed to create challenge');
 	}
@@ -50,7 +50,7 @@ export async function signInWithPasskey() {
 			throw new Error('Unexpected error: invalid credential response.');
 		}
 
-		const response = await fetch('/api/auth/webauthn/passkey/sign-in', {
+		const response = await fetch('/api/auth/passkey/sign-in', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -136,7 +136,7 @@ export async function signUpWithPasskey(
 	const attestationObject = encodeBase64(new Uint8Array(response.attestationObject));
 	const clientDataJSON = encodeBase64(new Uint8Array(response.clientDataJSON));
 
-	const apiResponse = await fetch('/api/auth/webauthn/passkey/sign-up', {
+	const apiResponse = await fetch('/api/auth/passkey/sign-up', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
