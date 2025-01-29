@@ -20,9 +20,11 @@
 
 	onMount(() => {
 		const urlParams = new URLSearchParams(page.url.searchParams);
-		errorMessage = urlParams.get('error') || '';
-		if (errorMessage) {
-			errorMessage = decodeURIComponent(errorMessage);
+		const encodedErrorMessage = urlParams.get('error') || '';
+		if (encodedErrorMessage) {
+			errorMessage = decodeURIComponent(encodedErrorMessage);
+			urlParams.delete('error');
+			history.replaceState(null, '', '?' + urlParams.toString());
 		}
 	});
 

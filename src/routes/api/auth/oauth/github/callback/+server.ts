@@ -58,7 +58,13 @@ function splitFullName(fullName: string): { firstName: string; lastName: string 
 
 export async function GET(event: RequestEvent): Promise<Response> {
 	console.log('GitHub OAuth callback initiated');
-	const storedState = event.cookies.get('github_oauth_state') ?? null;
+	const storedState = event.cookies.get('oauth_state') ?? null;
+	const redirectUrl = event.cookies.get('oauth_redirect_url') || '/';
+
+	// Clear the OAuth-related cookies
+	event.cookies.delete('oauth_state', { path: '/' });
+    event.cookies.delete('oauth_redirect_url', { path: '/' });
+	
 	const code = event.url.searchParams.get('code');
 	const state = event.url.searchParams.get('state');
 
@@ -117,7 +123,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		return new Response(null, {
 			status: 302,
 			headers: {
-				Location: '/'
+				Location: redirectUrl
 			}
 		});
 	}
@@ -179,7 +185,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	return new Response(null, {
 		status: 302,
 		headers: {
-			Location: '/'
+			Location: redirectUrl
 		}
 	});
 }

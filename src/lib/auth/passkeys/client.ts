@@ -62,7 +62,9 @@ export async function signInWithPasskey() {
 		});
 
 		if (response.ok) {
-			goto('/');
+			const urlParams = new URLSearchParams(window.location.search);
+			const redirectUrl = urlParams.get('redirect_url') ?? '/';
+			goto(redirectUrl);
 		} else {
 			const errorText = await response.text();
 			throw new Error(errorText);
@@ -153,5 +155,7 @@ export async function signUpWithPasskey(
 		throw new Error(msg || 'Failed to sign up with passkey.');
 	}
 
-	goto('/');
+	const urlParams = new URLSearchParams(window.location.search);
+	const redirectUrl = urlParams.get('redirect_url') ?? '/';
+	goto(redirectUrl);
 }
