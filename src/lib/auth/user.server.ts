@@ -22,14 +22,11 @@ import type { SocialProvider, Tokens } from './user';
  * @returns {Promise<Tokens>} The authentication tokens for the user.
  */
 export async function signUpWithSocialProvider(
-	firstName: string,
-	lastName: string,
-	email: string,
-	providerUserId: string,
-	providerUserEmail: string
+	userData: { firstName: string; lastName: string; email: string; avatar?: string },
+	accountData: { providerName: SocialProvider; providerUserId: string; providerUserEmail: string }
 ): Promise<Tokens> {
 	const response = await sClient.query<Tokens>(
-		fql`signUpWithSocialProvider({ firstName: ${firstName}, lastName: ${lastName}, email: ${email}, providerUserId: ${providerUserId}, providerName: "Github", providerEmail: ${providerUserEmail} })`
+		fql`signUpWithSocialProvider( ${userData}, ${accountData} )` 
 	);
 
 	return response.data;

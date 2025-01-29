@@ -7,7 +7,7 @@ import {
 	invalidateUserSessions
 } from './session';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { Account, User, User_FaunaUpdate } from '$lib/db/schema/types/custom';
+import type { Account, User, User_Update, } from '$lib/db/schema/types/custom';
 import type { Document, Document_Update } from '$lib/db/schema/types/system';
 import type { WebAuthnUserCredentialEncoded } from './passkeys/types';
 
@@ -68,7 +68,7 @@ export async function signOutFromAllDevices(event: RequestEvent): Promise<boolea
 
 export async function updateUser(
 	accessToken: string,
-	user: Document_Update<User_FaunaUpdate>
+	user: Document_Update<User_Update>
 ): Promise<Document<User>> {
 	const response = await uClient(accessToken).query<Document<User>>(
 		fql`Query.identity()!.update({${user}})`
@@ -86,13 +86,13 @@ export async function addEmail(
 	try {
 		const response = await uClient(accessToken).query<Document<User>>(
 			fql`addEmail(${email}, ${verificationOTP})`
-		); 
-		if(!response.data) {
+		);
+		if (!response.data) {
 			throw new Error(response.summary);
 		}
 		return response.data;
 	} catch (err: unknown) {
-		console.log("addEmail() error: ", err);
+		console.log('addEmail() error: ', err);
 		if (err instanceof Error) {
 			throw new Error(err.message);
 		}
@@ -100,12 +100,9 @@ export async function addEmail(
 	}
 }
 
-
 export async function deleteEmail(accessToken: string, email: string): Promise<Document<User>> {
 	try {
-		const response = await uClient(accessToken).query<Document<User>>(
-			fql`deleteEmail(${email})`
-		);
+		const response = await uClient(accessToken).query<Document<User>>(fql`deleteEmail(${email})`);
 		return response.data;
 	} catch (err: unknown) {
 		if (err instanceof Error) {
@@ -134,12 +131,12 @@ export async function cancelEmailVerification(
 	email: string
 ): Promise<boolean> {
 	const response = await uClient(accessToken).query<boolean>(
-        fql`deleteEmailVerification(${email})`
-    );
-    if (!response.data) {
-        throw new Error(response.summary);
-    }
-	return response.data
+		fql`deleteEmailVerification(${email})`
+	);
+	if (!response.data) {
+		throw new Error(response.summary);
+	}
+	return response.data;
 }
 
 export async function getUserAndAccounts(accessToken: string): Promise<Document<User>> {
@@ -158,14 +155,45 @@ export async function getUserAndAccounts(accessToken: string): Promise<Document<
 	return response.data;
 }
 
-export async function createPasskeyAccount(accessToken: string, credential: WebAuthnUserCredentialEncoded): Promise<Account> {
-	const response = await uClient(accessToken).query<Account>(fql`createPasskeyAccount(${credential}, null)`);
+export async function createSocialProviderAccount(
+	accessToken: string,
+	accountData: { providerName: SocialProvider; providerUserId: string; providerUserEmail: string }
+): Promise<Account> {
+	const response = await uClient(accessToken).query<Account>(
+		fql`createSocialProviderAccount(${accountData}, null)`
+	);
+	return response.data;
+}
+
+export async function createPasskeyAccount(
+	accessToken: string,
+	credential: WebAuthnUserCredentialEncoded
+): Promise<Account> {
+	const response = await uClient(accessToken).query<Account>(
+		fql`createPasskeyAccount(${credential}, null)`
+	);
 	return response.data;
 }
 
 export async function deleteAccount(accessToken: string, accountId: string): Promise<boolean> {
 	const response = await uClient(accessToken).query<boolean>(fql`deleteAccount(${accountId})`);
 	return response.data;
+}
+
+export async function deleteUser(event: RequestEvent, userId: string): Promise<boolean> {
+	const accessToken = event.cookies.get('access_token');
+	if (accessToken) {
+		try {
+			await uClient(accessToken).query<boolean>(fql`deleteUser(${userId})`);
+			deleteAccessTokenCookie(event);
+			deleteRefreshTokenCookie(event);
+			return true;
+		} catch (error) {
+			console.error('Failed to delete user:', error);
+			return false;
+		}
+	}
+	return false;
 }
 
 export type SocialProvider = 'Github' | 'Google' | 'Facebook';

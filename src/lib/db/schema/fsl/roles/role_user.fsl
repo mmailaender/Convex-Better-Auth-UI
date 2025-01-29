@@ -50,9 +50,17 @@ role role_user {
   privileges createPasskeyAccount {
     call
   }
+  privileges createSocialProviderAccount {
+    call
+  }
   privileges deleteAccount {
     call {
       predicate (accountId => Account.byId(ID(accountId))?.user == Query.identity())
+    }
+  }
+  privileges deleteUser {
+    call {
+      predicate (userId => User.byId(ID(userId)) == Query.identity())
     }
   }
 

@@ -20,7 +20,7 @@
 	import { createCredentials } from './passkeys/client';
 	import { encodeBase64 } from '@oslojs/encoding';
 	import { bigEndian } from '@oslojs/binary';
-	import { Fingerprint } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
 
 	// Pull the user from SSR data:
 	let user: Document<User> = $state(JSON.parse(page.data.user));
@@ -184,6 +184,22 @@
 			user.accounts = user.accounts.filter((account) => account.id !== accountId);
 		} catch (error) {
 			console.error('Error deleting account:', error);
+		}
+	}
+
+	async function handleDeleteUser(userId: string) {
+		const response = await fetch(`/api/auth/user/${userId}/delete`, {
+			method: 'DELETE'
+		});
+
+
+		if (response.redirected) {
+			const url = new URL(response.url);
+			const path = url.pathname; 
+			goto(path);
+		} else {
+			// Handle error
+			console.error('Failed to delete user');
 		}
 	}
 </script>
@@ -394,7 +410,7 @@
 						{#if !user.accounts.some((acc) => acc.socialProvider?.name === 'Github')}
 							<a
 								class="btn flex items-center gap-2 hover:preset-tonal-surface"
-								href="/api/auth/oauth/github"
+								href="/api/auth/oauth/github?redirect_url=%2Fuser-profile"
 							>
 								<Github class="size-5 fill-surface-950-50" />
 								GitHub
@@ -403,6 +419,11 @@
 					</div>
 				</div>
 			{/if}
+		</div>
+		<div class="mt-8 flex justify-end">
+			<button class="btn preset-filled-error-500" onclick={() => handleDeleteUser(user.id)}>
+				Delete Account
+			</button>
 		</div>
 	</div>
 </div>

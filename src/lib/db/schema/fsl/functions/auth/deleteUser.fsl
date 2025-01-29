@@ -1,0 +1,18 @@
+/**
+ * Deletes a user and all their associated accounts.
+ * 
+ * @param {String} userId - The ID of the user to be deleted.
+ * @returns {NullUser} - Returns null as the documents doesn't exists any more after deletion.
+ */
+@role(server)
+function deleteUser(userId: String): NullUser {
+    let user = User.byId(ID(userId))
+
+    // If no user found for the provided userId, return null
+    if(user == null) {
+        null
+    }
+
+    user!.accounts?.forEach((account) => account?.delete())
+    user!.delete()
+}

@@ -17,7 +17,7 @@ const handleParaglide: Handle = i18n.handle();
 
 const bucket = new RefillingTokenBucket<string>(100, 1);
 
-const isPublicRoute = createRouteMatcher(['/sign-in*', '/api/auth/oauth*', '/api/auth/webauthn*']);
+const isPublicRoute = createRouteMatcher(['/sign-in*', '/api/auth/oauth*', '/api/auth/passkey*']);
 
 const rateLimitHandle: Handle = async ({ event, resolve }) => {
 	// Note: Assumes X-Forwarded-For will always be defined.

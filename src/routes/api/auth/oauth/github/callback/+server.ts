@@ -17,6 +17,7 @@ import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
 
 import type { OAuth2Tokens } from 'arctic';
 import type { RequestEvent } from './$types';
+import { createSocialProviderAccount, type SocialProvider } from '$lib/auth/user';
 
 /**
  * Splits a full name into first name and last name.
@@ -25,46 +26,49 @@ import type { RequestEvent } from './$types';
  * @returns An object containing `firstName` and `lastName`.
  */
 function splitFullName(fullName: string): { firstName: string; lastName: string } {
-    // Trim the input to remove leading and trailing whitespace
-    const trimmedName = fullName.trim();
+	// Trim the input to remove leading and trailing whitespace
+	const trimmedName = fullName.trim();
 
-    // Replace multiple spaces with a single space
-    const normalizedName = trimmedName.replace(/\s+/g, ' ');
+	// Replace multiple spaces with a single space
+	const normalizedName = trimmedName.replace(/\s+/g, ' ');
 
-    // Split the name into parts based on space
-    const nameParts = normalizedName.split(' ');
+	// Split the name into parts based on space
+	const nameParts = normalizedName.split(' ');
 
-    // Initialize firstName and lastName
-    let firstName = '';
-    let lastName = '';
+	// Initialize firstName and lastName
+	let firstName = '';
+	let lastName = '';
 
-    if (nameParts.length === 0) {
-        // Empty string case
-        firstName = '';
-        lastName = '';
-    } else if (nameParts.length === 1) {
-        // Only one name part, assign to firstName
-        firstName = nameParts[0];
-        lastName = '';
-    } else {
-        // More than one name part
-        // Assign last part to lastName and the rest to firstName
-        lastName = nameParts[nameParts.length - 1];
-        firstName = nameParts.slice(0, -1).join(' ');
-    }
+	if (nameParts.length === 0) {
+		// Empty string case
+		firstName = '';
+		lastName = '';
+	} else if (nameParts.length === 1) {
+		// Only one name part, assign to firstName
+		firstName = nameParts[0];
+		lastName = '';
+	} else {
+		// More than one name part
+		// Assign last part to lastName and the rest to firstName
+		lastName = nameParts[nameParts.length - 1];
+		firstName = nameParts.slice(0, -1).join(' ');
+	}
 
-    return { firstName, lastName };
+	return { firstName, lastName };
 }
 
 export async function GET(event: RequestEvent): Promise<Response> {
 	console.log('GitHub OAuth callback initiated');
 	const storedState = event.cookies.get('oauth_state') ?? null;
 	const redirectUrl = event.cookies.get('oauth_redirect_url') || '/';
+	const accessToken = event.cookies.get('access_token');
+
+	console.log('Access token: ', accessToken);
 
 	// Clear the OAuth-related cookies
 	event.cookies.delete('oauth_state', { path: '/' });
-    event.cookies.delete('oauth_redirect_url', { path: '/' });
-	
+	event.cookies.delete('oauth_redirect_url', { path: '/' });
+
 	const code = event.url.searchParams.get('code');
 	const state = event.url.searchParams.get('state');
 
@@ -165,20 +169,43 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		});
 	}
 
-	try {
-		console.log('Creating new user with GitHub account');
-		const { access, refresh } = await signUpWithSocialProvider(firstName || username, lastName || '', email, githubUserId, email);
-		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
-		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
-	} catch (error) {
-		console.error('Error during user sign-up:', error);
-		const errorMessage = encodeURIComponent('User with this email already exists. Please sign in with your initial used account.');
-		return new Response(null, {
-			status: 302,
-			headers: {
-				Location: `/sign-in?error=${errorMessage}`
-			}
-		});
+	const accountData: {
+		providerName: SocialProvider;
+		providerUserId: string;
+		providerUserEmail: string;
+	} = {
+		providerName: 'Github',
+		providerUserId: githubUserId,
+		providerUserEmail: email
+	};
+
+	if (accessToken) {
+		console.log('User already exists, adding account');
+		await createSocialProviderAccount(accessToken, accountData);
+	} else {
+		try {
+			console.log('Creating new user with GitHub account');
+			const userData = {
+				firstName: firstName || username,
+				lastName: lastName || '',
+				email
+			};
+
+			const { access, refresh } = await signUpWithSocialProvider(userData, accountData);
+			setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
+			setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());
+		} catch (error) {
+			console.error('Error during user sign-up:', error);
+			const errorMessage = encodeURIComponent(
+				'User with this email already exists. Please sign in with your initial used account.'
+			);
+			return new Response(null, {
+				status: 302,
+				headers: {
+					Location: `/sign-in?error=${errorMessage}`
+				}
+			});
+		}
 	}
 
 	console.log('GitHub OAuth process completed successfully');
