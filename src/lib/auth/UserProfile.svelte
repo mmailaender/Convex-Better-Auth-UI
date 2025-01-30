@@ -425,7 +425,7 @@
 		<div class="mt-8 flex justify-end">
 			<Modal
 				bind:open={isShowingDeleteAccountModal}
-				triggerBase="btn preset-filled-error-500"
+				triggerBase="btn text-error-500 hover:preset-tonal-error-500"
 				contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
 				backdropClasses="backdrop-blur-sm"
 			>
