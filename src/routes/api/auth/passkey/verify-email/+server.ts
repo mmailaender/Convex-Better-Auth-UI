@@ -2,6 +2,7 @@ import { createVerification, verifyUserExists } from '$lib/auth/user.server';
 import type { RequestEvent, RequestHandler } from './$types';
 import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
 import { getVerificationEmail, sendEmail } from '$lib/emails';
+import { error } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async (event: RequestEvent) => {
 	const url = new URL(event.request.url);
@@ -14,7 +15,7 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 	}
 
 	const exists = await verifyUserExists(email);
-	console.log(`check-email: Email ${email} exists: ${exists}`);
+	console.log(`verify-email: Email ${email} exists: ${exists}`);
 
 	if (exists == false) {
 		try {
@@ -29,24 +30,24 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 			}
 
 			const otp = await createVerification(email, userId ? userId : undefined);
-
 			const { html } = await getVerificationEmail(otp);
 
-			const { data, error } = await sendEmail({
+			const { data, error: err } = await sendEmail({
 				from: 'verifications@etesie.dev',
 				to: email,
 				subject: `${otp} is your verification code`,
 				html: html
 			});
 
-			if (error) {
-				return new Response(error.message, { status: 400 });
+			if (err) {
+				error(400, err.message);
 			}
 
-			console.log(`check-email: Successfully verified email ${email}, data: ${data}`);
+			console.log(`verify-email: Successfully send verification email to ${email}, email id: ${data?.id}`);
+			return new Response(JSON.stringify(true), { status: 200, headers: { 'Content-Type': 'application/json' } });
 		} catch (err) {
-			console.error(`check-email: Error verifying email ${email}`, err);
-			return new Response('Internal Server Error', { status: 500 });
+			console.error(`verify-email: Error verifying email ${email}`, err);
+			error(500, 'Internal Server Error');
 		}
 	}
 

@@ -118,7 +118,7 @@ export async function verifySocialAccountExists(
  * @returns {Promise<string>} A verification token.
  */
 export async function createVerification(email: string, userId?: string): Promise<string> {
-	console.log(`Creating email verification for: ${email} with userId: ${userId}`);
+	console.log(`user.server.ts: Creating email verification for: ${email} with userId: ${userId}`);
 	const res = await sClient.query<string>(
 		fql`createVerification({email: ${email}, userId: ${userId ? userId : null}})`
 	);
@@ -206,8 +206,8 @@ export async function createEmailVerification(
 			throw new Error(errorMessage);
 		}
 
-		const { exists } = await res.json();
-		console.log(`Email ${email} successfuly verified: ${exists}`);
+		const exists = (await res.json()) as boolean;
+		console.log(`Email ${email} successfully verified: ${exists}`);
 		return exists;
 	} catch (err: unknown) {
 		console.error('Error creating email verification:', err);
