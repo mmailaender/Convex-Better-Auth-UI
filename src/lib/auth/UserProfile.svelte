@@ -6,7 +6,7 @@
 	import type { Document } from '$lib/db/schema/types/system';
 
 	// Skeleton UI
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
+	import { Avatar, Modal } from '@skeletonlabs/skeleton-svelte';
 
 	// Custom imports
 	import { getAccountIcon, Github } from './social/icons';
@@ -31,6 +31,8 @@
 	let otp = $state('');
 
 	let showConnectOptions = $state(false);
+
+	let isShowingDeleteAccountModal = $state(false);
 
 	/**
 	 * Handle updating basic user info (first name, last name, etc.).
@@ -192,10 +194,10 @@
 			method: 'DELETE'
 		});
 
-
 		if (response.redirected) {
+			isShowingDeleteAccountModal = false;
 			const url = new URL(response.url);
-			const path = url.pathname; 
+			const path = url.pathname;
 			goto(path);
 		} else {
 			// Handle error
@@ -421,9 +423,28 @@
 			{/if}
 		</div>
 		<div class="mt-8 flex justify-end">
-			<button class="btn preset-filled-error-500" onclick={() => handleDeleteUser(user.id)}>
-				Delete Account
-			</button>
+			<Modal
+				bind:open={isShowingDeleteAccountModal}
+				triggerBase="btn preset-filled-error-500"
+				contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
+				backdropClasses="backdrop-blur-sm"
+			>
+				{#snippet trigger()}Delete Account{/snippet}
+				{#snippet content()}
+					<header class="flex justify-between">
+						<h2 class="h2">Delete your account</h2>
+					</header>
+					<article>
+						<p class="opacity-60">
+							Are you sure you want to delete your account? All of your data will be permanently deleted.
+						</p>
+					</article>
+					<footer class="flex justify-end gap-4">
+						<button type="button" class="btn preset-tonal" onclick={() => (isShowingDeleteAccountModal = false)}>Cancel</button>
+						<button type="button" class="btn preset-filled-error-500" onclick={() => handleDeleteUser(user.id)}>Confirm</button>
+					</footer>
+				{/snippet}
+			</Modal>
 		</div>
 	</div>
 </div>
