@@ -1,21 +1,20 @@
 import { validatePasskeyData } from '$lib/auth/passkeys/server/validatePasskey';
 import type { WebAuthnUserCredentialEncoded } from '$lib/auth/passkeys/types';
 import { getUserAndAccounts, addEmail, updateUser, createPasskeyAccount } from '$lib/auth/user';
-import { createEmailVerification } from '$lib/auth/user.server';
 import { encodeBase64 } from '@oslojs/encoding';
 import type { Actions } from './$types';
 
 import type { PageServerLoad } from './$types';
-import { fail } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 
 export const load = (async ({ cookies }) => {
-    const accessToken = cookies.get('access_token')!;
+	const accessToken = cookies.get('access_token')!;
 
-    const user = await getUserAndAccounts(accessToken);
-    const stringifiedUser = JSON.stringify(user);
-    
-    console.log('user: ', stringifiedUser);
-    return { user: stringifiedUser, accessToken };
+	const user = await getUserAndAccounts(accessToken);
+	const stringifiedUser = JSON.stringify(user);
+
+	console.log('user: ', stringifiedUser);
+	return { user: stringifiedUser, accessToken };
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -36,7 +35,7 @@ export const actions = {
 			(avatar !== undefined && typeof avatar !== 'string')
 		) {
 			console.error('Invalid fields: must be strings or undefined');
-			return { message: 'Invalid fields: must be strings or undefined' };
+			return error(400, { message: 'Invalid fields: must be strings or undefined' });
 		}
 
 		const updateData = {
@@ -48,65 +47,77 @@ export const actions = {
 		try {
 			await updateUser(accessToken, updateData);
 			return { message: 'Profile updated successfully' };
-		} catch (error) {
-			console.error('Error updating user:', error);
-			return { message: 'Failed to update profile' };
+		} catch (err) {
+			console.error('Error updating user:', err);
+			return error(400, { message: 'Failed to update profile' });
 		}
 	},
 
-	verifyEmail: async ({ cookies, request, fetch }) => {
-		console.log('Starting verifyEmail action');
-		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			console.warn('No access token found');
-			return { message: 'Please reload the page' };
-		}
-
+	verifyEmail: async ({ request, fetch }) => {
 		const formData = await request.formData();
 		const email = formData.get('email');
 		const userId = formData.get('userId');
+
 		if (typeof email !== 'string' || typeof userId !== 'string') {
 			console.error('Invalid or missing email in formData');
-			return fail(400, { message: 'Invalid or missing email' });
+			return error(400, { message: 'Invalid or missing email' });
 		}
 
 		try {
-			console.log(`Attempting to create email verification for: ${email}`);
-			await createEmailVerification(accessToken, email, fetch, userId);
-			console.log('Email verification created successfully');
-			return { message: 'Email updated successfully', newEmail: email };
-		} catch (error) {
-			console.error('Error updating user:', error);
-			return { message: 'Failed to update email' };
+			console.log(`Verifying email: ${email}`);
+			const res = await fetch(
+				`/api/auth/passkey/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`,
+				{
+					method: 'GET',
+					headers: { 'Content-Type': 'application/json' }
+				}
+			);
+
+			if (!res.ok) {
+				const errorMessage = await res.text();
+				console.error('Failed to verify email:', errorMessage);
+				return error(400, { message: errorMessage });
+			}
+
+			const exists = (await res.json()) as boolean;
+			console.log(`Email ${email} successfully verified: ${exists}`);
+
+			return {
+				message: `Email verification successfully created for ${email}`,
+				verified: exists
+			};
+		} catch (err) {
+			console.error(`Failed to verify email ${email}:`, err);
+			return error(400, { message: `Failed to verify email ${email}` });
 		}
 	},
 
 	addEmail: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return { message: 'Please reload the page' };
+			return error(400, { message: 'Please reload the page' });
 		}
 
 		const formData = await request.formData();
 		const email = formData.get('email');
 		const verificationOTP = formData.get('verificationOTP');
 		if (typeof email !== 'string' || typeof verificationOTP !== 'string') {
-			return fail(400, { message: 'Invalid or missing email' });
+			return error(400, { message: 'Invalid or missing email' });
 		}
 
 		try {
 			await addEmail(accessToken, email, verificationOTP);
 			return { message: 'Email updated successfully' };
-		} catch (error) {
-			console.error('Error updating user:', error);
-			return { message: 'Failed to update email' };
+		} catch (err) {
+			console.error('Error updating user:', err);
+			return error(400, { message: 'Failed to update email' });
 		}
 	},
 
 	createPasskeyAccount: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
 		if (!accessToken) {
-			return fail(400, { message: 'Please reload the page' });
+			return error(400, { message: 'Please reload the page' });
 		}
 
 		const formData = await request.formData();
@@ -120,17 +131,14 @@ export const actions = {
 			typeof encodedClientDataJSON !== 'string'
 		) {
 			console.error('Invalid or missing fields');
-			return fail(400, { message: 'Invalid or missing fields' });
+			return error(400, { message: 'Invalid or missing fields' });
 		}
 
 		try {
-			console.log(
-				`Attempting to create passkey account for user: ${userId} with data:`,
-				{
-					encodedAttestationObject,
-					encodedClientDataJSON
-				}
-			);
+			console.log(`Attempting to create passkey account for user: ${userId} with data:`, {
+				encodedAttestationObject,
+				encodedClientDataJSON
+			});
 
 			const credential = await validatePasskeyData({
 				userId,
@@ -154,9 +162,9 @@ export const actions = {
 			const account = JSON.stringify(response);
 
 			return { message: 'Passkey account created successfully', account };
-		} catch (error) {
-			console.error('Error creating passkey account:', error);
-			return fail(400, { message: 'Failed to create passkey account' });
+		} catch (err) {
+			console.error('Error creating passkey account:', err);
+			return error(400, { message: 'Failed to create passkey account' });
 		}
 	}
 } satisfies Actions;

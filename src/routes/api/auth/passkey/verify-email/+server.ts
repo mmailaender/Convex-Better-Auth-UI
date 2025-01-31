@@ -2,7 +2,7 @@ import { createVerification, verifyUserExists } from '$lib/auth/user.server';
 import type { RequestEvent, RequestHandler } from './$types';
 import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
 import { getVerificationEmail, sendEmail } from '$lib/emails';
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async (event: RequestEvent) => {
 	const url = new URL(event.request.url);
@@ -11,7 +11,7 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 	console.log('GET request received', { email, userId });
 	if (typeof email !== 'string' || (userId !== null && typeof userId !== 'string')) {
 		console.error('Invalid or missing fields');
-		return new Response('Invalid or missing fields', { status: 400 });
+		return error(400, 'Invalid or missing fields');
 	}
 
 	const exists = await verifyUserExists(email);
@@ -26,7 +26,7 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 
 			if (verificationResult.status !== 'valid') {
 				console.warn(`verify-email: Email ${email} is not valid`);
-				return new Response('Invalid email', { status: 400 });
+				return error(400, 'Invalid email');
 			}
 
 			const otp = await createVerification(email, userId ? userId : undefined);
@@ -40,14 +40,14 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 			});
 
 			if (err) {
-				error(400, err.message);
+				return error(400, err.message);
 			}
-
+			
 			console.log(`verify-email: Successfully send verification email to ${email}, email id: ${data?.id}`);
-			return new Response(JSON.stringify(true), { status: 200, headers: { 'Content-Type': 'application/json' } });
+			return json(true);
 		} catch (err) {
 			console.error(`verify-email: Error verifying email ${email}`, err);
-			error(500, 'Internal Server Error');
+			return error(500, 'Internal Server Error');
 		}
 	}
 

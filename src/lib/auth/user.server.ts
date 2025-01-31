@@ -8,7 +8,7 @@ import {
 	invalidateSession,
 	invalidateUserSessions
 } from './session';
-import type { RequestEvent } from '@sveltejs/kit';
+import { type RequestEvent } from '@sveltejs/kit';
 import type { SocialProvider, Tokens } from './user';
 
 /**
@@ -118,7 +118,7 @@ export async function verifySocialAccountExists(
  * @returns {Promise<string>} A verification token.
  */
 export async function createVerification(email: string, userId?: string): Promise<string> {
-	console.log(`user.server.ts: Creating email verification for: ${email} with userId: ${userId}`);
+	console.log(`user.server.ts: Creating email ownership verification entry for: ${email} with userId: ${userId}`);
 	const res = await sClient.query<string>(
 		fql`createVerification({email: ${email}, userId: ${userId ? userId : null}})`
 	);
@@ -167,53 +167,4 @@ export async function signOutFromAllDevices(event: RequestEvent): Promise<boolea
 		}
 	}
 	return false;
-}
-
-/**
- * Creates an email verification entry.
- *
- * @param {string} accessToken - The user's access token.
- * @param {string} email - The user's email address.
- * @param {string} [userId] - The user's ID. Only relevant during update email.
- * @returns {Promise<boolean>} True if the email verification was created successfully, false otherwise.
- *
- * @throws {Error} If the email verification fails.
- */
-export async function createEmailVerification(
-	accessToken: string,
-	email: string,
-	fetch: (input: string | URL | globalThis.Request, init?: RequestInit) => Promise<Response>,
-	userId?: string
-): Promise<boolean> {
-	if (!accessToken) {
-		console.warn('Access token is missing');
-		return false;
-	}
-
-	try {
-		console.log(`Verifying email: ${email}`);
-		const res = await fetch(
-			`/api/auth/passkey/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`,
-			{
-				method: 'GET',
-				headers: { 'Content-Type': 'application/json' }
-			}
-		);
-
-		if (!res.ok) {
-			const errorMessage = await res.text();
-			console.error('Failed to verify email:', errorMessage);
-			throw new Error(errorMessage);
-		}
-
-		const exists = (await res.json()) as boolean;
-		console.log(`Email ${email} successfully verified: ${exists}`);
-		return exists;
-	} catch (err: unknown) {
-		console.error('Error creating email verification:', err);
-		if (err instanceof Error) {
-			throw new Error(err.message);
-		}
-		throw new Error('Error creating email verification.');
-	}
 }
