@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 	import type { User } from '$lib/db/schema/types/custom';
 	import type { Document } from '$lib/db/schema/types/system';
@@ -9,7 +10,6 @@
 	import { Avatar, Modal } from '@skeletonlabs/skeleton-svelte';
 
 	// Custom imports
-	import { getAccountIcon, Github } from './social/icons';
 	import {
 		cancelEmailVerification,
 		addEmail,
@@ -20,122 +20,162 @@
 	import { createCredentials } from './passkeys/client';
 	import { encodeBase64 } from '@oslojs/encoding';
 	import { bigEndian } from '@oslojs/binary';
-	import { goto } from '$app/navigation';
+	import { getAccountIcon, Github } from './social/icons';
+	import { TriangleAlert } from 'lucide-svelte';
 
-	// Pull the user from SSR data:
+	// Grab user & accessToken from SSR data.
 	let user: Document<User> = $state(JSON.parse(page.data.user));
+	const accessToken = page.data.accessToken;
 
-	// Local state
+	// Local UI state.
 	let isEditingUsername = $state(false);
 	let isAddingNewEmail = $state(false);
-	let otp = $state('');
-
 	let showConnectOptions = $state(false);
-
 	let isShowingDeleteAccountModal = $state(false);
 
+	let otp = $state('');
+
+	// Basic feedback messages.
+	let successMessage = $state('');
+	let errorMessage = $state('');
+
 	/**
-	 * Handle updating basic user info (first name, last name, etc.).
+	 * Simple helpers for showing feedback.
+	 * In production, you might want a more sophisticated toast system.
+	 */
+	function notifySuccess(msg: string) {
+		successMessage = msg;
+		errorMessage = '';
+	}
+
+	function notifyError(msg: string) {
+		errorMessage = msg;
+		successMessage = '';
+	}
+
+	/**
+	 * Unified fetch helper to reduce boilerplate.
+	 */
+	async function callForm({
+		url,
+		method = 'POST',
+		data
+	}: {
+		url: string;
+		method?: string;
+		data?: Record<string, string> | URLSearchParams;
+	}) {
+		try {
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			};
+
+			const body =
+				data instanceof URLSearchParams
+					? data.toString()
+					: data
+						? new URLSearchParams(data).toString()
+						: undefined;
+
+			const response = await fetch(url, {
+				method,
+				headers,
+				body
+			});
+
+			console.log('response: ', response)
+			if (!response.ok) {
+				const body = await response.json();
+				throw new Error(`${body.error.message}`);
+			}
+
+			return await response.json();
+		} catch (err: any) {
+			notifyError(err?.message || 'An unknown error occurred.');
+			throw err;
+		}
+	}
+
+	/**
+	 * Called automatically after SvelteKit form submission for user data.
+	 * On success, close the edit form.
 	 */
 	function handleUserDataSubmit() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type === 'success') {
 				isEditingUsername = false;
+				notifySuccess('Profile updated successfully!');
+			} else if (result.type === 'error') {
+				notifyError(`Failed to update profile: ${result.error}`);
 			}
 		};
 	}
 
 	/**
-	 * Submit form to start verification of a newly added email.
-	 * On success, we store the verification email in `user.emailVerification`.
+	 * Called automatically after SvelteKit form submission for adding a new email (to be verified).
 	 */
 	function handleVerifyEmail() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type === 'success') {
-				user!.emailVerification = result.data?.newEmail;
+				// The backend returns the email in `result.data?.newEmail`
+				user.emailVerification = result.data?.newEmail;
 				isAddingNewEmail = false;
+				notifySuccess('Verification email sent!');
+			} else if (result.type === 'error') {
+				notifyError(`Failed to verify email: ${result.error}`);
 			}
 		};
 	}
 
 	/**
-	 * Once the user gets an OTP via email, we confirm it here.
+	 * Once the user receives an OTP, confirm it.
 	 */
 	async function handleVerifyOtp() {
 		try {
-			const updatedUser = await addEmail(page.data.accessToken, user.emailVerification!, otp);
-
-			// Update local user data
+			const updatedUser = await addEmail(accessToken, user.emailVerification!, otp);
 			user.emails = updatedUser.emails;
 			user.emailVerification = updatedUser.emailVerification;
+			notifySuccess('Email verified successfully!');
 		} catch (error) {
-			console.error('Error verifying OTP:', error);
+			notifyError('Error verifying OTP.');
 		}
 	}
 
-	/**
-	 * Make an existing email the new primary.
-	 */
 	async function handleMakePrimary(email: string) {
 		try {
-			const { primaryEmail } = await setPrimaryEmail(page.data.accessToken, email);
+			const { primaryEmail } = await setPrimaryEmail(accessToken, email);
 			user.primaryEmail = primaryEmail;
+			notifySuccess(`"${email}" is now your primary email.`);
 		} catch (error) {
-			console.error('Error making primary:', error);
+			notifyError('Error making email primary.');
 		}
 	}
 
-	/**
-	 * Delete an existing email (not allowed if it's already the primary).
-	 */
 	async function handleDeleteEmail(email: string) {
 		try {
-			const { emails } = await deleteEmail(page.data.accessToken, email);
+			const { emails } = await deleteEmail(accessToken, email);
 			user.emails = emails;
+			notifySuccess(`Deleted email "${email}".`);
 		} catch (error) {
-			console.error('Error deleting email:', error);
+			notifyError(`Error deleting email "${email}".`);
 		}
 	}
 
-	/**
-	 * Resend the verification code to the email currently in user.emailVerification.
-	 * Sends form-encoded data including email and userId.
-	 */
 	async function handleResendVerification(email: string) {
-		try {
-			const formData = new URLSearchParams();
-			formData.append('email', email);
-			formData.append('userId', user.id);
-
-			const response = await fetch('/user-profile?/verifyEmail', {
-				method: 'POST',
-				body: formData.toString(),
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error(`Error resending verification: ${response.statusText}`);
-			}
-
-			// TODO: Optionally, show a success notification here
-			console.log('Verification email resent successfully.');
-		} catch (error) {
-			console.error('Error resending verification:', error);
-			// Optionally, show an error notification here
-		}
+		await callForm({
+			url: '/user-profile?/verifyEmail',
+			data: { email, userId: user.id }
+		});
+		notifySuccess('Verification code resent.');
 	}
 
-	/**
-	 * Cancel the verification process for the active unverified email.
-	 */
 	async function handleCancelVerification(email: string) {
 		try {
-			await cancelEmailVerification(page.data.accessToken, email);
+			await cancelEmailVerification(accessToken, email);
 			user.emailVerification = undefined;
+			notifySuccess(`Canceled verification for "${email}".`);
 		} catch (error) {
-			console.error('Error canceling verification:', error);
+			notifyError('Error canceling verification.');
 		}
 	}
 
@@ -151,60 +191,105 @@
 				credentialUserId
 			);
 
-			const formData = new URLSearchParams({
-				userId: user.id,
-				encodedAttestationObject: encodeBase64(new Uint8Array(credentials.attestationObject)),
-				encodedClientDataJSON: encodeBase64(new Uint8Array(credentials.clientDataJSON))
-			});
+			const encodedAttestation = encodeBase64(new Uint8Array(credentials.attestationObject));
+			const encodedClientData = encodeBase64(new Uint8Array(credentials.clientDataJSON));
 
-			const response = await fetch('/user-profile?/createPasskeyAccount', {
-				method: 'POST',
-				body: formData.toString(),
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
+			const responseJson = await callForm({
+				url: '/user-profile?/createPasskeyAccount',
+				data: {
+					userId: user.id,
+					encodedAttestationObject: encodedAttestation,
+					encodedClientDataJSON: encodedClientData
 				}
 			});
-			const responseJson = await response.json();
-
-			if (responseJson.status !== 200) {
-				throw new Error(`Error creating passkey account: ${response.statusText}`);
-			}
-
+			
+			// The server might double-encode; adjust if needed
 			const account = JSON.parse(JSON.parse(responseJson.data).at(-1));
-
 			user.accounts.push(account);
+
 			showConnectOptions = false;
-			console.log('Passkey account created successfully.');
+			notifySuccess('Passkey account created successfully!');
 		} catch (error) {
-			console.error('Error creating account:', error);
+			// Handled by callApi or catch
 		}
 	}
 
 	async function handleDeleteAccount(accountId: string) {
 		try {
-			await deleteAccount(page.data.accessToken, accountId);
+			await deleteAccount(accessToken, accountId);
 			user.accounts = user.accounts.filter((account) => account.id !== accountId);
+			notifySuccess('Account disconnected.');
 		} catch (error) {
-			console.error('Error deleting account:', error);
+			notifyError('Error deleting connected account.');
 		}
 	}
 
+	/**
+	 * Delete the entire user from the system.
+	 */
 	async function handleDeleteUser(userId: string) {
-		const response = await fetch(`/api/auth/user/${userId}/delete`, {
-			method: 'DELETE'
-		});
+		try {
+			const response = await fetch(`/api/auth/user/${userId}/delete`, {
+				method: 'DELETE'
+			});
 
-		if (response.redirected) {
-			isShowingDeleteAccountModal = false;
-			const url = new URL(response.url);
-			const path = url.pathname;
-			goto(path);
-		} else {
-			// Handle error
-			console.error('Failed to delete user');
+			if (response.redirected) {
+				isShowingDeleteAccountModal = false;
+				goto(response.url);
+			} else {
+				notifyError('Failed to delete user account.');
+			}
+		} catch (error) {
+			notifyError('Error deleting user account.');
 		}
 	}
+
+	/**
+	 * Reactive helpers to keep the template simpler.
+	 */
+	const hasPasskey = $derived(user.accounts.some((acc) => acc.passkey));
+	const hasGithub = $derived(user.accounts.some((acc) => acc.socialProvider?.name === 'Github'));
+
+	/**
+	 * Return a "sorted" array of emails so the primary is always first.
+	 */
+	const sortedEmails = $derived([
+		user.primaryEmail,
+		...user.emails.filter((e) => e !== user.primaryEmail)
+	]);
 </script>
+
+<!-- Feedback Messages -->
+{#if successMessage}
+	<div
+		class="card grid grid-cols-1 items-center gap-4 p-4 preset-outlined-success-500 lg:grid-cols-[1fr_auto]"
+	>
+		<div>
+			<p class="font-bold">Success</p>
+			<p class="opacity-60 type-scale-1">{successMessage}</p>
+		</div>
+		<div class="flex gap-1">
+			<button class="btn preset-tonal hover:preset-filled" onclick={() => (successMessage = '')}
+				>Dismiss</button
+			>
+		</div>
+	</div>
+{/if}
+
+{#if errorMessage}
+	<div
+		class="card grid grid-cols-1 items-center gap-4 p-4 preset-outlined-error-500 lg:grid-cols-[auto_1fr_auto]"
+	>
+		<TriangleAlert />
+		<div>
+			<p class="font-bold">Error</p>
+			<p class="opacity-60 type-scale-1">{errorMessage}</p>
+		</div>
+		<div class="flex gap-1">
+			<button class="btn preset-tonal hover:preset-filled" onclick={() => (errorMessage = '')}>Dismiss</button>
+		</div>
+	</div>
+{/if}
 
 <div
 	class="mx-auto flex w-full max-w-4xl flex-col rounded-container shadow-lg bg-surface-100-900 md:flex-row"
@@ -262,16 +347,15 @@
 		<div class="mb-6">
 			<h3 class="mb-4 font-bold text-surface-800-200">Email addresses</h3>
 
-			<!-- List of existing emails: primary first, then others -->
 			<ul class="mb-4 flex flex-col gap-2">
-				{#each [user.primaryEmail, ...user.emails.filter((email) => email !== user.primaryEmail)] as email}
+				{#each sortedEmails as email}
 					<li class="flex items-center justify-between">
 						<div class="text-surface-800-200">
 							{email}
 							{#if email === user.primaryEmail}
 								<span class="ml-2 text-sm font-semibold text-primary-500">Primary</span>
 							{:else}
-								<div class="flex gap-2">
+								<div class="mt-1 flex gap-2">
 									<button
 										class="btn text-sm hover:preset-tonal-surface"
 										onclick={() => handleMakePrimary(email)}
@@ -291,7 +375,7 @@
 				{/each}
 			</ul>
 
-			<!-- If there's no ongoing verification, let user add a new email -->
+			<!-- If there's no ongoing verification, allow adding new email -->
 			{#if !user.emailVerification}
 				{#if !isAddingNewEmail}
 					<button class="btn" onclick={() => (isAddingNewEmail = true)}> Add a new email </button>
@@ -302,13 +386,7 @@
 						use:enhance={handleVerifyEmail}
 						class="flex gap-2"
 					>
-						<input
-							type="email"
-							name="email"
-							placeholder="Add a new email address"
-							class="input"
-							required
-						/>
+						<input type="email" name="email" placeholder="New email" class="input" required />
 						<input type="text" name="userId" value={user.id} required hidden />
 						<button type="submit" class="btn">Add</button>
 						<button type="button" class="btn" onclick={() => (isAddingNewEmail = false)}>
@@ -319,14 +397,15 @@
 			{/if}
 		</div>
 
-		<!-- If there's an email waiting to be verified, show the verification flow -->
+		<!-- Verification Flow -->
 		{#if user.emailVerification}
 			<div class="mb-6">
 				<div>
 					<span class="text-surface-800-200">{user.emailVerification}</span>
 					<span class="badge preset-tonal-surface">Unverified</span>
 				</div>
-				<div class="w-full max-w-sm rounded-lg border p-6 shadow-md border-surface-300-700">
+
+				<div class="mt-2 w-full max-w-sm rounded-lg border p-6 shadow-md border-surface-300-700">
 					<h2 class="text-lg font-semibold text-surface-900-100">Verify email address</h2>
 					<p class="mt-1 text-sm text-surface-600-400">
 						Enter the verification code sent to
@@ -346,7 +425,7 @@
 						</button>
 					</div>
 
-					<div class="mt-6 flex justify-end text-sm">
+					<div class="mt-6 flex justify-end gap-2 text-sm">
 						<button
 							class="btn hover:preset-tonal-surface"
 							onclick={() => handleCancelVerification(user.emailVerification!)}
@@ -365,19 +444,18 @@
 		<div>
 			<h3 class="mb-4 font-bold text-surface-800-200">Connected accounts</h3>
 			<ul>
-				{#each user.accounts as account, index}
-					{@const AccountIcon = getAccountIcon(
-						account.socialProvider ? account.socialProvider.name : 'Passkey'
-					)}
+				{#each user.accounts as account}
+					{@const accountProvider = account.socialProvider?.name || 'Passkey'}
+					{@const AccountIcon = getAccountIcon(accountProvider)}
+
 					<li class="mb-2 flex items-center justify-between">
 						<span class="flex items-center text-surface-800-200">
 							<AccountIcon
 								class={['mr-2 size-5', account.socialProvider && 'fill-surface-950-50']}
 							/>
+							{accountProvider}
 							{#if account.socialProvider}
-								{account.socialProvider.name} • {account.socialProvider.email}
-							{:else}
-								Passkey
+								• {account.socialProvider.email}
 							{/if}
 						</span>
 						{#if user.accounts.length > 1}
@@ -392,7 +470,8 @@
 				{/each}
 			</ul>
 
-			{#if !(user.accounts.some((acc) => acc.passkey) && user.accounts.some((acc) => acc.socialProvider?.name === 'Github'))}
+			<!-- Show connect button only if missing passkey or GitHub -->
+			{#if !(hasPasskey && hasGithub)}
 				<button
 					class="mt-2 text-primary-500 hover:underline"
 					onclick={() => (showConnectOptions = !showConnectOptions)}
@@ -404,12 +483,12 @@
 			{#if showConnectOptions}
 				<div class="card mt-2 max-w-72 border border-surface-300-700">
 					<div class="flex flex-col gap-2">
-						{#if !user.accounts.some((acc) => acc.passkey)}
+						{#if !hasPasskey}
 							<button class="btn hover:preset-tonal-surface" onclick={handleCreatePasskeyAccount}>
 								Passkey
 							</button>
 						{/if}
-						{#if !user.accounts.some((acc) => acc.socialProvider?.name === 'Github')}
+						{#if !hasGithub}
 							<a
 								class="btn flex items-center gap-2 hover:preset-tonal-surface"
 								href="/api/auth/oauth/github?redirect_url=%2Fuser-profile"
@@ -422,6 +501,8 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- Delete Entire Account -->
 		<div class="mt-8 flex justify-end">
 			<Modal
 				bind:open={isShowingDeleteAccountModal}
@@ -429,19 +510,32 @@
 				contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
 				backdropClasses="backdrop-blur-sm"
 			>
-				{#snippet trigger()}Delete Account{/snippet}
+				{#snippet trigger()}Delete account{/snippet}
 				{#snippet content()}
 					<header class="flex justify-between">
 						<h2 class="h2">Delete your account</h2>
 					</header>
 					<article>
 						<p class="opacity-60">
-							Are you sure you want to delete your account? All of your data will be permanently deleted.
+							Are you sure you want to delete your account? All of your data will be permanently
+							deleted.
 						</p>
 					</article>
 					<footer class="flex justify-end gap-4">
-						<button type="button" class="btn preset-tonal" onclick={() => (isShowingDeleteAccountModal = false)}>Cancel</button>
-						<button type="button" class="btn preset-filled-error-500" onclick={() => handleDeleteUser(user.id)}>Confirm</button>
+						<button
+							type="button"
+							class="btn preset-tonal"
+							onclick={() => (isShowingDeleteAccountModal = false)}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							class="btn preset-filled-error-500"
+							onclick={() => handleDeleteUser(user.id)}
+						>
+							Confirm
+						</button>
 					</footer>
 				{/snippet}
 			</Modal>
