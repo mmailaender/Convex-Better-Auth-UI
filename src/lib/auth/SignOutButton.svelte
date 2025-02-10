@@ -5,9 +5,10 @@
 		redirectUrl?: string;
 		class?: string;
 		children?: import('svelte').Snippet;
+		onSignOut?: () => void;
 	}
 
-	let { redirectUrl, class: className = 'btn preset-filled', children }: Props = $props();
+	let { redirectUrl, class: className = 'btn preset-filled', children, onSignOut }: Props = $props();
 
 	let buttonText: string = 'Sign Out';
 
@@ -16,6 +17,7 @@
 			const response = await fetch('/api/auth/sign-out');
 			if (response.ok) {
                 invalidateAll();
+				if (onSignOut) onSignOut();
 
 				if (redirectUrl) {
 					goto(redirectUrl);

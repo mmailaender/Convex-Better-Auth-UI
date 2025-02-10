@@ -6,17 +6,64 @@ role role_user {
       )
     }
     write {
-      predicate ((oldDoc, newDoc) => 
+      predicate ((oldDoc, newDoc) => {
+        oldDoc.emails == newDoc.emails &&
+        oldDoc.accounts == newDoc.accounts &&
         oldDoc == Query.identity()
-      )
+      })
     }
   }
+  privileges Account {
+    read {
+      predicate ((doc) => {
+        doc.user == Query.identity()
+      })
+    }
+  }
+
   privileges signOut {
     call
   }
   privileges signOutFromAllDevices {
     call
   }
+
+  privileges getVerificationEmail {
+    call {
+      predicate (userId => Query.identity()!.id == userId)
+    }
+  }
+  privileges deleteEmailVerification {
+    call {
+      predicate (email => Query.identity()!.emailVerification == email)
+    }
+  }
+  privileges addEmail {
+    call
+  }
+  privileges deleteEmail {
+    call {
+      predicate (email => Query.identity()!.emails.includes(email))
+    }
+  }
+
+  privileges createPasskeyAccount {
+    call
+  }
+  privileges createSocialProviderAccount {
+    call
+  }
+  privileges deleteAccount {
+    call {
+      predicate (accountId => Account.byId(ID(accountId))?.user == Query.identity())
+    }
+  }
+  privileges deleteUser {
+    call {
+      predicate (userId => User.byId(ID(userId)) == Query.identity())
+    }
+  }
+
   membership User {
     predicate ( (doc) => isCalledWithAccessToken() )
   }

@@ -1,25 +1,38 @@
 @role(server)
-function createSocialProviderAccount(firstName: String, lastName: String, email: String, avatar: String?, providerName: "Github" | "Facebook" | "Google", providerUserId: String, providerEmail: String): Account {
-  let user = User.firstWhere(.email == email)
+function createSocialProviderAccount( accountData: { providerName: "Github" | "Facebook" | "Google", providerUserId: String, providerUserEmail: String }, userData: { firstName: String, lastName: String, email: String, avatar: String? }? ): Account {
+  // Check if a user with the provided email already exists
+  let user = User.firstWhere((user) => { userData != null && user.emails!.includes(userData!.email) })
+
+  // if user is null, check if the function was called with an access token and if yes assign the user connected with the identiy to the user.
+  let identity: Any = Query.identity()
+  let user: User | Null = if(user == null) { identity } else { user }
   
   if(user == null) {
+    if(userData == null) {
+      abort({
+        code: "DATA_MISSING",
+        message: "The function was called without userData or access token. Please call the function either with userData or with an access token."
+      })
+    }
+
     let userId = newId()
 
     let newAccount = Account.create({
       user: User.byId(userId),
       socialProvider: {
-        name: providerName,
-        userId: providerUserId,
-        email: providerEmail
+        name: accountData.providerName,
+        userId: accountData.providerUserId,
+        email: accountData.providerUserEmail
       }
     })
     
     let newUser = User.create({
         id: userId,
-        firstName: firstName,
-        lastName: lastName,
-        avatar: avatar,
-        email: email,
+        firstName: userData!.firstName,
+        lastName: userData!.lastName,
+        avatar: userData!.avatar,
+        primaryEmail: userData!.email,
+        emails: [userData!.email],
         accounts: [newAccount]
     })
     
@@ -30,15 +43,15 @@ function createSocialProviderAccount(firstName: String, lastName: String, email:
   } else if (user == Query.identity()){
     // If an user with this email is already existing, the user needs to be signed it to add a new account.
   
-    let account = Account.firstWhere(.user == user && .socialProvider?.name == providerName)
+    let account = Account.firstWhere(.user == user && .socialProvider?.name == accountData.providerName)
 
     let account = if(account == null) {
       let account = Account.create({
         user: user!,
         socialProvider: {
-          name: providerName,
-          userId: providerUserId,
-          email: providerEmail
+          name: accountData.providerName,
+          userId: accountData.providerUserId,
+          email: accountData.providerUserEmail
         }
       })
       

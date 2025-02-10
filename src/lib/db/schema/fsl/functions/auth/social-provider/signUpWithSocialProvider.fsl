@@ -1,6 +1,13 @@
+/**
+ * Signs up a user using a social provider.
+ *
+ * @param {Object} userData - User data to be stored in the User document.
+ * @param {Object} accountData - Data about the social account to be stored in the Account document.
+ * @returns {Object} An object containing the access and refresh tokens for the user.
+ */
 @role(server)
-function signUpWithSocialProvider(sp: {firstName: String, lastName: String, email: String, avatar: String?, providerUserId: String, providerName: "Github" | "Facebook" | "Google", providerEmail: String}): { access: Token, refresh: Token } {
+function signUpWithSocialProvider(userData: { firstName: String, lastName: String, email: String, avatar: String? }, accountData: { providerName: "Github" | "Facebook" | "Google", providerUserId: String, providerUserEmail: String }): { access: Token, refresh: Token } {
     
-  createSocialProviderAccount(sp.firstName, sp.lastName, sp.email, sp.avatar, sp.providerName, sp.providerUserId, sp.providerEmail)
-  signInWithSocialProvider(sp.providerName, sp.providerUserId)
+  createSocialProviderAccount(accountData, userData)
+  signInWithSocialProvider(accountData.providerName, accountData.providerUserId)
 }

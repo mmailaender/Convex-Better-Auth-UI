@@ -11,6 +11,11 @@ collection Account {
         id: String
     }?
 
-    // unique [.user, .socialProvider?.name]
-    // unique [.passkey?.id]
+    compute _socialProviderName: String? = (doc => doc.socialProvider?.name)
+    compute _passkeyId: String? = (doc => doc.passkey?.id)
+
+    // ensures that only one social account per social provider and one passkey exists per user
+    unique [.user, ._socialProviderName, .passkey]
+    // ensures that a passkey is associated only with one user
+    unique [._passkeyId]
 }

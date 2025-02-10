@@ -1,18 +1,21 @@
 collection User {
     firstName: String
     lastName: String
-    email: String
+    primaryEmail: String
+    emails: Array<String>
+    compute emailVerification: String? = doc => { getVerificationEmail(doc.id)}
     avatar: String?
     accounts: Array<Ref<Account>>
 
-    check isValidRegistration ((user) => {
-      if (user.accounts!.any((account) => account!.passkey != null)) {
-          Registration.all().any((registration) => registration.email == user.email)
-      } else {
-          true
-      }
+    // Ensures that only a `primaryEmail` is set, that is also part of the array field `emails`. 
+    // The array field `emails` contains all verified emails of the user, that way we ensure 
+    // only verified and owned emails of the users are set as `primaryEmail`. 
+    check isPrimaryEmailPartOfEmails ((user) => {
+        user.emails!.includes(user.primaryEmail)
     })
 
-    unique [.email]
+    check uniqueEmails (user => user.emails.length == user.emails.distinct().length)
+    unique [mva(.emails)]
+    check uniqueAccounts (user => user.accounts.length == user.accounts.distinct().length)
     unique [mva(.accounts)]
 }

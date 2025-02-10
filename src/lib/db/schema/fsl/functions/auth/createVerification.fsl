@@ -1,0 +1,27 @@
+/**
+ * Creates a new verification entry for a user that wants to sign-up or a user that want to update his email. The user receives the OTP to his email and can finish his sign-up with this code by calling updadeEmail().
+ * This function is only accessible by the server.
+ * @param {Object} i The object with the email and user id of the user who initiated the update email process
+ * @param {String} i.email The email of the user that wants to sign-up.
+ * @param {String} [i.userId] The id of the user who initiated the update email process. Only relevant during update email.
+ * @returns {String} The OTP of the verification entry.
+ */
+@role(server)
+function createVerification(i: { email: String, userId: String?}): String {
+  let user = if(i.userId != null) {
+    User.byId(ID(i.userId!))
+  }
+
+  let verification = Verification.firstWhere(.email == i.email)
+
+  if(verification != null) {
+    verification!.otp
+  } else {
+    Verification.create({
+      email: i.email,
+      otp: newId().toString(),
+      user: user
+    }).otp
+  }
+}
+

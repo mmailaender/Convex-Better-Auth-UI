@@ -24,7 +24,7 @@ role role_signIn {
     call
   }
 
-  privileges createRegistration {
+  privileges createVerification {
     call
   }
 }
