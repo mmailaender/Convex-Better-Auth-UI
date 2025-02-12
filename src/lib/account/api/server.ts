@@ -1,4 +1,3 @@
-import { encodeBase64 } from '@oslojs/encoding';
 import { fql } from 'fauna';
 
 import client from '$lib/db/client';
@@ -6,7 +5,6 @@ import { validatePasskeyData } from '$lib/auth/api/passkey.server.ts';
 
 import type { Account } from '$lib/db/schema/types/custom';
 import type { NullDocument } from '$lib/db/schema/types/system';
-import type { WebAuthnUserCredentialEncoded } from '$lib/auth/api/types';
 import type { SocialProvider } from './types';
 import type { CreatePasskeyAccountData } from '$lib/user/api/types';
 
@@ -29,17 +27,10 @@ export async function createPasskeyAccount(
 
 	const credential = await validatePasskeyData(data);
 
-	const encodedCredential: WebAuthnUserCredentialEncoded = {
-		id: encodeBase64(credential.id),
-		userId: credential.userId,
-		algorithmId: credential.algorithmId,
-		publicKey: encodeBase64(credential.publicKey)
-	};
-
-	console.log(`Attempting to create passkey account with credential:`, encodedCredential);
+	console.log(`Attempting to create passkey account with credential:`, credential);
 
 	const response = await client(accessToken).query<Account>(
-		fql`createPasskeyAccount(${encodedCredential}, null)`
+		fql`createPasskeyAccount(${credential}, null)`
 	);
 
 	return response.data;
