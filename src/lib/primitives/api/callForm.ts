@@ -2,36 +2,44 @@ import { goto } from "$app/navigation";
 
 /**
  * Recursively deep parses any JSON string values found in objects or arrays.
+ * Only parses strings that appear to be JSON objects or arrays.
  * @param value - The input which can be a JSON string, object, or array.
  * @returns The value with all nested JSON strings parsed.
  */
 function deepParse<T>(value: unknown): T {
 	if (typeof value === 'string') {
+	  // Trim the string so we can check the first character accurately.
+	  const trimmed = value.trim();
+	  // Only attempt to parse if it looks like an object or array.
+	  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
 		try {
-			// Attempt to parse the string.
-			const parsed = JSON.parse(value);
-			// Recursively parse the result in case it's an array or object with nested JSON strings.
-			return deepParse(parsed);
+		  const parsed = JSON.parse(trimmed);
+		  // Recursively process the parsed value.
+		  return deepParse(parsed);
 		} catch {
-			// Not a JSON string, so return it as-is.
-			return value as T;
+		  // If parsing fails, return the original string.
+		  return value as T;
 		}
+	  }
+	  // If it doesn't start with { or [, return the string as-is.
+	  return value as T;
 	} else if (Array.isArray(value)) {
-		// If it's an array, map over the elements and deep-parse each one.
-		return value.map((item) => deepParse(item)) as unknown as T;
+	  // Process each element of the array.
+	  return value.map(item => deepParse(item)) as unknown as T;
 	} else if (value !== null && typeof value === 'object') {
-		// If it's an object, iterate over its keys and deep-parse each property.
-		const newObj: Record<string, unknown> = {};
-		for (const key in value) {
-			if (Object.prototype.hasOwnProperty.call(value, key)) {
-				newObj[key] = deepParse((value as Record<string, unknown>)[key]);
-			}
+	  // Process each key in the object.
+	  const newObj: Record<string, unknown> = {};
+	  for (const key in value) {
+		if (Object.prototype.hasOwnProperty.call(value, key)) {
+		  newObj[key] = deepParse((value as Record<string, unknown>)[key]);
 		}
-		return newObj as T;
+	  }
+	  return newObj as T;
 	}
-	// For any other type (number, boolean, etc.), return it as-is.
+	// Return numbers, booleans, etc. as-is.
 	return value as T;
-}
+  }
+  
 
 /**
  * Calls a SvelteKit form action via `fetch`, submitting form data in `application/x-www-form-urlencoded` format.
