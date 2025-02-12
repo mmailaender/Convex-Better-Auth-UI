@@ -1,6 +1,6 @@
 import type { RequestEvent, RequestHandler } from './$types';
 
-import { getVerificationEmail, sendEmail } from '$lib/emails';
+import { getVerificationEmail, sendEmail } from '$lib/email/templates';
 
 export const POST: RequestHandler = async (event: RequestEvent) => {
 	const { OTP, emailTo } = await event.request.json();

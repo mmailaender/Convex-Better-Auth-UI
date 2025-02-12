@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	
+	import { signInWithPasskey, signUpWithPasskey } from '$lib/auth/api/passkey';
 	import SocialProvider from '$lib/auth/social/provider.svelte';
-	import { signInWithPasskey, signUpWithPasskey } from '$lib/auth/passkeys/client';
 	interface Props {
 		data: { userId: string; credentialUserId: Uint8Array };
 	}
@@ -48,8 +49,7 @@
 				const errorMessage = await res.text();
 				throw new Error(errorMessage);
 			}
-			const { exists } = await res.json();
-			userExists = exists;
+			userExists = (await res.json()).userExists;
 		} catch (err: any) {
 			errorMessage = err?.message ?? 'Error verifying email.';
 		}

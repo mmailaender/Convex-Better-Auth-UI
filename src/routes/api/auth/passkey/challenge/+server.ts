@@ -1,6 +1,7 @@
-import { createWebAuthnChallenge } from "$lib/auth/passkeys/server";
 import { encodeBase64 } from "@oslojs/encoding";
+
 import { RefillingTokenBucket } from "$lib/auth/rate-limit";
+import { createWebAuthnChallenge } from "$lib/auth/api/passkey.server.ts";
 
 import type { RequestEvent } from "./$types";
 

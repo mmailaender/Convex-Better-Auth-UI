@@ -1,93 +1,189 @@
+import { type TimeStub, type DateStub } from "fauna";
+import { v } from "./system";
 
-import { type TimeStub, type DateStub, type DocumentReference } from 'fauna';
-import type { Document, Document_Create, Document_Update, Document_Replace } from './system';
+import { scope, type } from "arktype";
 
-type Account = {
-  user: Document<User>;
-  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
-  passkey?: { publicKey: string; algorithmId: number; id: string };
-  _socialProviderName?: string;
-  _passkeyId?: string;
-};
+const types = scope({
+  user: [
+    v.document.read,
+    "&",
+    {
+      firstName: "string",
+      lastName: "string",
+      primaryEmail: "string",
+      emails: "string[]",
+      "avatar?": "string",
+      accounts: "account[]",
+      "emailVerification?": "string",
+    },
+  ],
+  account: [
+    v.document.read,
+    "&",
+    {
+      user: "user",
+      "socialProvider?": {
+        name: "'Github' | 'Google' | 'Facebook'",
+        userId: "string",
+        email: "string",
+      },
+      "passkey?": {
+        publicKey: "string",
+        algorithmId: "number",
+        id: "string",
+      },
+      "_socialProviderName?": "string",
+      "_passkeyId?": "string",
+    },
+  ],
+  verification: [
+    v.document.read,
+    "&",
+    {
+      email: "string",
+      otp: "string",
+      "user?": "user",
+    },
+  ],
+}).export();
 
-type Account_Create = {
-  user: DocumentReference;
-  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
-  passkey?: { publicKey: string; algorithmId: number; id: string };
-};
+const types_create = scope({
+  user: [
+    v.document.create,
+    "&",
+    {
+      firstName: "string",
+      lastName: "string",
+      primaryEmail: "string",
+      emails: "string[]",
+      "avatar?": "string",
+      accounts: v.createRef(type("'Account'")).array(),
+    },
+  ],
+  account: [
+    v.document.create,
+    "&",
+    {
+      user: v.createRef(type("'User'")),
+      "socialProvider?": {
+        name: "'Github' | 'Google' | 'Facebook'",
+        userId: "string",
+        email: "string",
+      },
+      "passkey?": {
+        publicKey: "string",
+        algorithmId: "number",
+        id: "string",
+      },
+    },
+  ],
+  verification: [
+    v.document.create,
+    "&",
+    {
+      email: "string",
+      otp: "string",
+      "user?": v.createRef(type("'User'")),
+    },
+  ],
+}).export();
 
-type Account_Replace = {
-  user: DocumentReference;
-  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
-  passkey?: { publicKey: string; algorithmId: number; id: string };
-};
+const types_update = scope({
+  user: [
+    v.document.update,
+    "&",
+    {
+      "firstName?": "string",
+      "lastName?": "string",
+      "primaryEmail?": "string",
+      "emails?": "string[]",
+      "avatar?": "string",
+      "accounts?": v.createRef(type("'Account'")).array(),
+    },
+  ],
+  account: [
+    v.document.update,
+    "&",
+    {
+      "user?": v.createRef(type("'User'")),
+      "socialProvider?": {
+        "name?": "'Github' | 'Google' | 'Facebook'",
+        "userId?": "string",
+        "email?": "string",
+      },
+      "passkey?": {
+        "publicKey?": "string",
+        "algorithmId?": "number",
+        "id?": "string",
+      },
+    },
+  ],
+  verification: [
+    v.document.update,
+    "&",
+    {
+      "email?": "string",
+      "otp?": "string",
+      "user?": v.createRef(type("'User'")),
+    },
+  ],
+}).export();
 
-type Account_Update = Partial<{
-  user: DocumentReference;
-  socialProvider?: { name: "Github" | "Google" | "Facebook"; userId: string; email: string };
-  passkey?: { publicKey: string; algorithmId: number; id: string };
-}>;
+const types_replace = scope({
+  user: [
+    v.document.replace,
+    "&",
+    {
+      firstName: "string",
+      lastName: "string",
+      primaryEmail: "string",
+      emails: "string[]",
+      "avatar?": "string",
+      accounts: v.createRef(type("'Account'")).array(),
+    },
+  ],
+  account: [
+    v.document.replace,
+    "&",
+    {
+      user: v.createRef(type("'User'")),
+      "socialProvider?": {
+        name: "'Github' | 'Google' | 'Facebook'",
+        userId: "string",
+        email: "string",
+      },
+      "passkey?": {
+        publicKey: "string",
+        algorithmId: "number",
+        id: "string",
+      },
+    },
+  ],
+  verification: [
+    v.document.replace,
+    "&",
+    {
+      email: "string",
+      otp: "string",
+      "user?": v.createRef(type("'User'")),
+    },
+  ],
+}).export();
 
-type User = {
-  firstName: string;
-  lastName: string;
-  primaryEmail: string;
-  emails: Array<string>;
-  avatar?: string;
-  accounts: Array<Document<Account>>;
-  emailVerification?: string;
-};
+type User = typeof types.user.infer;
+type User_Create = typeof types_create.user.infer;
+type User_Update = typeof types_update.user.infer;
+type User_Replace = typeof types_replace.user.infer;
 
-type User_Create = {
-  firstName: string;
-  lastName: string;
-  primaryEmail: string;
-  emails: Array<string>;
-  avatar?: string;
-  accounts: Array<DocumentReference>;
-};
+type Account = typeof types.account;
+type Account_Create = typeof types_create.account.infer;
+type Account_Update = typeof types_update.account.infer;
+type Account_Replace = typeof types_replace.account.infer;
 
-type User_Replace = {
-  firstName: string;
-  lastName: string;
-  primaryEmail: string;
-  emails: Array<string>;
-  avatar?: string;
-  accounts: Array<DocumentReference>;
-};
-
-type User_Update = Partial<{
-  firstName: string;
-  lastName: string;
-  primaryEmail: string;
-  emails: Array<string>;
-  avatar?: string;
-  accounts: Array<DocumentReference>;
-}>;
-
-type Verification = {
-  email: string;
-  otp: string;
-  user?: Document<User>;
-};
-
-type Verification_Create = {
-  email: string;
-  otp: string;
-  user?: DocumentReference;
-};
-
-type Verification_Replace = {
-  email: string;
-  otp: string;
-  user?: DocumentReference;
-};
-
-type Verification_Update = Partial<{
-  email: string;
-  otp: string;
-  user?: DocumentReference;
-}>;
+type Verification = typeof types.verification;
+type Verification_Create = typeof types_create.verification.infer;
+type Verification_Update = typeof types_update.verification.infer;
+type Verification_Replace = typeof types_replace.verification.infer;
 
 interface UserCollectionsTypeMapping {
   Account: {
@@ -110,7 +206,30 @@ interface UserCollectionsTypeMapping {
   };
 }
 
+const validator = {
+  user: {
+    read: types.user,
+    create: types_create.user,
+    update: types_update.user,
+    replace: types_replace.user,
+  },
+  account: {
+    read: types.account,
+    create: types_create.account,
+    update: types_update.account,
+    replace: types_replace.account,
+  },
+  verification: {
+    read: types.verification,
+    create: types_create.verification,
+    update: types_update.verification,
+    replace: types_replace.verification,
+  },
+};
+
 export type {
+  validator,
+  validator as v,
   Account,
   Account_Create,
   Account_Replace,
@@ -123,5 +242,5 @@ export type {
   Verification_Create,
   Verification_Replace,
   Verification_Update,
-  UserCollectionsTypeMapping
+  UserCollectionsTypeMapping,
 };

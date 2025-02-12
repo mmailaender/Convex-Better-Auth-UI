@@ -1,9 +1,5 @@
 <script lang="ts">
-	import UserProfile from '$lib/auth/UserProfile.svelte';
-	import type { PageData } from './$types';
-    import { page } from '$app/state';
-
-	let { data }: { data: PageData } = $props();
+	import UserProfile from '$lib/user/ui/page/UserProfile.svelte';
 </script>
 
 <UserProfile />

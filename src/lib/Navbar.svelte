@@ -1,5 +1,5 @@
 <script>
-	import UserButton from './auth/UserButton.svelte';
+	import UserButton from '$lib/user/ui/widget/UserButton.svelte';
 </script>
 
 <nav class="bg-gray-800">

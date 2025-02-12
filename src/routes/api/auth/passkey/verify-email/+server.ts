@@ -1,8 +1,10 @@
-import { createVerification, verifyUserExists } from '$lib/auth/user.server';
-import type { RequestEvent, RequestHandler } from './$types';
-import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
-import { getVerificationEmail, sendEmail } from '$lib/emails';
 import { error, json } from '@sveltejs/kit';
+
+import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
+import { getVerificationEmail, sendEmail } from '$lib/email/templates';
+import { createVerification, verifyUserExists } from '$lib/auth/api/verification.server';
+
+import type { RequestEvent, RequestHandler } from './$types';
 
 export const GET: RequestHandler = async (event: RequestEvent) => {
 	const url = new URL(event.request.url);
@@ -42,14 +44,16 @@ export const GET: RequestHandler = async (event: RequestEvent) => {
 			if (err) {
 				return error(400, err.message);
 			}
-			
-			console.log(`verify-email: Successfully send verification email to ${email}, email id: ${data?.id}`);
-			return json(true);
+
+			console.log(
+				`verify-email: Successfully send verification email to ${email}, email id: ${data?.id}`
+			);
+			return json({ userExists: false });
 		} catch (err) {
 			console.error(`verify-email: Error verifying email ${email}`, err);
 			return error(500, 'Internal Server Error');
 		}
 	}
 
-	return new Response(JSON.stringify({ exists }), { status: 200 });
+	return json({ userExists: true });
 };

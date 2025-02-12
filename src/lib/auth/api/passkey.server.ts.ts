@@ -15,11 +15,16 @@ import type {
 	COSERSAPublicKey
 } from '@oslojs/webauthn';
 import { ECDSAPublicKey, p256 } from '@oslojs/crypto/ecdsa';
-import { decodeBase64 } from '@oslojs/encoding';
-import { verifyWebAuthnChallenge } from '$lib/auth/passkeys/server';
+import { decodeBase64, encodeBase64, encodeHexLowerCase } from '@oslojs/encoding';
 import { RSAPublicKey } from '@oslojs/crypto/rsa';
 import { env } from '$env/dynamic/private';
-import type { WebAuthnUserCredential } from '$lib/auth/passkeys/types';
+
+import client from "$lib/db/client";
+import { fql } from "fauna";
+import { FAUNA_SIGNIN_KEY } from '$env/static/private';
+import type { WebAuthnUserCredential, WebAuthnUserCredentialEncoded } from './types';
+
+const challengeBucket = new Set<string>();
 
 /**
  * Validates the passkey data provided during sign-up.
@@ -38,7 +43,7 @@ export async function validatePasskeyData(data: {
 	userId: string;
 	encodedAttestationObject: string;
 	encodedClientDataJSON: string;
-}): Promise<WebAuthnUserCredential> {
+}): Promise<WebAuthnUserCredentialEncoded> {
 	const { otp, userId, encodedAttestationObject, encodedClientDataJSON } = data;
 
 	// Construct allowed URLs from environment variables
@@ -122,7 +127,7 @@ export async function validatePasskeyData(data: {
 		throw new Error('Cross-origin requests are not allowed');
 	}
 
-	let credential: WebAuthnUserCredential;
+	let credential: WebAuthnUserCredentialEncoded;
 
 	// Handle EC2 Public Key
 	if (authenticatorData.credential.publicKey.algorithm() === coseAlgorithmES256) {
@@ -146,10 +151,10 @@ export async function validatePasskeyData(data: {
 		).encodeSEC1Uncompressed();
 
 		credential = {
-			id: authenticatorData.credential.id,
+			id: encodeBase64(authenticatorData.credential.id),
 			userId: userId,
 			algorithmId: coseAlgorithmES256,
-			publicKey: encodedPublicKey,
+			publicKey: encodeBase64(encodedPublicKey),
 			otp: otp
 		};
 	}
@@ -166,10 +171,10 @@ export async function validatePasskeyData(data: {
 		const encodedPublicKey = new RSAPublicKey(cosePublicKey.n, cosePublicKey.e).encodePKCS1();
 
 		credential = {
-			id: authenticatorData.credential.id,
+			id: encodeBase64(authenticatorData.credential.id),
 			userId: userId,
 			algorithmId: coseAlgorithmRS256,
-			publicKey: encodedPublicKey,
+			publicKey: encodeBase64(encodedPublicKey),
 			otp: otp
 		};
 	}
@@ -180,4 +185,56 @@ export async function validatePasskeyData(data: {
 
 	return credential;
 }
+
+/**
+ * Creates a new WebAuthn challenge.
+ * A challenge is a unique random value sent to the client to ensure authenticity. The client signs this challenge using its private key, and the server verifies it.
+ *
+ * @returns {Uint8Array} The generated challenge as a Uint8Array.
+ */
+export function createWebAuthnChallenge(): Uint8Array {
+	const challenge = new Uint8Array(20);
+	crypto.getRandomValues(challenge);
+	const encoded = encodeHexLowerCase(challenge);
+	challengeBucket.add(encoded);
+	return challenge;
+}
+
+/**
+ * Verifies a WebAuthn challenge by checking if it exists in the challenge bucket.
+ * This ensures that the challenge was created and not tampered with.
+ *
+ * @param {Uint8Array} challenge - The challenge to verify.
+ * @returns {boolean} True if the challenge is valid, false otherwise.
+ */
+export function verifyWebAuthnChallenge(challenge: Uint8Array): boolean {
+	const encoded = encodeHexLowerCase(challenge);
+	console.log("Verifying WebAuthn challenge:", encoded);
+	return challengeBucket.delete(encoded);
+}
+
+/**
+ * Fetches a stored WebAuthn credential by its ID.
+ * Retrieves and decodes the credential from the database for use in WebAuthn operations.
+ *
+ * @param {Uint8Array} credentialId - The ID of the credential to fetch.
+ * @returns {Promise<WebAuthnUserCredential | null>} The credential if found, otherwise null.
+ */
+export async function getPasskeyCredential(credentialId: Uint8Array): Promise<WebAuthnUserCredential | null> {
+	const response = await client(FAUNA_SIGNIN_KEY).query<WebAuthnUserCredentialEncoded>(fql`getPasskeyCredential(${encodeBase64(credentialId)})`);
+
+	if (response.data === null) {
+		return null;
+	}
+
+	console.log("Fetched WebAuthn credential:", response.data);
+
+	return {
+		id: decodeBase64(response.data.id),
+		userId: response.data.userId,
+		algorithmId: response.data.algorithmId,
+		publicKey: decodeBase64(response.data.publicKey)
+	};
+}
+
 

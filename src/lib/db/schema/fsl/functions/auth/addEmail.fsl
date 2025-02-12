@@ -1,6 +1,6 @@
 @role(server)
-function addEmail(email: String, verificationOTP: String): User {
-    let verification = Verification.all().firstWhere((verification) => verification.email == email && verification.otp == verificationOTP)
+function addEmail( data: { email: String, verificationOTP: String } ): User {
+    let verification = Verification.all().firstWhere((verification) => verification.email == data.email && verification.otp == data.verificationOTP)
 
     if(verification == null) {
       abort({
@@ -11,7 +11,7 @@ function addEmail(email: String, verificationOTP: String): User {
 
     let user = Query.identity()
     verification!.delete()
-    user!.update({emails: user!.emails!.append(email)})
+    user!.update({emails: user!.emails!.append(data.email)})
     
 
 }

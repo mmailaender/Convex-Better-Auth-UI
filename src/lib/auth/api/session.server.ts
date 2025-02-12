@@ -1,8 +1,9 @@
-import type { Tokens } from '../user';
-import type { RequestEvent } from '@sveltejs/kit';
-import uClient from '$lib/db/userClient';
+import client from '$lib/db/client';
 import { fql } from 'fauna';
+
+import type { RequestEvent } from '@sveltejs/kit';
 import type { User } from '$lib/db/schema/types/custom';
+import type { Tokens } from './types';
 
 /**
  * Invalidates the current session for the user.
@@ -12,7 +13,7 @@ import type { User } from '$lib/db/schema/types/custom';
  * @returns {Promise<void>} Resolves when the session is invalidated.
  */
 export async function invalidateSession(secret: string): Promise<void> {
-	await uClient(secret).query(fql`signOut()`);
+	await client(secret).query(fql`signOut()`);
 }
 
 /**
@@ -22,8 +23,8 @@ export async function invalidateSession(secret: string): Promise<void> {
  * @param {string} secret - The session secret token.
  * @returns {Promise<void>} Resolves when all sessions are invalidated.
  */
-export async function invalidateUserSessions(secret: string): Promise<void> {
-	await uClient(secret).query(fql`signOutFromAllDevices()`);
+export async function invalidateAllSessions(secret: string): Promise<void> {
+	await client(secret).query(fql`signOutFromAllDevices()`);
 }
 
 /**
@@ -38,7 +39,7 @@ export function setAccessTokenCookie(event: RequestEvent, token: string, expires
 		httpOnly: true,
 		sameSite: 'lax',
 		expires: expiresAt,
-		path: '/',
+		path: '/'
 	});
 }
 
@@ -54,7 +55,7 @@ export function setRefreshTokenCookie(event: RequestEvent, token: string, expire
 		httpOnly: true,
 		sameSite: 'strict',
 		expires: expiresAt,
-		path: '/',
+		path: '/'
 	});
 }
 
@@ -65,7 +66,7 @@ export function setRefreshTokenCookie(event: RequestEvent, token: string, expire
  */
 export function deleteAccessTokenCookie(event: RequestEvent): void {
 	event.cookies.delete('access_token', {
-		path: '/',
+		path: '/'
 	});
 }
 
@@ -76,7 +77,7 @@ export function deleteAccessTokenCookie(event: RequestEvent): void {
  */
 export function deleteRefreshTokenCookie(event: RequestEvent): void {
 	event.cookies.delete('refresh_token', {
-		path: '/',
+		path: '/'
 	});
 
 	// console.log("After deletion:", event.cookies.getAll());
@@ -89,7 +90,7 @@ export function deleteRefreshTokenCookie(event: RequestEvent): void {
  * @returns {Promise<Tokens>} The new set of tokens.
  */
 export async function refreshAccessToken(refreshToken: string): Promise<Tokens> {
-	const response = await uClient(refreshToken).query(fql`refreshAccessToken()`);
+	const response = await client(refreshToken).query(fql`refreshAccessToken()`);
 	return response.data;
 }
 

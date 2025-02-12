@@ -5,13 +5,13 @@ import {
 	refreshAccessToken,
 	setAccessTokenCookie,
 	setRefreshTokenCookie
-} from '$lib/auth/session';
+} from '$lib/auth/api/session.server';
 import { sequence } from '@sveltejs/kit/hooks';
 
 import { redirect, type Handle } from '@sveltejs/kit';
 import { i18n } from '$lib/i18n';
-import { getUser } from '$lib/auth/user';
-import { createRouteMatcher } from '$lib/auth/createRouteMatcher';
+import { getUser } from '$lib/user/api/server';
+import { createRouteMatcher } from '$lib/auth/utils/createRouteMatcher';
 
 const handleParaglide: Handle = i18n.handle();
 
