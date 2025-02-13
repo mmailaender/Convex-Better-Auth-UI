@@ -1,8 +1,10 @@
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/api/session.server';
+import { validatePasskeyData } from '$lib/auth/api/passkey.server.ts';
+
+// types
 import type { RequestEvent } from './$types';
-import { signUpWithPasskey } from '$lib/auth/user.server';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
-import type { WebAuthnUserCredential } from '$lib/auth/passkeys/types';
-import { validatePasskeyData } from '$lib/auth/passkeys/server/validatePasskey';
+import type { WebAuthnUserCredentialEncoded } from '$lib/auth/api/types';
+import { signUpWithPasskey } from '$lib/auth/api/signUp.server';
 
 /**
  * Handles the WebAuthn sign-up process by verifying the provided attestation and client data.
@@ -35,7 +37,7 @@ export async function POST(event: RequestEvent) {
 		return new Response('Invalid or missing fields', { status: 400 });
 	}
 
-	let credential: WebAuthnUserCredential;
+	let credential: WebAuthnUserCredentialEncoded;
 	try {
 		credential = await validatePasskeyData({
 			otp: payload.otp,
@@ -48,18 +50,17 @@ export async function POST(event: RequestEvent) {
 		console.error('Validation error:', error);
 		let message = 'Invalid data';
 		if (error instanceof Error) {
-		  message = error.message;
+			message = error.message;
 		}
 		return new Response(message, { status: 400 });
-	  }
+	}
 
 	try {
-		const { access, refresh } = await signUpWithPasskey(
-			credential,
-			payload.firstName,
-			payload.lastName,
-			payload.email
-		);
+		const { access, refresh } = await signUpWithPasskey(credential, {
+			firstName: payload.firstName,
+			lastName: payload.lastName,
+			email: payload.email
+		});
 		console.log('Sign-up with passkey succeeded');
 		setAccessTokenCookie(event, access.secret!, access.ttl!.toDate());
 		setRefreshTokenCookie(event, refresh.secret!, refresh.ttl!.toDate());

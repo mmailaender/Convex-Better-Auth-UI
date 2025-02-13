@@ -10,7 +10,7 @@ import { goto } from '$app/navigation';
 import { decodeBase64, encodeBase64 } from '@oslojs/encoding';
 import { ObjectParser } from '@pilcrowjs/object-parser';
 
-function getFriendlyErrorMessage(error: any): string {
+function getFriendlyErrorMessage(error: Error): string {
 	switch (error.name) {
 		case 'NotAllowedError':
 			return 'Authentication was canceled or timed out. Please try again.';
@@ -69,8 +69,8 @@ export async function signInWithPasskey() {
 			const errorText = await response.text();
 			throw new Error(errorText);
 		}
-	} catch (err: any) {
-		throw new Error(getFriendlyErrorMessage(err));
+	} catch (err) {
+		throw new Error(getFriendlyErrorMessage(err as Error));
 	}
 }
 

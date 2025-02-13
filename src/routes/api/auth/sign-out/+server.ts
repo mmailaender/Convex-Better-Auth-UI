@@ -1,5 +1,5 @@
 import type { RequestEvent, RequestHandler } from './$types';
-import  { signOut } from '$lib/auth/user';
+import  { signOut } from '$lib/auth/api/signOut.server';
 
 export const GET: RequestHandler = async (event: RequestEvent) => {
     const success = await signOut(event);

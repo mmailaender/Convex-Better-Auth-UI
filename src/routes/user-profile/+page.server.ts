@@ -1,11 +1,26 @@
-import { validatePasskeyData } from '$lib/auth/passkeys/server/validatePasskey';
-import type { WebAuthnUserCredentialEncoded } from '$lib/auth/passkeys/types';
-import { getUserAndAccounts, addEmail, updateUser, createPasskeyAccount } from '$lib/auth/user';
-import { encodeBase64 } from '@oslojs/encoding';
-import type { Actions } from './$types';
+// modules
+import { error, redirect } from '@sveltejs/kit';
+import { type } from 'arktype';
 
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+// lib
+import { deleteUser, getUserAndAccounts, updateProfileData } from '$lib/user/api/server';
+import {
+	addEmail,
+	cancelEmailVerification,
+	deleteEmail,
+	setPrimaryEmail
+} from '$lib/email/api/server';
+import { createPasskeyAccount, deleteAccount } from '$lib/account/api/server';
+
+// types
+import {
+	addEmailData,
+	cancelEmailVerificationData,
+	createPasskeyAccountData,
+	profileData,
+	verifyEmailData
+} from '$lib/user/api/types';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ cookies }) => {
 	const accessToken = cookies.get('access_token')!;
@@ -18,153 +33,217 @@ export const load = (async ({ cookies }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-	profileData: async ({ cookies, request }) => {
+	updateProfileData: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return;
-		}
-
 		const formData = await request.formData();
-		const firstName = formData.get('firstName') || undefined;
-		const lastName = formData.get('lastName') || undefined;
-		const avatar = formData.get('avatar') || undefined;
 
-		if (
-			(firstName !== undefined && typeof firstName !== 'string') ||
-			(lastName !== undefined && typeof lastName !== 'string') ||
-			(avatar !== undefined && typeof avatar !== 'string')
-		) {
-			console.error('Invalid fields: must be strings or undefined');
-			return error(400, { message: 'Invalid fields: must be strings or undefined' });
+		const data = profileData.partial()({
+			firstName: formData.get('firstName') || undefined,
+			lastName: formData.get('lastName') || undefined,
+			avatar: formData.get('avatar') || undefined
+		});
+		if (data instanceof type.errors) {
+			console.error(data.summary);
+			return error(400, { message: data.summary });
+		} else {
+			const updateData = {
+				...(data.firstName && { avatar: data.firstName }),
+				...(data.firstName && { avatar: data.lastName }),
+				...(data.avatar && { avatar: data.avatar })
+			};
+
+			try {
+				await updateProfileData(accessToken!, updateData);
+				return { message: 'Profile updated successfully' };
+			} catch (err) {
+				console.error('Error updating user:', err);
+				return error(400, { message: 'Failed to update profile' });
+			}
 		}
+	},
 
-		const updateData = {
-			...(firstName && { firstName }),
-			...(lastName && { lastName }),
-			...(avatar && { avatar })
-		};
+	setPrimaryEmail: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
 
-		try {
-			await updateUser(accessToken, updateData);
-			return { message: 'Profile updated successfully' };
-		} catch (err) {
-			console.error('Error updating user:', err);
-			return error(400, { message: 'Failed to update profile' });
+		const email = type('string')(formData.get('email'));
+
+		if (email instanceof type.errors) {
+			console.error('email ', email.summary);
+			return error(400, { message: `email ${email.summary}` });
+		} else {
+			try {
+				const user = await setPrimaryEmail(accessToken!, email);
+				return JSON.stringify(user);
+			} catch (err) {
+				console.error('Error setting primary email:', err);
+				return error(400, { message: `Failed to set primary email "${email}"` });
+			}
+		}
+	},
+
+	deleteEmail: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
+
+		const email = type('string')(formData.get('email'));
+
+		if (email instanceof type.errors) {
+			console.error('email ', email.summary);
+			return error(400, { message: `email ${email.summary}` });
+		} else {
+			try {
+				const user = await deleteEmail(accessToken!, email);
+				return JSON.stringify(user);
+			} catch (err) {
+				console.error('Error deleting email:', err);
+				return error(400, { message: `Failed to delete email "${email}"` });
+			}
 		}
 	},
 
 	verifyEmail: async ({ request, fetch }) => {
 		const formData = await request.formData();
-		const email = formData.get('email');
-		const userId = formData.get('userId');
 
-		if (typeof email !== 'string' || typeof userId !== 'string') {
-			console.error('Invalid or missing email in formData');
-			return error(400, { message: 'Invalid or missing email' });
-		}
+		const data = verifyEmailData({ email: formData.get('email'), userId: formData.get('userId') });
+		if (data instanceof type.errors) {
+			console.error(data.summary);
+			return error(400, { message: data.summary });
+		} else {
+			try {
+				console.log(`Verifying email: ${data.email}`);
+				const res = await fetch(
+					`/api/auth/passkey/verify-email?email=${encodeURIComponent(data.email)}&userId=${data.userId}`,
+					{
+						method: 'GET',
+						headers: { 'Content-Type': 'application/json' }
+					}
+				);
 
-		try {
-			console.log(`Verifying email: ${email}`);
-			const res = await fetch(
-				`/api/auth/passkey/verify-email?email=${encodeURIComponent(email)}&userId=${userId}`,
-				{
-					method: 'GET',
-					headers: { 'Content-Type': 'application/json' }
+				if (!res.ok) {
+					const errorMessage = await res.text();
+					console.error('Failed to verify email:', errorMessage);
+					return error(400, { message: errorMessage });
 				}
-			);
 
-			if (!res.ok) {
-				const errorMessage = await res.text();
-				console.error('Failed to verify email:', errorMessage);
-				return error(400, { message: errorMessage });
+				const exists = (await res.json()) as boolean;
+				console.log(`Email ${data.email} successfully verified: ${exists}`);
+
+				return {
+					message: `Email verification successfully created for ${data.email}`,
+					verified: exists,
+					email: data.email
+				};
+			} catch (err) {
+				console.error(`Failed to verify email ${data.email}:`, err);
+				return error(400, { message: `Failed to verify email ${data.email}` });
 			}
+		}
+	},
 
-			const exists = (await res.json()) as boolean;
-			console.log(`Email ${email} successfully verified: ${exists}`);
+	cancelEmailVerification: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
 
-			return {
-				message: `Email verification successfully created for ${email}`,
-				verified: exists
-			};
-		} catch (err) {
-			console.error(`Failed to verify email ${email}:`, err);
-			return error(400, { message: `Failed to verify email ${email}` });
+		const data = cancelEmailVerificationData(formData.get('emailVerification'));
+		if (data instanceof type.errors) {
+			console.log(data.message);
+			return error(400, { message: data.summary });
+		} else {
+			try {
+				await cancelEmailVerification(accessToken!, data);
+				return { success: 'true' };
+			} catch (err) {
+				console.error('Error canceling confirmation: ', err);
+				return error(400, { message: 'Failed to cancel confirmation' });
+			}
 		}
 	},
 
 	addEmail: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return error(400, { message: 'Please reload the page' });
-		}
-
 		const formData = await request.formData();
-		const email = formData.get('email');
-		const verificationOTP = formData.get('verificationOTP');
-		if (typeof email !== 'string' || typeof verificationOTP !== 'string') {
-			return error(400, { message: 'Invalid or missing email' });
-		}
 
-		try {
-			await addEmail(accessToken, email, verificationOTP);
-			return { message: 'Email updated successfully' };
-		} catch (err) {
-			console.error('Error updating user:', err);
-			return error(400, { message: 'Failed to update email' });
+		const out = addEmailData({
+			email: formData.get('email'),
+			verificationOTP: formData.get('verificationOTP')
+		});
+		if (out instanceof type.errors) {
+			console.error(out.summary);
+			return error(400, { message: out.summary });
+		} else {
+			try {
+				const res = await addEmail(accessToken!, out);
+				return JSON.stringify(res);
+			} catch (err) {
+				console.error('Error updating user:', err);
+				return error(400, { message: 'Failed to update email' });
+			}
 		}
 	},
 
 	createPasskeyAccount: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
-		if (!accessToken) {
-			return error(400, { message: 'Please reload the page' });
-		}
 
 		const formData = await request.formData();
-		const userId = formData.get('userId');
-		const encodedAttestationObject = formData.get('encodedAttestationObject');
-		const encodedClientDataJSON = formData.get('encodedClientDataJSON');
+		const out = createPasskeyAccountData({
+			userId: formData.get('userId'),
+			encodedAttestationObject: formData.get('encodedAttestationObject'),
+			encodedClientDataJSON: formData.get('encodedClientDataJSON')
+		});
 
-		if (
-			typeof userId !== 'string' ||
-			typeof encodedAttestationObject !== 'string' ||
-			typeof encodedClientDataJSON !== 'string'
-		) {
-			console.error('Invalid or missing fields');
-			return error(400, { message: 'Invalid or missing fields' });
+		if (out instanceof type.errors) {
+			console.error(out.summary);
+			return error(400, { message: out.summary });
+		} else {
+			try {
+				const response = await createPasskeyAccount(accessToken!, out);
+
+				console.log('Passkey account created successfully');
+				return JSON.stringify(response);
+			} catch (err) {
+				console.error('Error creating passkey account:', err);
+				return error(400, { message: 'Failed to create passkey account' });
+			}
 		}
+	},
 
-		try {
-			console.log(`Attempting to create passkey account for user: ${userId} with data:`, {
-				encodedAttestationObject,
-				encodedClientDataJSON
-			});
+	deleteAccount: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
 
-			const credential = await validatePasskeyData({
-				userId,
-				encodedAttestationObject,
-				encodedClientDataJSON
-			});
+		const accountId = type('string.numeric > 0')(formData.get('accountId'));
 
-			const encodedCredential: WebAuthnUserCredentialEncoded = {
-				id: encodeBase64(credential.id),
-				userId,
-				algorithmId: credential.algorithmId,
-				publicKey: encodeBase64(credential.publicKey)
-			};
+		if (accountId instanceof type.errors) {
+			console.error('accountId ', accountId.summary);
+			return error(400, { message: `accountId ${accountId.summary}` });
+		} else {
+			try {
+				await deleteAccount(accessToken!, accountId);
+				console.log(`Account ${accountId} deleted successfully.`);
+				return { success: true };
+			} catch (err) {
+				console.error(`Error deleting account ${accountId}: `, err);
+				return error(400, { message: 'Failed to delete account' });
+			}
+		}
+	},
 
-			console.log(`Attempting to create passkey account with credential:`, encodedCredential);
+	deleteUser: async (event) => {
+		const formData = await event.request.formData();
+		const userId = type('string')(formData.get('userId'));
 
-			const response = await createPasskeyAccount(accessToken, encodedCredential);
-
-			console.log('Passkey account created successfully');
-
-			const account = JSON.stringify(response);
-
-			return { message: 'Passkey account created successfully', account };
-		} catch (err) {
-			console.error('Error creating passkey account:', err);
-			return error(400, { message: 'Failed to create passkey account' });
+		if (userId instanceof type.errors) {
+			console.error('userId ', userId.summary);
+			return error(400, { message: `userId ${userId.summary}` });
+		} else {
+			try {
+				await deleteUser(event, userId);
+			} catch (err) {
+				console.error('Failed to delete user:', err);
+				return error(400, { message: 'Failed to delete user' });
+			}
+			redirect(303, '/sign-in');
 		}
 	}
 } satisfies Actions;

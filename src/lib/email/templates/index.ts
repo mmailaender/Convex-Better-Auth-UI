@@ -2,10 +2,9 @@ import type { Component, ComponentProps } from 'svelte';
 import { render as svelteRender } from 'svelte/server';
 import { render as maizzleRender, type Config } from '@maizzle/framework';
 import tailwindcssPresetEmail from 'tailwindcss-preset-email';
-import tailwindConfig from '../../../tailwind.config';
+import tailwindConfig from '../../../../tailwind.config';
 
 import Verification from './Verification.svelte';
-
 import { RESEND_API_KEY } from '$env/static/private';
 import { Resend } from 'resend';
 
@@ -21,7 +20,7 @@ const maizzleConfig = (input: string) => {
 						extension: 'html'
 					}
 				],
-				theme: tailwindConfig.theme,
+				theme: tailwindConfig.theme
 				// plugins: tailwindConfig.plugins
 			}
 		}

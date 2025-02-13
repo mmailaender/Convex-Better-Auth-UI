@@ -6,18 +6,18 @@
  * @param {RequestEvent} event - The incoming request event.
  * @returns {Promise<Response>} A redirect response to the appropriate location based on the outcome.
  */
-import { github } from '$lib/auth/social/oauth';
-import { ObjectParser } from '@pilcrowjs/object-parser';
-import {
-	signUpWithSocialProvider,
-	signInWithSocialProvider,
-	verifySocialAccountExists
-} from '$lib/auth/user.server';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
-
 import type { OAuth2Tokens } from 'arctic';
+import { ObjectParser } from '@pilcrowjs/object-parser';
 import type { RequestEvent } from './$types';
-import { createSocialProviderAccount, type SocialProvider } from '$lib/auth/user';
+
+import { github } from '$lib/auth/social/oauth';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/api/session.server';
+import { verifySocialAccountExists } from '$lib/auth/api/verification.server';
+import { signInWithSocialProvider } from '$lib/auth/api/signIn.server';
+import { signUpWithSocialProvider } from '$lib/auth/api/signUp.server';
+import { createSocialProviderAccount } from '$lib/account/api/server';
+
+import type { SocialProvider } from '$lib/account/api/types';
 
 /**
  * Splits a full name into first name and last name.

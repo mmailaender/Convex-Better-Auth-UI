@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	import { LogOut, Plus } from 'lucide-svelte';
-	import SignOutButton from './SignOutButton.svelte';
+	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
+
+	import SignOutButton from '$lib/auth/ui/widget/SignOutButton.svelte';
+
 	import type { User } from '$lib/db/schema/types/custom';
-	import type { Document } from '$lib/db/schema/types/system';
 
 	import { page } from '$app/state';
 
-	let user: Document<User> | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
+	let user: User | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
 
 	const userAccounts = $state([
 		{

@@ -11,7 +11,9 @@ import {
 	ClientDataType,
 	parseAuthenticatorData,
 	createAssertionSignatureMessage,
-	coseAlgorithmRS256
+	coseAlgorithmRS256,
+	type ClientData,
+	type AuthenticatorData
 } from '@oslojs/webauthn';
 import {
 	decodePKIXECDSASignature,
@@ -21,20 +23,19 @@ import {
 } from '@oslojs/crypto/ecdsa';
 import { ObjectParser } from '@pilcrowjs/object-parser';
 import { decodeBase64, encodeBase64 } from '@oslojs/encoding';
-import { verifyWebAuthnChallenge, getPasskeyCredential } from '$lib/auth/passkeys/server';
 import { sha256 } from '@oslojs/crypto/sha2';
 import {
 	decodePKCS1RSAPublicKey,
 	sha256ObjectIdentifier,
 	verifyRSASSAPKCS1v15Signature
 } from '@oslojs/crypto/rsa';
+import { env } from '$env/dynamic/private';
+
+import { verifyWebAuthnChallenge, getPasskeyCredential } from '$lib/auth/api/passkey.server.ts';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/api/session.server';
+import { signInWithPasskey } from '$lib/auth/api/signIn.server';
 
 import type { RequestEvent } from './$types';
-import type { ClientData, AuthenticatorData } from '@oslojs/webauthn';
-
-import { env } from '$env/dynamic/private';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '$lib/auth/session';
-import { signInWithPasskey } from '$lib/auth/user.server';
 
 const allowedUrls = [] as string[];
 if (env.VERCEL_URL) {

@@ -1,0 +1,1 @@
+export type SocialProvider = 'Github' | 'Google' | 'Facebook';
