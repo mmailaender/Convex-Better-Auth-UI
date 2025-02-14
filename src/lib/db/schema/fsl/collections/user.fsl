@@ -27,9 +27,4 @@ collection User {
     unique [mva(.emails)]
     check uniqueAccounts (user => user.accounts.length == user.accounts.distinct().length)
     unique [mva(.accounts)]
-
-    migrations {
-        add .activeOrganization
-        add .organizations
-    }
 }
