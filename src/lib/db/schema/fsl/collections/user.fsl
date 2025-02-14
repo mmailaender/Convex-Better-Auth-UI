@@ -5,6 +5,8 @@ collection User {
     emails: Array<String>
     compute emailVerification: String? = doc => { getVerificationEmail(doc.id)}
     avatar: String?
+    activeOrganization: Ref<Organization>?
+    organizations: Array<Ref<Organization>>?
     accounts: Array<Ref<Account>>
 
     // Ensures that only a `primaryEmail` is set, that is also part of the array field `emails`. 
@@ -14,8 +16,20 @@ collection User {
         user.emails!.includes(user.primaryEmail)
     })
 
+    // Ensures that only a `activeOrganization` is set, that is also part of the array field `organizations`. 
+    // The array field `organizations` contains all organizations of the user, that way we ensure 
+    // only organizations where the user is member are set as `activeOrganization`. 
+    check isActiveOrganizationPartOfOrganizations ((user) => {
+        user.organizations?.includes(user.activeOrganization)
+    })
+
     check uniqueEmails (user => user.emails.length == user.emails.distinct().length)
     unique [mva(.emails)]
     check uniqueAccounts (user => user.accounts.length == user.accounts.distinct().length)
     unique [mva(.accounts)]
+
+    migrations {
+        add .activeOrganization
+        add .organizations
+    }
 }

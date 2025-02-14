@@ -1,0 +1,13 @@
+collection Organization {
+    name: String
+    avatar: String?
+    slug: String
+    roles: {
+        members: Array<Ref<User>>?
+        admins: Array<Ref<User>>?
+        owner: Ref<User>
+    }
+    plan: "Free" | "Pro" | "Enterprise"
+
+    unique [.slug]
+}

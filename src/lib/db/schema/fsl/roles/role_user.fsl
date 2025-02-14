@@ -64,6 +64,14 @@ role role_user {
     }
   }
 
+  privileges createOrganization {
+    call {
+      // User can be only part of 5 organizations to avoid organization abuse. 
+      // Limit can be lifted if you have a specific use case.
+      predicate (() => { Query.identity()!.organizations < 5 })
+    }
+  }
+
   membership User {
     predicate ( (doc) => isCalledWithAccessToken() )
   }
