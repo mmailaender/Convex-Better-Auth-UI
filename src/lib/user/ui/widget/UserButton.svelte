@@ -44,7 +44,7 @@
 		bind:open={openState}
 		positioning={{ placement: 'bottom-end' }}
 		triggerBase="btn"
-		contentBase="card bg-surface-200-800 max-w-[320px]"
+		contentBase="card bg-surface-200-800 max-w-80"
 	>
 		{#snippet trigger()}
 			<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-10" />
