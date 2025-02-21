@@ -1,0 +1,49 @@
+/**
+ * Leaves the current organization.
+ *
+ * If the user is the owner of the organization, the `successorId` must be provided to transfer the ownership to the specified user.
+ *
+ * @param {object} data - The data object.
+ * @param {string} data.userId - The ID of the user that leaves the organization.
+ * @param {string} data.organizationId - The ID of the organization.
+ * @param {string} [data.successorId] - The ID of the user that should become the new owner of the organization. Only required if the user is the owner of the organization.
+ * @returns {User} The updated user document.
+ */
+@role(server)
+function leaveOrganization(data: { userId: String, organizationId: String, successorId: String? }): User {
+  let user = User.byId(ID(data.userId));
+  let org = Organization.byId(ID(data.organizationId));
+  
+  let userOrganizationRole = if (org!.members.any(member => member.user == user && member.role == "role_organization_owner")) {
+    "role_organization_owner"
+  }
+
+  if (userOrganizationRole == "role_organization_owner") {
+    if (data.successorId != null && User.byId(ID(data.successorId!)) != null) {
+      let successor = User.byId(ID(data.successorId!));
+      org!.update({
+        members: org!.members.filter(member => 
+          member.user != user || 
+          member.user != successor
+        ).concat([{
+          user: successor!,
+          role: "role_organization_owner"
+        }])
+      });
+
+    } else {
+      abort("If the owner leaves the organization, a successor is needed.");
+    }
+  } else {
+    org!.update({
+      members: org!.members.filter(member => member.user != user)
+    });
+  }
+
+  user!.update({
+    activeOrganization: null,
+    organizations: user!.organizations!.filter(organization => organization != org)
+  });
+
+}
+

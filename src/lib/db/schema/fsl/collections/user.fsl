@@ -20,7 +20,11 @@ collection User {
     // The array field `organizations` contains all organizations of the user, that way we ensure 
     // only organizations where the user is member are set as `activeOrganization`. 
     check isActiveOrganizationPartOfOrganizations ((user) => {
-        user.organizations?.includes(user.activeOrganization)
+        if(user.activeOrganization != null) {
+            user.organizations?.includes(user.activeOrganization)
+        } else {
+            true
+        }
     })
 
     check uniqueEmails (user => user.emails.length == user.emails.distinct().length)

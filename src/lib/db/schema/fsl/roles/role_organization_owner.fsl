@@ -1,0 +1,66 @@
+role role_organization_owner {
+  privileges Organization {
+    read {
+      predicate ((org) => {
+        if( Query.identity()!.activeOrganization != org ) {
+          false
+        } else {
+          true
+        }
+      })
+    }
+    write {
+      predicate ((old, new) => { 
+        // User is only allowed to do actions in his activeOrganization
+        if( Query.identity()!.activeOrganization != old) {
+          false
+        }
+
+        let oldOwner = old.members.firstWhere(member => member.role == "role_organization_owner")?.user
+        let newOwner = new.members.firstWhere(member => member.role == "role_organization_owner")?.user
+
+        // An owner can't change it's own role via a normal write operation. He needs to call the updateOwner function. 
+        if( oldOwner != newOwner ) {
+          false
+        } else {
+          true
+        }
+      })
+    }
+  }
+  privileges transferOwnership {
+    call {
+      predicate ((data) => {
+        // This predicate allows an owner to transfer the ownership of their active organization to another user.
+        // It checks if the operation is performed within the owner's active organization.
+        data.organizationId == Query.identity()!.activeOrganization.id   
+      })
+    }
+  }
+  privileges leaveOrganization {
+    call {
+      predicate ((data) => {
+        // This predicate allows an owner to leave their active organization or remove another user from the organization.
+        // It checks if the operation is performed within the owner's active organization.
+        data.organizationId == Query.identity()!.activeOrganization.id   
+      })
+    }
+  }
+  privileges deleteOrganization {
+    call {
+      predicate ((organizationId) => {
+        // This predicate allows an owner to delete their active organization.
+        // It checks if the operation is performed within the owner's active organization.
+        organizationId == Query.identity()!.activeOrganization!.id   
+      })
+    }
+  }
+
+  membership User {
+    predicate ( (user) => {
+      user.activeOrganization!.members.any(member => 
+        member.user == user && member.role == "role_organization_owner"
+      )
+    })
+  }
+}

@@ -1,0 +1,24 @@
+@role(server)
+function deleteOrganization( organizationId: String ): NullOrganization {
+  let org = Organization.byId( ID(organizationId) )
+
+  if(org != null) {
+    let orgUsers = org!.members.map(member => member.user)
+
+    orgUsers.forEach(user => {
+      if(user!.activeOrganization == org) {
+          user!.update({
+            activeOrganization: null
+          })
+      }
+
+      user!.update({
+        organizations: user!.organizations!.filter(userOrg => userOrg != org)
+      }) 
+    })
+
+    org!.delete()
+  } else {
+    abort("Organization not found")
+  }
+}

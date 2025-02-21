@@ -73,7 +73,7 @@
 			if (result.type === 'success') {
 				user.emailVerification = result.data?.email;
 				isAddingNewEmail = false;
-                localSuccess = `Verification email sent!".`;
+                localSuccess = `Verification email sent!`;
 			} else if (result.type === 'error') {
                 localError = `Failed to verify email: ${result.error}`;
 			}

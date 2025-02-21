@@ -1,0 +1,69 @@
+/**
+ * Transfers the ownership of an organization to a new user.
+ *
+ * @param {object} data - The data object.
+ * @param {string} data.organizationId - The ID of the organization.
+ * @param {string} data.ownerId - The ID of the current owner of the organization.
+ * @param {string} data.successorId - The ID of the user that should become the new owner of the organization.
+ * @returns {Organization} The updated organization document.
+ */
+@role(server)
+function transferOwnership(data: { organizationId: String, ownerId: String, successorId: String }): Organization {
+  let org = Organization.byId(ID(data.organizationId));
+  let owner = User.byId(ID(data.ownerId));
+  let successor = User.byId(ID(data.successorId));
+
+  if(org == null) {
+    abort({
+      code: "organization_not_found",
+      message: "Organization not found"
+    });
+  }
+
+  if(owner == null) {
+    abort({
+      code: "owner_not_found",
+      message: "Owner not found"
+    });
+  }
+
+  if(successor == null) {
+    abort({
+      code: "successor_not_found",
+      message: "Successor not found"
+    });
+  }
+
+  if(org!.members.firstWhere(member => member.user == owner && member.role == "role_organization_owner") == null) {
+    abort({
+      code: "not_organization_owner",
+      message: "User is not the owner of the organization"
+    });
+  }
+
+  if(org!.members.firstWhere(member => member.user == successor && member.role == "role_organization_owner") != null) {
+    abort({
+      code: "already_organization_owner",
+      message: "Successor is already the owner of the organization"
+    });
+  }
+
+  if(org!.members.firstWhere(member => member.user == successor) == null) {
+    abort({
+      code: "successor_not_organization_member",
+      message: "Successor need to be a member of the organization to receive ownership"
+    });
+  }
+
+  org!.update({
+    members: org!.members.filter(member => member.user != owner || member.user != successor).concat([{
+      user: successor!,
+      role: "role_organization_owner"
+    },
+    {
+      user: owner!,
+      role: "role_organization_admin"
+    }])
+  });
+}
+
