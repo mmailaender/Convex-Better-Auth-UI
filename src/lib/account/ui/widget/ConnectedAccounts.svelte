@@ -84,7 +84,9 @@
 			{@const AccountIcon = getAccountIcon(accountProvider)}
 			<li class="mb-2 flex items-center justify-between">
 				<span class="flex items-center text-surface-800-200">
-					<AccountIcon class="mr-2 size-5" />
+					<AccountIcon
+						class={`mr-2 size-5 ${accountProvider !== 'Passkey' ? 'fill-surface-900-100' : ''}`}
+					/>
 					{accountProvider}
 					{#if account.socialProvider}
 						• {account.socialProvider.email}
