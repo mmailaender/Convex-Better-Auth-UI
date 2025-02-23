@@ -1,229 +1,237 @@
-import { type TimeStub, type DateStub } from "fauna";
-import { v } from "./system";
+import { type TimeStub, type DateStub } from 'fauna';
+import { v } from './system';
 
-import { scope, type } from "arktype";
+import { scope, type } from 'arktype';
 
 const types = scope({
-  account: [
-    v.document.read,
-    "&",
-    {
-      user: "user",
-      "socialProvider?": {
-        name: "'Github' | 'Google' | 'Facebook'",
-        userId: "string",
-        email: "string",
-      },
-      "passkey?": { publicKey: "string", algorithmId: "number", id: "string" },
-      "_socialProviderName?": "string",
-      "_passkeyId?": "string",
-    },
-  ],
-  user: [
-    v.document.read,
-    "&",
-    {
-      firstName: "string",
-      lastName: "string",
-      primaryEmail: "string",
-      emails: ["string"],
-      "avatar?": "string",
-      "activeOrganization?": "organization",
-      "organizations?": ["organization"],
-      accounts: ["account"],
-      "emailVerification?": "string",
-    },
-  ],
-  verification: [
-    v.document.read,
-    "&",
-    {
-      email: "string",
-      otp: "string",
-      "user?": "user",
-    },
-  ],
-  organization: [
-    v.document.read,
-    "&",
-    {
-      name: "string",
-      "avatar?": "string",
-      slug: "string",
-      members: [
-        {
-          user: "user",
-          role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'",
-        },
-      ],
-      plan: "'Free' | 'Pro' | 'Enterprise'",
-    },
-  ],
+	account: [
+		v.document.read,
+		'&',
+		{
+			user: 'user',
+			'socialProvider?': {
+				name: "'Github' | 'Google' | 'Facebook'",
+				userId: 'string',
+				email: 'string'
+			},
+			'passkey?': { publicKey: 'string', algorithmId: 'number', id: 'string' },
+			'_socialProviderName?': 'string',
+			'_passkeyId?': 'string'
+		}
+	],
+	user: [
+		v.document.read,
+		'&',
+		{
+			firstName: 'string',
+			lastName: 'string',
+			primaryEmail: 'string',
+			emails: 'string[]',
+			'avatar?': 'string',
+			'activeOrganization?': 'organization',
+			'organizations?': 'organization[]',
+			accounts: 'account[]',
+			'emailVerification?': 'string'
+		}
+	],
+	verification: [
+		v.document.read,
+		'&',
+		{
+			email: 'string',
+			otp: 'string',
+			'user?': 'user'
+		}
+	],
+	organization: [
+		v.document.read,
+		'&',
+		{
+			name: 'string',
+			'avatar?': 'string',
+			slug: 'string',
+			members: [
+				{
+					user: 'user',
+					role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+				},
+				'[]'
+			],
+			plan: "'Free' | 'Pro' | 'Enterprise'"
+		}
+	]
 }).export();
 
 const types_create = scope({
-  account: [
-    v.document.create,
-    "&",
-    {
-      user: v.createRef(type("'User'")),
-      "socialProvider?": {
-        name: "'Github' | 'Google' | 'Facebook'",
-        userId: "string",
-        email: "string",
-      },
-      "passkey?": { publicKey: "string", algorithmId: "number", id: "string" },
-    },
-  ],
-  user: [
-    v.document.create,
-    "&",
-    {
-      firstName: "string",
-      lastName: "string",
-      primaryEmail: "string",
-      emails: ["string"],
-      "avatar?": "string",
-      "activeOrganization?": v.createRef(type("'Organization'")),
-      "organizations?": [v.createRef(type("'Organization'"))],
-      accounts: [v.createRef(type("'Account'"))],
-    },
-  ],
-  verification: [
-    v.document.create,
-    "&",
-    {
-      email: "string",
-      otp: "string",
-      "user?": v.createRef(type("'User'")),
-    },
-  ],
-  organization: [
-    v.document.create,
-    "&",
-    {
-      name: "string",
-      "avatar?": "string",
-      slug: "string",
-      members: [
-        {
-          user: v.createRef(type("'User'")),
-          role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'",
-        },
-      ],
-      plan: "'Free' | 'Pro' | 'Enterprise'",
-    },
-  ],
+	account: [
+		v.document.create,
+		'&',
+		{
+			user: v.createRef(type("'User'")),
+			'socialProvider?': {
+				name: "'Github' | 'Google' | 'Facebook'",
+				userId: 'string',
+				email: 'string'
+			},
+			'passkey?': { publicKey: 'string', algorithmId: 'number', id: 'string' }
+		}
+	],
+	user: [
+		v.document.create,
+		'&',
+		{
+			firstName: 'string',
+			lastName: 'string',
+			primaryEmail: 'string',
+			emails: 'string[]',
+			'avatar?': 'string',
+			'activeOrganization?': v.createRef(type("'Organization'")),
+			'organizations?': v.createRef(type("'Organization'")).array(),
+			accounts: v.createRef(type("'Account'")).array()
+		}
+	],
+	verification: [
+		v.document.create,
+		'&',
+		{
+			email: 'string',
+			otp: 'string',
+			'user?': v.createRef(type("'User'"))
+		}
+	],
+	organization: [
+		v.document.create,
+		'&',
+		{
+			name: 'string',
+			'avatar?': 'string',
+			slug: 'string',
+			members: [
+				{
+					user: v.createRef(type("'User'")),
+					role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+				},
+				'[]'
+			],
+			plan: "'Free' | 'Pro' | 'Enterprise'"
+		}
+	]
 }).export();
 
 const types_update = scope({
-  account: [
-    v.document.update,
-    "&",
-    {
-      "user?": v.createRef(type("'User'")),
-      "socialProvider?": {
-        name: "'Github' | 'Google' | 'Facebook'",
-        userId: "string",
-        email: "string",
-      },
-      "passkey?": { publicKey: "string", algorithmId: "number", id: "string" },
-    },
-  ],
-  user: [
-    v.document.update,
-    "&",
-    {
-      "firstName?": "string",
-      "lastName?": "string",
-      "primaryEmail?": "string",
-      "emails?": ["string"],
-      "avatar?": "string",
-      "activeOrganization?": v.createRef(type("'Organization'")),
-      "organizations?": [v.createRef(type("'Organization'"))],
-      "accounts?": [v.createRef(type("'Account'"))],
-    },
-  ],
-  verification: [
-    v.document.update,
-    "&",
-    {
-      "email?": "string",
-      "otp?": "string",
-      "user?": v.createRef(type("'User'")),
-    },
-  ],
-  organization: [
-    v.document.update,
-    "&",
-    {
-      "name?": "string",
-      "avatar?": "string",
-      "slug?": "string",
-      "members?": [
-        {
-          user: v.createRef(type("'User'")),
-          role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'",
-        },
-      ],
-      "plan?": "'Free' | 'Pro' | 'Enterprise'",
-    },
-  ],
+	account: [
+		v.document.update,
+		'&',
+		{
+			'user?': v.createRef(type("'User'")),
+			'socialProvider?': {
+				'name?': "'Github' | 'Google' | 'Facebook'",
+				'userId?': 'string',
+				'email?': 'string'
+			},
+			'passkey?': {
+				'publicKey?': 'string',
+				'algorithmId?': 'number',
+				'id?': 'string'
+			}
+		}
+	],
+	user: [
+		v.document.update,
+		'&',
+		{
+			'firstName?': 'string',
+			'lastName?': 'string',
+			'primaryEmail?': 'string',
+			'emails?': 'string[]',
+			'avatar?': 'string',
+			'activeOrganization?': v.createRef(type("'Organization'")),
+			'organizations?': v.createRef(type("'Organization'")).array(),
+			'accounts?': v.createRef(type("'Account'")).array()
+		}
+	],
+	verification: [
+		v.document.update,
+		'&',
+		{
+			'email?': 'string',
+			'otp?': 'string',
+			'user?': v.createRef(type("'User'"))
+		}
+	],
+	organization: [
+		v.document.update,
+		'&',
+		{
+			'name?': 'string',
+			'avatar?': 'string',
+			'slug?': 'string',
+			'members?': [
+				{
+					user: v.createRef(type("'User'")),
+					role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+				},
+				'[]'
+			],
+			'plan?': "'Free' | 'Pro' | 'Enterprise'"
+		}
+	]
 }).export();
 
 const types_replace = scope({
-  account: [
-    v.document.replace,
-    "&",
-    {
-      user: v.createRef(type("'User'")),
-      "socialProvider?": {
-        name: "'Github' | 'Google' | 'Facebook'",
-        userId: "string",
-        email: "string",
-      },
-      "passkey?": { publicKey: "string", algorithmId: "number", id: "string" },
-    },
-  ],
-  user: [
-    v.document.replace,
-    "&",
-    {
-      firstName: "string",
-      lastName: "string",
-      primaryEmail: "string",
-      emails: ["string"],
-      "avatar?": "string",
-      "activeOrganization?": v.createRef(type("'Organization'")),
-      "organizations?": [v.createRef(type("'Organization'"))],
-      accounts: [v.createRef(type("'Account'"))],
-    },
-  ],
-  verification: [
-    v.document.replace,
-    "&",
-    {
-      email: "string",
-      otp: "string",
-      "user?": v.createRef(type("'User'")),
-    },
-  ],
-  organization: [
-    v.document.replace,
-    "&",
-    {
-      name: "string",
-      "avatar?": "string",
-      slug: "string",
-      members: [
-        {
-          user: v.createRef(type("'User'")),
-          role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'",
-        },
-      ],
-      plan: "'Free' | 'Pro' | 'Enterprise'",
-    },
-  ],
+	account: [
+		v.document.replace,
+		'&',
+		{
+			user: v.createRef(type("'User'")),
+			'socialProvider?': {
+				name: "'Github' | 'Google' | 'Facebook'",
+				userId: 'string',
+				email: 'string'
+			},
+			'passkey?': { publicKey: 'string', algorithmId: 'number', id: 'string' }
+		}
+	],
+	user: [
+		v.document.replace,
+		'&',
+		{
+			firstName: 'string',
+			lastName: 'string',
+			primaryEmail: 'string',
+			emails: 'string[]',
+			'avatar?': 'string',
+			'activeOrganization?': v.createRef(type("'Organization'")),
+			'organizations?': v.createRef(type("'Organization'")).array(),
+			accounts: v.createRef(type("'Account'")).array()
+		}
+	],
+	verification: [
+		v.document.replace,
+		'&',
+		{
+			email: 'string',
+			otp: 'string',
+			'user?': v.createRef(type("'User'"))
+		}
+	],
+	organization: [
+		v.document.replace,
+		'&',
+		{
+			name: 'string',
+			'avatar?': 'string',
+			slug: 'string',
+			members: [
+				{
+					user: v.createRef(type("'User'")),
+					role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+				},
+				'[]'
+			],
+			plan: "'Free' | 'Pro' | 'Enterprise'"
+		}
+	]
 }).export();
 
 type Account = typeof types.account.infer;
@@ -247,80 +255,77 @@ type Organization_Update = typeof types_update.organization.infer;
 type Organization_Replace = typeof types_replace.organization.infer;
 
 interface UserCollectionsTypeMapping {
-  Account: {
-    main: Account;
-    create: Account_Create;
-    replace: Account_Replace;
-    update: Account_Update;
-  };
-
-  User: {
-    main: User;
-    create: User_Create;
-    replace: User_Replace;
-    update: User_Update;
-  };
-
-  Verification: {
-    main: Verification;
-    create: Verification_Create;
-    replace: Verification_Replace;
-    update: Verification_Update;
-  };
-
-  Organization: {
-    main: Organization;
-    create: Organization_Create;
-    replace: Organization_Replace;
-    update: Organization_Update;
-  };
+	Account: {
+		main: Account;
+		create: Account_Create;
+		replace: Account_Replace;
+		update: Account_Update;
+	};
+	User: {
+		main: User;
+		create: User_Create;
+		replace: User_Replace;
+		update: User_Update;
+	};
+	Verification: {
+		main: Verification;
+		create: Verification_Create;
+		replace: Verification_Replace;
+		update: Verification_Update;
+	};
+	Organization: {
+		main: Organization;
+		create: Organization_Create;
+		replace: Organization_Replace;
+		update: Organization_Update;
+	};
 }
 
 const validator = {
-  account: {
-    read: types.account,
-    create: types_create.account,
-    update: types_update.account,
-    replace: types_replace.account,
-  },
-  user: {
-    read: types.user,
-    create: types_create.user,
-    update: types_update.user,
-    replace: types_replace.user,
-  },
-  verification: {
-    read: types.verification,
-    create: types_create.verification,
-    update: types_update.verification,
-    replace: types_replace.verification,
-  },
-  organization: {
-    read: types.organization,
-    create: types_create.organization,
-    update: types_update.organization,
-    replace: types_replace.organization,
-  },
+	account: {
+		read: types.account,
+		create: types_create.account,
+		update: types_update.account,
+		replace: types_replace.account
+	},
+	user: {
+		read: types.user,
+		create: types_create.user,
+		update: types_update.user,
+		replace: types_replace.user
+	},
+	verification: {
+		read: types.verification,
+		create: types_create.verification,
+		update: types_update.verification,
+		replace: types_replace.verification
+	},
+	organization: {
+		read: types.organization,
+		create: types_create.organization,
+		update: types_update.organization,
+		replace: types_replace.organization
+	}
 };
 
 export type {
-  validator,
-  validator as v,
-  Account,
-  Account_Create,
-  Account_Replace,
-  Account_Update,
-  User,
-  User_Create,
-  User_Replace,
-  User_Update,
-  Verification,
-  Verification_Create,
-  Verification_Replace,
-  Verification_Update,
-  Organization,
-  Organization_Create,
-  Organization_Replace,
-  Organization_Update,
-  UserCollectionsTypeMapping,
+	validator,
+	validator as v,
+	Account,
+	Account_Create,
+	Account_Replace,
+	Account_Update,
+	User,
+	User_Create,
+	User_Replace,
+	User_Update,
+	Verification,
+	Verification_Create,
+	Verification_Replace,
+	Verification_Update,
+	Organization,
+	Organization_Create,
+	Organization_Replace,
+	Organization_Update,
+	UserCollectionsTypeMapping
 };
