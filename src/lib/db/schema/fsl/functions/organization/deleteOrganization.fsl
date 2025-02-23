@@ -6,14 +6,17 @@ function deleteOrganization( organizationId: String ): NullOrganization {
     let orgUsers = org!.members.map(member => member.user)
 
     orgUsers.forEach(user => {
+      let filteredOrgs = user!.organizations!.filter(userOrg => userOrg != org);
+
       if(user!.activeOrganization == org) {
           user!.update({
-            activeOrganization: null
+            activeOrganization: filteredOrgs.first()
           })
       }
 
+      
       user!.update({
-        organizations: user!.organizations!.filter(userOrg => userOrg != org)
+        organizations: filteredOrgs
       }) 
     })
 

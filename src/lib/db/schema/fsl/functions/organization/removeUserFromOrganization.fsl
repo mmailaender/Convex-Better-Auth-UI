@@ -40,10 +40,18 @@ function removeUserFromOrganization(data: { userId: String, organizationId: Stri
     });
   }
 
+  let filteredOrgs = user!.organizations!.filter(userOrg => userOrg != org)
+
+  if(user!.activeOrganization == org) {
+      user!.update({
+        activeOrganization: filteredOrgs.first()
+      })
+  }
+
+  
   user!.update({
-    activeOrganization: null,
-    organizations: user!.organizations!.filter(organization => organization != org)
-  });
+    organizations: filteredOrgs
+  }) 
 
 }
 
