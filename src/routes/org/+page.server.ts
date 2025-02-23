@@ -5,8 +5,8 @@ import { type } from 'arktype';
 import {
 	createOrganization,
 	deleteOrganization,
-	leaveOrganization,
 	removeUserFromOrganization,
+	leaveOrganization,
 	transferOwnership,
 	updateOrganizationProfile,
 	updateUserRole

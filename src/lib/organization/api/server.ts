@@ -51,7 +51,7 @@ export async function updateUserRole(
 export async function leaveOrganization(accessToken: string, successorId?: string): Promise<User> {
 	const response = await client(accessToken).query<User>(
 		fql`let user = Query.identity()
-		leaveOrganization({
+		removeUserFromOrganization({
 			userId: user!.id,
 			organizationId: user!.activeOrganization!.id,
 			successorId: ${successorId}
@@ -66,7 +66,7 @@ export async function removeUserFromOrganization(
 ): Promise<User> {
 	const response = await client(accessToken).query<User>(
 		fql`let user = Query.identity()
-		leaveOrganization({
+		removeUserFromOrganization({
 			userId: ${userId},
 			organizationId: user!.activeOrganization!.id
 		})`

@@ -37,7 +37,7 @@ role role_organization_owner {
       })
     }
   }
-  privileges leaveOrganization {
+  privileges removeUserFromOrganization {
     call {
       predicate ((data) => {
         // This predicate allows an owner to leave their active organization or remove another user from the organization.
