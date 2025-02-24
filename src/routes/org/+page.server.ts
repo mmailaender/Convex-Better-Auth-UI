@@ -1,4 +1,4 @@
-import { error, type Actions } from '@sveltejs/kit';
+import { error, redirect, type Actions } from '@sveltejs/kit';
 import { type } from 'arktype';
 
 // Lib
@@ -9,7 +9,8 @@ import {
 	leaveOrganization,
 	transferOwnership,
 	updateOrganizationProfile,
-	updateUserRole
+	updateUserRole,
+	getUsersOrganizations
 } from '$lib/organization/api/server';
 
 // Types
@@ -26,7 +27,7 @@ export const actions = {
 
 		const out = createOrganizationData({
 			name: formData.get('name'),
-			avatar: formData.get('avatar'),
+			logo: formData.get('logo'),
 			slug: formData.get('slug')
 		});
 
@@ -35,12 +36,23 @@ export const actions = {
 			return error(400, { message: out.summary });
 		} else {
 			try {
-				const res = await createOrganization(accessToken!, out);
-				return JSON.stringify(res);
+				const org = await createOrganization(accessToken!, out);
+				return JSON.stringify(org);
 			} catch (err) {
 				console.error('Error creating organization:', err);
 				return error(400, { message: 'Failed to create organization' });
 			}
+		}
+	},
+
+	getUsersOrganizations: async ({ cookies }) => {
+		const accessToken = cookies.get('access_token');
+		try {
+			const res = await getUsersOrganizations(accessToken!);
+			return JSON.stringify(res);
+		} catch (err) {
+			console.error('Error getting user organizations:', err);
+			return error(400, { message: 'Failed to get user organizations' });
 		}
 	},
 
@@ -52,7 +64,7 @@ export const actions = {
 
 		const out = updateOrganizationProfileData({
 			name: formData.get('name') || undefined,
-			avatar: formData.get('avatar') || undefined,
+			logo: formData.get('logo') || undefined,
 			slug: formData.get('slug') || undefined
 		});
 

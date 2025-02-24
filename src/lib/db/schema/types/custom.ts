@@ -48,7 +48,7 @@ const types = scope({
 		'&',
 		{
 			name: 'string',
-			'avatar?': 'string',
+			'logo?': 'string',
 			slug: 'string',
 			members: [
 				{
@@ -104,7 +104,7 @@ const types_create = scope({
 		'&',
 		{
 			name: 'string',
-			'avatar?': 'string',
+			'logo?': 'string',
 			slug: 'string',
 			members: [
 				{
@@ -125,15 +125,11 @@ const types_update = scope({
 		{
 			'user?': v.createRef(type("'User'")),
 			'socialProvider?': {
-				'name?': "'Github' | 'Google' | 'Facebook'",
-				'userId?': 'string',
-				'email?': 'string'
+				name: "'Github' | 'Google' | 'Facebook'",
+				userId: 'string',
+				email: 'string'
 			},
-			'passkey?': {
-				'publicKey?': 'string',
-				'algorithmId?': 'number',
-				'id?': 'string'
-			}
+			'passkey?': { publicKey: 'string', algorithmId: 'number', id: 'string' }
 		}
 	],
 	user: [
@@ -164,7 +160,7 @@ const types_update = scope({
 		'&',
 		{
 			'name?': 'string',
-			'avatar?': 'string',
+			'logo?': 'string',
 			'slug?': 'string',
 			'members?': [
 				{
@@ -220,7 +216,7 @@ const types_replace = scope({
 		'&',
 		{
 			name: 'string',
-			'avatar?': 'string',
+			'logo?': 'string',
 			slug: 'string',
 			members: [
 				{
@@ -261,18 +257,21 @@ interface UserCollectionsTypeMapping {
 		replace: Account_Replace;
 		update: Account_Update;
 	};
+
 	User: {
 		main: User;
 		create: User_Create;
 		replace: User_Replace;
 		update: User_Update;
 	};
+
 	Verification: {
 		main: Verification;
 		create: Verification_Create;
 		replace: Verification_Replace;
 		update: Verification_Update;
 	};
+
 	Organization: {
 		main: Organization;
 		create: Organization_Create;

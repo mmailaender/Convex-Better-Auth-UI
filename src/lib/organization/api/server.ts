@@ -1,7 +1,12 @@
 import client from '$lib/db/client';
 import { fql } from 'fauna';
 
-import type { CreateOrganizationData, UpdateOrganizationData, UpdateUserRoleData } from './types';
+import type {
+	CreateOrganizationData,
+	UpdateOrganizationData,
+	UpdateUserRoleData,
+	UsersOrganizations
+} from './types';
 import type { Organization, User } from '$lib/db/schema/types/custom';
 import type { NullDocument } from '$lib/db/schema/types/system';
 
@@ -11,6 +16,17 @@ export async function createOrganization(
 ): Promise<Organization> {
 	const response = await client(accessToken).query<Organization>(
 		fql`createOrganization( ${organizationData} )`
+	);
+	return response.data;
+}
+
+export async function getUsersOrganizations(accessToken: string): Promise<UsersOrganizations> {
+	const response = await client(accessToken).query<UsersOrganizations>(
+		fql`Query.identity() {
+			id,
+			activeOrganization,
+			organizations
+		  }`
 	);
 	return response.data;
 }

@@ -2,10 +2,10 @@ role role_organization_owner {
   privileges Organization {
     read {
       predicate ((org) => {
-        if( Query.identity()!.activeOrganization != org ) {
-          false
-        } else {
+        if( Query.identity()!.organizations.includes(org) ) {
           true
+        } else {
+          false
         }
       })
     }

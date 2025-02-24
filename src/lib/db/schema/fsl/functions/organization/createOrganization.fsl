@@ -1,11 +1,11 @@
 @role(server)
-function createOrganization ( data: { name: String, avatar: String?, slug: String } ): User {
+function createOrganization ( data: { name: String, logo: String?, slug: String } ): User {
   let user: Any = Query.identity()
   let user: User = user
 
   let organization = Organization.create({
     name: data!.name,
-    avatar: data!.avatar,
+    logo: data!.logo,
     slug: data!.slug,
     members: [{
       user: user!,
@@ -16,7 +16,7 @@ function createOrganization ( data: { name: String, avatar: String?, slug: Strin
 
   let user = user!.update({
     activeOrganization: organization,
-    organizations: if(user!.organizations != null && user!.organizations > 0) { user!.organizations!.append( organization ) } else { [organization] }
+    organizations: if(user!.organizations != null) { user!.organizations!.append( organization ) } else { [organization] }
   })
 
   user {

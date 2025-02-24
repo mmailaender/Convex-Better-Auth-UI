@@ -1,6 +1,6 @@
 collection Organization {
     name: String
-    avatar: String?
+    logo: String?
     slug: String
     members: Array<{
         user: Ref<User>

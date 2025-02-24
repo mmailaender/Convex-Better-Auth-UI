@@ -1,5 +1,6 @@
 <script>
 	import UserButton from '$lib/user/ui/widget/UserButton.svelte';
+	import OrganizationSwitcher from './organization/ui/widget/OrganizationSwitcher.svelte';
 </script>
 
 <nav class="bg-gray-800">
@@ -78,7 +79,7 @@
 				</div>
 			</div>
 			<div
-				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
+				class="absolute inset-y-0 right-0 flex items-center gap-3 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
 			>
 				<button
 					type="button"
@@ -103,8 +104,10 @@
 					</svg>
 				</button>
 
+				<OrganizationSwitcher />
+
 				<!-- Profile dropdown -->
-				<div class="relative ml-3">
+				<div class="relative">
 					<UserButton />
 				</div>
 			</div>
