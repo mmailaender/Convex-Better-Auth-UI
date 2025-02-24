@@ -46,14 +46,8 @@ export const actions = {
 			console.error(data.summary);
 			return error(400, { message: data.summary });
 		} else {
-			const updateData = {
-				...(data.firstName && { avatar: data.firstName }),
-				...(data.firstName && { avatar: data.lastName }),
-				...(data.avatar && { avatar: data.avatar })
-			};
-
 			try {
-				await updateProfileData(accessToken!, updateData);
+				await updateProfileData(accessToken!, data);
 				return { message: 'Profile updated successfully' };
 			} catch (err) {
 				console.error('Error updating user:', err);
