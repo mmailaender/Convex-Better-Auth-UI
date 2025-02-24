@@ -20,6 +20,17 @@ export async function createOrganization(
 	return response.data;
 }
 
+export async function setActiveOrganization(
+	accessToken: string,
+	organizationId: string
+): Promise<Organization> {
+	const response = await client(accessToken).query<Organization>(
+		fql`Query.identity()!.update({ activeOrganization: Organization.byId( ${organizationId} ) })
+		Organization.byId( ${organizationId} )`
+	);
+	return response.data;
+}
+
 export async function getUsersOrganizations(accessToken: string): Promise<UsersOrganizations> {
 	const response = await client(accessToken).query<UsersOrganizations>(
 		fql`Query.identity() {

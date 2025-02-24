@@ -5,7 +5,9 @@
 
 	import CreateOrganization from './CreateOrganization.svelte';
 
-	import type { User } from '$lib/db/schema/types/custom';
+	import type { Organization, User } from '$lib/db/schema/types/custom';
+	import { callForm } from '$lib/primitives/api/callForm';
+	import { goto } from '$app/navigation';
 
 	let user: User | null = $state(JSON.parse(page.data.user));
 
@@ -22,8 +24,19 @@
 		openStateCreateOrganization = !openStateCreateOrganization;
 	}
 
-	function updateActiveOrg(orgId: string) {
-		// TODO
+	async function updateActiveOrg(organizationId: string) {
+		try {
+			const org = await callForm<Organization>({
+				url: '/org?/setActiveOrganization',
+				data: { organizationId }
+			});
+			user!.activeOrganization = org;
+
+			goto('/', { invalidateAll: true });
+		} catch (err) {
+			console.error(err);
+		}
+
 		openStateSwitcher = false;
 	}
 </script>

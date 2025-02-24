@@ -1,4 +1,4 @@
-import { error, redirect, type Actions } from '@sveltejs/kit';
+import { error, type Actions } from '@sveltejs/kit';
 import { type } from 'arktype';
 
 // Lib
@@ -10,7 +10,8 @@ import {
 	transferOwnership,
 	updateOrganizationProfile,
 	updateUserRole,
-	getUsersOrganizations
+	getUsersOrganizations,
+	setActiveOrganization
 } from '$lib/organization/api/server';
 
 // Types
@@ -41,6 +42,26 @@ export const actions = {
 			} catch (err) {
 				console.error('Error creating organization:', err);
 				return error(400, { message: 'Failed to create organization' });
+			}
+		}
+	},
+
+	setActiveOrganization: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
+
+		const organizationId = type('string.numeric > 0')(formData.get('organizationId'));
+
+		if (organizationId instanceof type.errors) {
+			console.error('Invalid organization ID');
+			return error(400, { message: 'Invalid organization ID' });
+		} else {
+			try {
+				const org = await setActiveOrganization(accessToken!, organizationId);
+				return JSON.stringify(org);
+			} catch (err) {
+				console.error('Error setting active organization:', err);
+				return error(400, { message: 'Failed to set active organization' });
 			}
 		}
 	},
