@@ -20,7 +20,6 @@ import type { AddEmailData } from '$lib/user/api/types';
  * @returns {Promise<boolean>} - Returns true if the email already exists, otherwise false after sending a verification email.
  * @throws {Error} - Throws an error if the email is invalid or if there's an issue with sending the verification email.
  */
-
 export async function verifyEmail(email: string, userId?: string): Promise<boolean> {
 	const exists = await verifyUserExists(email);
 	console.log(`verify-email: Email ${email} exists: ${exists}`);
@@ -64,15 +63,9 @@ export async function verifyEmail(email: string, userId?: string): Promise<boole
 	return true;
 }
 
-
-export async function addEmail(
-	accessToken: string,
-    addEmailData: AddEmailData
-): Promise<User> {
+export async function addEmail(accessToken: string, addEmailData: AddEmailData): Promise<User> {
 	try {
-		const response = await client(accessToken).query<User>(
-			fql`addEmail(${addEmailData})`
-		);
+		const response = await client(accessToken).query<User>(fql`addEmail(${addEmailData})`);
 		if (!response.data) {
 			throw new Error(response.summary);
 		}
@@ -116,9 +109,7 @@ export async function cancelEmailVerification(
 	accessToken: string,
 	email: string
 ): Promise<boolean> {
-	const response = await client(accessToken).query<boolean>(
-		fql`deleteEmailVerification(${email})`
-	);
+	const response = await client(accessToken).query<boolean>(fql`deleteEmailVerification(${email})`);
 	if (!response.data) {
 		throw new Error(response.summary);
 	}
