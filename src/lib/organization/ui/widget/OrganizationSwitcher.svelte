@@ -9,10 +9,10 @@
 	import { callForm } from '$lib/primitives/api/callForm';
 	import { goto } from '$app/navigation';
 
-	let user: User | null = $state(JSON.parse(page.data.user));
+	let user: User | null = $state(JSON.parse(page.data.user ?? null));
 
-	let activeOrg = $derived(user!.activeOrganization);
-	let orgs = $derived(user!.organizations);
+	let activeOrg = $derived(user?.activeOrganization);
+	let orgs = $derived(user?.organizations);
 
 	$inspect('OrganizationSwitcher orgs: ', orgs);
 
