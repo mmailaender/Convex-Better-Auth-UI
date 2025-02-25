@@ -52,7 +52,7 @@
 		{#snippet content()}
 			<ul role="list" class="space-y-1">
 				<li>
-					<div class="flex gap-x-3 rounded-md p-4 text-sm/6 font-semibold text-surface-700-300">
+					<div class="rounded-base text-surface-700-300 flex gap-x-3 p-4 text-sm/6 font-semibold">
 						<Avatar src={user.avatar} name={user.firstName + ' ' + user.lastName} size="size-10" />
 						<div class="flex flex-col gap-3">
 							<div class="flex-1">
@@ -75,7 +75,7 @@
 					<li>
 						<a
 							href="#"
-							class="group flex gap-x-3 rounded-md p-4 text-sm/6 font-semibold text-surface-700-300 hover:bg-gray-50 hover:text-primary-600-400"
+							class="group rounded-base text-surface-700-300 hover:text-primary-600-400 flex gap-x-3 p-4 text-sm/6 font-semibold hover:bg-gray-50"
 						>
 							<Avatar
 								src={account.avatar}
@@ -93,16 +93,16 @@
 				{/each}
 				<a
 					href="/sign-in"
-					class="flex items-center gap-x-5 rounded-md p-4 pl-6 text-sm/6 font-semibold text-surface-700-300 hover:bg-gray-50 hover:text-primary-600-400"
+					class="rounded-base text-surface-700-300 hover:text-primary-600-400 flex items-center gap-x-5 p-4 pl-6 text-sm/6 font-semibold hover:bg-gray-50"
 				>
-					<Plus class="rounded-full bg-surface-700-300 text-surface-300-700" /> Add account
+					<Plus class="bg-surface-700-300 text-surface-300-700 rounded-base" /> Add account
 				</a>
 				<!-- TODO: Call signOutAll + we need to add in local storage or as session which accounts are used, 
 			  so if the user clicks on this account, the tokens get checked and if not valid, he is redirected to sign in 
 			  (although he has already an active session) -->
 				{#if userAccounts.length > 1}
 					<button
-						class="flex w-full items-center gap-x-6 rounded-md p-4 pl-7 text-sm/6 font-semibold text-surface-700-300 hover:bg-gray-50 hover:text-primary-600-400"
+						class="rounded-base text-surface-700-300 hover:text-primary-600-400 flex w-full items-center gap-x-6 p-4 pl-7 text-sm/6 font-semibold hover:bg-gray-50"
 					>
 						<LogOut class="size-4" /> Sign out from all accounts
 					</button>

@@ -38,17 +38,17 @@
 			isEditing = false;
 			localSuccess = 'Profile updated successfully!';
 		} catch (err: any) {
-			localError = `Failed to update profile: ${err.message}`
+			localError = `Failed to update profile: ${err.message}`;
 		}
 	}
 </script>
 
 <div class="mb-6 flex items-center gap-4">
-	<Avatar src={user.avatar} name={`${user.firstName} ${user.lastName}`} size="size-16" />
+	<Avatar src={user.avatar} name={`${user.firstName} ${user.lastName}`} />
 	{#if !isEditing}
 		<button onclick={toggleEdit}>
-			<span class="font-medium text-surface-800-200">{user.firstName}</span>
-			<span class="font-medium text-surface-800-200">{user.lastName}</span>
+			<span class="text-surface-800-200 font-medium">{user.firstName}</span>
+			<span class="text-surface-800-200 font-medium">{user.lastName}</span>
 		</button>
 	{:else}
 		<form onsubmit={handleSubmit}>

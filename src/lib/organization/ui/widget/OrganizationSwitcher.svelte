@@ -51,7 +51,7 @@
 		{#snippet trigger()}
 			<div class="flex items-center gap-2">
 				<Avatar src={activeOrg!.logo} name={activeOrg!.name} size="size-6" />
-				<span class="text-base font-semibold text-surface-700-300">{activeOrg!.name}</span>
+				<span class="text-surface-700-300 text-base font-semibold">{activeOrg!.name}</span>
 				<ChevronsUpDown size="12" />
 			</div>
 		{/snippet}
@@ -59,13 +59,13 @@
 			<ul role="list" class="space-y-1">
 				<li>
 					<div
-						class="flex items-center gap-x-3 rounded-md p-4 text-sm/6 font-semibold text-surface-700-300"
+						class="rounded-base text-surface-700-300 flex items-center gap-x-3 p-4 text-sm/6 font-semibold"
 					>
 						<Avatar src={activeOrg!.logo} name={activeOrg!.name} size="size-6" />
-						<span class="text-base font-semibold text-surface-700-300">{activeOrg!.name}</span>
+						<span class="text-surface-700-300 text-base font-semibold">{activeOrg!.name}</span>
 						<a
 							href="/org/${activeOrg!.id}/profile"
-							class="btn flex gap-2 preset-outlined-surface-500"
+							class="btn preset-outlined-surface-500 flex gap-2"
 							onclick={toggleUserProfile}
 						>
 							<Settings size="16" />
@@ -79,10 +79,10 @@
 						<li>
 							<button
 								onclick={() => updateActiveOrg(org.id)}
-								class="group flex gap-x-3 rounded-md p-4 text-sm/6 font-semibold text-surface-700-300 hover:bg-gray-50 hover:text-primary-600-400"
+								class="group rounded-base text-surface-700-300 hover:text-primary-600-400 flex gap-x-3 p-4 text-sm/6 font-semibold hover:bg-gray-50"
 							>
 								<Avatar src={org!.logo} name={org!.name} size="size-6" />
-								<span class="text-base font-semibold text-surface-700-300">{org!.name}</span>
+								<span class="text-surface-700-300 text-base font-semibold">{org!.name}</span>
 							</button>
 						</li>
 					{/if}
@@ -91,8 +91,8 @@
 					<Modal
 						bind:open={openStateCreateOrganization}
 						triggerBase="btn preset-tonal"
-						contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm min-w-96"
-						backdropClasses="backdrop-blur-sm"
+						contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm) min-w-96"
+						backdropClasses="backdrop-blur-xs"
 					>
 						{#snippet trigger()}
 							<Plus size="16" />
@@ -110,8 +110,8 @@
 	<Modal
 		bind:open={openStateCreateOrganization}
 		triggerBase="btn preset-tonal"
-		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm min-w-96"
-		backdropClasses="backdrop-blur-sm"
+		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm) min-w-96"
+		backdropClasses="backdrop-blur-xs"
 	>
 		{#snippet trigger()}
 			<Plus size="16" />
