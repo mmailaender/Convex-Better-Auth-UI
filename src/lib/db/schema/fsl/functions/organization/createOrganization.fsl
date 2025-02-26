@@ -29,8 +29,26 @@ function createOrganization ( data: { name: String, logo: String?, slug: String 
     emails,
     emailVerification,
     avatar,
-    activeOrganization,
-    organizations,
+    activeOrganization: .activeOrganization {
+      id,
+      ttl,
+      ts,
+      name,
+      logo,
+      slug,
+      members,
+      plan
+    },
+    organizations: .organizations?.map(ao => ao {
+      id,
+      ttl,
+      ts,
+      name,
+      logo,
+      slug,
+      members,
+      plan
+    }),
     accounts
   }
 }

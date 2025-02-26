@@ -1,20 +1,23 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { ChevronsUpDown, Plus, Settings } from 'lucide-svelte';
 	import { Avatar, Modal, Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import CreateOrganization from './CreateOrganization.svelte';
+	import { callForm } from '$lib/primitives/api/callForm';
 
 	import type { Organization, User } from '$lib/db/schema/types/custom';
-	import { callForm } from '$lib/primitives/api/callForm';
-	import { goto } from '$app/navigation';
 
 	let user: User | null = $state(JSON.parse(page.data.user ?? null));
+	let derivedUser: User | null = $derived(JSON.parse(page.data.user ?? null));
+
+	$effect(() => {
+		user = derivedUser;
+	});
 
 	let activeOrg = $derived(user?.activeOrganization);
 	let orgs = $derived(user?.organizations);
-
-	$inspect('OrganizationSwitcher orgs: ', orgs);
 
 	let openStateSwitcher = $state(false);
 	let openStateCreateOrganization = $state(false);

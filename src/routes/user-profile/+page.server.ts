@@ -22,13 +22,23 @@ import {
 } from '$lib/user/api/types';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load = (async ({ cookies }) => {
+export const load = (async ({ parent, cookies }) => {
+	const { user: layoutUser } = await parent();
+	const layoutUserData = layoutUser ? JSON.parse(layoutUser) : null;
+
 	const accessToken = cookies.get('access_token')!;
 
-	const user = await getUserAndAccounts(accessToken);
-	const stringifiedUser = JSON.stringify(user);
+	const userWithAccounts = await getUserAndAccounts(accessToken);
 
-	console.log('user: ', stringifiedUser);
+	const mergedUser = {
+		...layoutUserData,
+		...userWithAccounts,
+		accounts: userWithAccounts.accounts,
+		activeOrganization: layoutUserData?.activeOrganization,
+		organizations: layoutUserData?.organizations
+	};
+	const stringifiedUser = JSON.stringify(mergedUser);
+
 	return { user: stringifiedUser, accessToken };
 }) satisfies PageServerLoad;
 

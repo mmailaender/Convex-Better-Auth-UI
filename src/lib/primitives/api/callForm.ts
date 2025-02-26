@@ -89,8 +89,6 @@ export async function callForm<T>({
 		return responseBody;
 	}
 
-	console.log('responseBody: ', responseBody);
-
 	// Deep parse the responseBody.data.
 	const normalizedData = deepParse<T>(responseBody.data);
 

@@ -27,7 +27,6 @@ const enrichBody = (body: string) => {
     <html>
     <head>
         <style>
-            @tailwind components;
             @tailwind utilities;
         </style>
     </head>

@@ -14,7 +14,6 @@ export const load = (async ({ locals, fetch }) => {
 
 		user.activeOrganization = usersOrganizations.activeOrganization;
 		user.organizations = usersOrganizations.organizations;
-		console.log('user: ', user);
 
 		const stringifiedUser = JSON.stringify(user);
 		return { user: stringifiedUser };

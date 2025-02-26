@@ -11,6 +11,11 @@
 	import type { User } from '$lib/db/schema/types/custom';
 
 	let user: User = $state(JSON.parse(page.data.user));
+	let derivedUser: User = $derived(JSON.parse(page.data.user));
+
+	$effect(() => {
+		user = derivedUser;
+	});
 </script>
 
 <div
