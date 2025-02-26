@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { User } from '$lib/db/schema/types/custom';
 	import { page } from '$app/state';
+	import OrganizationProfile from '$lib/organization/ui/widget/OrganizationProfile.svelte';
 
 	let user: User | null = $derived(JSON.parse(page.data.user ?? null));
 </script>
@@ -9,4 +10,6 @@
 	{#if user}
 		Hello {user.primaryEmail}
 	{/if}
+
+	<OrganizationProfile />
 </div>

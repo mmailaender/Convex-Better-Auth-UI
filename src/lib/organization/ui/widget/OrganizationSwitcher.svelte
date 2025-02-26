@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { ChevronsUpDown, Plus, Settings } from 'lucide-svelte';
+	import { ChevronsUpDown, Plus, Settings, X } from 'lucide-svelte';
 	import { Avatar, Modal, Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import CreateOrganization from './CreateOrganization.svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
+	import CreateOrganization from './CreateOrganization.svelte';
+	import OrganizationProfile from './OrganizationProfile.svelte';
 
 	import type { Organization, User } from '$lib/db/schema/types/custom';
 
@@ -21,6 +22,7 @@
 
 	let openStateSwitcher = $state(false);
 	let openStateCreateOrganization = $state(false);
+	let openStateOrganizationProfile = $state(false);
 
 	function toggleUserProfile() {
 		openStateSwitcher = false;
@@ -109,6 +111,24 @@
 			</ul>
 		{/snippet}
 	</Popover>
+	<Modal
+		bind:open={openStateOrganizationProfile}
+		triggerBase="btn preset-tonal"
+		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm) min-w-96 relative"
+		backdropClasses="backdrop-blur-xs"
+	>
+		{#snippet trigger()}
+			<span>Manage</span>
+		{/snippet}
+		{#snippet content()}
+			<OrganizationProfile />
+			<button
+				type="button"
+				class="btn-icon preset-tonal absolute top-3 right-3 rounded-full"
+				onclick={() => (openStateOrganizationProfile = false)}><X size="16" /></button
+			>
+		{/snippet}
+	</Modal>
 {:else if user}
 	<Modal
 		bind:open={openStateCreateOrganization}

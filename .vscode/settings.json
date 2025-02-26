@@ -174,12 +174,18 @@
 		"stateInfo",
 		"stateError",
 		"stateSuccess",
+		"stateActive",
+		"stateInactive",
 		"stateDisabled",
 		"stateInteractive",
 		"stateReadOnly",
 		"stateInvalid",
 		"stateFocused",
 		"stateDragging",
+
+		// StateLabel
+		"stateLabelInactive",
+		"stateLabelActive",
 
 		// Tiles
 		"tilesBase",
