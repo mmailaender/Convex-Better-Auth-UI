@@ -28,6 +28,15 @@ role role_organization_owner {
       })
     }
   }
+  privileges getOrganizationMembers {
+    call {
+      predicate ((organizationId) => {
+        // This predicate allows an owner to get the members of their active organization.
+        // It checks if the operation is performed within the owner's active organization.
+        organizationId == Query.identity()!.activeOrganization!.id   
+      })
+    }
+  }
   privileges transferOwnership {
     call {
       predicate ((data) => {

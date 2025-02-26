@@ -1,0 +1,19 @@
+@role(server)
+function getOrganizationMembers(organizationId: ID): Array<{ user: { id: ID, firstName: String, lastName: String, primaryEmail: String, avatar: String? }, role: String }> {
+  let org = Organization.byId(organizationId);
+
+  if (org == null) {
+    abort("Organization not found");
+  }
+  
+  org!.members {
+    user: .user! {
+      id,
+      firstName,
+      lastName,
+      primaryEmail,
+      avatar
+    },
+    role
+  }
+}

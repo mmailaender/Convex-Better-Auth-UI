@@ -10,7 +10,7 @@
  * @returns {User} The updated user document.
  */
 @role(server)
-function removeUserFromOrganization(data: { userId: String, organizationId: String, successorId: String? }): User {
+function removeUserFromOrganization(data: { userId: String, organizationId: String, successorId: String? }): Organization {
   let user = User.byId(ID(data.userId));
   let org = Organization.byId(ID(data.organizationId));
   
@@ -52,6 +52,8 @@ function removeUserFromOrganization(data: { userId: String, organizationId: Stri
   user!.update({
     organizations: filteredOrgs
   }) 
+
+  org!
 
 }
 

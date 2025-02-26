@@ -4,8 +4,9 @@ import { fql } from 'fauna';
 import type {
 	CreateOrganizationData,
 	UpdateOrganizationData,
-	UpdateUserRoleData,
-	UsersOrganizations
+	UpdateMemberRoleData,
+	UsersOrganizations,
+	Member
 } from './types';
 import type { Organization, User } from '$lib/db/schema/types/custom';
 import type { NullDocument } from '$lib/db/schema/types/system';
@@ -42,6 +43,14 @@ export async function getUsersOrganizations(accessToken: string): Promise<UsersO
 	return response.data;
 }
 
+export async function getOrganizationMembers(accessToken: string): Promise<Member> {
+	const response = await client(accessToken).query<Array<Member>>(
+		fql`getOrganizationMembers(Query.identity()!.activeOrganization!.id)
+		`
+	);
+	return response.data;
+}
+
 export async function updateOrganizationProfile(
 	accessToken: string,
 	organizationId: string,
@@ -53,9 +62,9 @@ export async function updateOrganizationProfile(
 	return response.data;
 }
 
-export async function updateUserRole(
+export async function updateMemberRole(
 	accessToken: string,
-	data: UpdateUserRoleData
+	data: UpdateMemberRoleData
 ): Promise<Organization> {
 	const response = await client(accessToken).query<Organization>(
 		fql`let user = Query.identity()
@@ -90,8 +99,8 @@ export async function leaveOrganization(accessToken: string, successorId?: strin
 export async function removeUserFromOrganization(
 	accessToken: string,
 	userId: string
-): Promise<User> {
-	const response = await client(accessToken).query<User>(
+): Promise<Organization> {
+	const response = await client(accessToken).query<Organization>(
 		fql`let user = Query.identity()
 		removeUserFromOrganization({
 			userId: ${userId},

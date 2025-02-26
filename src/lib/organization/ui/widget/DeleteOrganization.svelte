@@ -1,26 +1,30 @@
 <script lang="ts">
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
+	import type { Organization } from '$lib/db/schema/types/custom';
+	import { goto } from '$app/navigation';
 
 	interface Props {
-		userId: string;
+		org: Organization;
 	}
 
-	let { userId }: Props = $props();
+	let { org = $bindable() }: Props = $props();
 	let open = $state(false);
-	let localError = $state('');
+	let error = $state('');
 
 	async function handleConfirm() {
 		try {
 			await callForm({
-				url: '/user-profile?/deleteUser',
-				data: { userId }
+				url: '/org?/deleteOrganization',
+				data: { organizationId: org.id }
 			});
+			open = false;
+			goto('/', { invalidateAll: true });
 		} catch (err) {
 			if (err instanceof Error) {
-				localError = err.message;
+				error = err.message;
 			} else {
-				localError = 'Unknown error. Please try again. If it persists, contact support.';
+				error = 'Unknown error. Please try again. If it persists, contact support.';
 			}
 		}
 	}
@@ -37,15 +41,16 @@
 	backdropClasses="backdrop-blur-xs"
 >
 	{#snippet trigger()}
-		Delete account
+		Delete organization
 	{/snippet}
 	{#snippet content()}
 		<header class="flex justify-between">
-			<h2 class="h2">Delete your account</h2>
+			<h2 class="h2">Delete organization</h2>
 		</header>
 		<article>
 			<p class="opacity-60">
-				Are you sure you want to delete your account? All of your data will be permanently deleted.
+				Are you sure you want to delete the organization {org.name}? All organization data will be
+				permanently deleted.
 			</p>
 		</article>
 		<footer class="flex justify-end gap-4">
@@ -54,8 +59,8 @@
 				Confirm
 			</button>
 		</footer>
-		{#if localError}
-			<p class="text-error-600-400">{localError}</p>
+		{#if error}
+			<p class="text-error-600-400">{error}</p>
 		{/if}
 	{/snippet}
 </Modal>

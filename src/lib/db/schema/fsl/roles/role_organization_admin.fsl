@@ -30,6 +30,17 @@ role role_organization_admin {
       })
     }
   }
+
+  privileges getOrganizationMembers {
+    call {
+      predicate ((organizationId) => {
+        // This predicate allows an admin to get the members of their active organization.
+        // It checks if the operation is performed within the admin's active organization.
+        organizationId == Query.identity()!.activeOrganization!.id   
+      })
+    }
+  }
+
   privileges removeUserFromOrganization {
     call {
       predicate ((data) => {

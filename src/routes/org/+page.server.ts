@@ -9,16 +9,17 @@ import {
 	leaveOrganization,
 	transferOwnership,
 	updateOrganizationProfile,
-	updateUserRole,
 	getUsersOrganizations,
-	setActiveOrganization
+	setActiveOrganization,
+	updateMemberRole,
+	getOrganizationMembers
 } from '$lib/organization/api/server';
 
 // Types
 import {
 	createOrganizationData,
 	updateOrganizationProfileData,
-	updateUserRoleData
+	updateMemberRoleData
 } from '$lib/organization/api/types';
 
 export const actions = {
@@ -77,6 +78,17 @@ export const actions = {
 		}
 	},
 
+	getOrganizationMembers: async ({ cookies }) => {
+		const accessToken = cookies.get('access_token');
+		try {
+			const org = await getOrganizationMembers(accessToken!);
+			return JSON.stringify(org);
+		} catch (err) {
+			console.error('Error getting organization members:', err);
+			return error(400, { message: 'Failed to get organization members' });
+		}
+	},
+
 	updateOrganizationProfile: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
 		const formData = await request.formData();
@@ -108,11 +120,11 @@ export const actions = {
 		}
 	},
 
-	updateUserRole: async ({ cookies, request }) => {
+	updateMemberRole: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
 		const formData = await request.formData();
 
-		const out = updateUserRoleData({
+		const out = updateMemberRoleData({
 			userId: formData.get('userId'),
 			newRole: formData.get('newRole')
 		});
@@ -122,8 +134,8 @@ export const actions = {
 			return error(400, { message: out.summary });
 		} else {
 			try {
-				const res = await updateUserRole(accessToken!, out);
-				return JSON.stringify(res);
+				const org = await updateMemberRole(accessToken!, out);
+				return JSON.stringify(org);
 			} catch (err) {
 				console.error('Error updating user role:', err);
 				return error(400, { message: 'Failed to update user role' });
@@ -182,8 +194,8 @@ export const actions = {
 			return error(400, { message: 'Invalid user ID' });
 		} else {
 			try {
-				const res = await removeUserFromOrganization(accessToken!, userId);
-				return JSON.stringify(res);
+				const org = await removeUserFromOrganization(accessToken!, userId);
+				return JSON.stringify(org);
 			} catch (err) {
 				console.error('Error removing user from organization:', err);
 				return error(500, { message: 'Failed to remove user from organization' });

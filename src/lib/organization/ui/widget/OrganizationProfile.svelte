@@ -3,10 +3,12 @@
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import ProfileInfo from './ProfileInfo.svelte';
+	import DeleteOrganization from './DeleteOrganization.svelte';
+	import Members from './Members.svelte';
 
 	import type { User } from '$lib/db/schema/types/custom';
 
-	let derivedUser: User | null = $state(page.data.user ? JSON.parse(page.data.user) : null);
+	let derivedUser: User | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
 	let derivedOrg = $derived(derivedUser?.activeOrganization);
 
 	let org = $state(derivedUser?.activeOrganization);
@@ -49,8 +51,11 @@
 		{#snippet content()}
 			<Tabs.Panel value="general">
 				<ProfileInfo bind:org={org!} />
+				<DeleteOrganization bind:org={org!} />
 			</Tabs.Panel>
-			<Tabs.Panel value="members">Boat Panel</Tabs.Panel>
+			<Tabs.Panel value="members">
+				<Members bind:org={org!} />
+			</Tabs.Panel>
 			<Tabs.Panel value="billing">Car Panel</Tabs.Panel>
 		{/snippet}
 	</Tabs>
