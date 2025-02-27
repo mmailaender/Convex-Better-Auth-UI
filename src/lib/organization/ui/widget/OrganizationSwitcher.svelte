@@ -68,14 +68,16 @@
 					>
 						<Avatar src={activeOrg!.logo} name={activeOrg!.name} size="size-6" />
 						<span class="text-surface-700-300 text-base font-semibold">{activeOrg!.name}</span>
-						<a
-							href="/org/${activeOrg!.id}/profile"
+						<button
+							onclick={() => {
+								openStateOrganizationProfile = true;
+								openStateSwitcher = false;
+							}}
 							class="btn preset-outlined-surface-500 flex gap-2"
-							onclick={toggleUserProfile}
 						>
 							<Settings size="16" />
 							<span>Manage</span>
-						</a>
+						</button>
 					</div>
 				</li>
 
@@ -117,9 +119,6 @@
 		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm) min-w-96 relative"
 		backdropClasses="backdrop-blur-xs"
 	>
-		{#snippet trigger()}
-			<span>Manage</span>
-		{/snippet}
 		{#snippet content()}
 			<OrganizationProfile />
 			<button
