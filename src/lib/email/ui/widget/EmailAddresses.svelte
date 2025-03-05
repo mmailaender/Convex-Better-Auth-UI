@@ -2,8 +2,9 @@
 	import { enhance } from '$app/forms';
 	import type { ActionResult } from '@sveltejs/kit';
 
-	import type { User } from '$lib/db/schema/types/custom';
 	import { callForm } from '$lib/primitives/api/callForm';
+
+	import type { User } from '$lib/db/schema/types/custom';
 
 	interface Props {
 		user: User;
@@ -38,7 +39,7 @@
 			const { primaryEmail } = await callForm<User>({
 				url: '/user-profile?/setPrimaryEmail',
 				data: { email }
-			})
+			});
 			user.primaryEmail = primaryEmail;
 			localSuccess = `"${email}" is now your primary email.`;
 		} catch (err) {
@@ -68,38 +69,38 @@
 	/**
 	 * Called automatically after SvelteKit form submission for adding a new email (to be verified).
 	 */
-     function handleVerifyEmail() {
+	function handleVerifyEmail() {
 		return async ({ result }: { result: ActionResult }) => {
 			if (result.type === 'success') {
 				user.emailVerification = result.data?.email;
 				isAddingNewEmail = false;
-                localSuccess = `Verification email sent!`;
+				localSuccess = `Verification email sent!`;
 			} else if (result.type === 'error') {
-                localError = `Failed to verify email: ${result.error}`;
+				localError = `Failed to verify email: ${result.error}`;
 			}
 		};
 	}
 </script>
 
 <div class="mb-6">
-	<h3 class="mb-4 font-bold text-surface-800-200">Email addresses</h3>
+	<h3 class="text-surface-800-200 mb-4 font-bold">Email addresses</h3>
 	<ul class="mb-4 flex flex-col gap-2">
 		{#each sortedEmails as email}
 			<li class="flex items-center justify-between">
 				<div class="text-surface-800-200">
 					{email}
 					{#if email === user.primaryEmail}
-						<span class="ml-2 text-sm font-semibold text-primary-500">Primary</span>
+						<span class="text-primary-500 ml-2 text-sm font-semibold">Primary</span>
 					{:else}
 						<div class="mt-1 flex gap-2">
 							<button
-								class="btn text-sm hover:preset-tonal-surface"
+								class="btn hover:preset-tonal-surface text-sm"
 								onclick={() => handleMakePrimary(email)}
 							>
 								Make Primary
 							</button>
 							<button
-								class="btn text-sm hover:preset-tonal-surface"
+								class="btn hover:preset-tonal-surface text-sm"
 								onclick={() => handleDeleteEmail(email)}
 							>
 								Delete
@@ -115,7 +116,7 @@
 			<button class="btn" onclick={addNewEmail}> Add a new email </button>
 		{:else}
 			<form
-				action="/user-profile?/verifyEmail"
+				action="/user-profile?/verifyEmailAndSendVerification"
 				method="POST"
 				use:enhance={handleVerifyEmail}
 				class="flex gap-2"

@@ -16,7 +16,7 @@
 	async function handleResendVerification() {
 		try {
 			await callForm({
-				url: '/user-profile?/verifyEmail',
+				url: '/user-profile?/resendVerification',
 				data: { email: user.emailVerification!, userId: user.id }
 			});
 			localSuccess = 'Verification code resent.';
@@ -63,11 +63,11 @@
 			<span class="text-surface-800-200">{user.emailVerification}</span>
 			<span class="badge preset-tonal-surface">Unverified</span>
 		</div>
-		<div class="mt-2 w-full max-w-sm rounded-lg border p-6 shadow-md border-surface-300-700">
-			<h2 class="text-lg font-semibold text-surface-900-100">Verify email address</h2>
-			<p class="mt-1 text-sm text-surface-600-400">
+		<div class="border-surface-300-700 mt-2 w-full max-w-sm rounded-lg border p-6 shadow-md">
+			<h2 class="text-surface-900-100 text-lg font-semibold">Verify email address</h2>
+			<p class="text-surface-600-400 mt-1 text-sm">
 				Enter the verification code sent to
-				<span class="font-medium text-surface-900-100">{user.emailVerification}</span>
+				<span class="text-surface-900-100 font-medium">{user.emailVerification}</span>
 			</p>
 			<div class="mt-4 flex justify-between space-x-1">
 				<input type="text" class="input" bind:value={otp} />

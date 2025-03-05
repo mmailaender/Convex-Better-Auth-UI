@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	
+
+	import { callForm } from '$lib/primitives/api/callForm';
 	import { signInWithPasskey, signUpWithPasskey } from '$lib/auth/api/passkey';
 	import SocialProvider from '$lib/auth/social/provider.svelte';
+
+	import type { VerifyEmailAndSendVerificationReturnData } from '$lib/user/api/types';
+
 	interface Props {
 		data: { userId: string; credentialUserId: Uint8Array };
 	}
@@ -35,21 +39,15 @@
 		}
 	});
 
-	async function verifyEmail(event: SubmitEvent) {
+	async function verifyEmailAndSendVerification(event: SubmitEvent) {
 		event.preventDefault();
 		try {
-			const res = await fetch(
-				`/api/auth/passkey/verify-email?email=${encodeURIComponent(email)}`,
-				{
-					method: 'GET',
-					headers: { 'Content-Type': 'application/json' }
-				}
-			);
-			if (!res.ok) {
-				const errorMessage = await res.text();
-				throw new Error(errorMessage);
-			}
-			userExists = (await res.json()).userExists;
+			await callForm<VerifyEmailAndSendVerificationReturnData>({
+				url: `/user-profile?/verifyEmailAndSendVerification`,
+				data: { email }
+			});
+
+			userExists = true;
 		} catch (err: any) {
 			errorMessage = err?.message ?? 'Error verifying email.';
 		}
@@ -79,12 +77,12 @@
 
 <div class="flex min-h-screen items-center justify-center">
 	<div
-		class="card flex w-full max-w-md flex-col gap-6 border p-6 text-center border-surface-200-800"
+		class="card border-surface-200-800 flex w-full max-w-md flex-col gap-6 border p-6 text-center"
 	>
 		<!-- Title -->
 		<div id="auth_sign-in_title" class="flex flex-col gap-3">
 			<h2 class="h3 text-center">Sign in or create account</h2>
-			<p class="text-center text-surface-600-400">Get started for free</p>
+			<p class="text-surface-600-400 text-center">Get started for free</p>
 		</div>
 
 		<!-- Social Sign-In -->
@@ -93,13 +91,13 @@
 		<!-- Divider -->
 		<div class="flex items-center">
 			<hr class="hr" />
-			<div class="mx-4 text-surface-500">OR</div>
+			<div class="text-surface-500 mx-4">OR</div>
 			<hr class="hr" />
 		</div>
 
 		<!-- If user existence not checked or if user doesn't exist yet, show email form -->
 		{#if userExists === null}
-			<form class="flex flex-col gap-3" onsubmit={verifyEmail}>
+			<form class="flex flex-col gap-3" onsubmit={verifyEmailAndSendVerification}>
 				<input
 					class="input"
 					type="email"
@@ -107,14 +105,14 @@
 					placeholder="Enter your email"
 					required
 				/>
-				<button class="btn w-full preset-filled" type="submit">Continue</button>
+				<button class="btn preset-filled w-full" type="submit">Continue</button>
 			</form>
 		{/if}
 
 		<!-- If user exists, show passkey sign-in -->
 		{#if userExists === true}
 			<div class="flex flex-col items-center gap-2">
-				<button class="btn w-full preset-filled" onclick={handleSignInWithPasskey}>
+				<button class="btn preset-filled w-full" onclick={handleSignInWithPasskey}>
 					Continue with passkey
 				</button>
 			</div>
@@ -142,7 +140,7 @@
 					required
 				/>
 
-				<button class="btn w-full preset-filled" type="submit"> Create Passkey and Sign Up </button>
+				<button class="btn preset-filled w-full" type="submit"> Create Passkey and Sign Up </button>
 			</form>
 		{/if}
 

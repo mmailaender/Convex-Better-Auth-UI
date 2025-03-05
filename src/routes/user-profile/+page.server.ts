@@ -7,8 +7,10 @@ import { deleteUser, getUserAndAccounts, updateProfileData } from '$lib/user/api
 import {
 	addEmail,
 	cancelEmailVerification,
+	createAndSendVerification,
 	deleteEmail,
-	setPrimaryEmail
+	setPrimaryEmail,
+	verifyEmail
 } from '$lib/email/api/server';
 import { createPasskeyAccount, deleteAccount } from '$lib/account/api/server';
 
@@ -18,7 +20,7 @@ import {
 	cancelEmailVerificationData,
 	createPasskeyAccountData,
 	profileData,
-	verifyEmailData
+	verifyEmailAndSendVerificationData
 } from '$lib/user/api/types';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -106,42 +108,72 @@ export const actions = {
 		}
 	},
 
-	verifyEmail: async ({ request, fetch }) => {
+	verifyEmailAndSendVerification: async ({ request }) => {
 		const formData = await request.formData();
 
-		const data = verifyEmailData({ email: formData.get('email'), userId: formData.get('userId') });
+		const data = verifyEmailAndSendVerificationData({
+			email: formData.get('email'),
+			userId: formData.get('userId') ?? undefined
+		});
 		if (data instanceof type.errors) {
 			console.error(data.summary);
 			return error(400, { message: data.summary });
 		} else {
 			try {
 				console.log(`Verifying email: ${data.email}`);
-				const res = await fetch(
-					`/api/auth/passkey/verify-email?email=${encodeURIComponent(data.email)}&userId=${data.userId}`,
-					{
-						method: 'GET',
-						headers: { 'Content-Type': 'application/json' }
-					}
-				);
 
-				if (!res.ok) {
-					const errorMessage = await res.text();
-					console.error('Failed to verify email:', errorMessage);
-					return error(400, { message: errorMessage });
+				const verificationResult = await verifyEmail(data.email);
+
+				if (!verificationResult.valid) {
+					console.error(`Email ${data.email} is not valid: ${verificationResult.reason}`);
+					return error(400, {
+						message: `Email ${data.email} is not valid: ${verificationResult.reason}`
+					});
 				}
 
-				const exists = (await res.json()) as boolean;
-				console.log(`Email ${data.email} successfully verified: ${exists}`);
+				if (verificationResult.exists) {
+					console.error(`Email ${data.email} already exists: ${verificationResult.reason}`);
+					return error(400, {
+						message: `Email ${data.email} already exists: ${verificationResult.reason}`
+					});
+				}
+
+				await createAndSendVerification(data.email, data.userId);
+
+				console.log(`Email ${data.email} successfully verified and verification created and send.`);
 
 				return {
 					message: `Email verification successfully created for ${data.email}`,
-					verified: exists,
+					verified: verificationResult,
 					email: data.email
 				};
 			} catch (err) {
 				console.error(`Failed to verify email ${data.email}:`, err);
 				return error(400, { message: `Failed to verify email ${data.email}` });
 			}
+		}
+	},
+
+	resendVerification: async ({ request }) => {
+		const formData = await request.formData();
+
+		const email = type('string.email')(formData.get('email'));
+		const userId = type('string.numeric > 0 | undefined')(formData.get('userId'));
+
+		if (email instanceof type.errors) {
+			console.error('email ', email.summary);
+			return error(400, { message: `email ${email.summary}` });
+		} else if (userId instanceof type.errors) {
+			console.error('userId ', userId.summary);
+			return error(400, { message: `userId ${userId.summary}` });
+		}
+
+		try {
+			await createAndSendVerification(email, userId);
+			return { success: 'true' };
+		} catch (err) {
+			console.error(`Error resending verification for email ${email}: `, err);
+			return error(400, { message: 'Failed to resend verification' });
 		}
 	},
 
