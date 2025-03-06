@@ -1,5 +1,5 @@
 // modules
-import { error, redirect } from '@sveltejs/kit';
+import { error, json, redirect } from '@sveltejs/kit';
 import { type } from 'arktype';
 
 // lib
@@ -108,6 +108,25 @@ export const actions = {
 		}
 	},
 
+	verifyEmail: async ({ request }) => {
+		const formData = await request.formData();
+
+		const email = type('string.email')(formData.get('email'));
+
+		if (email instanceof type.errors) {
+			console.error('email ', email.summary);
+			return error(400, { message: `email ${email.summary}` });
+		} else {
+			try {
+				const verificationResult = await verifyEmail(email);
+				return JSON.stringify(verificationResult);
+			} catch (err) {
+				console.error('Error verifying email:', err);
+				return error(400, { message: `Failed to verify email "${email}"` });
+			}
+		}
+	},
+
 	verifyEmailAndSendVerification: async ({ request }) => {
 		const formData = await request.formData();
 
@@ -124,29 +143,23 @@ export const actions = {
 
 				const verificationResult = await verifyEmail(data.email);
 
+				console.log(`Verification result: `, verificationResult);
+
 				if (!verificationResult.valid) {
 					console.error(`Email ${data.email} is not valid: ${verificationResult.reason}`);
-					return error(400, {
-						message: `Email ${data.email} is not valid: ${verificationResult.reason}`
-					});
+					return JSON.stringify(verificationResult);
 				}
 
 				if (verificationResult.exists) {
 					console.error(`Email ${data.email} already exists: ${verificationResult.reason}`);
-					return error(400, {
-						message: `Email ${data.email} already exists: ${verificationResult.reason}`
-					});
+					return JSON.stringify(verificationResult);
 				}
 
 				await createAndSendVerification(data.email, data.userId);
 
-				console.log(`Email ${data.email} successfully verified and verification created and send.`);
+				console.log(`Email ${data.email} successfully verified and send verification.`);
 
-				return {
-					message: `Email verification successfully created for ${data.email}`,
-					verified: verificationResult,
-					email: data.email
-				};
+				return JSON.stringify(verificationResult);
 			} catch (err) {
 				console.error(`Failed to verify email ${data.email}:`, err);
 				return error(400, { message: `Failed to verify email ${data.email}` });

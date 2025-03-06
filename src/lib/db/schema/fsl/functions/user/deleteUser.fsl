@@ -14,5 +14,14 @@ function deleteUser(userId: String): NullUser {
     }
 
     user!.accounts?.forEach((account) => account?.delete())
+    user!.organizations?.forEach((organization) => {
+        organization?.update({ 
+            members: organization!.members.filter(member => member.user != user) 
+        })
+    })
+
+    Invitation.all().where((invitation) => user!.emails.includes(invitation.email)).forEach((invitation) => invitation?.delete())
+
+
     user!.delete()
 }

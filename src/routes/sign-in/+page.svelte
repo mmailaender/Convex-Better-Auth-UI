@@ -6,7 +6,11 @@
 	import { signInWithPasskey, signUpWithPasskey } from '$lib/auth/api/passkey';
 	import SocialProvider from '$lib/auth/social/provider.svelte';
 
-	import type { VerifyEmailAndSendVerificationReturnData } from '$lib/user/api/types';
+	import type {
+		VerifyEmailAndSendVerificationReturnData,
+		VerifyEmailReturnData
+	} from '$lib/user/api/types';
+	import { Fingerprint } from 'lucide-svelte';
 
 	interface Props {
 		data: { userId: string; credentialUserId: Uint8Array };
@@ -42,12 +46,20 @@
 	async function verifyEmailAndSendVerification(event: SubmitEvent) {
 		event.preventDefault();
 		try {
-			await callForm<VerifyEmailAndSendVerificationReturnData>({
+			const verificationResult = await callForm<VerifyEmailReturnData>({
 				url: `/user-profile?/verifyEmailAndSendVerification`,
 				data: { email }
 			});
 
-			userExists = true;
+			if (!verificationResult.valid) {
+				errorMessage = `Please use a valid email.`;
+			} else {
+				userExists = verificationResult.exists;
+				errorMessage = ``;
+			}
+
+			console.log('verificationResult: ', verificationResult);
+			console.log('userExists: ', userExists);
 		} catch (err: any) {
 			errorMessage = err?.message ?? 'Error verifying email.';
 		}
@@ -81,12 +93,19 @@
 	>
 		<!-- Title -->
 		<div id="auth_sign-in_title" class="flex flex-col gap-3">
-			<h2 class="h3 text-center">Sign in or create account</h2>
-			<p class="text-surface-600-400 text-center">Get started for free</p>
+			<h2 class="h3 text-center">Sign in</h2>
 		</div>
 
-		<!-- Social Sign-In -->
+		<!-- Sign-In -->
 		<SocialProvider />
+
+		<button
+			class="btn preset-filled-surface-100-900 flex items-center gap-2"
+			onclick={handleSignInWithPasskey}
+		>
+			<Fingerprint class="text-surface-950-50" />
+			Continue with Passkey
+		</button>
 
 		<!-- Divider -->
 		<div class="flex items-center">
@@ -94,6 +113,13 @@
 			<div class="text-surface-500 mx-4">OR</div>
 			<hr class="hr" />
 		</div>
+
+		{#if userExists !== true}
+			<div id="auth_sign-in_title" class="flex flex-col gap-3">
+				<h2 class="h3 text-center">Create account</h2>
+				<p class="text-surface-600-400 text-center">Get started for free</p>
+			</div>
+		{/if}
 
 		<!-- If user existence not checked or if user doesn't exist yet, show email form -->
 		{#if userExists === null}
@@ -107,15 +133,6 @@
 				/>
 				<button class="btn preset-filled w-full" type="submit">Continue</button>
 			</form>
-		{/if}
-
-		<!-- If user exists, show passkey sign-in -->
-		{#if userExists === true}
-			<div class="flex flex-col items-center gap-2">
-				<button class="btn preset-filled w-full" onclick={handleSignInWithPasskey}>
-					Continue with passkey
-				</button>
-			</div>
 		{/if}
 
 		<!-- If user does not exist, show sign-up fields -->
@@ -144,10 +161,20 @@
 			</form>
 		{/if}
 
-		<p class="text-center text-xs">
-			By continuing, you agree to our <a href="/terms" class="anchor">Terms of Service</a> and
-			<a href="/privacy-policy" class="anchor">Privacy Policy</a>.
-		</p>
+		{#if userExists === true}
+			<div class="flex flex-col gap-3">
+				<p class="text-surface-600-400 text-center">
+					An account for this email already exists. Sign in instead.
+				</p>
+			</div>
+		{/if}
+
+		{#if userExists === false}
+			<p class="text-center text-xs">
+				By continuing, you agree to our <a href="/terms" class="anchor">Terms of Service</a> and
+				<a href="/privacy-policy" class="anchor">Privacy Policy</a>.
+			</p>
+		{/if}
 
 		{#if errorMessage}
 			<p class="text-error-500">{errorMessage}</p>

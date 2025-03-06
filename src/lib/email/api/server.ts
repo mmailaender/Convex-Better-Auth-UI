@@ -6,61 +6,92 @@ import { createVerification, verifyUserExists } from '$lib/auth/api/verification
 import { getVerificationEmail, sendEmail } from '../templates';
 
 // env
-import { REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
+import { EMAIL_SEND_FROM, REOON_EMAIL_VERIFIER_TOKEN } from '$env/static/private';
 
 // types
 import type { User } from '$lib/db/schema/types/custom';
-import type { AddEmailData } from '$lib/user/api/types';
+import type { AddEmailData, VerifyEmailReturnData } from '$lib/user/api/types';
 
 /**
- * Verifies the existence of a user's email address and sends a verification email if it doesn't exist.
+ * Enhanced email verification function that checks:
+ * 1. If the email already exists in Fauna
+ * 2. If the email is valid using Reoon's API (not disposable, properly formatted, etc.)
  *
- * @param {string} email - The email address to verify.
- * @param {string} [userId] - Optional user ID associated with the email address.
- * @returns {Promise<boolean>} - Returns true if the email already exists, otherwise false after sending a verification email.
- * @throws {Error} - Throws an error if the email is invalid or if there's an issue with sending the verification email.
+ * @param email Email address to verify
+ * @returns Object with validation results and reason if invalid
  */
-export async function verifyEmail(email: string, userId?: string): Promise<boolean> {
-	const exists = await verifyUserExists(email);
-	console.log(`verify-email: Email ${email} exists: ${exists}`);
+export async function verifyEmail(email: string): Promise<VerifyEmailReturnData> {
+	try {
+		// First check if user already exists in Fauna
+		const exists = await verifyUserExists(email);
 
-	if (exists == false) {
-		try {
+		// If user doesn't exist, verify email validity with Reoon
+		if (!exists) {
 			const response = await fetch(
-				`https://emailverifier.reoon.com/api/v1/verify?email=${email}&key=${REOON_EMAIL_VERIFIER_TOKEN}&mode=quick`
+				`https://emailverifier.reoon.com/api/v1/verify?email=${encodeURIComponent(email)}&key=${REOON_EMAIL_VERIFIER_TOKEN}&mode=quick`
 			);
-			const verificationResult = await response.json();
 
-			if (verificationResult.status !== 'valid') {
-				console.warn(`verify-email: Email ${email} is not valid`);
-				throw new Error('Invalid email');
+			if (!response.ok) {
+				return {
+					valid: false,
+					exists,
+					email,
+					reason: 'Email verification service unavailable'
+				};
 			}
 
-			const otp = await createVerification(email, userId ? userId : undefined);
-			const { html } = await getVerificationEmail(otp);
+			const result = await response.json();
 
-			const { data, error: err } = await sendEmail({
-				from: 'verifications@etesie.dev',
-				to: email,
-				subject: `${otp} is your verification code`,
-				html: html
-			});
-
-			if (err) {
-				throw new Error(err.message);
+			if (result.status !== 'valid') {
+				return {
+					valid: false,
+					exists,
+					email,
+					reason: 'Invalid email'
+				};
 			}
-
-			console.log(
-				`verify-email: Successfully send verification email to ${email}, email id: ${data?.id}`
-			);
-			return false;
-		} catch (err) {
-			console.error(`verify-email: Error verifying email ${email}`, err);
-			throw new Error('Internal Server Error');
 		}
-	}
 
-	return true;
+		return {
+			valid: true,
+			exists,
+			email,
+			reason: 'User with this email already exists'
+		};
+	} catch (err) {
+		console.error('Error verifying email:', err);
+		return {
+			valid: false,
+			exists: false,
+			email,
+			reason: 'Error processing email verification'
+		};
+	}
+}
+
+export async function createAndSendVerification(email: string, userId?: string): Promise<void> {
+	try {
+		const otp = await createVerification(email, userId ? userId : undefined);
+		const { html } = await getVerificationEmail(otp);
+
+		const { data, error: err } = await sendEmail({
+			from: EMAIL_SEND_FROM,
+			to: email,
+			subject: `${otp} is your verification code`,
+			html: html
+		});
+
+		if (err) {
+			throw new Error(err.message);
+		}
+
+		console.log(
+			`verify-email: Successfully send verification email to ${email}, email id: ${data?.id}`
+		);
+	} catch (err) {
+		console.error(`verify-email: Error verifying email ${email}`, err);
+		throw new Error('Internal Server Error');
+	}
 }
 
 export async function addEmail(accessToken: string, addEmailData: AddEmailData): Promise<User> {

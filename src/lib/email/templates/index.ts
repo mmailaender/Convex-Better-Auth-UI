@@ -1,10 +1,12 @@
 import type { Component, ComponentProps } from 'svelte';
 import { render as svelteRender } from 'svelte/server';
 import { render as maizzleRender, type Config } from '@maizzle/framework';
+import { Resend } from 'resend';
 
 import Verification from './Verification.svelte';
+import OrganizationInvitation from './OrganizationInvitation.svelte';
+
 import { RESEND_API_KEY } from '$env/static/private';
-import { Resend } from 'resend';
 
 const maizzleConfig = (input: string) => {
 	return {
@@ -69,4 +71,18 @@ const getVerificationEmail = async (OTP: string) => {
 	return await render(Verification, componentProps);
 };
 
-export { send as sendEmail, getVerificationEmail };
+const getOrganizationInvitationEmail = async (
+	organizationName: string,
+	inviterName: string,
+	acceptUrl: string
+) => {
+	const componentProps: ComponentProps<typeof OrganizationInvitation> = {
+		organizationName,
+		inviterName,
+		acceptUrl
+	};
+
+	return await render(OrganizationInvitation, componentProps);
+};
+
+export { send as sendEmail, getVerificationEmail, getOrganizationInvitationEmail };

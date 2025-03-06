@@ -28,6 +28,15 @@ role role_organization_owner {
       })
     }
   }
+  privileges Invitation {
+    read {
+      predicate ( (doc) => {
+        doc.organization == Query.identity()!.activeOrganization
+      })
+    }
+  }
+
+
   privileges getOrganizationMembers {
     call {
       predicate ((organizationId) => {
@@ -62,6 +71,28 @@ role role_organization_owner {
         // It checks if the operation is performed within the owner's active organization.
         organizationId == Query.identity()!.activeOrganization!.id   
       })
+    }
+  }
+
+  privileges createInvitation {
+    call {
+      predicate ((organizationId, email, role) => {
+        // This predicate allows an owner to invite members to their active organization.
+        // It checks if the operation is performed within the owner's active organization.
+        organizationId == Query.identity()!.activeOrganization!.id   
+      })
+    }
+  }
+
+  privileges currentRoles {
+    call
+  }
+  privileges hasRole {
+    call
+  }
+  privileges RoleCheck {
+    read {
+      predicate ((doc) => doc.name == "role_organization_owner")
     }
   }
 

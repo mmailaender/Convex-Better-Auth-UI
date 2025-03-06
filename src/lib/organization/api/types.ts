@@ -11,7 +11,7 @@ export type CreateOrganizationData = typeof createOrganizationData.infer;
 
 export const updateOrganizationProfileData = type({
 	'name?': 'string',
-	'avatar?': 'URL',
+	'avatar?': 'string.url',
 	'slug?': 'string'
 });
 export type UpdateOrganizationData = typeof updateOrganizationProfileData.infer;
@@ -36,5 +36,10 @@ export type Member = {
 		primaryEmail: string;
 		avatar?: string;
 	};
-	role: 'role_organization_admin' | 'role_organization_owner' | 'role_organization_member';
+	role: Role;
 };
+
+export const role = type(
+	"'role_organization_owner' | 'role_organization_admin' | 'role_organization_member'"
+);
+export type Role = typeof role.infer;

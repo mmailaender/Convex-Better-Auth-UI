@@ -65,7 +65,7 @@
 				<div class="hidden sm:ml-6 sm:block">
 					<div class="flex space-x-4">
 						<!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-						<a href="#" class="btn preset-filled-surface-100-900 px-3 py-2" aria-current="page"
+						<a href="/" class="btn preset-filled-surface-100-900 px-3 py-2" aria-current="page"
 							>Dashboard</a
 						>
 						<a

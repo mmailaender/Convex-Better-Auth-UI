@@ -63,6 +63,28 @@ role role_organization_admin {
     }
   }
 
+  privileges createInvitation {
+    call {
+      predicate ((organizationId) => {
+        // This predicate allows an admin to invite members to their active organization.
+        // It checks if the operation is performed within the admin's active organization.
+        organizationId == Query.identity()!.activeOrganization!.id   
+      })
+    }
+  }
+
+  privileges currentRoles {
+    call
+  }
+  privileges hasRole {
+    call
+  }
+  privileges RoleCheck {
+    read {
+      predicate ((doc) => doc.name == "role_organization_admin")
+    }
+  }
+
   membership User {
     predicate ( (user) => {
       user.activeOrganization!.members.any(member => 

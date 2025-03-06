@@ -7,6 +7,7 @@
 	import { callForm } from '$lib/primitives/api/callForm';
 	import CreateOrganization from './CreateOrganization.svelte';
 	import OrganizationProfile from './OrganizationProfile.svelte';
+	import LeaveOrganization from './LeaveOrganization.svelte';
 
 	import type { Organization, User } from '$lib/db/schema/types/custom';
 
@@ -23,11 +24,6 @@
 	let openStateSwitcher = $state(false);
 	let openStateCreateOrganization = $state(false);
 	let openStateOrganizationProfile = $state(false);
-
-	function toggleUserProfile() {
-		openStateSwitcher = false;
-		openStateCreateOrganization = !openStateCreateOrganization;
-	}
 
 	async function updateActiveOrg(organizationId: string) {
 		try {
@@ -68,16 +64,20 @@
 					>
 						<Avatar src={activeOrg!.logo} name={activeOrg!.name} size="size-6" />
 						<span class="text-surface-700-300 text-base font-semibold">{activeOrg!.name}</span>
-						<button
-							onclick={() => {
-								openStateOrganizationProfile = true;
-								openStateSwitcher = false;
-							}}
-							class="btn preset-outlined-surface-500 flex gap-2"
-						>
-							<Settings size="16" />
-							<span>Manage</span>
-						</button>
+						{#if user!.roles.some( (role) => ['role_organization_owner', 'role_organization_admin'].includes(role) )}
+							<button
+								onclick={() => {
+									openStateOrganizationProfile = true;
+									openStateSwitcher = false;
+								}}
+								class="btn preset-outlined-surface-500 flex gap-2"
+							>
+								<Settings size="16" />
+								<span>Manage</span>
+							</button>
+						{:else}
+							<LeaveOrganization bind:user={user!} />
+						{/if}
 					</div>
 				</li>
 

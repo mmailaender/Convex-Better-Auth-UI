@@ -4,25 +4,23 @@
 
 	import ProfileInfo from './ProfileInfo.svelte';
 	import DeleteOrganization from './DeleteOrganization.svelte';
+	import LeaveOrganization from './LeaveOrganization.svelte';
 	import Members from './Members.svelte';
 
 	import type { User } from '$lib/db/schema/types/custom';
 
 	let derivedUser: User | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
-	let derivedOrg = $derived(derivedUser?.activeOrganization);
 
-	let org = $state(derivedUser?.activeOrganization);
+	let user = $state(page.data.user ? JSON.parse(page.data.user) : null);
 
 	$effect(() => {
-		org = derivedOrg;
+		user = derivedUser;
 	});
-
-	$inspect('OrganizationProfile org: ', org);
 
 	let group = $state('general');
 </script>
 
-{#if org}
+{#if user.activeOrganization}
 	<Tabs
 		bind:value={group}
 		base="flex flex-row min-w-72"
@@ -50,11 +48,12 @@
 		{/snippet}
 		{#snippet content()}
 			<Tabs.Panel value="general">
-				<ProfileInfo bind:org={org!} />
-				<DeleteOrganization bind:org={org!} />
+				<ProfileInfo bind:user={user!} />
+				<DeleteOrganization bind:user={user!} />
+				<LeaveOrganization bind:user={user!} />
 			</Tabs.Panel>
 			<Tabs.Panel value="members">
-				<Members bind:org={org!} />
+				<Members bind:user={user!} />
 			</Tabs.Panel>
 			<Tabs.Panel value="billing">Car Panel</Tabs.Panel>
 		{/snippet}

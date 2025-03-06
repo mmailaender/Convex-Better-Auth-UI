@@ -8,5 +8,7 @@ collection Organization {
     }>
     plan: "Free" | "Pro" | "Enterprise"
 
+    compute invitations: Set<Invitation> | Null = (org => Invitation.all().where(.organization == org))
+
     unique [.slug]
 }

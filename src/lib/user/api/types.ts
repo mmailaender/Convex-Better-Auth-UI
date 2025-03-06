@@ -7,19 +7,23 @@ export const profileData = type({
 });
 export type ProfileData = typeof profileData.infer;
 
+export const verifyEmailReturnData = type({
+	valid: 'boolean',
+	exists: 'boolean',
+	email: 'string.email',
+	reason: 'string'
+});
+export type VerifyEmailReturnData = typeof verifyEmailReturnData.infer;
+
 export const verifyEmailAndSendVerificationData = type({
-	email: 'string',
+	email: 'string.email',
 	userId: 'string | undefined'
 });
 export type VerifyEmailAndSendVerificationData = typeof verifyEmailAndSendVerificationData.infer;
 
 export const verifyEmailAndSendVerificationReturnData = type({
 	message: 'string',
-	verified: {
-		valid: 'boolean',
-		exists: 'boolean',
-		'reason?': 'string | undefined'
-	},
+	verified: verifyEmailReturnData,
 	email: 'string'
 });
 export type VerifyEmailAndSendVerificationReturnData =

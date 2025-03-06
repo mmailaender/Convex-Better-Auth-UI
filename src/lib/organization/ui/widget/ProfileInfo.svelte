@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
-	import type { Organization } from '$lib/db/schema/types/custom';
+	import type { User, Organization } from '$lib/db/schema/types/custom';
 	import { callForm } from '$lib/primitives/api/callForm';
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
-		org: Organization;
+		user: User;
 	}
 
-	let { org = $bindable() }: Props = $props();
+	let { user = $bindable() }: Props = $props();
 
 	let profileData = $state({
-		organizationId: org.id,
-		name: org.name,
-		slug: org.slug,
-		logo: org.logo
+		organizationId: user.activeOrganization!.id,
+		name: user.activeOrganization!.name,
+		slug: user.activeOrganization!.slug,
+		logo: user.activeOrganization!.logo
 	});
 
 	let isEditing = $state(false);
@@ -43,7 +43,7 @@
 				url: '/org?/updateOrganizationProfile',
 				data: profileData
 			});
-			org = updatedOrg;
+			user.activeOrganization = updatedOrg;
 
 			isEditing = false;
 			success = 'Profile updated successfully!';
@@ -57,10 +57,10 @@
 </script>
 
 <div class="mb-6 flex items-center gap-4">
-	<Avatar src={org.logo} name={org.name} />
+	<Avatar src={user.activeOrganization!.logo} name={user.activeOrganization!.name} />
 	{#if !isEditing}
 		<button onclick={toggleEdit}>
-			<span class="text-surface-800-200 font-medium">{org.name}</span>
+			<span class="text-surface-800-200 font-medium">{user.activeOrganization!.name}</span>
 		</button>
 	{:else}
 		<form onsubmit={handleSubmit}>

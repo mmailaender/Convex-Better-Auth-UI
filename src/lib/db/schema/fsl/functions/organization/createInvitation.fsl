@@ -1,0 +1,26 @@
+@role(server)
+function createInvitation(
+  organizationId: ID, 
+  email: String, 
+  role: "role_organization_member" | "role_organization_admin"
+): Invitation {
+  let user: Any = Query.identity()
+  let user: User = user!
+  let organization = Organization.byId(organizationId)
+  
+  // Check if user is authorized (owner or admin)
+  let isMember = organization!.members.any(member => 
+    member.user == user && (member.role == "role_organization_owner" || member.role == "role_organization_admin")
+  )
+  
+  if (!isMember) {
+    abort("Unauthorized: Only owners and admins can invite members")
+  }
+  
+  Invitation.create({
+    organization: organization,
+    email: email,
+    invitedBy: user,
+    role: role,
+  })
+}

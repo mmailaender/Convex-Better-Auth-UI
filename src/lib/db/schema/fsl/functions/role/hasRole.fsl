@@ -1,0 +1,5 @@
+// Defines the `hasRole()` UDF.
+// Takes a role as an argument. Returns `true` or `false`.
+function hasRole(role) {
+  RoleCheck.byName(role) != null
+}

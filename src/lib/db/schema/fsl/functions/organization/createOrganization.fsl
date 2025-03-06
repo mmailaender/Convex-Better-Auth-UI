@@ -29,6 +29,7 @@ function createOrganization ( data: { name: String, logo: String?, slug: String 
     emails,
     emailVerification,
     avatar,
+    roles,
     activeOrganization: .activeOrganization {
       id,
       ttl,
@@ -37,7 +38,8 @@ function createOrganization ( data: { name: String, logo: String?, slug: String 
       logo,
       slug,
       members,
-      plan
+      plan,
+      invitations
     },
     organizations: .organizations?.map(ao => ao {
       id,
@@ -47,7 +49,8 @@ function createOrganization ( data: { name: String, logo: String?, slug: String 
       logo,
       slug,
       members,
-      plan
+      plan,
+      invitations
     }),
     accounts
   }

@@ -5,6 +5,7 @@ collection User {
     emails: Array<String>
     compute emailVerification: String? = doc => { getVerificationEmail(doc.id)}
     avatar: String?
+    compute roles: Array<String> = (user => currentRoles()) 
     activeOrganization: Ref<Organization>?
     organizations: Array<Ref<Organization>>?
     accounts: Array<Ref<Account>>

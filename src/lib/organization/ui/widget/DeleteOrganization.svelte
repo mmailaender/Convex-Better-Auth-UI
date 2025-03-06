@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
-	import type { Organization } from '$lib/db/schema/types/custom';
+	import type { User } from '$lib/db/schema/types/custom';
 	import { goto } from '$app/navigation';
 
 	interface Props {
-		org: Organization;
+		user: User;
 	}
 
-	let { org = $bindable() }: Props = $props();
+	let { user = $bindable() }: Props = $props();
 	let open = $state(false);
 	let error = $state('');
 
@@ -16,7 +16,7 @@
 		try {
 			await callForm({
 				url: '/org?/deleteOrganization',
-				data: { organizationId: org.id }
+				data: { organizationId: user.activeOrganization!.id }
 			});
 			open = false;
 			goto('/', { invalidateAll: true });
@@ -49,8 +49,8 @@
 		</header>
 		<article>
 			<p class="opacity-60">
-				Are you sure you want to delete the organization {org.name}? All organization data will be
-				permanently deleted.
+				Are you sure you want to delete the organization {user.activeOrganization!.name}? All
+				organization data will be permanently deleted.
 			</p>
 		</article>
 		<footer class="flex justify-end gap-4">

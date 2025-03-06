@@ -17,7 +17,14 @@ const handleParaglide: Handle = i18n.handle();
 
 const bucket = new RefillingTokenBucket<string>(100, 1);
 
-const isPublicRoute = createRouteMatcher(['/sign-in*', '/api/auth/oauth*', '/api/auth/passkey*']);
+const isPublicRoute = createRouteMatcher([
+	'/sign-in*',
+	'/api/auth/oauth*',
+	'/api/auth/passkey*',
+	'/user-profile?/verifyEmail',
+	'/user-profile?/verifyEmailAndSendVerification',
+	'/user-profile?/resendVerification'
+]);
 
 const rateLimitHandle: Handle = async ({ event, resolve }) => {
 	// Note: Assumes X-Forwarded-For will always be defined.
@@ -69,14 +76,16 @@ const authHandle: Handle = async ({ event, resolve }) => {
 
 				deleteAccessTokenCookie(event);
 
+				const currentPathAndSearch = event.url.pathname + event.url.search;
+				console.info(`Current pathAndSearch: ${currentPathAndSearch}`);
+
 				// Redirect to sign-in page if not a public route
-				if (!isPublicRoute(event.url.pathname)) {
+				if (!isPublicRoute(currentPathAndSearch)) {
 					console.info('Redirecting to sign-in page');
-					redirect(307, `/sign-in?redirect_url=${encodeURIComponent(event.url.pathname)}`);
+					redirect(307, `/sign-in?redirect_url=${encodeURIComponent(currentPathAndSearch)}`);
 				} else {
 					console.info('\n');
-					// return response;
-					return resolve(event)
+					return resolve(event);
 				}
 			}
 
@@ -95,14 +104,16 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				deleteRefreshTokenCookie(event);
 				deleteAccessTokenCookie(event);
 
+				const currentPathAndSearch = event.url.pathname + event.url.search;
+				console.info(`Current pathAndSearch: ${currentPathAndSearch}`);
+
 				// Redirect to sign-in page if not a public route
-				if (!isPublicRoute(event.url.pathname)) {
+				if (!isPublicRoute(currentPathAndSearch)) {
 					// Redirect to sign-in
 					console.info('Redirecting to sign-in page');
-					redirect(307, `/sign-in?redirect_url=${encodeURIComponent(event.url.pathname)}`);
+					redirect(307, `/sign-in?redirect_url=${encodeURIComponent(currentPathAndSearch)}`);
 				} else {
-					// return response;
-					return resolve(event)
+					return resolve(event);
 				}
 			}
 		} else {

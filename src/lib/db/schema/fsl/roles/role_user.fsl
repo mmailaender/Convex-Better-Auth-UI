@@ -74,6 +74,27 @@ role role_user {
     }
   }
 
+  privileges acceptInvitation {
+    call {
+      predicate ((data) => {
+        let user = User.byId(data.userId)
+        user == Query.identity()
+      })
+    }
+  }
+
+  privileges currentRoles {
+    call
+  }
+  privileges hasRole {
+    call
+  }
+  privileges RoleCheck {
+    read {
+      predicate ((doc) => doc.name == "role_user")
+    }
+  }
+
   membership User {
     predicate ( (doc) => isCalledWithAccessToken() )
   }

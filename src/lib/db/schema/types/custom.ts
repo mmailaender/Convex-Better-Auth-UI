@@ -28,6 +28,7 @@ const types = scope({
 			primaryEmail: 'string',
 			emails: 'string[]',
 			'avatar?': 'string',
+			roles: 'string[]',
 			'activeOrganization?': 'organization',
 			'organizations?': 'organization[]',
 			accounts: 'account[]',
@@ -57,7 +58,25 @@ const types = scope({
 				},
 				'[]'
 			],
-			plan: "'Free' | 'Pro' | 'Enterprise'"
+			plan: "'Free' | 'Pro' | 'Enterprise'",
+			invitations: [
+				{
+					data: 'invitation[]',
+					'after?': 'string'
+				},
+				'|',
+				'null'
+			]
+		}
+	],
+	invitation: [
+		v.document.read,
+		'&',
+		{
+			invitedBy: 'user',
+			organization: 'organization',
+			email: 'string',
+			role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
 		}
 	]
 }).export();
@@ -115,6 +134,16 @@ const types_create = scope({
 			],
 			plan: "'Free' | 'Pro' | 'Enterprise'"
 		}
+	],
+	invitation: [
+		v.document.create,
+		'&',
+		{
+			invitedBy: v.createRef(type("'User'")),
+			organization: v.createRef(type("'Organization'")),
+			email: 'string',
+			role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+		}
 	]
 }).export();
 
@@ -170,6 +199,16 @@ const types_update = scope({
 				'[]'
 			],
 			'plan?': "'Free' | 'Pro' | 'Enterprise'"
+		}
+	],
+	invitation: [
+		v.document.update,
+		'&',
+		{
+			'invitedBy?': v.createRef(type("'User'")),
+			'organization?': v.createRef(type("'Organization'")),
+			'email?': 'string',
+			'role?': "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
 		}
 	]
 }).export();
@@ -227,6 +266,16 @@ const types_replace = scope({
 			],
 			plan: "'Free' | 'Pro' | 'Enterprise'"
 		}
+	],
+	invitation: [
+		v.document.replace,
+		'&',
+		{
+			invitedBy: v.createRef(type("'User'")),
+			organization: v.createRef(type("'Organization'")),
+			email: 'string',
+			role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+		}
 	]
 }).export();
 
@@ -249,6 +298,11 @@ type Organization = typeof types.organization.infer;
 type Organization_Create = typeof types_create.organization.infer;
 type Organization_Update = typeof types_update.organization.infer;
 type Organization_Replace = typeof types_replace.organization.infer;
+
+type Invitation = typeof types.invitation.infer;
+type Invitation_Create = typeof types_create.invitation.infer;
+type Invitation_Update = typeof types_update.invitation.infer;
+type Invitation_Replace = typeof types_replace.invitation.infer;
 
 interface UserCollectionsTypeMapping {
 	Account: {
@@ -278,6 +332,13 @@ interface UserCollectionsTypeMapping {
 		replace: Organization_Replace;
 		update: Organization_Update;
 	};
+
+	Invitation: {
+		main: Invitation;
+		create: Invitation_Create;
+		replace: Invitation_Replace;
+		update: Invitation_Update;
+	};
 }
 
 const validator = {
@@ -304,6 +365,12 @@ const validator = {
 		create: types_create.organization,
 		update: types_update.organization,
 		replace: types_replace.organization
+	},
+	invitation: {
+		read: types.invitation,
+		create: types_create.invitation,
+		update: types_update.invitation,
+		replace: types_replace.invitation
 	}
 };
 
@@ -326,5 +393,9 @@ export type {
 	Organization_Create,
 	Organization_Replace,
 	Organization_Update,
+	Invitation,
+	Invitation_Create,
+	Invitation_Replace,
+	Invitation_Update,
 	UserCollectionsTypeMapping
 };
