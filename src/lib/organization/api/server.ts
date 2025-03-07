@@ -7,7 +7,8 @@ import type {
 	UpdateMemberRoleData,
 	UsersOrganizations,
 	Member,
-	Role
+	Role,
+	MembersAndInvitations
 } from './types';
 import type { Invitation, Organization, User } from '$lib/db/schema/types/custom';
 import type { NullDocument } from '$lib/db/schema/types/system';
@@ -44,9 +45,11 @@ export async function getUsersOrganizations(accessToken: string): Promise<UsersO
 	return response.data;
 }
 
-export async function getOrganizationMembers(accessToken: string): Promise<Array<Member>> {
-	const response = await client(accessToken).query<Array<Member>>(
-		fql`getOrganizationMembers(Query.identity()!.activeOrganization!.id)
+export async function getOrganizationMembersAndInvitations(
+	accessToken: string
+): Promise<MembersAndInvitations> {
+	const response = await client(accessToken).query<MembersAndInvitations>(
+		fql`getOrganizationMembersAndInvitations(Query.identity()!.activeOrganization!.id)
 		`
 	);
 	return response.data;
@@ -59,6 +62,16 @@ export async function createInvitation(
 ): Promise<Invitation> {
 	const response = await client(accessToken).query<Invitation>(
 		fql`createInvitation(Query.identity()!.activeOrganization!.id, ${email}, ${role})`
+	);
+	return response.data;
+}
+
+export async function revokeInvitation(
+	accessToken: string,
+	invitationId: string
+): Promise<NullDocument> {
+	const response = await client(accessToken).query<NullDocument>(
+		fql`revokeInvitation( ID(${invitationId}) )`
 	);
 	return response.data;
 }

@@ -28,11 +28,11 @@ const types = scope({
 			primaryEmail: 'string',
 			emails: 'string[]',
 			'avatar?': 'string',
-			roles: 'string[]',
 			'activeOrganization?': 'organization',
 			'organizations?': 'organization[]',
 			accounts: 'account[]',
-			'emailVerification?': 'string'
+			'emailVerification?': 'string',
+			roles: 'string[]'
 		}
 	],
 	verification: [
@@ -59,14 +59,7 @@ const types = scope({
 				'[]'
 			],
 			plan: "'Free' | 'Pro' | 'Enterprise'",
-			invitations: [
-				{
-					data: 'invitation[]',
-					'after?': 'string'
-				},
-				'|',
-				'null'
-			]
+			invitations: 'invitation[]'
 		}
 	],
 	invitation: [
@@ -77,6 +70,13 @@ const types = scope({
 			organization: 'organization',
 			email: 'string',
 			role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+		}
+	],
+	roleCheck: [
+		v.document.read,
+		'&',
+		{
+			name: 'string'
 		}
 	]
 }).export();
@@ -144,6 +144,13 @@ const types_create = scope({
 			email: 'string',
 			role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
 		}
+	],
+	roleCheck: [
+		v.document.create,
+		'&',
+		{
+			name: 'string'
+		}
 	]
 }).export();
 
@@ -209,6 +216,13 @@ const types_update = scope({
 			'organization?': v.createRef(type("'Organization'")),
 			'email?': 'string',
 			'role?': "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
+		}
+	],
+	roleCheck: [
+		v.document.update,
+		'&',
+		{
+			'name?': 'string'
 		}
 	]
 }).export();
@@ -276,6 +290,13 @@ const types_replace = scope({
 			email: 'string',
 			role: "'role_organization_member' | 'role_organization_admin' | 'role_organization_owner'"
 		}
+	],
+	roleCheck: [
+		v.document.replace,
+		'&',
+		{
+			name: 'string'
+		}
 	]
 }).export();
 
@@ -303,6 +324,11 @@ type Invitation = typeof types.invitation.infer;
 type Invitation_Create = typeof types_create.invitation.infer;
 type Invitation_Update = typeof types_update.invitation.infer;
 type Invitation_Replace = typeof types_replace.invitation.infer;
+
+type RoleCheck = typeof types.roleCheck.infer;
+type RoleCheck_Create = typeof types_create.roleCheck.infer;
+type RoleCheck_Update = typeof types_update.roleCheck.infer;
+type RoleCheck_Replace = typeof types_replace.roleCheck.infer;
 
 interface UserCollectionsTypeMapping {
 	Account: {
@@ -339,6 +365,13 @@ interface UserCollectionsTypeMapping {
 		replace: Invitation_Replace;
 		update: Invitation_Update;
 	};
+
+	RoleCheck: {
+		main: RoleCheck;
+		create: RoleCheck_Create;
+		replace: RoleCheck_Replace;
+		update: RoleCheck_Update;
+	};
 }
 
 const validator = {
@@ -371,6 +404,12 @@ const validator = {
 		create: types_create.invitation,
 		update: types_update.invitation,
 		replace: types_replace.invitation
+	},
+	roleCheck: {
+		read: types.roleCheck,
+		create: types_create.roleCheck,
+		update: types_update.roleCheck,
+		replace: types_replace.roleCheck
 	}
 };
 
@@ -397,5 +436,9 @@ export type {
 	Invitation_Create,
 	Invitation_Replace,
 	Invitation_Update,
+	RoleCheck,
+	RoleCheck_Create,
+	RoleCheck_Replace,
+	RoleCheck_Update,
 	UserCollectionsTypeMapping
 };

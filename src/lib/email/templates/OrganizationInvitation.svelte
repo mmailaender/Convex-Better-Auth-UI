@@ -19,7 +19,7 @@
 
 	<div class="mb-6">
 		<a
-			href="${acceptUrl}"
+			href={acceptUrl}
 			class="rounded-lg bg-blue-500 px-6 py-2 font-medium text-white no-underline"
 		>
 			Accept Invitation

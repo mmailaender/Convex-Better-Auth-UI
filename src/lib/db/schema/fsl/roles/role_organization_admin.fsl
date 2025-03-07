@@ -31,7 +31,7 @@ role role_organization_admin {
     }
   }
 
-  privileges getOrganizationMembers {
+  privileges getOrganizationMembersAndInvitations {
     call {
       predicate ((organizationId) => {
         // This predicate allows an admin to get the members of their active organization.
@@ -59,6 +59,15 @@ role role_organization_admin {
         } else {
           false
         }
+      })
+    }
+  }
+  privileges revokeInvitation {
+    call {
+      predicate ((invitationId) => {
+        // This predicate allows an admin to revoke invitations to their active organization.
+        // It checks if the operation is performed within the admin's active organization.
+        Query.identity()!.activeOrganization!.invitations.any(invitation => invitation.id == invitationId)
       })
     }
   }

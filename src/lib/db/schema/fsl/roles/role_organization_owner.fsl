@@ -37,7 +37,7 @@ role role_organization_owner {
   }
 
 
-  privileges getOrganizationMembers {
+  privileges getOrganizationMembersAndInvitations {
     call {
       predicate ((organizationId) => {
         // This predicate allows an owner to get the members of their active organization.
@@ -80,6 +80,15 @@ role role_organization_owner {
         // This predicate allows an owner to invite members to their active organization.
         // It checks if the operation is performed within the owner's active organization.
         organizationId == Query.identity()!.activeOrganization!.id   
+      })
+    }
+  }
+  privileges revokeInvitation {
+    call {
+      predicate ((invitationId) => {
+        // This predicate allows an owner to revoke invitations to their active organization.
+        // It checks if the operation is performed within the owner's active organization.
+        Query.identity()!.activeOrganization!.invitations.any(invitation => invitation.id == invitationId)
       })
     }
   }

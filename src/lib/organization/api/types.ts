@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { scope, type } from 'arktype';
 
 import type { Organization } from '$lib/db/schema/types/custom';
 
@@ -28,18 +28,37 @@ export type UsersOrganizations = {
 	organizations: Organization[];
 };
 
-export type Member = {
-	user: {
-		id: string;
-		firstName: string;
-		lastName: string;
-		primaryEmail: string;
-		avatar?: string;
-	};
-	role: Role;
-};
-
 export const role = type(
 	"'role_organization_owner' | 'role_organization_admin' | 'role_organization_member'"
 );
 export type Role = typeof role.infer;
+
+export const member = type({
+	user: {
+		id: 'string.numeric > 0',
+		firstName: 'string',
+		lastName: 'string',
+		primaryEmail: 'string',
+		'avatar?': 'string.url'
+	},
+	role: role
+});
+export type Member = typeof member.infer;
+
+export const invitation = type({
+	id: 'string.numeric > 0',
+	invitedBy: {
+		id: 'string.numeric > 0',
+		firstName: 'string',
+		lastName: 'string'
+	},
+	email: 'string',
+	role: role
+});
+export type Invitation = typeof invitation.infer;
+
+export const membersAndInvitations = type({
+	members: member.array(),
+	invitations: invitation.array()
+});
+export type MembersAndInvitations = typeof membersAndInvitations.infer;

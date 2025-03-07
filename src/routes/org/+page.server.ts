@@ -12,8 +12,9 @@ import {
 	getUsersOrganizations,
 	setActiveOrganization,
 	updateMemberRole,
-	getOrganizationMembers,
-	createInvitation
+	getOrganizationMembersAndInvitations,
+	createInvitation,
+	revokeInvitation
 } from '$lib/organization/api/server';
 
 // Types
@@ -85,14 +86,14 @@ export const actions = {
 		}
 	},
 
-	getOrganizationMembers: async ({ cookies }) => {
+	getOrganizationMembersAndInvitations: async ({ cookies }) => {
 		const accessToken = cookies.get('access_token');
 		try {
-			const org = await getOrganizationMembers(accessToken!);
-			return JSON.stringify(org);
+			const membersAndInvitations = await getOrganizationMembersAndInvitations(accessToken!);
+			return JSON.stringify(membersAndInvitations);
 		} catch (err) {
-			console.error('Error getting organization members:', err);
-			return error(400, { message: 'Failed to get organization members' });
+			console.error('Error getting organization members and invitations:', err);
+			return error(400, { message: 'Failed to get organization members and invitations.' });
 		}
 	},
 
@@ -152,6 +153,26 @@ export const actions = {
 			} catch (err) {
 				console.error('Error inviting user:', err);
 				return error(400, { message: 'Failed to invite user' });
+			}
+		}
+	},
+
+	revokeInvitation: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
+
+		const invitationId = type('string.numeric > 0')(formData.get('invitationId'));
+
+		if (invitationId instanceof type.errors) {
+			console.error('Invalid invitation ID: ', invitationId.summary);
+			return error(400, { message: 'Invalid invitation ID' });
+		} else {
+			try {
+				const res = await revokeInvitation(accessToken!, invitationId);
+				return JSON.stringify(res);
+			} catch (err) {
+				console.error('Error revoking invitation:', err);
+				return error(400, { message: 'Failed to revoke invitation' });
 			}
 		}
 	},
