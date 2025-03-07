@@ -1,4 +1,4 @@
-import { Client } from 'fauna';
+import { Client, fql } from 'fauna';
 
 // const customLogger = {
 //     trace: console.trace,
@@ -6,18 +6,33 @@ import { Client } from 'fauna';
 //     info: console.info,
 //     error: console.error,
 //     warn: console.warn,
-//     fatal: console.error, 
+//     fatal: console.error,
 //   };
 
 /**
- * Creates a new FaunaDB client with the given secret key. Can be a fauna key or token.
- * 
- * @param {string} secret - The secret key for the FaunaDB client.
- * @returns {Client} A new FaunaDB client instance.
+ * Extended Fauna client with additional convenience methods.
  */
-export default (secret: string): Client => {
-    return new Client({
-        secret: secret,
-        // logger: customLogger 
-    });
+class ExtendedClient extends Client {
+	/**
+	 * Generates a new unique ID using Fauna's newId() function.
+	 *
+	 * @returns {Promise<string>} A promise that resolves to the new ID.
+	 */
+	async newId(): Promise<string> {
+		const response = await this.query<string>(fql`newId()`);
+		return response.data;
+	}
+}
+
+/**
+ * Creates a new extended FaunaDB client with the given secret key.
+ *
+ * @param {string} secret - The secret key for the FaunaDB client.
+ * @returns {ExtendedClient} A new extended FaunaDB client instance.
+ */
+export default (secret: string): ExtendedClient => {
+	return new ExtendedClient({
+		secret: secret
+		// logger: customLogger
+	});
 };

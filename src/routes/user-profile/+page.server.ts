@@ -1,5 +1,5 @@
 // modules
-import { error, json, redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { type } from 'arktype';
 
 // lib
@@ -23,6 +23,7 @@ import {
 	verifyEmailAndSendVerificationData
 } from '$lib/user/api/types';
 import type { Actions, PageServerLoad } from './$types';
+import client from '$lib/db/client';
 
 export const load = (async ({ parent, cookies }) => {
 	const { user: layoutUser } = await parent();
@@ -45,6 +46,17 @@ export const load = (async ({ parent, cookies }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
+	newId: async ({ cookies }) => {
+		const accessToken = cookies.get('access_token');
+		try {
+			const newId = await client(accessToken!).newId();
+			return { newId };
+		} catch (err) {
+			console.error('Error generating new ID:', err);
+			return error(400, { message: 'Failed to generate new ID' });
+		}
+	},
+
 	updateProfileData: async ({ cookies, request }) => {
 		const accessToken = cookies.get('access_token');
 		const formData = await request.formData();
