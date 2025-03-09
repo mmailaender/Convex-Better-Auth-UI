@@ -39,7 +39,7 @@
 		if (isOwnerOrAdmin) {
 			try {
 				const membersAndInvitations = await callForm<MembersAndInvitations>({
-					url: '/org?/getOrganizationMembersAndInvitations',
+					url: '/api/org?/getOrganizationMembersAndInvitations',
 					data: { organizationId: user.activeOrganization!.id }
 				});
 
@@ -95,7 +95,7 @@
 
 			try {
 				const updatedOrg = await callForm<Organization>({
-					url: '/org?/updateMemberRole',
+					url: '/api/org?/updateMemberRole',
 					data: { userId, newRole }
 				});
 
@@ -113,7 +113,7 @@
 	async function removeMember(userId: string) {
 		try {
 			const updatedmembers = await callForm<Array<Member>>({
-				url: '/org?/removeUserFromOrganization',
+				url: '/api/org?/removeUserFromOrganization',
 				data: { userId }
 			});
 			successMessage = 'Member removed successfully!';
@@ -127,7 +127,7 @@
 	async function handleRevokeInvitation(invitationId: string) {
 		try {
 			await callForm<NullDocument>({
-				url: '/org?/revokeInvitation',
+				url: '/api/org?/revokeInvitation',
 				data: { invitationId }
 			});
 			successMessage = 'Invitation revoked successfully!';

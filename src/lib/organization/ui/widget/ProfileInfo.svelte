@@ -40,7 +40,7 @@
 
 		try {
 			const updatedOrg = await callForm<Organization>({
-				url: '/org?/updateOrganizationProfile',
+				url: '/api/org?/updateOrganizationProfile',
 				data: profileData
 			});
 			user.activeOrganization = updatedOrg;

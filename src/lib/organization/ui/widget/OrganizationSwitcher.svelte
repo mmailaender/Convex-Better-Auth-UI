@@ -28,7 +28,7 @@
 	async function updateActiveOrg(organizationId: string) {
 		try {
 			const org = await callForm<Organization>({
-				url: '/org?/setActiveOrganization',
+				url: '/api/org?/setActiveOrganization',
 				data: { organizationId }
 			});
 			user!.activeOrganization = org;

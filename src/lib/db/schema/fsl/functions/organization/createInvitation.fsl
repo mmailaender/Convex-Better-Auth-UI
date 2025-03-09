@@ -22,5 +22,13 @@ function createInvitation(
     email: email,
     invitedBy: user,
     role: role,
-  })
+  }) {
+    id,
+    ts,
+    ttl,
+    invitedBy,
+    organization,
+    email,
+    role
+  }
 }

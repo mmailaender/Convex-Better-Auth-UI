@@ -35,7 +35,7 @@
 
 		try {
 			await callForm({
-				url: '/org?/leaveOrganization',
+				url: '/api/org?/leaveOrganization',
 				data: {
 					successorId: selectedSuccessor
 				}

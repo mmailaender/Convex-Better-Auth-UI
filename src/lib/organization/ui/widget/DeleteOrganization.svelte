@@ -15,7 +15,7 @@
 	async function handleConfirm() {
 		try {
 			await callForm({
-				url: '/org?/deleteOrganization',
+				url: '/api/org?/deleteOrganization',
 				data: { organizationId: user.activeOrganization!.id }
 			});
 			open = false;

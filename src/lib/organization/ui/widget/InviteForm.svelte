@@ -45,7 +45,7 @@
 			const invitationPromises = emails.map(async (email) => {
 				try {
 					const invitation = await callForm<Invitation>({
-						url: `/org?/inviteUserToOrganization`,
+						url: `/api/org?/inviteUserToOrganization`,
 						data: {
 							email,
 							role: selectedRole,
@@ -74,17 +74,10 @@
 					.join(', ')}`;
 				emailInput = '';
 
-				// If invitations doesn't exist, create it with an empty data array
-				if (!user.activeOrganization!.invitations) {
-					user.activeOrganization!.invitations = { data: [] };
-				}
-
-				user.activeOrganization!.invitations.data = [
-					...(user.activeOrganization!.invitations.data || []),
+				user.activeOrganization!.invitations = [
+					...user.activeOrganization!.invitations,
 					...successful.map((r) => r.invitation!)
 				];
-				// Refresh invitations list
-				// invalidateAll();
 			}
 
 			if (failed.length > 0) {

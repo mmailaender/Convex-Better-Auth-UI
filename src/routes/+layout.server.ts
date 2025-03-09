@@ -6,7 +6,7 @@ import type { UsersOrganizations } from '$lib/organization/api/types';
 export const load = (async ({ locals, fetch }) => {
 	if (locals.user) {
 		const usersOrganizations = await callForm<UsersOrganizations>({
-			url: '/org?/getUsersOrganizations',
+			url: '/api/org?/getUsersOrganizations',
 			fetch
 		});
 
