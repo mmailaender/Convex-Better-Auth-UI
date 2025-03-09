@@ -32,7 +32,7 @@
 
 		try {
 			await callForm({
-				url: '/user-profile?/updateProfileData',
+				url: '/api/user?/updateProfileData',
 				data: new URLSearchParams(formData as any)
 			});
 			isEditing = false;

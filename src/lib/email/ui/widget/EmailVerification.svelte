@@ -16,7 +16,7 @@
 	async function handleResendVerification() {
 		try {
 			await callForm({
-				url: '/user-profile?/resendVerification',
+				url: '/api/user?/resendVerification',
 				data: { email: user.emailVerification!, userId: user.id }
 			});
 			localSuccess = 'Verification code resent.';
@@ -28,7 +28,7 @@
 	async function handleCancelVerification() {
 		try {
 			await callForm({
-				url: '/user-profile?/cancelEmailVerification',
+				url: '/api/user?/cancelEmailVerification',
 				data: { emailVerification: user.emailVerification! }
 			});
 			localSuccess = `Canceled verification for "${user.emailVerification!}".`;
@@ -41,7 +41,7 @@
 	async function handleVerifyOtp() {
 		try {
 			const res = await callForm<User>({
-				url: '/user-profile?/addEmail',
+				url: '/api/user?/addEmail',
 				data: {
 					email: user.emailVerification!,
 					verificationOTP: otp

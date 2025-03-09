@@ -21,9 +21,9 @@ const isPublicRoute = createRouteMatcher([
 	'/sign-in*',
 	'/api/auth/oauth*',
 	'/api/auth/passkey*',
-	'/user-profile?/verifyEmail',
-	'/user-profile?/verifyEmailAndSendVerification',
-	'/user-profile?/resendVerification'
+	'/api/user?/verifyEmail',
+	'/api/user?/verifyEmailAndSendVerification',
+	'/api/user?/resendVerification'
 ]);
 
 const rateLimitHandle: Handle = async ({ event, resolve }) => {

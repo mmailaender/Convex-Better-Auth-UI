@@ -13,7 +13,7 @@
 	async function handleConfirm() {
 		try {
 			await callForm({
-				url: '/user-profile?/deleteUser',
+				url: '/api/user?/deleteUser',
 				data: { userId }
 			});
 		} catch (err) {

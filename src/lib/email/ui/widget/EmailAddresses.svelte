@@ -37,7 +37,7 @@
 	async function handleMakePrimary(email: string) {
 		try {
 			const { primaryEmail } = await callForm<User>({
-				url: '/user-profile?/setPrimaryEmail',
+				url: '/api/user?/setPrimaryEmail',
 				data: { email }
 			});
 			user.primaryEmail = primaryEmail;
@@ -53,7 +53,7 @@
 	async function handleDeleteEmail(email: string) {
 		try {
 			const { emails } = await callForm<User>({
-				url: '/user-profile?/deleteEmail',
+				url: '/api/user?/deleteEmail',
 				data: { email }
 			});
 			user.emails = emails;
@@ -116,7 +116,7 @@
 			<button class="btn" onclick={addNewEmail}> Add a new email </button>
 		{:else}
 			<form
-				action="/user-profile?/verifyEmailAndSendVerification"
+				action="/api/user?/verifyEmailAndSendVerification"
 				method="POST"
 				use:enhance={handleVerifyEmail}
 				class="flex gap-2"

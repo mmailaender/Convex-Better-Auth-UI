@@ -70,7 +70,7 @@
 		event.preventDefault();
 		try {
 			const verificationResult = await callForm<VerifyEmailReturnData>({
-				url: `/user-profile?/verifyEmailAndSendVerification`,
+				url: `/api/user?/verifyEmailAndSendVerification`,
 				data: { email }
 			});
 

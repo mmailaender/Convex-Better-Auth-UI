@@ -38,7 +38,7 @@
 			const encodedClientData = encodeBase64(new Uint8Array(credentials.clientDataJSON));
 
 			const account = await callForm<Account>({
-				url: '/user-profile?/createPasskeyAccount',
+				url: '/api/user?/createPasskeyAccount',
 				data: {
 					userId: user.id,
 					encodedAttestationObject: encodedAttestation,
@@ -57,7 +57,7 @@
 	async function handleDeleteAccount(accountId: string) {
 		try {
 			await callForm({
-				url: '/user-profile?/deleteAccount',
+				url: '/api/user?/deleteAccount',
 				data: {
 					accountId
 				}
