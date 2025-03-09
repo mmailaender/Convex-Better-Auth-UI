@@ -1,5 +1,5 @@
 import client from '$lib/db/client';
-import type { User } from '$lib/db/schema/types/custom';
+import type { Account, User } from '$lib/db/schema/types/custom';
 import type { RequestEvent } from '@sveltejs/kit';
 import { fql } from 'fauna';
 import type { ProfileData } from './types';
@@ -23,8 +23,13 @@ export async function getUser(accessToken: string): Promise<User> {
  * @param {Partial<ProfileData>} profileData - The new user data.
  * @returns {Promise<User>} The updated user object.
  */
-export async function updateProfileData(accessToken: string, profileData: Partial<ProfileData>): Promise<User> {
-	const response = await client(accessToken).query<User>(fql`Query.identity()!.update({${profileData}})`);
+export async function updateProfileData(
+	accessToken: string,
+	profileData: Partial<ProfileData>
+): Promise<User> {
+	const response = await client(accessToken).query<User>(
+		fql`Query.identity()!.update({${profileData}})`
+	);
 	return response.data;
 }
 
@@ -34,19 +39,8 @@ export async function updateProfileData(accessToken: string, profileData: Partia
  * @param {string} accessToken - The user's access token.
  * @returns {Promise<User>} The user object with their accounts.
  */
-export async function getUserAndAccounts(accessToken: string): Promise<User> {
-	const response = await client(accessToken).query<User>(
-		fql`Query.identity() {
-			id,
-			coll,
-			firstName,
-			lastName,
-			primaryEmail,
-			emailVerification,
-			emails,
-			accounts
-		  }`
-	);
+export async function getUserAccounts(accessToken: string): Promise<Array<Account>> {
+	const response = await client(accessToken).query<Array<Account>>(fql`Query.identity()!.accounts`);
 	return response.data;
 }
 

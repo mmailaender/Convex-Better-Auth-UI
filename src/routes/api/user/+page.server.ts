@@ -3,7 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { type } from 'arktype';
 
 // lib
-import { deleteUser, updateProfileData } from '$lib/user/api/server';
+import { deleteUser, getUserAccounts, updateProfileData } from '$lib/user/api/server';
 import {
 	addEmail,
 	cancelEmailVerification,
@@ -34,6 +34,17 @@ export const actions = {
 		} catch (err) {
 			console.error('Error generating new ID:', err);
 			return error(400, { message: 'Failed to generate new ID' });
+		}
+	},
+
+	getUserAccounts: async ({ cookies }) => {
+		const accessToken = cookies.get('access_token');
+		try {
+			const userAccounts = await getUserAccounts(accessToken!);
+			return JSON.stringify(userAccounts);
+		} catch (err) {
+			console.error('Error getting user and accounts:', err);
+			return error(400, { message: 'Failed to get user and accounts' });
 		}
 	},
 

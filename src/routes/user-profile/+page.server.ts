@@ -1,25 +1,19 @@
 // lib
-import { getUserAndAccounts } from '$lib/user/api/server';
+import { getUserAccounts } from '$lib/user/api/server';
 
 // types
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ parent, cookies }) => {
-	const { user: layoutUser } = await parent();
-	const layoutUserData = layoutUser ? JSON.parse(layoutUser) : null;
+	const { user: user } = await parent();
+	const userData = user ? JSON.parse(user) : null;
 
 	const accessToken = cookies.get('access_token')!;
 
-	const userWithAccounts = await getUserAndAccounts(accessToken);
+	const accounts = await getUserAccounts(accessToken);
 
-	const mergedUser = {
-		...layoutUserData,
-		...userWithAccounts,
-		accounts: userWithAccounts.accounts,
-		activeOrganization: layoutUserData?.activeOrganization,
-		organizations: layoutUserData?.organizations
-	};
-	const stringifiedUser = JSON.stringify(mergedUser);
+	userData.accounts = accounts;
+	const stringifiedUser = JSON.stringify(userData);
 
 	return { user: stringifiedUser, accessToken };
 }) satisfies PageServerLoad;
