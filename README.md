@@ -8,7 +8,7 @@
 8. Update your company image (Used e.g. for sending emails)
 9. Add CUSTOM_DOMAINS as environment variables. That is on production your custom urls e.g. in our case etesie.dev. on .env.local it will be your localhost server with port - probably `localhost:5173,127.0.0.1:5173`
 10. Create in your fauna dashboard for your database the key `FAUNA_SIGNIN_KEY`with the role `role_signIn` and add it the value to your environment variables
-11. Changing/storie avatars: Add cloudflare key
+11. Changing/store avatars: Add Vercel BLOB_READ_WRITE_TOKEN. If you want to change this, update `src/lib/primitives/api/storage/upload.ts`
 12. Add protected routes
 
 ## Protected routes

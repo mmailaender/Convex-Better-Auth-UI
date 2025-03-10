@@ -13,6 +13,7 @@ import {
 	verifyEmail
 } from '$lib/email/api/server';
 import { createPasskeyAccount, deleteAccount } from '$lib/account/api/server';
+import { uploadAvatar, UploadError } from '$lib/primitives/api/storage/upload';
 
 // types
 import {
@@ -45,6 +46,32 @@ export const actions = {
 		} catch (err) {
 			console.error('Error getting user and accounts:', err);
 			return error(400, { message: 'Failed to get user and accounts' });
+		}
+	},
+
+	updateProfileAvatar: async ({ cookies, request }) => {
+		const accessToken = cookies.get('access_token');
+		const formData = await request.formData();
+		const avatar = type('File')(formData.get('avatar'));
+
+		if (avatar instanceof type.errors) {
+			console.error('Invalid avatar file: ', avatar.summary);
+			return error(400, { message: avatar.summary });
+		} else {
+			try {
+				const avatarUrl = await uploadAvatar(avatar);
+
+				// Update the user profile with the new avatar URL
+				const updatedUser = await updateProfileData(accessToken!, { avatar: avatarUrl });
+				return JSON.stringify(updatedUser);
+			} catch (err) {
+				if (err instanceof UploadError) {
+					return error(400, err.message);
+				}
+
+				console.error('Error updating avatar:', err);
+				return error(500, { message: 'Failed to update profile with new avatar' });
+			}
 		}
 	},
 

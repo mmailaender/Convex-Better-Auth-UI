@@ -53,7 +53,7 @@ function deepParse<T>(value: unknown): T {
  * @template T - The expected response type when the request succeeds.
  * @param {Object} options - The function parameters.
  * @param {string} options.url - The URL of the form action to call.
- * @param {Record<string, unknown> | URLSearchParams} options.data - The form data object.
+ * @param {Record<string, unknown> | URLSearchParams | FormData} options.data - The form data object.
  * @param {typeof fetch} [options.fetch] - The fetch function to use.
  * @returns {Promise<T>} - Resolves with the server response when successful.
  * @throws {Error} - Rejects with an error if the request fails.
@@ -64,33 +64,46 @@ export async function callForm<T>({
 	fetch: customFetch = globalThis.fetch
 }: {
 	url: string;
-	data?: Record<string, unknown> | URLSearchParams;
+	data?: Record<string, unknown> | URLSearchParams | FormData;
 	fetch?: typeof fetch;
 }): Promise<T> {
-	const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+	const headers: Record<string, string> = {};
+	let body: string | FormData;
 
-	let body: string;
-	if (data instanceof URLSearchParams) {
+	// Handle different data types
+	if (data instanceof FormData) {
+		// If it's FormData, just pass it through
+		body = data;
+		// Don't set Content-Type for FormData - browser will set it with boundary
+	} else if (data instanceof URLSearchParams) {
 		body = data.toString();
+		headers['Content-Type'] = 'application/x-www-form-urlencoded';
 	} else {
+		// Handle Record<string, unknown>
 		const params = new URLSearchParams();
 		for (const key in data) {
 			if (Object.prototype.hasOwnProperty.call(data, key)) {
 				const value = data[key];
 
 				if (value === null) {
-					params.append(key, SENTINEL.NULL);
+					params.append(key, '__NULL__');
 				} else if (value === undefined) {
-					params.append(key, SENTINEL.UNDEFINED);
+					params.append(key, '__UNDEFINED__');
 				} else {
 					params.append(key, String(value));
 				}
 			}
 		}
 		body = params.toString();
+		headers['Content-Type'] = 'application/x-www-form-urlencoded';
 	}
 
-	const response = await customFetch(url, { method: 'POST', headers, body });
+	const response = await customFetch(url, {
+		method: 'POST',
+		headers,
+		body
+	});
+
 	const responseBody = await response.json();
 
 	if (!response.ok) {
