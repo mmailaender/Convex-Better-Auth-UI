@@ -2,19 +2,13 @@
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
 
-	interface Props {
-		userId: string;
-	}
-
-	let { userId }: Props = $props();
 	let open = $state(false);
 	let localError = $state('');
 
 	async function handleConfirm() {
 		try {
 			await callForm({
-				url: '/api/user?/deleteUser',
-				data: { userId }
+				url: '/api/user?/deleteUser'
 			});
 		} catch (err) {
 			if (err instanceof Error) {

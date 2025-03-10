@@ -1,21 +1,23 @@
-export async function optimizeImage(
-	file: File,
-	options: {
-		maxWidth?: number;
-		maxHeight?: number;
-		quality?: number;
-		maxSizeKB?: number;
-		format?: 'jpeg' | 'png' | 'webp';
-		forceConvert?: boolean;
-	} = {}
-): Promise<File> {
+import type { OptimizeImageOptions } from './types';
+
+export async function optimizeImage(file: File, options: OptimizeImageOptions = {}): Promise<File> {
+	// Check if we're in a browser environment
+	if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+		return optimizeImageBrowser(file, options);
+	} else {
+		// We're in a server environment
+		return optimizeImageServer(file, options);
+	}
+}
+
+async function optimizeImageBrowser(file: File, options: OptimizeImageOptions = {}): Promise<File> {
 	const {
 		maxWidth = 800,
 		maxHeight = 800,
 		quality = 0.8,
 		maxSizeKB = 800,
 		format = 'webp',
-		forceConvert = true // Always convert to target format
+		forceConvert = true
 	} = options;
 
 	// Skip resizing but still convert format if file is small enough
@@ -86,3 +88,69 @@ export async function optimizeImage(
 	// Create new file from blob
 	return new File([blob], file.name.replace(/\.[^/.]+$/, `.${format}`), { type: mimeType });
 }
+
+async function optimizeImageServer(file: File, options: OptimizeImageOptions = {}): Promise<File> {
+	const {
+		maxWidth = 800,
+		maxHeight = 800,
+		quality = 80, // Sharp uses 1-100 scale instead of 0-1
+		maxSizeKB = 800,
+		format = 'webp'
+	} = options;
+
+	// Import sharp dynamically to avoid issues with browser environments
+	const sharp = await import('sharp');
+
+	// Convert File to Buffer
+	const arrayBuffer = await file.arrayBuffer();
+	const buffer = Buffer.from(arrayBuffer);
+
+	// Process the image
+	let sharpInstance = sharp.default(buffer);
+
+	// Get image metadata to calculate resize dimensions
+	const metadata = await sharpInstance.metadata();
+
+	// Calculate new dimensions while maintaining aspect ratio
+	if (metadata.width && metadata.height) {
+		const needsResize =
+			file.size > maxSizeKB * 1024 || metadata.width > maxWidth || metadata.height > maxHeight;
+
+		if (needsResize) {
+			const aspectRatio = metadata.width / metadata.height;
+
+			let width = metadata.width;
+			let height = metadata.height;
+
+			if (width > height) {
+				width = Math.min(width, maxWidth);
+				height = Math.round(width / aspectRatio);
+			} else {
+				height = Math.min(height, maxHeight);
+				width = Math.round(height * aspectRatio);
+			}
+
+			sharpInstance = sharpInstance.resize(width, height);
+		}
+	}
+
+	// Convert to desired format with quality
+	if (format === 'webp') {
+		sharpInstance = sharpInstance.webp({ quality });
+	} else if (format === 'jpeg' || format === 'jpg') {
+		sharpInstance = sharpInstance.jpeg({ quality });
+	} else if (format === 'png') {
+		sharpInstance = sharpInstance.png({ quality });
+	}
+
+	// Process and get the buffer
+	const outputBuffer = await sharpInstance.toBuffer();
+
+	// Create a new file from the buffer
+	return new File([outputBuffer], file.name.replace(/\.[^/.]+$/, `.${format}`), {
+		type: `image/${format}`
+	});
+}
+
+// Export type for usage
+export type { OptimizeImageOptions };

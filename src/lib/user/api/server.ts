@@ -4,6 +4,8 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { fql } from 'fauna';
 import type { ProfileData } from './types';
 import { deleteAccessTokenCookie, deleteRefreshTokenCookie } from '$lib/auth/api/session.server';
+import { deleteBlob } from '$lib/primitives/api/storage/upload';
+import { ArkErrors, type } from 'arktype';
 
 /**
  * Retrieves the current user based on the provided access token.
@@ -51,14 +53,21 @@ export async function getUserAccounts(accessToken: string): Promise<Array<Accoun
  * @param {string} userId - The user ID to delete.
  * @returns {Promise<boolean>} True if the deletion was successful, false otherwise.
  */
-export async function deleteUser(event: RequestEvent, userId: string): Promise<boolean> {
+export async function deleteUser(event: RequestEvent): Promise<boolean> {
 	const accessToken = event.cookies.get('access_token');
-	if (accessToken) {
+	const user = event.locals.user;
+	if (accessToken && user) {
 		try {
-			await client(accessToken).query<boolean>(fql`deleteUser(${userId})`);
+			await client(accessToken).query<boolean>(fql`deleteUser(${user.id})`);
+
+			const avatar = type('string.url')(user.avatar);
+			if (typeof avatar === 'string') {
+				await deleteBlob(avatar);
+			}
+
 			deleteAccessTokenCookie(event);
 			deleteRefreshTokenCookie(event);
-			console.log(`User ${userId} deleted successfully`);
+			console.log(`User ${user.id} deleted successfully`);
 			return true;
 		} catch (error) {
 			console.error('Failed to delete user:', error);

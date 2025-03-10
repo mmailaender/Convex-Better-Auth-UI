@@ -1,5 +1,5 @@
 import { BLOB_READ_WRITE_TOKEN } from '$env/static/private';
-import { put } from '@vercel/blob';
+import { del, put } from '@vercel/blob';
 
 type UploadOptions = {
 	/**
@@ -114,4 +114,26 @@ export async function uploadAvatar(file: File): Promise<string> {
 		directory: 'avatars',
 		maxSize: 1 * 1024 * 1024 // 1MB limit for avatars
 	});
+}
+
+/**
+ * Deletes a blob from storage by URL
+ *
+ * @param url - The URL of the blob to delete
+ * @returns A boolean indicating success
+ */
+export async function deleteBlob(url: string): Promise<boolean> {
+	try {
+		// Extract the pathname from the URL
+		const urlObj = new URL(url);
+		const pathname = urlObj.pathname.startsWith('/')
+			? urlObj.pathname.substring(1) // Remove leading slash
+			: urlObj.pathname;
+
+		await del(pathname, { token: BLOB_READ_WRITE_TOKEN });
+		return true;
+	} catch (error) {
+		console.error('Error deleting blob:', error);
+		throw error;
+	}
 }

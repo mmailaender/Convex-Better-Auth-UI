@@ -13,7 +13,7 @@ import {
 	verifyEmail
 } from '$lib/email/api/server';
 import { createPasskeyAccount, deleteAccount } from '$lib/account/api/server';
-import { uploadAvatar, UploadError } from '$lib/primitives/api/storage/upload';
+import { deleteBlob, uploadAvatar, UploadError } from '$lib/primitives/api/storage/upload';
 
 // types
 import {
@@ -49,7 +49,7 @@ export const actions = {
 		}
 	},
 
-	updateProfileAvatar: async ({ cookies, request }) => {
+	updateProfileAvatar: async ({ cookies, request, locals }) => {
 		const accessToken = cookies.get('access_token');
 		const formData = await request.formData();
 		const avatar = type('File')(formData.get('avatar'));
@@ -63,6 +63,17 @@ export const actions = {
 
 				// Update the user profile with the new avatar URL
 				const updatedUser = await updateProfileData(accessToken!, { avatar: avatarUrl });
+
+				const oldAvatarUrl = locals.user?.avatar;
+				if (oldAvatarUrl) {
+					try {
+						await deleteBlob(oldAvatarUrl);
+						console.log('Deleted old avatar:', oldAvatarUrl);
+					} catch (error) {
+						console.error('Failed to delete old avatar:', error);
+						// Non-critical error, continue execution
+					}
+				}
 				return JSON.stringify(updatedUser);
 			} catch (err) {
 				if (err instanceof UploadError) {
@@ -309,20 +320,12 @@ export const actions = {
 	},
 
 	deleteUser: async (event) => {
-		const formData = await event.request.formData();
-		const userId = type('string')(formData.get('userId'));
-
-		if (userId instanceof type.errors) {
-			console.error('userId ', userId.summary);
-			return error(400, { message: `userId ${userId.summary}` });
-		} else {
-			try {
-				await deleteUser(event, userId);
-			} catch (err) {
-				console.error('Failed to delete user:', err);
-				return error(400, { message: 'Failed to delete user' });
-			}
-			redirect(303, '/sign-in');
+		try {
+			await deleteUser(event);
+		} catch (err) {
+			console.error('Failed to delete user:', err);
+			return error(400, { message: 'Failed to delete user' });
 		}
+		redirect(303, '/sign-in');
 	}
 } satisfies Actions;

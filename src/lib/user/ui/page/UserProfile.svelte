@@ -29,7 +29,7 @@
 		<VerificationFlow bind:user />
 		<ConnectedAccounts bind:user />
 		<div class="flex justify-end">
-			<DeleteUser userId={user.id} />
+			<DeleteUser />
 		</div>
 	</div>
 </div>

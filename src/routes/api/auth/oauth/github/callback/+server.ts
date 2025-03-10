@@ -16,6 +16,7 @@ import { verifySocialAccountExists } from '$lib/auth/api/verification.server';
 import { signInWithSocialProvider } from '$lib/auth/api/signIn.server';
 import { signUpWithSocialProvider } from '$lib/auth/api/signUp.server';
 import { createSocialProviderAccount } from '$lib/account/api/server';
+import { processRemoteAvatar } from '$lib/primitives/api/storage/remote';
 
 import type { SocialProvider } from '$lib/account/api/types';
 
@@ -112,7 +113,14 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	const username = userParser.getString('login');
 	const fullName = userParser.getString('name');
 	const { firstName, lastName } = splitFullName(fullName);
-	console.log('GitHub user information fetched:', { githubUserId, username, firstName, lastName });
+	const avatarUrl = userParser.getString('avatar_url');
+	console.log('GitHub user information fetched:', {
+		githubUserId,
+		username,
+		firstName,
+		lastName,
+		avatarUrl
+	});
 
 	// Check if the user already exists
 	console.log('Checking if the GitHub user already exists');
@@ -185,10 +193,21 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	} else {
 		try {
 			console.log('Creating new user with GitHub account');
+
+			// Download and process the avatar
+			let processedAvatarUrl: string | undefined;
+			if (avatarUrl) {
+				processedAvatarUrl = await processRemoteAvatar(
+					avatarUrl,
+					`github-${githubUserId}-avatar.jpg`
+				);
+			}
+
 			const userData = {
 				firstName: firstName || username,
 				lastName: lastName || '',
-				email
+				email,
+				avatar: processedAvatarUrl
 			};
 
 			const { access, refresh } = await signUpWithSocialProvider(userData, accountData);
