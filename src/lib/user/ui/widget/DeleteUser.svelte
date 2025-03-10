@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
+	import { goto } from '$app/navigation';
 
 	let open = $state(false);
 	let localError = $state('');
@@ -10,6 +11,7 @@
 			await callForm({
 				url: '/api/user?/deleteUser'
 			});
+			goto('/sign-in', { invalidateAll: true });
 		} catch (err) {
 			if (err instanceof Error) {
 				localError = err.message;

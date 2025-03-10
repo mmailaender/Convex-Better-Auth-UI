@@ -326,6 +326,5 @@ export const actions = {
 			console.error('Failed to delete user:', err);
 			return error(400, { message: 'Failed to delete user' });
 		}
-		redirect(303, '/sign-in');
 	}
 } satisfies Actions;
