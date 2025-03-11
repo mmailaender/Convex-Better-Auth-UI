@@ -133,7 +133,7 @@ export async function signUpWithPasskey(data: {
 	// userId: string;
 }): Promise<void> {
 	const userId = await callForm<string>({
-		url: '/api/user?/newId'
+		url: '/api/primitives?/newId'
 	});
 
 	const credentialUserId = new Uint8Array(8);

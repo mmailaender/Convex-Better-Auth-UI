@@ -223,7 +223,6 @@ export const actions = {
 		} else {
 			try {
 				const org = await updateMemberRole(accessToken!, out);
-				console.log('routes/org org: ', org);
 				return JSON.stringify(org);
 			} catch (err) {
 				console.error('Error updating user role:', err);

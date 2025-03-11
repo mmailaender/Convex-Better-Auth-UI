@@ -53,7 +53,7 @@
 	}
 </script>
 
-{#if user.activeOrganization}
+{#if user.activeOrganization && user.activeOrganization.members.length > 1}
 	<Modal
 		bind:open
 		triggerBase="btn text-error-500 hover:preset-tonal-error-500"

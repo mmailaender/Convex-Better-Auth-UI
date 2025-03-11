@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Shield, ShieldCheck } from 'lucide-svelte';
+	import { Shield, ShieldCheck, X } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { Avatar, Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -30,6 +30,8 @@
 
 	let searchQuery = $state('');
 	let filteredMembers = $derived(filterMembers(user.activeOrganization!.members));
+
+	let openInviteForm = $state(false);
 
 	let errorMessage = $state('');
 	let successMessage = $state('');
@@ -94,7 +96,7 @@
 			const newRole = select.value as Role;
 
 			try {
-				const updatedOrg = await callForm<Organization>({
+				await callForm<Organization>({
 					url: '/api/org?/updateMemberRole',
 					data: { userId, newRole }
 				});
@@ -156,15 +158,33 @@
 		{#snippet content()}
 			<Tabs.Panel value="members">
 				<div class="p-4">
-					<input
-						type="text"
-						class="input"
-						placeholder="Search members..."
-						bind:value={searchQuery}
-					/>
+					<div class="flex gap-3">
+						<input
+							type="text"
+							class="input"
+							placeholder="Search members..."
+							bind:value={searchQuery}
+						/>
+						{#if isOwnerOrAdmin}
+							<button
+								type="button"
+								class="btn preset-tonal"
+								onclick={() => (openInviteForm = !openInviteForm)}>Invite</button
+							>
+						{/if}
+					</div>
 
-					{#if isOwnerOrAdmin}
-						<InviteForm bind:user />
+					{#if openInviteForm}
+						<div class="relative mt-3">
+							<InviteForm bind:user />
+							<button
+								type="button"
+								class="btn-icon preset-tonal absolute top-3 right-3 rounded-full"
+								onclick={() => (openInviteForm = false)}
+							>
+								<X />
+							</button>
+						</div>
 					{/if}
 
 					{#if errorMessage}

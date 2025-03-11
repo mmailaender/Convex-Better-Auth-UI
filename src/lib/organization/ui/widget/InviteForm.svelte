@@ -103,7 +103,7 @@
 		<div class="flex flex-col gap-4 md:flex-row">
 			<textarea
 				bind:value={emailInput}
-				placeholder="Enter email addresses separated by commas"
+				placeholder="example@email.com, example2@email.com"
 				class="textarea min-h-24 grow"
 				required
 			></textarea>

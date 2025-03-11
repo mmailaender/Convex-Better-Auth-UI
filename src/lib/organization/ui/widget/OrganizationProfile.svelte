@@ -23,8 +23,8 @@
 {#if user.activeOrganization}
 	<Tabs
 		bind:value={group}
-		base="flex flex-row min-w-72"
-		listBase="flex flex-col pr-2"
+		base="flex flex-row w-192 h-160"
+		listBase="flex flex-col pr-2 w-30"
 		contentBase="flex flex-col"
 	>
 		{#snippet list()}
@@ -55,7 +55,7 @@
 			<Tabs.Panel value="members">
 				<Members bind:user={user!} />
 			</Tabs.Panel>
-			<Tabs.Panel value="billing">Car Panel</Tabs.Panel>
+			<Tabs.Panel value="billing">Billing Panel</Tabs.Panel>
 		{/snippet}
 	</Tabs>
 {/if}

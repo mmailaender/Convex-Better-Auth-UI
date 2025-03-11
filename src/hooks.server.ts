@@ -21,6 +21,7 @@ const isPublicRoute = createRouteMatcher([
 	'/sign-in*',
 	'/api/auth/oauth*',
 	'/api/auth/passkey*',
+	'/api/primitives?/newId',
 	'/api/user?/verifyEmail',
 	'/api/user?/verifyEmailAndSendVerification',
 	'/api/user?/resendVerification'

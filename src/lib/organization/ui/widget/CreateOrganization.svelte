@@ -27,7 +27,7 @@
 	}
 </script>
 
-<form method="POST" action="org?/createOrganization" use:enhance={handleSubmit}>
+<form method="POST" action="/api/org?/createOrganization" use:enhance={handleSubmit}>
 	<h2 class="mb-4 text-2xl font-bold">Create Organization</h2>
 
 	<div class="mb-4">
