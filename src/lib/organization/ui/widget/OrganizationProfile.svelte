@@ -9,9 +9,15 @@
 
 	import type { User } from '$lib/db/schema/types/custom';
 
-	let derivedUser: User | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
+	let derivedUser: User = $derived(page.data.user ? JSON.parse(page.data.user) : null);
 
-	let user = $state(page.data.user ? JSON.parse(page.data.user) : null);
+	let user: User = $state(page.data.user ? JSON.parse(page.data.user) : null);
+
+	let isOwnerOrAdmin = $derived(
+		user.roles?.some((role) =>
+			['role_organization_owner', 'role_organization_admin'].includes(role)
+		)
+	);
 
 	$effect(() => {
 		user = derivedUser;
@@ -35,16 +41,18 @@
 				base="border-r-1 border-transparent"
 				stateActive="border-r-surface-950-50 opacity-100">General</Tabs.Control
 			>
-			<Tabs.Control
-				value="members"
-				base="border-r-1 border-transparent"
-				stateActive="border-r-surface-950-50 opacity-100">Members</Tabs.Control
-			>
-			<Tabs.Control
-				value="billing"
-				base="border-r-1 border-transparent"
-				stateActive="border-r-surface-950-50 opacity-100">Billing</Tabs.Control
-			>
+			{#if isOwnerOrAdmin}
+				<Tabs.Control
+					value="members"
+					base="border-r-1 border-transparent"
+					stateActive="border-r-surface-950-50 opacity-100">Members</Tabs.Control
+				>
+				<Tabs.Control
+					value="billing"
+					base="border-r-1 border-transparent"
+					stateActive="border-r-surface-950-50 opacity-100">Billing</Tabs.Control
+				>
+			{/if}
 		{/snippet}
 		{#snippet content()}
 			<Tabs.Panel value="general">
@@ -52,10 +60,12 @@
 				<DeleteOrganization bind:user={user!} />
 				<LeaveOrganization bind:user={user!} />
 			</Tabs.Panel>
-			<Tabs.Panel value="members">
-				<Members bind:user={user!} />
-			</Tabs.Panel>
-			<Tabs.Panel value="billing">Billing Panel</Tabs.Panel>
+			{#if isOwnerOrAdmin}
+				<Tabs.Panel value="members">
+					<Members bind:user={user!} />
+				</Tabs.Panel>
+				<Tabs.Panel value="billing">Billing Panel</Tabs.Panel>
+			{/if}
 		{/snippet}
 	</Tabs>
 {/if}

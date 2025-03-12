@@ -1,23 +1,23 @@
-import { type, scope } from "arktype";
+import { type, scope } from 'arktype';
 import {
-  DateStub,
-  Document as FaunaDocument,
-  DocumentReference,
-  Module,
-  NamedDocument as FaunaNamedDocument,
-  NamedDocumentReference,
-  NullDocument,
-  TimeStub,
-  Page,
-  EmbeddedSet,
-  StreamToken,
-  type QueryValueObject
-} from "fauna";
+	DateStub,
+	Document as FaunaDocument,
+	DocumentReference,
+	Module,
+	NamedDocument as FaunaNamedDocument,
+	NamedDocumentReference,
+	NullDocument,
+	TimeStub,
+	Page,
+	EmbeddedSet,
+	StreamToken,
+	type QueryValueObject
+} from 'fauna';
 
 const dateStub = DateStub as type.cast<DateStub>;
 const timeStub = TimeStub as type.cast<TimeStub>;
 const module = type.instanceOf(Module);
-const uint8Array = type("instanceof", Uint8Array);
+const uint8Array = type('instanceof', Uint8Array);
 const documentRef = type.instanceOf(DocumentReference);
 const namedDocumentRef = type.instanceOf(NamedDocumentReference);
 const nullDocument = type.instanceOf(NullDocument);
@@ -25,146 +25,135 @@ const page = type.instanceOf(Page);
 const embeddedSet = type.instanceOf(EmbeddedSet);
 const streamToken = type.instanceOf(StreamToken);
 const field = type({
-  signature: "string",
+	signature: 'string'
 });
 const fields = type({
-  "[string]": field,
+	'[string]': field
 });
 const document = type.instanceOf(FaunaDocument);
 const namedDocument = type.instanceOf(FaunaNamedDocument);
 
 const createDocumentRef = <T extends string>(ref: type.Any<T>) =>
-  type({
-	coll: ref,
-	id: "string",
-  });
+	type({
+		coll: ref,
+		id: 'string'
+	});
 
 const types = scope({
-  queryValue: [
-	"null | string | number | bigint | boolean | queryValueObject | queryValue[]",
-	uint8Array,
-	dateStub,
-	timeStub,
-	module,
-	document,
-	documentRef,
-	namedDocument,
-	namedDocumentRef,
-	nullDocument,
-	page,
-	embeddedSet,
-	streamToken,
-  ],
-  queryValueObject: {
-	"[string]": "queryValue",
-  },
-  document: {
-	id: "string",
-	coll: module,
-	ts: timeStub,
-	"ttl?": timeStub,
-  },
-  document_create: {
-	"id?": "string",
-	"ttl?": timeStub,
-  },
-  document_update: {
-	"ttl?": timeStub,
-  },
-  document_replace: {
-	"ttl?": timeStub,
-  },
+	queryValue: [
+		'null | string | number | bigint | boolean | queryValueObject | queryValue[]',
+		uint8Array,
+		dateStub,
+		timeStub,
+		module,
+		document,
+		documentRef,
+		namedDocument,
+		namedDocumentRef,
+		nullDocument,
+		page,
+		embeddedSet,
+		streamToken
+	],
+	queryValueObject: {
+		'[string]': 'queryValue'
+	},
+	document: {
+		id: 'string',
+		coll: module,
+		ts: timeStub,
+		'ttl?': timeStub
+	},
+	document_create: {
+		'id?': 'string',
+		'ttl?': timeStub
+	},
+	document_update: {
+		'ttl?': timeStub
+	},
+	document_replace: {
+		'ttl?': timeStub
+	},
 
-  "namedDocument<metadata extends queryValueObject = Record<string, never>>": {
-	coll: module,
-	name: "string",
-	ts: timeStub,
-	"data?": "metadata",
-  },
-  "namedDocument_create<metadata extends queryValueObject = Record<string, never>>":
-	{
-	  "data?": "metadata",
+	'namedDocument<metadata extends queryValueObject = Record<string, never>>': {
+		coll: module,
+		name: 'string',
+		ts: timeStub,
+		'data?': 'metadata'
 	},
-  "namedDocument_update<metadata extends queryValueObject = Record<string, never>>":
-	{
-	  "data?": "metadata",
+	'namedDocument_create<metadata extends queryValueObject = Record<string, never>>': {
+		'data?': 'metadata'
 	},
-  "namedDocument_replace<metadata extends queryValueObject = Record<string, never>>":
-	{
-	  "data?": "metadata",
+	'namedDocument_update<metadata extends queryValueObject = Record<string, never>>': {
+		'data?': 'metadata'
 	},
+	'namedDocument_replace<metadata extends queryValueObject = Record<string, never>>': {
+		'data?': 'metadata'
+	}
 }).export();
 
-const collection = type(
-  types.namedDocument("object", "object", "object"),
-  "&",
-  {
-	history_days: "number",
-	"ttl_days?": "number",
-	"document_ttls?": "boolean",
-	"fields?": fields,
-	"computed_fields?": [
-	  {
-		body: "string",
-		signature: "string",
-	  },
-	  "[]",
+const collection = type(types.namedDocument(types.queryValueObject, 'object', 'object'), '&', {
+	history_days: 'number',
+	'ttl_days?': 'number',
+	'document_ttls?': 'boolean',
+	'fields?': fields,
+	'computed_fields?': [
+		{
+			body: 'string',
+			signature: 'string'
+		},
+		'[]'
 	],
-	"wildcard?": "string",
-	constraints: "unknown[]",
-	indexes: "unknown",
-	"migrations?": "unknown",
-  }
-);
+	'wildcard?': 'string',
+	constraints: 'unknown[]',
+	indexes: 'unknown',
+	'migrations?': 'unknown'
+});
 
 const collection_create = type(
-  types.namedDocument_create(types.queryValueObject, "object", "object"),
-  "&",
-  collection.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_create(types.queryValueObject, 'object', 'object'),
+	'&',
+	collection.omit('coll', 'name', 'ts', 'data').partial()
 );
 const collection_update = type(
-  types.namedDocument_update(types.queryValueObject, "object", "object"),
-  "&",
-  collection.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_update(types.queryValueObject, 'object', 'object'),
+	'&',
+	collection.omit('coll', 'name', 'ts', 'data').partial()
 );
 const collection_replace = type(
-  types.namedDocument_replace(types.queryValueObject, "object", "object"),
-  "&",
-  collection.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_replace(types.queryValueObject, 'object', 'object'),
+	'&',
+	collection.omit('coll', 'name', 'ts', 'data').partial()
 );
 
 /**
  * Reusable FQL code stored as Fauna Functions.
  */
-const func = type(
-  types.namedDocument(types.queryValueObject, "object", "object"),
-  "&",
-  {
+const func = type(types.namedDocument(types.queryValueObject, 'object', 'object'), '&', {
 	/**
 	 * FQL expression.
 	 */
-	body: "string",
+	body: 'string',
 	/**
 	 * Role to use when the function is called. Only included if role is provided when the UDF is created.
 	 * Can be a built-in role, `admin`, `server`, or `server-readonly`, or a user-defined role that grants write privilege for Functions.
 	 */
-	"role?": "string",
-  }
-);
+	'role?': 'string'
+});
 const func_create = type(
-  types.namedDocument_create(types.queryValueObject, "object", "object"),
-  "&",
-  func.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_create(types.queryValueObject, 'object', 'object'),
+	'&',
+	func.omit('coll', 'name', 'ts', 'data').partial()
 );
 const func_update = type(
-  types.namedDocument_update(types.queryValueObject, "object", "object"),
-  "&",
-  func.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_update(types.queryValueObject, 'object', 'object'),
+	'&',
+	func.omit('coll', 'name', 'ts', 'data').partial()
 );
 const func_replace = type(
-  types.namedDocument_replace(types.queryValueObject, "object", "object"),
-  "&",
-  func.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_replace(types.queryValueObject, 'object', 'object'),
+	'&',
+	func.omit('coll', 'name', 'ts', 'data').partial()
 );
 
 /**
@@ -172,35 +161,31 @@ const func_replace = type(
  *
  * Fauna stores user-defined roles as documents in the `Role` system collection. See {@link https://docs.fauna.com/fauna/current/reference/fql-api/auth/role/ | Role}.
  */
-const role = type(
-  types.namedDocument(types.queryValueObject, "object", "object"),
-  "&",
-  {
+const role = type(types.namedDocument(types.queryValueObject, 'object', 'object'), '&', {
 	/**
 	 * Assigns the role to tokens based on the {@link https://docs.fauna.com/fauna/current/learn/security/tokens/ | token’s} identity document. See for more information on {@link https://fauna.com/docs/reference/javascript#membership-roles | Membership definition}.
 	 */
-	"membership?": "string",
+	'membership?': 'string',
 	/**
 	 * Allows one or more actions on a resource. See {@link https://docs.fauna.com/fauna/current/reference/fsl/role/#privileges-definition | Privileges definition}.
 	 */
-	"privileges?": "string",
-  }
-);
+	'privileges?': 'string'
+});
 
 const role_create = type(
-  types.namedDocument_create(types.queryValueObject, "object", "object"),
-  "&",
-  role.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_create(types.queryValueObject, 'object', 'object'),
+	'&',
+	role.omit('coll', 'name', 'ts', 'data').partial()
 );
 const role_update = type(
-  types.namedDocument_update(types.queryValueObject, "object", "object"),
-  "&",
-  role.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_update(types.queryValueObject, 'object', 'object'),
+	'&',
+	role.omit('coll', 'name', 'ts', 'data').partial()
 );
 const role_replace = type(
-  types.namedDocument_replace(types.queryValueObject, "object", "object"),
-  "&",
-  role.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_replace(types.queryValueObject, 'object', 'object'),
+	'&',
+	role.omit('coll', 'name', 'ts', 'data').partial()
 );
 
 /**
@@ -210,10 +195,7 @@ const role_replace = type(
  *
  * Once {@link https://docs.fauna.com/fauna/current/learn/security/access-providers/#config | set up}, the IdP can issue JSON Web Tokens (JWTs) that act as Fauna {@link https://docs.fauna.com/fauna/current/learn/security/authentication/#secrets | authentication secrets}. This lets your application’s end users use the IdP for authentication.
  */
-const accessProvider = type(
-  types.namedDocument(types.queryValueObject, "object", "object"),
-  "&",
-  {
+const accessProvider = type(types.namedDocument(types.queryValueObject, 'object', 'object'), '&', {
 	/**
 	 * User-defined roles assigned to JWTs issued by the IdP. Can’t be built-in roles.
 	 * @example
@@ -227,18 +209,18 @@ const accessProvider = type(
 	 * ]
 	 * ```
 	 */
-	"roles?": [
-	  "string[]",
-	  "|",
-	  {
-		role: "string",
-		predicate: "string",
-	  },
+	'roles?': [
+		'string[]',
+		'|',
+		{
+			role: 'string',
+			predicate: 'string'
+		}
 	],
 	/**
 	 * URI that points to public JSON web key sets (JWKS) for JWTs issued by the IdP. Fauna uses the keys to verify each JWT’s signature..
 	 */
-	jwks_uri: "string",
+	jwks_uri: 'string',
 	/**
 	 * Globally unique URL for the Fauna database. audience URLs have the following structure:
 	 *
@@ -246,71 +228,70 @@ const accessProvider = type(
 	 *
 	 * Must match the `aud` claim in JWTs issued by the IdP.
 	 */
-	audience: "string",
+	audience: 'string',
 	/**
 	 * Issuer for the IdP’s JWTs. Must match the `iss` claim in JWTs issued by the IdP.
 	 */
-	issuer: "string",
-  }
-);
+	issuer: 'string'
+});
 
 const accessProvider_create = type(
-  types.namedDocument_create(types.queryValueObject, "object", "object"),
-  "&",
-  accessProvider.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_create(types.queryValueObject, 'object', 'object'),
+	'&',
+	accessProvider.omit('coll', 'name', 'ts', 'data').partial()
 );
 const accessProvider_update = type(
-  types.namedDocument_update(types.queryValueObject, "object", "object"),
-  "&",
-  accessProvider.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_update(types.queryValueObject, 'object', 'object'),
+	'&',
+	accessProvider.omit('coll', 'name', 'ts', 'data').partial()
 );
 const accessProvider_replace = type(
-  types.namedDocument_replace(types.queryValueObject, "object", "object"),
-  "&",
-  accessProvider.omit("coll", "name", "ts", "data").partial()
+	types.namedDocument_replace(types.queryValueObject, 'object', 'object'),
+	'&',
+	accessProvider.omit('coll', 'name', 'ts', 'data').partial()
 );
 
 const validator = {
-  document: {
-	read: types.document,
-	create: types.document_create,
-	update: types.document_update,
-	replace: types.document_replace,
-  },
-  namedDocument: {
-	read: types.namedDocument,
-	create: types.namedDocument_create,
-	update: types.namedDocument_update,
-	replace: types.namedDocument_replace,
-  },
-  function: {
-	read: func,
-	create: func_create,
-	update: func_update,
-	replace: func_replace,
-  },
-  collection: {
-	read: collection,
-	create: collection_create,
-	update: collection_update,
-	replace: collection_replace,
-  },
-  role: {
-	read: role,
-	create: role_create,
-	update: role_update,
-	replace: role_replace,
-  },
-  accessProvider: {
-	read: accessProvider,
-	create: accessProvider_create,
-	update: accessProvider_update,
-	replace: accessProvider_replace,
-  },
-  createRef: createDocumentRef,
-  field,
-  fields,
-  nullDocument
+	document: {
+		read: types.document,
+		create: types.document_create,
+		update: types.document_update,
+		replace: types.document_replace
+	},
+	namedDocument: {
+		read: types.namedDocument,
+		create: types.namedDocument_create,
+		update: types.namedDocument_update,
+		replace: types.namedDocument_replace
+	},
+	function: {
+		read: func,
+		create: func_create,
+		update: func_update,
+		replace: func_replace
+	},
+	collection: {
+		read: collection,
+		create: collection_create,
+		update: collection_update,
+		replace: collection_replace
+	},
+	role: {
+		read: role,
+		create: role_create,
+		update: role_update,
+		replace: role_replace
+	},
+	accessProvider: {
+		read: accessProvider,
+		create: accessProvider_create,
+		update: accessProvider_update,
+		replace: accessProvider_replace
+	},
+	createRef: createDocumentRef,
+	field,
+	fields,
+	nullDocument
 };
 
 export type DocumentT<T extends QueryValueObject> = {
@@ -319,37 +300,39 @@ export type DocumentT<T extends QueryValueObject> = {
 	ts: TimeStub;
 	ttl?: TimeStub;
 } & T;
-export type DocumentT_Create<T extends QueryValueObject> = Partial<Omit<DocumentT<T>, 'ts' | 'coll'>>;
+export type DocumentT_Create<T extends QueryValueObject> = Partial<
+	Omit<DocumentT<T>, 'ts' | 'coll'>
+>;
 export type DocumentT_Update<T extends QueryValueObject> = Omit<DocumentT_Create<T>, 'id'>;
 export type DocumentT_Replace<T extends QueryValueObject> = DocumentT_Update<T>;
 
 export type NamedDocumentT<
-  T extends QueryValueObject,
-  T_Metadata extends QueryValueObject = Record<string, never>
+	T extends QueryValueObject,
+	T_Metadata extends QueryValueObject = Record<string, never>
 > = {
-  coll: Module;
-  name: string;
-  ts: TimeStub;
-  data?: T_Metadata;
+	coll: Module;
+	name: string;
+	ts: TimeStub;
+	data?: T_Metadata;
 } & T;
 
 export type NamedDocumentT_Create<
-  T extends QueryValueObject,
-  T_Metadata extends QueryValueObject = Record<string, never>
+	T extends QueryValueObject,
+	T_Metadata extends QueryValueObject = Record<string, never>
 > = {
-  name: string;
-  data?: T_Metadata;
+	name: string;
+	data?: T_Metadata;
 } & T;
 export type NamedDocumentT_Update<
-  T extends QueryValueObject,
-  T_Metadata extends QueryValueObject = Record<string, never>
+	T extends QueryValueObject,
+	T_Metadata extends QueryValueObject = Record<string, never>
 > = {
-  name?: string;
-  data?: T_Metadata;
+	name?: string;
+	data?: T_Metadata;
 } & T;
 export type NamedDocumentT_Replace<
-  T extends QueryValueObject,
-  T_Metadata extends QueryValueObject = Record<string, never>
+	T extends QueryValueObject,
+	T_Metadata extends QueryValueObject = Record<string, never>
 > = NamedDocumentT_Update<T, T_Metadata>;
 
 export type Function = typeof validator.function.read.infer;
@@ -372,13 +355,13 @@ export type Field = typeof validator.field.infer;
 export type Fields = typeof validator.fields.infer;
 
 export {
-  validator,
-  validator as v,
-  DateStub,
-  Module,
-  NullDocument,
-  TimeStub,
-  Page,
-  EmbeddedSet,
-  StreamToken,
+	validator,
+	validator as v,
+	DateStub,
+	Module,
+	NullDocument,
+	TimeStub,
+	Page,
+	EmbeddedSet,
+	StreamToken
 };

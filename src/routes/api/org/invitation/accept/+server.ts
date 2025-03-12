@@ -18,9 +18,13 @@ export async function GET(event: RequestEvent) {
 
 	try {
 		// Call the Fauna function to accept the invitation
-		acceptInvitation(accessToken!, invitationId);
+		await acceptInvitation(accessToken!, invitationId);
 	} catch (err) {
 		console.error('Error accepting invitation:', err);
+
+		if (err.abort) {
+			throw error(400, err.abort);
+		}
 
 		// Return a 400 error with the error message
 		throw error(

@@ -10,6 +10,12 @@
 
 	let { user = $bindable() }: Props = $props();
 
+	let isOwnerOrAdmin = $derived(
+		user.roles?.some((role) =>
+			['role_organization_owner', 'role_organization_admin'].includes(role)
+		)
+	);
+
 	let profileData = $state({
 		organizationId: user.activeOrganization!.id,
 		name: user.activeOrganization!.name,
@@ -22,6 +28,7 @@
 	let error = $state('');
 
 	function toggleEdit() {
+		if (!isOwnerOrAdmin) return;
 		isEditing = true;
 		success = '';
 		error = '';
@@ -59,9 +66,10 @@
 <div class="mb-6 flex items-center gap-4">
 	<Avatar src={user.activeOrganization!.logo} name={user.activeOrganization!.name} />
 	{#if !isEditing}
-		<button onclick={toggleEdit}>
-			<span class="text-surface-800-200 font-medium">{user.activeOrganization!.name}</span>
-		</button>
+		<span class="text-surface-800-200 font-medium">{user.activeOrganization!.name}</span>
+		{#if isOwnerOrAdmin}
+			<button onclick={toggleEdit} class="btn"> Edit </button>
+		{/if}
 	{:else}
 		<form onsubmit={handleSubmit}>
 			<div class="flex flex-col gap-2">

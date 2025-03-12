@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { Shield, ShieldCheck, X } from 'lucide-svelte';
 	import { onMount } from 'svelte';
-	import { Avatar, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import InviteForm from './InviteForm.svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
 
-	import type { Organization, User } from '$lib/db/schema/types/custom';
-	import type { Member, MembersAndInvitations, Role } from '$lib/organization/api/types';
-	import { NullDocument } from 'fauna';
+	import type { User } from '$lib/db/schema/types/custom';
+	import type { MembersAndInvitations } from '$lib/organization/api/types';
+	import MembersList from './MembersList.svelte';
+	import InvitationList from './InvitationList.svelte';
+	import { X } from 'lucide-svelte';
 
 	interface Props {
 		user: User;
@@ -19,10 +20,8 @@
 	let invitations = $derived(user.activeOrganization?.invitations ?? []);
 
 	let isOwnerOrAdmin = $derived(
-		user.activeOrganization?.members.some(
-			(member) =>
-				member.user.id === user.id &&
-				['role_organization_owner', 'role_organization_admin'].includes(member.role)
+		user.roles?.some((role) =>
+			['role_organization_owner', 'role_organization_admin'].includes(role)
 		)
 	);
 
@@ -85,62 +84,6 @@
 				);
 			});
 	}
-
-	async function handleUpdateRole(
-		userId: string,
-		event: Event
-		// newRole: 'role_organization_admin' | 'role_organization_member'
-	) {
-		const select = event.target as HTMLSelectElement;
-		if (select) {
-			const newRole = select.value as Role;
-
-			try {
-				await callForm<Organization>({
-					url: '/api/org?/updateMemberRole',
-					data: { userId, newRole }
-				});
-
-				successMessage = 'Role updated successfully!';
-				user.activeOrganization!.members = user.activeOrganization!.members.map((member) =>
-					member.user.id === userId ? { ...member, role: newRole } : member
-				);
-			} catch (err) {
-				errorMessage = 'Failed to update role';
-				console.error(err);
-			}
-		}
-	}
-
-	async function removeMember(userId: string) {
-		try {
-			const updatedmembers = await callForm<Array<Member>>({
-				url: '/api/org?/removeUserFromOrganization',
-				data: { userId }
-			});
-			successMessage = 'Member removed successfully!';
-			user.activeOrganization!.members = updatedmembers;
-		} catch (err) {
-			errorMessage = 'Failed to remove member';
-			console.error(err);
-		}
-	}
-
-	async function handleRevokeInvitation(invitationId: string) {
-		try {
-			await callForm<NullDocument>({
-				url: '/api/org?/revokeInvitation',
-				data: { invitationId }
-			});
-			successMessage = 'Invitation revoked successfully!';
-			user.activeOrganization!.invitations = user.activeOrganization!.invitations.filter(
-				(invitation) => invitation.id !== invitationId
-			);
-		} catch (err) {
-			errorMessage = 'Failed to revoke invitation';
-			console.error(err);
-		}
-	}
 </script>
 
 {#if isLoading}
@@ -194,127 +137,33 @@
 						<p class="text-success-500">{successMessage}</p>
 					{/if}
 
-					<table class="table caption-bottom">
-						<thead>
-							<tr class="border-surface-300-700 border-b">
-								<th class="p-2 text-left">Name</th>
-								<th class="p-2 text-left">Email</th>
-								<th class="p-2 text-left">Role</th>
-								{#if isOwnerOrAdmin}
-									<th class="p-2 text-right">Actions</th>
-								{/if}
-							</tr>
-						</thead>
-						<tbody>
-							{#each filteredMembers as member}
-								<tr>
-									<td>
-										<div class="flex items-center space-x-4">
-											<Avatar
-												src={member.user.avatar}
-												name={`${member.user.firstName} ${member.user.lastName}`}
-											/>
-											<span class="font-semibold"
-												>{member.user.firstName} {member.user.lastName}</span
-											>
-										</div>
-									</td>
-									<td>{member.user.primaryEmail}</td>
-									<td>
-										<div class="flex items-center">
-											{#if isOwnerOrAdmin && member.user.id !== user.id && member.role !== 'role_organization_owner'}
-												<select
-													bind:value={member.role}
-													onchange={(event) => handleUpdateRole(member.user.id, event)}
-													class="select"
-												>
-													<option value="role_organization_admin">Admin</option>
-													<option value="role_organization_member">Member</option>
-												</select>
-											{:else if member.role === 'role_organization_owner'}
-												<ShieldCheck class="text-primary-500 mr-1 size-4" />
-												<span class="font-medium">Owner</span>
-											{:else if member.role === 'role_organization_admin'}
-												<Shield class="text-primary-400 mr-1 size-4" />
-												<span class="font-medium">Admin</span>
-											{:else}
-												<span>Member</span>
-											{/if}
-										</div>
-									</td>
-									<td>
-										<div class="flex space-x-2">
-											{#if isOwnerOrAdmin && member.user.id !== user.id && member.role !== 'role_organization_owner'}
-												<button
-													onclick={() => removeMember(member.user.id)}
-													class="btn preset-outlined-error-500"
-												>
-													Remove
-												</button>
-											{/if}
-										</div>
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
+					<MembersList bind:user members={filteredMembers} {isOwnerOrAdmin} />
 				</div>
 			</Tabs.Panel>
-			<Tabs.Panel value="invitations">
-				{#if invitations.length == 0}
-					<div class="text-surface-600-400 p-8 text-center">
-						<p>No pending invitations.</p>
-					</div>
-				{:else}
-					<div class="overflow-x-auto">
-						<table class="w-full">
-							<thead>
-								<tr class="border-surface-300-700 border-b">
-									<th class="p-2 text-left">Email</th>
-									<th class="p-2 text-left">Role</th>
-									<th class="p-2 text-left">Invited By</th>
-									{#if isOwnerOrAdmin}
-										<th class="p-2 text-right">Actions</th>
-									{/if}
-								</tr>
-							</thead>
-							<tbody>
-								{#each invitations as invitation}
-									<tr class="border-surface-300-700 border-b">
-										<td class="p-2">{invitation.email}</td>
-										<td class="p-2">
-											{#if invitation.role === 'role_organization_owner'}
-												<div class="flex items-center">
-													<ShieldCheck class="text-primary-500 mr-1 size-4" />
-													<span class="font-medium">Owner</span>
-												</div>
-											{:else if invitation.role === 'role_organization_admin'}
-												<div class="flex items-center">
-													<Shield class="text-primary-400 mr-1 size-4" />
-													<span class="font-medium">Admin</span>
-												</div>
-											{:else}
-												<span>Member</span>
-											{/if}
-										</td>
-										<td class="p-2"
-											>{invitation.invitedBy.firstName} {invitation.invitedBy.lastName}</td
-										>
-										<td class="p-2 text-right">
-											<button
-												class="btn text-error-500"
-												onclick={() => handleRevokeInvitation(invitation.id)}
-											>
-												Revoke
-											</button>
-										</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				{/if}
-			</Tabs.Panel>
+			{#if isOwnerOrAdmin}
+				<Tabs.Panel value="invitations">
+					{#if isOwnerOrAdmin}
+						<button
+							type="button"
+							class="btn preset-tonal"
+							onclick={() => (openInviteForm = !openInviteForm)}>Invite</button
+						>
+					{/if}
+					{#if openInviteForm}
+						<div class="relative mt-3">
+							<InviteForm bind:user />
+							<button
+								type="button"
+								class="btn-icon preset-tonal absolute top-3 right-3 rounded-full"
+								onclick={() => (openInviteForm = false)}
+							>
+								<X />
+							</button>
+						</div>
+					{/if}
+					<InvitationList bind:user {invitations} isOwnerOrAdmin />
+				</Tabs.Panel>
+			{/if}
 		{/snippet}
 	</Tabs>
 {/if}
