@@ -1,6 +1,5 @@
 {
 	"editor.tabSize": 2,
-	"gitlens.showWelcomeOnInstall": false,
 	"gitlens.showWhatsNewAfterUpgrades": true,
 	"gitlens.virtualRepositories.enabled": false,
 	"files.autoSave": "onFocusChange",
