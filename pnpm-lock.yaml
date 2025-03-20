@@ -41,6 +41,12 @@ importers:
       arktype:
         specifier: ^2.1.9
         version: 2.1.9
+      convex:
+        specifier: ^1.21.0
+        version: 1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      convex-svelte:
+        specifier: ^0.0.11
+        version: 0.0.11(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(svelte@5.22.6)
       fauna:
         specifier: ^2.5.0
         version: 2.5.0
@@ -1815,6 +1821,31 @@ packages:
     resolution: {integrity: sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==}
     engines: {node: '>= 0.6'}
 
+  convex-svelte@0.0.11:
+    resolution: {integrity: sha512-N/29gg5Zqy72vKL4xHSLk3jGwXVKIWXPs6xzq6KxGL84y/D6hG85pG2CPOzn08EzMmByts5FTkJ5p3var6yDng==}
+    peerDependencies:
+      convex: ^1.10.0
+      svelte: ^5.0.0
+
+  convex@1.21.0:
+    resolution: {integrity: sha512-+peYmXSWsnnyASKI302RIlsf07gv6uHAOduBwDFLBjNZciO+kOVjQcskJwhTeNbAV59glL+tf7kvDh8PEnhmCw==}
+    engines: {node: '>=18.0.0', npm: '>=7.0.0'}
+    hasBin: true
+    peerDependencies:
+      '@auth0/auth0-react': ^2.0.1
+      '@clerk/clerk-react': ^4.12.8 || ^5.0.0
+      react: ^17.0.2 || ^18.0.0 || ^19.0.0-0 || ^19.0.0
+      react-dom: ^17.0.2 || ^18.0.0 || ^19.0.0-0 || ^19.0.0
+    peerDependenciesMeta:
+      '@auth0/auth0-react':
+        optional: true
+      '@clerk/clerk-react':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   cookie-signature@1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
 
@@ -2587,6 +2618,9 @@ packages:
   jws@3.2.2:
     resolution: {integrity: sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==}
 
+  jwt-decode@3.1.2:
+    resolution: {integrity: sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==}
+
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -3327,6 +3361,11 @@ packages:
         optional: true
       prettier-plugin-svelte:
         optional: true
+
+  prettier@3.4.2:
+    resolution: {integrity: sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   prettier@3.5.3:
     resolution: {integrity: sha512-QQtaxnoDJeAkDvDKWCLiwIXkTgRhwYDEQCghU9Z6q03iyek/rxRh/2lC3HB7P8sWT2xC/y5JDctPLBIGzHKbhw==}
@@ -5972,6 +6011,20 @@ snapshots:
 
   content-type@1.0.5: {}
 
+  convex-svelte@0.0.11(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(svelte@5.22.6):
+    dependencies:
+      convex: 1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      svelte: 5.22.6
+
+  convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      esbuild: 0.25.1
+      jwt-decode: 3.1.2
+      prettier: 3.4.2
+    optionalDependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
   cookie-signature@1.0.6: {}
 
   cookie@0.6.0: {}
@@ -6806,6 +6859,8 @@ snapshots:
       jwa: 1.4.1
       safe-buffer: 5.2.1
 
+  jwt-decode@3.1.2: {}
+
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
@@ -7436,6 +7491,8 @@ snapshots:
       prettier: 3.5.3
     optionalDependencies:
       prettier-plugin-svelte: 3.3.3(prettier@3.5.3)(svelte@5.22.6)
+
+  prettier@3.4.2: {}
 
   prettier@3.5.3: {}
 
