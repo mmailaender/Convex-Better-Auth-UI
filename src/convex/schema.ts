@@ -1,117 +1,116 @@
-import { defineSchema, defineTable } from 'convex/server';
-import { v } from 'convex/values';
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
 
-/**
- * Convex schema definition that maps Fauna collections to Convex tables
- */
 export default defineSchema({
-	// Users table - maps to User collection in Fauna
-	users: defineTable({
-		firstName: v.string(),
-		lastName: v.string(),
-		primaryEmail: v.string(),
-		emails: v.array(v.string()),
-		avatar: v.optional(v.string()),
-		// In Convex, we'll store activeOrganizationId instead of a reference
-		activeOrganizationId: v.optional(v.id('organizations')),
-		// We'll handle this in the application logic rather than computed fields
-		recovery_code: v.optional(v.string())
-	})
-		.index('by_email', ['primaryEmail'])
-		.index('by_emails', ['emails']), // This creates a multi-value index on emails array
+  // Users table
+  users: defineTable({
+    firstName: v.string(),
+    lastName: v.string(),
+    primaryEmail: v.string(),
+    emails: v.array(v.string()),
+    avatar: v.optional(v.string()),
+    activeOrganizationId: v.optional(v.id("organizations")),
+    // We'll store roles directly instead of computing them
+    roles: v.array(v.string()),
+  })
+    .index("by_primaryEmail", ["primaryEmail"])
+    .index("by_emails", ["emails"]),
 
-	// Accounts table - maps to Account collection in Fauna
-	accounts: defineTable({
-		userId: v.id('users'),
-		// Social provider details
-		socialProvider: v.optional(
-			v.object({
-				name: v.union(v.literal('Github'), v.literal('Google'), v.literal('Facebook')),
-				userId: v.string(),
-				email: v.string()
-			})
-		),
-		// Passkey details
-		passkey: v.optional(
-			v.object({
-				publicKey: v.string(),
-				algorithmId: v.number(),
-				id: v.string()
-			})
-		)
-	})
-		.index('by_user_id', ['userId'])
-		.index('by_social_provider', ['socialProvider.name', 'socialProvider.userId'])
-		.index('by_passkey_id', ['passkey.id']),
+  // Accounts table - for social and passkey auth
+  accounts: defineTable({
+    userId: v.id("users"),
+    // Social provider data
+    socialProviderName: v.optional(v.string()),
+    socialProviderUserId: v.optional(v.string()),
+    socialProviderEmail: v.optional(v.string()),
+    // Passkey data
+    passkeyId: v.optional(v.string()),
+    passkeyPublicKey: v.optional(v.string()),
+    passkeyAlgorithmId: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_social_provider", ["userId", "socialProviderName"])
+    .index("by_passkey_id", ["passkeyId"]),
 
-	// Tokens table - maps to Token collection in Fauna
-	tokens: defineTable({
-		// In Convex, we use IDs rather than references directly
-		userId: v.id('users'),
-		secret: v.string(),
-		type: v.union(v.literal('access'), v.literal('refresh')),
-		// For access tokens, store the refresh token ID
-		refreshTokenId: v.optional(v.id('tokens')),
-		// Expiration timestamp
-		expiresAt: v.number()
-	})
-		.index('by_user_id', ['userId'])
-		.index('by_secret', ['secret'])
-		.index('by_refresh_token_id', ['refreshTokenId']),
+  // Email verifications
+  verifications: defineTable({
+    email: v.string(),
+    otp: v.string(),
+    userId: v.optional(v.id("users")),
+    expiresAt: v.number(), // TTL implementation
+  })
+    .index("by_email", ["email"])
+    .index("by_user", ["userId"]),
 
-	// Verifications table - maps to Verification collection in Fauna
-	verifications: defineTable({
-		email: v.string(),
-		otp: v.string(),
-		userId: v.optional(v.id('users')), // Optional because sometimes verifications are created for non-users
-		expiresAt: v.number() // Expiration timestamp, replacing ttl_days
-	})
-		.index('by_email', ['email'])
-		.index('by_otp', ['otp']),
+  // Organizations
+  organizations: defineTable({
+    name: v.string(),
+    logo: v.optional(v.string()),
+    slug: v.string(),
+    plan: v.string(), // "Free", "Pro", "Enterprise"
+  })
+    .index("by_slug", ["slug"]),
 
-	// Organizations table - maps to Organization collection in Fauna
-	organizations: defineTable({
-		name: v.string(),
-		logo: v.optional(v.string()),
-		slug: v.string(),
-		plan: v.union(v.literal('Free'), v.literal('Pro'), v.literal('Enterprise'))
-	}).index('by_slug', ['slug']),
+  // Organization memberships
+  organizationMembers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),
+    role: v.string(), // "role_organization_member", "role_organization_admin", "role_organization_owner"
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_user", ["userId"])
+    .index("by_org_and_user", ["organizationId", "userId"]),
 
-	// OrganizationMembers - normalizing the members field in Fauna's Organization
-	organizationMembers: defineTable({
-		organizationId: v.id('organizations'),
-		userId: v.id('users'),
-		role: v.union(
-			v.literal('role_organization_member'),
-			v.literal('role_organization_admin'),
-			v.literal('role_organization_owner')
-		)
-	})
-		.index('by_organization_id', ['organizationId'])
-		.index('by_user_id', ['userId'])
-		.index('by_org_and_user', ['organizationId', 'userId']),
+  // Invitations
+  invitations: defineTable({
+    invitedByUserId: v.id("users"),
+    organizationId: v.id("organizations"),
+    email: v.string(),
+    role: v.string(), // "role_organization_member", "role_organization_admin", "role_organization_owner"
+    expiresAt: v.number(), // TTL implementation - 7 days
+  })
+    .index("by_organization", ["organizationId"])
+    .index("by_email", ["email"])
+    .index("by_org_and_email", ["organizationId", "email"]),
 
-	// Invitations table - maps to Invitation collection in Fauna
-	invitations: defineTable({
-		invitedByUserId: v.id('users'),
-		organizationId: v.id('organizations'),
-		email: v.string(),
-		role: v.union(
-			v.literal('role_organization_member'),
-			v.literal('role_organization_admin'),
-			v.literal('role_organization_owner')
-		),
-		expiresAt: v.number() // Expiration timestamp, replacing ttl_days
-	})
-		.index('by_organization_id', ['organizationId'])
-		.index('by_email', ['email'])
-		.index('by_org_and_email', ['organizationId', 'email']),
+  // Sessions
+  sessions: defineTable({
+    userId: v.id("users"),
+    expiresAt: v.number(),
+    twoFactorVerified: v.boolean(),
+  })
+    .index("by_user", ["userId"]),
 
-	// RoleAssignments - replacing Fauna's RoleCheck concept
-	roleAssignments: defineTable({
-		userId: v.id('users'),
-		role: v.string() // e.g., 'role_user', 'role_signIn', etc.
-	})
-		.index('by_user_id', ['userId'])
-		.index('by_role', ['role'])
+  // Access tokens - replaces Fauna's built-in token system
+  accessTokens: defineTable({
+    userId: v.id("users"),
+    refreshTokenId: v.id("refreshTokens"),
+    tokenHash: v.string(),
+    expiresAt: v.number(), // 10 minutes
+  })
+    .index("by_user", ["userId"])
+    .index("by_token_hash", ["tokenHash"]),
+
+  // Refresh tokens
+  refreshTokens: defineTable({
+    userId: v.id("users"),
+    tokenHash: v.string(),
+    expiresAt: v.number(), // 8 hours
+  })
+    .index("by_user", ["userId"])
+    .index("by_token_hash", ["tokenHash"]),
+
+  // Roles for RBAC
+  roles: defineTable({
+    name: v.string(),
+  })
+    .index("by_name", ["name"]),
+
+  // User-role associations
+  userRoles: defineTable({
+    userId: v.id("users"),
+    roleName: v.string(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_role", ["roleName"]),
 });
