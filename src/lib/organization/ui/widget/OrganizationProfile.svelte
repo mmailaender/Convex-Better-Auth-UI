@@ -1,0 +1,71 @@
+<script lang="ts">
+	import { page } from '$app/state';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+
+	import ProfileInfo from './ProfileInfo.svelte';
+	import DeleteOrganization from './DeleteOrganization.svelte';
+	import LeaveOrganization from './LeaveOrganization.svelte';
+	import Members from './Members.svelte';
+
+	import type { User } from '$lib/db/schema/types/custom';
+
+	let derivedUser: User = $derived(page.data.user ? JSON.parse(page.data.user) : null);
+
+	let user: User = $state(page.data.user ? JSON.parse(page.data.user) : null);
+
+	let isOwnerOrAdmin = $derived(
+		user.roles?.some((role) =>
+			['role_organization_owner', 'role_organization_admin'].includes(role)
+		)
+	);
+
+	$effect(() => {
+		user = derivedUser;
+	});
+
+	let group = $state('general');
+</script>
+
+{#if user.activeOrganization}
+	<Tabs
+		bind:value={group}
+		base="flex flex-row w-192 h-160"
+		listBase="flex flex-col pr-2 w-30"
+		contentBase="flex flex-col"
+	>
+		{#snippet list()}
+			<h1>Organization</h1>
+			<h4>Manage your organization.</h4>
+			<Tabs.Control
+				value="general"
+				base="border-r-1 border-transparent"
+				stateActive="border-r-surface-950-50 opacity-100">General</Tabs.Control
+			>
+			{#if isOwnerOrAdmin}
+				<Tabs.Control
+					value="members"
+					base="border-r-1 border-transparent"
+					stateActive="border-r-surface-950-50 opacity-100">Members</Tabs.Control
+				>
+				<Tabs.Control
+					value="billing"
+					base="border-r-1 border-transparent"
+					stateActive="border-r-surface-950-50 opacity-100">Billing</Tabs.Control
+				>
+			{/if}
+		{/snippet}
+		{#snippet content()}
+			<Tabs.Panel value="general">
+				<ProfileInfo bind:user={user!} />
+				<DeleteOrganization bind:user={user!} />
+				<LeaveOrganization bind:user={user!} />
+			</Tabs.Panel>
+			{#if isOwnerOrAdmin}
+				<Tabs.Panel value="members">
+					<Members bind:user={user!} />
+				</Tabs.Panel>
+				<Tabs.Panel value="billing">Billing Panel</Tabs.Panel>
+			{/if}
+		{/snippet}
+	</Tabs>
+{/if}

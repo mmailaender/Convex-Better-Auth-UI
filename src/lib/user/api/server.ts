@@ -1,9 +1,11 @@
 import client from '$lib/db/client';
-import type { User } from '$lib/db/schema/types/custom';
+import type { Account, User } from '$lib/db/schema/types/custom';
 import type { RequestEvent } from '@sveltejs/kit';
 import { fql } from 'fauna';
 import type { ProfileData } from './types';
 import { deleteAccessTokenCookie, deleteRefreshTokenCookie } from '$lib/auth/api/session.server';
+import { deleteBlob } from '$lib/primitives/api/storage/upload';
+import { ArkErrors, type } from 'arktype';
 
 /**
  * Retrieves the current user based on the provided access token.
@@ -23,8 +25,13 @@ export async function getUser(accessToken: string): Promise<User> {
  * @param {Partial<ProfileData>} profileData - The new user data.
  * @returns {Promise<User>} The updated user object.
  */
-export async function updateProfileData(accessToken: string, profileData: Partial<ProfileData>): Promise<User> {
-	const response = await client(accessToken).query<User>(fql`Query.identity()!.update({${profileData}})`);
+export async function updateProfileData(
+	accessToken: string,
+	profileData: Partial<ProfileData>
+): Promise<User> {
+	const response = await client(accessToken).query<User>(
+		fql`Query.identity()!.update({${profileData}})`
+	);
 	return response.data;
 }
 
@@ -34,19 +41,8 @@ export async function updateProfileData(accessToken: string, profileData: Partia
  * @param {string} accessToken - The user's access token.
  * @returns {Promise<User>} The user object with their accounts.
  */
-export async function getUserAndAccounts(accessToken: string): Promise<User> {
-	const response = await client(accessToken).query<User>(
-		fql`Query.identity() {
-			id,
-			coll,
-			firstName,
-			lastName,
-			primaryEmail,
-			emailVerification,
-			emails,
-			accounts
-		  }`
-	);
+export async function getUserAccounts(accessToken: string): Promise<Array<Account>> {
+	const response = await client(accessToken).query<Array<Account>>(fql`Query.identity()!.accounts`);
 	return response.data;
 }
 
@@ -57,14 +53,21 @@ export async function getUserAndAccounts(accessToken: string): Promise<User> {
  * @param {string} userId - The user ID to delete.
  * @returns {Promise<boolean>} True if the deletion was successful, false otherwise.
  */
-export async function deleteUser(event: RequestEvent, userId: string): Promise<boolean> {
+export async function deleteUser(event: RequestEvent): Promise<boolean> {
 	const accessToken = event.cookies.get('access_token');
-	if (accessToken) {
+	const user = event.locals.user;
+	if (accessToken && user) {
 		try {
-			await client(accessToken).query<boolean>(fql`deleteUser(${userId})`);
+			await client(accessToken).query<boolean>(fql`deleteUser(${user.id})`);
+
+			const avatar = type('string.url')(user.avatar);
+			if (typeof avatar === 'string') {
+				await deleteBlob(avatar);
+			}
+
 			deleteAccessTokenCookie(event);
 			deleteRefreshTokenCookie(event);
-			console.log(`User ${userId} deleted successfully`);
+			console.log(`User ${user.id} deleted successfully`);
 			return true;
 		} catch (error) {
 			console.error('Failed to delete user:', error);

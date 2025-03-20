@@ -1,22 +1,17 @@
 <script lang="ts">
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
-	import { goto } from '$app/navigation';
 	import { callForm } from '$lib/primitives/api/callForm';
+	import { goto } from '$app/navigation';
 
-	interface Props {
-		userId: string;
-	}
-
-	let { userId }: Props = $props();
 	let open = $state(false);
 	let localError = $state('');
 
 	async function handleConfirm() {
 		try {
 			await callForm({
-				url: '/user-profile?/deleteUser',
-				data: { userId }
+				url: '/api/user?/deleteUser'
 			});
+			goto('/sign-in', { invalidateAll: true });
 		} catch (err) {
 			if (err instanceof Error) {
 				localError = err.message;
@@ -34,8 +29,8 @@
 <Modal
 	bind:open
 	triggerBase="btn text-error-500 hover:preset-tonal-error-500"
-	contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
-	backdropClasses="backdrop-blur-sm"
+	contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm)"
+	backdropClasses="backdrop-blur-xs"
 >
 	{#snippet trigger()}
 		Delete account

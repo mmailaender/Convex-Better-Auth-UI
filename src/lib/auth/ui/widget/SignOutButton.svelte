@@ -8,7 +8,12 @@
 		onSignOut?: () => void;
 	}
 
-	let { redirectUrl, class: className = 'btn preset-filled', children, onSignOut }: Props = $props();
+	let {
+		redirectUrl,
+		class: className = 'btn preset-filled',
+		children,
+		onSignOut
+	}: Props = $props();
 
 	let buttonText: string = 'Sign Out';
 
@@ -16,7 +21,7 @@
 		try {
 			const response = await fetch('/api/auth/sign-out');
 			if (response.ok) {
-                invalidateAll();
+				await invalidateAll();
 				if (onSignOut) onSignOut();
 
 				if (redirectUrl) {

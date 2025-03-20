@@ -1,0 +1,13 @@
+// Defines the `RoleCheck` collection.
+// The collection will contain a document for each
+// user-defined role.
+collection RoleCheck {
+  name: String
+
+  // Defines the `byName()` index.
+  // Use the index to get `RoleCheck` collection documents by
+  // their `name`.
+  index byName {
+     terms [.name]
+  }
+}

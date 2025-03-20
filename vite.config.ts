@@ -2,6 +2,7 @@ import { paraglide } from '@inlang/paraglide-sveltekit/vite';
 import { defineConfig } from 'vitest/config';
 import { sveltekit } from '@sveltejs/kit/vite';
 import mkcert from 'vite-plugin-mkcert';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
 	plugins: [
@@ -10,7 +11,8 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide'
 		}),
-		mkcert()
+		mkcert(),
+		tailwindcss()
 	],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']

@@ -27,4 +27,16 @@ role role_signIn {
   privileges createVerification {
     call
   }
+
+  privileges currentRoles {
+    call
+  }
+  privileges hasRole {
+    call
+  }
+  privileges RoleCheck {
+    read {
+      predicate ((doc) => doc.name == "role_signIn")
+    }
+  }
 }

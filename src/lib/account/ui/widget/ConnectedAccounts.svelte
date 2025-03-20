@@ -38,7 +38,7 @@
 			const encodedClientData = encodeBase64(new Uint8Array(credentials.clientDataJSON));
 
 			const account = await callForm<Account>({
-				url: '/user-profile?/createPasskeyAccount',
+				url: '/api/user?/createPasskeyAccount',
 				data: {
 					userId: user.id,
 					encodedAttestationObject: encodedAttestation,
@@ -57,7 +57,7 @@
 	async function handleDeleteAccount(accountId: string) {
 		try {
 			await callForm({
-				url: '/user-profile?/deleteAccount',
+				url: '/api/user?/deleteAccount',
 				data: {
 					accountId
 				}
@@ -77,14 +77,16 @@
 </script>
 
 <div>
-	<h3 class="mb-4 font-bold text-surface-800-200">Connected accounts</h3>
+	<h3 class="text-surface-800-200 mb-4 font-bold">Connected accounts</h3>
 	<ul>
 		{#each user.accounts as account}
 			{@const accountProvider = account.socialProvider?.name || 'Passkey'}
 			{@const AccountIcon = getAccountIcon(accountProvider)}
 			<li class="mb-2 flex items-center justify-between">
-				<span class="flex items-center text-surface-800-200">
-					<AccountIcon class="mr-2 size-5" />
+				<span class="text-surface-800-200 flex items-center">
+					<AccountIcon
+						class={`mr-2 size-5 ${accountProvider !== 'Passkey' ? 'fill-surface-900-100' : ''}`}
+					/>
 					{accountProvider}
 					{#if account.socialProvider}
 						• {account.socialProvider.email}
@@ -92,7 +94,7 @@
 				</span>
 				{#if user.accounts.length > 1}
 					<button
-						class="btn text-sm hover:preset-tonal-surface"
+						class="btn hover:preset-tonal-surface text-sm"
 						onclick={() => handleDeleteAccount(account.id)}
 					>
 						Delete
@@ -102,12 +104,12 @@
 		{/each}
 	</ul>
 	{#if !(hasPasskey && hasGithub)}
-		<button class="mt-2 text-primary-500 hover:underline" onclick={toggleConnectOptions}>
+		<button class="text-primary-500 mt-2 hover:underline" onclick={toggleConnectOptions}>
 			+ Connect account
 		</button>
 	{/if}
 	{#if showConnectOptions}
-		<div class="card mt-2 max-w-72 border border-surface-300-700">
+		<div class="card border-surface-300-700 mt-2 max-w-72 border">
 			<div class="flex flex-col gap-2">
 				{#if !hasPasskey}
 					<button class="btn hover:preset-tonal-surface" onclick={handleCreatePasskeyAccount}>
@@ -116,7 +118,7 @@
 				{/if}
 				{#if !hasGithub}
 					<a
-						class="btn flex items-center gap-2 hover:preset-tonal-surface"
+						class="btn hover:preset-tonal-surface flex items-center gap-2"
 						href="/api/auth/oauth/github?redirect_url=%2Fuser-profile"
 					>
 						<Github class="size-5" />

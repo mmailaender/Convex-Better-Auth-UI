@@ -1,0 +1,60 @@
+@role(server)
+function acceptInvitation(data: { userId: ID, invitationId: ID }): User {
+  let user = User.byId(data.userId)
+  let invitation = Invitation.byId(data.invitationId)
+  
+  if (invitation == null) {
+    abort("Invalid or expired invitation")
+  }
+
+  if (user == null) {
+    abort("User not found")
+  }
+  
+  // Check if user email matches invitation email
+  if (!user!.emails.includes(invitation!.email)) {
+    abort("This invitation was sent to a different email address")
+  }
+    
+  let organization = invitation!.organization
+  
+  // Check if user is already a member
+  let existingMember = organization!.members.firstWhere(member => member.user == user)
+  
+  if (existingMember != null) {
+    // User is already a member, return organization
+    organization
+  } else {
+    // Add user to organization
+    let updatedMembers = organization!.members.append({ 
+      user: user!, 
+      role: invitation!.role 
+    })
+    
+    organization!.update({ members: updatedMembers })
+    
+    // Set this as the user's active organization
+    user!.update({ 
+      activeOrganization: organization,
+      organizations: if(user!.organizations != null) { user!.organizations!.append( organization ) } else { [organization] } 
+    })
+  }
+  
+  // Delete the invitation
+  invitation!.delete()
+  
+  user! {
+    id,
+    ttl,
+    ts,
+    firstName,
+    lastName,
+    primaryEmail,
+    emails,
+    emailVerification,
+    roles,
+    activeOrganization: .activeOrganization!,
+    organizations: .organizations!,
+    accounts
+  }
+}

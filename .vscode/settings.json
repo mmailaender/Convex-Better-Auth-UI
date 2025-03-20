@@ -1,0 +1,374 @@
+{
+	"editor.tabSize": 2,
+	"gitlens.showWhatsNewAfterUpgrades": true,
+	"gitlens.virtualRepositories.enabled": false,
+	"files.autoSave": "onFocusChange",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"editor.formatOnSave": true,
+	"javascript.suggest.paths": false,
+	"typescript.suggest.paths": false,
+	"editor.linkedEditing": true,
+	"editor.quickSuggestions": {
+		"strings": "on"
+	},
+	// Customizations for Blockman
+	"editor.inlayHints.enabled": "off",
+	"editor.guides.indentation": false,
+	"editor.guides.bracketPairs": false,
+	"editor.wordWrap": "wordWrapColumn",
+	"diffEditor.wordWrap": "off",
+	"workbench.colorCustomizations": {
+		"editor.lineHighlightBorder": "#9fced11f",
+		"editor.lineHighlightBackground": "#1073cf2d"
+	},
+	"blockman.n35A01DisableRecommendationDialog": true,
+	// Intellisense - Complete function calls: .map(x => x)
+	"javascript.suggest.completeFunctionCalls": true,
+	"typescript.suggest.completeFunctionCalls": true,
+
+	// Custom VScode Icon Theme
+	"workbench.iconTheme": "material-icon-theme",
+
+	"tailwindCSS.experimental.classRegex": [
+		"class:\\s*?[\"'`]([^\"'`]*).*?,",
+		"tv\\((([^()]*|\\([^()]*\\))*)\\)"
+	],
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"console-ninja.featureSet": "Community",
+	"console-ninja.showWhatsNew": false,
+
+	// Fauna
+	"fauna.dbSecret": "${env:FAUNA_DEVELOPMENT_KEY}",
+
+	// AI
+	"codeium.enableSearch": true,
+
+	// Svelte
+	"[svelte]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"prettier.documentSelectors": ["**/*.svelte"],
+	"tailwindCSS.experimental.configFile": "src/app.css",
+	"tailwindCSS.classAttributes": [
+		"class",
+		// Base
+		"base",
+		"padding",
+		"border",
+		"background",
+		"spaceY",
+		"rounded",
+		"width",
+		"widthExpanded",
+		"height",
+		"size",
+		"font",
+		"shadow",
+		"style",
+		"hover",
+		"active",
+		"flexDirection",
+		"classes",
+
+		// Fallback
+		"fallbackBase",
+		"fallbackClasses",
+
+		// Image
+		"imageBase",
+		"imageClasses",
+
+		// Control
+		"controlBase",
+		"controlGap",
+		"controlHover",
+		"controlInactive",
+		"controlActive",
+		"controlDisabled",
+		"controlWidth",
+		"controlHeight",
+		"controlPadding",
+		"controlRounded",
+		"controlHover",
+		"controlClasses",
+
+		// Lead
+		"leadBase",
+		"leadSpaceX",
+		"leadPadding",
+		"leadClasses",
+
+		// Center
+		"centerBase",
+		"centerAlign",
+		"centerPadding",
+		"centerClasses",
+
+		// Content
+		"contentBase",
+		"contentBackground",
+		"contentClasses",
+
+		// Indicator
+		"indicatorBase",
+		"indicatorBg",
+		"indicatorText",
+		"indicatorRounded",
+		"indicatorClasses",
+
+		// Panel
+		"panelBase",
+		"panelPadding",
+		"panelRounded",
+		"panelClasses",
+
+		// Toolbar
+		"toolbarBase",
+		"toolbarGridCols",
+		"toolbarGap",
+		"toolbarClasses",
+
+		// Trail
+		"trailBase",
+		"trailSpaceX",
+		"trailPadding",
+		"trailClasses",
+
+		// Headline
+		"headlineBase",
+		"headlineClasses",
+
+		// Interface
+		"interfaceBase",
+		"interfaceBg",
+		"interfaceBorder",
+		"interfaceBorderColor",
+		"interfacePadding",
+		"interfaceRounded",
+		"interfaceIcon",
+		"interfaceText",
+		"interfaceSubtext",
+		"interfaceClasses",
+
+		// FilesList
+		"filesListBase",
+		"filesListClasses",
+
+		// File
+		"fileBase",
+		"fileBg",
+		"fileGap",
+		"filePadding",
+		"fileRounded",
+		"fileIcon",
+		"fileName",
+		"fileSize",
+		"fileButton",
+		"fileClasses",
+
+		// State
+		"stateInfo",
+		"stateError",
+		"stateSuccess",
+		"stateActive",
+		"stateInactive",
+		"stateDisabled",
+		"stateInteractive",
+		"stateReadOnly",
+		"stateInvalid",
+		"stateFocused",
+		"stateDragging",
+
+		// StateLabel
+		"stateLabelInactive",
+		"stateLabelActive",
+
+		// Tiles
+		"tilesBase",
+		"tilesFlexDirection",
+		"tilesJustify",
+		"tilesItems",
+		"tilesGap",
+		"tilesClasses",
+
+		// Header
+		"headerBase",
+		"headerFlexDirection",
+		"headerJustify",
+		"headerItems",
+		"headerGap",
+		"headerClasses",
+
+		// Footer
+		"footerBase",
+		"footerFlexDirection",
+		"footerJustify",
+		"footerItems",
+		"footerGap",
+		"footerClasses",
+
+		// Expanded
+		"expandedPadding",
+		"expandedGap",
+		"expandedClasses",
+
+		// Label
+		"labelBase",
+		"labelText",
+		"labelFill",
+		"labelFontSize",
+		"labelFontWeight",
+		"labelClasses",
+		"labelExpandedBase",
+		"labelExpandedClasses",
+
+		// Button
+		"buttonBase",
+		"buttonActive",
+		"buttonInactive",
+		"buttonHover",
+		"buttonClasses",
+
+		// Track
+		"trackBase",
+		"trackStroke",
+		"trackBg",
+		"trackRounded",
+		"trackClasses",
+
+		// Meter
+		"meterBase",
+		"meterStroke",
+		"meterBg",
+		"meterRounded",
+		"meterTransition",
+		"meterAnimate",
+		"meterDuration",
+		"meterClasses",
+
+		// Children
+		"childrenBase",
+		"childrenClasses",
+
+		// SVG
+		"svgBase",
+		"svgClasses",
+
+		// Item
+		"itemBase",
+		"itemClasses",
+
+		// Orient
+		"orientVertical",
+		"orientHorizontal",
+
+		// Thumb
+		"thumbBase",
+		"thumbSize",
+		"thumbBg",
+		"thumbRingSize",
+		"thumbRingColor",
+		"thumbRounded",
+		"thumbCursor",
+		"thumbInactive",
+		"thumbActive",
+		"thumbTranslateX",
+		"thumbTransition",
+		"thumbEase",
+		"thumbDuration",
+		"thumbClasses",
+
+		// Markers
+		"markersBase",
+		"markersClasses",
+
+		// Mark
+		"markBase",
+		"markText",
+		"markOpacity",
+		"markClasses",
+
+		// Icon
+		"iconInactiveBase",
+		"iconActiveBase",
+
+		// List
+		"listBase",
+		"listJustify",
+		"listBorder",
+		"listMargin",
+		"listGap",
+		"listClasses",
+
+		// TagList
+		"tagListBase",
+		"tagListClasses",
+
+		// Tag
+		"tagBase",
+		"tagBackground",
+		"tagClasses",
+
+		// InputEdit
+		"inputEditBase",
+
+		// TagEdit
+		"tagEditBase",
+		"tagEditBackground",
+
+		// InputEdit
+		"inputEditClasses",
+
+		// ButtonDelete
+		"buttonDeleteBase",
+		"buttonDeleteClasses",
+
+		// Trigger
+		"triggerBase",
+		"triggerBackground",
+		"triggerClasses",
+
+		// Positioner
+		"positionerBase",
+		"positionerClasses",
+
+		// Arrow
+		"arrowBase",
+		"arrowBackground",
+		"arrowClasses",
+
+		// Group
+		"groupBase",
+		"groupZIndex",
+		"groupGap",
+		"groupClasses",
+
+		// Toast
+		"toastBase",
+		"toastPadding",
+		"toastGap",
+		"toastShadow",
+		"toastClasses",
+
+		// Message
+		"messageBase",
+		"messageTitle",
+		"messageDescription",
+		"messageClasses",
+
+		// btnDismiss
+		"btnDismissBase",
+		"btnDimissPreset",
+		"btnDismissHover",
+		"btnDismissClasses",
+
+		// Backdrop
+		"backdropClasses",
+
+		// ZIndex
+		"zIndex"
+	]
+}

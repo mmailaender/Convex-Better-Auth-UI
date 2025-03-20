@@ -1,0 +1,4 @@
+@role(server)
+function revokeInvitation(invitationId: ID): NullInvitation {
+  Invitation.byId(invitationId)?.delete()
+}

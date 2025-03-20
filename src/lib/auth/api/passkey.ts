@@ -7,6 +7,8 @@
  * @throws {Error} If the request fails or the response is invalid.
  */
 import { goto } from '$app/navigation';
+import { callForm } from '$lib/primitives/api/callForm';
+import { bigEndian } from '@oslojs/binary';
 import { decodeBase64, encodeBase64 } from '@oslojs/encoding';
 import { ObjectParser } from '@pilcrowjs/object-parser';
 
@@ -123,15 +125,26 @@ export async function createCredentials(
 	return response;
 }
 
-export async function signUpWithPasskey(
-	firstName: string,
-	lastName: string,
-	email: string,
-	otp: string,
-	credentialUserId: Uint8Array,
-	userId: string
-): Promise<void> {
-	const response = await createCredentials(firstName, lastName, email, credentialUserId);
+export async function signUpWithPasskey(data: {
+	firstName: string;
+	lastName: string;
+	email: string;
+	otp: string;
+	// userId: string;
+}): Promise<void> {
+	const userId = await callForm<string>({
+		url: '/api/primitives?/newId'
+	});
+
+	const credentialUserId = new Uint8Array(8);
+	bigEndian.putUint64(credentialUserId, BigInt(userId), 0);
+
+	const response = await createCredentials(
+		data.firstName,
+		data.lastName,
+		data.email,
+		credentialUserId
+	);
 
 	const attestationObject = encodeBase64(new Uint8Array(response.attestationObject));
 	const clientDataJSON = encodeBase64(new Uint8Array(response.clientDataJSON));
@@ -140,11 +153,11 @@ export async function signUpWithPasskey(
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
-			firstName,
-			lastName,
-			email,
-			otp,
-			userId: userId,
+			firstName: data.firstName,
+			lastName: data.lastName,
+			email: data.email,
+			otp: data.otp,
+			userId,
 			encodedAttestationObject: attestationObject,
 			encodedClientDataJSON: clientDataJSON
 		})

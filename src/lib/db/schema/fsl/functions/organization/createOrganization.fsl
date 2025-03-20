@@ -1,0 +1,57 @@
+@role(server)
+function createOrganization ( data: { name: String, logo: String?, slug: String } ): User {
+  let user: Any = Query.identity()
+  let user: User = user
+
+  let organization = Organization.create({
+    name: data!.name,
+    logo: data!.logo,
+    slug: data!.slug,
+    members: [{
+      user: user!,
+      role: "role_organization_owner"
+    }],
+    plan: "Free"
+  })
+
+  let user = user!.update({
+    activeOrganization: organization,
+    organizations: if(user!.organizations != null) { user!.organizations!.append( organization ) } else { [organization] }
+  })
+
+  user {
+    id,
+    ttl,
+    ts,
+    firstName,
+    lastName,
+    primaryEmail,
+    emails,
+    emailVerification,
+    avatar,
+    roles,
+    activeOrganization: .activeOrganization {
+      id,
+      ttl,
+      ts,
+      name,
+      logo,
+      slug,
+      members,
+      plan,
+      invitations
+    },
+    organizations: .organizations?.map(ao => ao {
+      id,
+      ttl,
+      ts,
+      name,
+      logo,
+      slug,
+      members,
+      plan,
+      invitations
+    }),
+    accounts
+  }
+}

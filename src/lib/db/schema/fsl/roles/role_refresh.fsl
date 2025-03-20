@@ -2,6 +2,19 @@ role role_refreshAccessToken {
   privileges refreshAccessToken {
     call
   }
+
+  privileges currentRoles {
+    call
+  }
+  privileges hasRole {
+    call
+  }
+  privileges RoleCheck {
+    read {
+      predicate ((doc) => doc.name == "role_refreshAccessToken")
+    }
+  }
+
   membership User {
     predicate ( (doc) => isCalledWithRefreshToken() )
   }
