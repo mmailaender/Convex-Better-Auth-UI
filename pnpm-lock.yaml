@@ -44,6 +44,12 @@ importers:
       convex:
         specifier: ^1.21.0
         version: 1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      convex-ents:
+        specifier: ^0.13.0
+        version: 0.13.0(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
+      convex-helpers:
+        specifier: ^0.1.75
+        version: 0.1.75(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       convex-svelte:
         specifier: ^0.0.11
         version: 0.0.11(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(svelte@5.22.6)
@@ -1820,6 +1826,27 @@ packages:
   content-type@1.0.5:
     resolution: {integrity: sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==}
     engines: {node: '>= 0.6'}
+
+  convex-ents@0.13.0:
+    resolution: {integrity: sha512-Y9O9htEz/MnYN/aJzM9CxReItvGILH69VuuII0F3sWUCoA5tqdWyAT78bMyD499KRsZUjAknyZPpJ5tuwy4T9g==}
+    peerDependencies:
+      convex: ^1.13.0
+
+  convex-helpers@0.1.75:
+    resolution: {integrity: sha512-8o0AOQRlV0nnqeg1qGtsgqQcqXNxvtggSd/PcUyeV8N4esOcQnJLrpWvHJ5O95CiKNO9r2H1Jt5LrO7Vd7rPLw==}
+    hasBin: true
+    peerDependencies:
+      convex: ^1.13.0
+      hono: ^4.0.5
+      react: ^17.0.2 || ^18.0.0 || ^19.0.0
+      zod: ^3.22.4
+    peerDependenciesMeta:
+      hono:
+        optional: true
+      react:
+        optional: true
+      zod:
+        optional: true
 
   convex-svelte@0.0.11:
     resolution: {integrity: sha512-N/29gg5Zqy72vKL4xHSLk3jGwXVKIWXPs6xzq6KxGL84y/D6hG85pG2CPOzn08EzMmByts5FTkJ5p3var6yDng==}
@@ -6010,6 +6037,16 @@ snapshots:
       safe-buffer: 5.2.1
 
   content-type@1.0.5: {}
+
+  convex-ents@0.13.0(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)):
+    dependencies:
+      convex: 1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+
+  convex-helpers@0.1.75(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0):
+    dependencies:
+      convex: 1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+    optionalDependencies:
+      react: 19.0.0
 
   convex-svelte@0.0.11(convex@1.21.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(svelte@5.22.6):
     dependencies:

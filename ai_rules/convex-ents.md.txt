@@ -1,0 +1,511 @@
+# Convex Ents Framework Guidelines
+
+## Introduction
+Convex Ents is an ergonomic layer of the built-in Convex database API (`ctx.db`) that provides a more powerful and developer-friendly way to work with relational data. Ents (short for entities) allow you to explicitly declare relationships between documents, define default values, incorporate authorization rules, and much more.
+
+> **⚠️ Note:** Convex Ents is currently in maintenance mode. The Convex team will accept PRs and ensure it doesn't break, but there will not be active feature development.
+
+## Ent Schema Guidelines
+
+### Defining Your Schema
+Always define your Ent schema in `convex/schema.ts`. Unlike standard Convex schemas, Ent schemas require:
+
+```typescript
+import { v } from "convex/values";
+import { defineEnt, defineEntSchema, getEntDefinitions } from "convex-ents";
+
+const schema = defineEntSchema({
+  // Table definitions using defineEnt()
+});
+
+export default schema;
+
+// Must export entDefinitions for runtime use
+export const entDefinitions = getEntDefinitions(schema);
+```
+
+#### Basic Ent Definition
+Define an Ent using `defineEnt()` instead of `defineTable()`:
+
+```typescript
+const schema = defineEntSchema({
+  users: defineEnt({
+    name: v.string(),
+    email: v.string(),
+  }),
+  
+  messages: defineEnt({
+    text: v.string(),
+  }),
+});
+```
+
+### Fields and Indexes
+
+#### Indexed Fields
+Use the `field()` method with `index: true` to create a simple index:
+
+```typescript
+users: defineEnt({}).field("email", v.string(), { index: true })
+```
+
+This is equivalent to:
+
+```typescript
+users: defineEnt({
+  email: v.string(),
+}).index("email", ["email"])
+```
+
+#### Unique Fields
+Use the `unique: true` option to enforce uniqueness:
+
+```typescript
+users: defineEnt({}).field("email", v.string(), { unique: true })
+```
+
+#### Field Defaults
+Define default values for fields to simplify schema evolution:
+
+```typescript
+posts: defineEnt({}).field(
+  "contentType",
+  v.union(v.literal("text"), v.literal("video")),
+  { default: "text" }
+)
+```
+
+### Defining Relationships with Edges
+
+Ents have a powerful feature called "edges" to represent relationships between documents. There are three main types of edges:
+
+#### 1:1 Edges
+One-to-one relationships between two tables:
+
+```typescript
+users: defineEnt({
+  name: v.string(),
+}).edge("profile", { ref: true }),
+
+profiles: defineEnt({
+  bio: v.string(),
+}).edge("user"),
+```
+
+#### 1:Many Edges
+One-to-many relationships (one document can be related to many documents):
+
+```typescript
+users: defineEnt({
+  name: v.string(),
+}).edges("messages", { ref: true }),
+
+messages: defineEnt({
+  text: v.string(),
+}).edge("user"),
+```
+
+#### Many:Many Edges
+Many-to-many relationships (documents in both tables can be related to multiple documents in the other):
+
+```typescript
+messages: defineEnt({
+  text: v.string(),
+}).edges("tags"),
+
+tags: defineEnt({
+  name: v.string(),
+}).edges("messages"),
+```
+
+#### Self-Referential Edges
+For relationships within the same table:
+
+```typescript
+// Asymmetrical (e.g., followers)
+users: defineEnt({
+  name: v.string(),
+}).edges("followers", { to: "users", inverse: "followees" }),
+
+// Symmetrical (e.g., friends)
+users: defineEnt({
+  name: v.string(),
+}).edges("friends", { to: "users" }),
+```
+
+## Reading Data Guidelines
+
+### Reading Single Ents
+Replace `ctx.db.get()` with the Ents equivalent:
+
+```typescript
+// By ID
+const task = await ctx.table("tasks").get(taskId);
+
+// By indexed field
+const user = await ctx.table("users").get("email", "user@example.com");
+
+// Throw if not found
+const task = await ctx.table("tasks").getX(taskId);
+```
+
+### Reading Multiple Ents
+
+```typescript
+// Get all documents from a table
+const allUsers = await ctx.table("users");
+
+// Filter by an index
+const popularPosts = await ctx.table("posts", "numLikes", (q) =>
+  q.gt("numLikes", 100)
+);
+
+// Using search
+const results = await ctx.table("posts").search("text", (q) => 
+  q.search("text", "search term").eq("type", "video")
+);
+
+// Using filter
+const filteredPosts = await ctx.table("posts")
+  .filter((q) => q.gt(q.field("numLikes"), 100));
+```
+
+### Ordering and Limiting Results
+
+```typescript
+// Order by _creationTime (default)
+const newestFirst = await ctx.table("posts").order("desc");
+
+// Order by a specific field
+const mostLiked = await ctx.table("posts").order("desc", "numLikes");
+
+// Limit results
+const top5 = await ctx.table("users").take(5);
+
+// Get first result
+const latestUser = await ctx.table("users").order("desc").first();
+```
+
+### Traversing Edges (Relationships)
+
+```typescript
+// 1:1 edge
+const user = await ctx.table("profiles").getX(profileId).edge("user");
+const profile = await ctx.table("users").getX(userId).edge("profile");
+
+// 1:many edge
+const messages = await ctx.table("users").getX(userId).edge("messages");
+
+// many:many edge
+const tags = await ctx.table("messages").getX(messageId).edge("tags");
+```
+
+### Retrieving Related Ents
+
+```typescript
+// Map ents to include related data
+const usersWithMessages = await ctx.table("users").map(async (user) => {
+  return {
+    _id: user._id,
+    name: user.name,
+    messages: await user.edge("messages").take(5),
+  };
+});
+```
+
+## Writing Data Guidelines
+
+### Creating Ents
+
+```typescript
+// Insert a single ent
+const taskId = await ctx.table("tasks").insert({ text: "New task" });
+
+// Insert and get the ent
+const task = await ctx.table("tasks").insert({ text: "New task" }).get();
+
+// Insert multiple ents
+const taskIds = await ctx.table("tasks").insertMany(
+  { text: "Task 1" }, 
+  { text: "Task 2" }
+);
+```
+
+### Updating Ents
+
+```typescript
+// Update with patch (partial update)
+await ctx.table("tasks").getX(taskId).patch({ text: "Updated text" });
+
+// Replace (complete replacement)
+await ctx.table("tasks").getX(taskId).replace({ text: "New version" });
+```
+
+### Deleting Ents
+
+```typescript
+// Delete an ent
+await ctx.table("tasks").getX(taskId).delete();
+```
+
+### Working with Edges
+
+#### Creating 1:1 and 1:Many Edges
+
+```typescript
+// When inserting
+const userId = await ctx.table("users").insert({ name: "Alice" });
+const profileId = await ctx.table("profiles")
+  .insert({ bio: "Developer", userId });
+
+// When updating
+await ctx.table("profiles").getX(profileId).patch({ userId });
+```
+
+#### Creating Many:Many Edges
+
+```typescript
+// When inserting
+const tagId = await ctx.table("tags").insert({ name: "Important" });
+const messageId = await ctx.table("messages")
+  .insert({ text: "Hello", tags: [tagId] });
+
+// Using replace (replaces all edges)
+await ctx.table("messages").getX(messageId)
+  .replace({ text: "Updated", tags: [tagId, otherTagId] });
+
+// Using patch (add/remove specific edges)
+await ctx.table("messages").getX(messageId)
+  .patch({ tags: { add: [newTagId], remove: [oldTagId] } });
+```
+
+## Authorization Rules
+
+You can define rules to control when ents can be read, created, updated, or deleted. This centralizes your authorization logic.
+
+### Setting Up Rules
+
+1. Create a `rules.ts` file:
+
+```typescript
+import { addEntRules } from "convex-ents";
+import { entDefinitions } from "./schema";
+import { QueryCtx } from "./types";
+
+export function getEntDefinitionsWithRules(ctx: QueryCtx) {
+  return addEntRules(entDefinitions, {
+    tasks: {
+      read: async (task) => {
+        // Check if user can read this task
+        return ctx.viewer?._id === task.userId;
+      },
+      write: async ({ operation, ent, value }) => {
+        // Check if user can write/update/delete
+        if (operation === "create") {
+          return ctx.viewer !== null;
+        }
+        return ctx.viewer?._id === ent.userId;
+      }
+    }
+  });
+}
+```
+
+2. Implement the viewer context in your function configuration.
+
+### Common Rule Patterns
+
+#### Delegating to Another Ent
+
+```typescript
+tasks: {
+  read: async (task) => {
+    // Task can be read if its project can be read
+    const project = await task.edge("project");
+    return project !== null;
+  }
+}
+```
+
+#### Testing for an Edge
+
+```typescript
+documents: {
+  read: async (document) => {
+    // Document can be read by its owner or members of its team
+    if (ctx.viewerId === document.ownerId) return true;
+    const team = await document.edge("team");
+    return team !== null && await team.edge("members").has(ctx.viewerId);
+  }
+}
+```
+
+## TypeScript Guidelines
+
+- When using `ctx.table().map()`, always include proper type annotations for async callbacks.
+- For function returns, consider using the `.doc()` method to convert ents to plain documents.
+- Use `Id<'tableName'>` type for ID parameters to be explicit about which table they belong to.
+
+## File Storage and Uploads
+
+Convex Ents provides elegant integration with Convex's file storage system, allowing you to create relationships between your Ents and stored files.
+
+### Setting Up File Storage with Ents
+
+Define edges to the Convex system storage table (`_storage`) to create relationships between your Ents and files:
+
+```typescript
+const schema = defineEntSchema({
+  users: defineEnt({
+    name: v.string(),
+  }).edge("avatar", { to: "_storage", system: true }),
+  
+  documents: defineEnt({
+    title: v.string(),
+  }).edges("attachments", { to: "_storage", system: true }),
+});
+```
+
+### File Metadata Type
+
+When working with files, it's helpful to define a type for file metadata:
+
+```typescript
+type FileMetadata = {
+  _id: Id<"_storage">;
+  _creationTime: number;
+  contentType?: string;
+  sha256: string;
+  size: number;
+};
+```
+
+### Uploading Files and Linking to Ents
+
+1. **Generate Upload URLs**:
+
+```typescript
+export const generateUploadUrl = mutation({
+  args: {
+    contentType: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.storage.generateUploadUrl(args.contentType);
+  },
+});
+```
+
+2. **Associate Files with Ents**:
+
+```typescript
+export const setUserAvatar = mutation({
+  args: {
+    fileId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    const viewer = await ctx.viewerX();
+    
+    // Set the avatar file for the user
+    await viewer.patch({ avatarId: args.fileId });
+    
+    return viewer._id;
+  },
+});
+```
+
+3. **Associate Multiple Files with an Ent**:
+
+```typescript
+export const addDocumentAttachment = mutation({
+  args: {
+    documentId: v.id("documents"),
+    fileId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    // Add file to the document's attachments
+    await ctx.table("documents").getX(args.documentId)
+      .patch({ attachments: { add: [args.fileId] } });
+    
+    return null;
+  },
+});
+```
+
+### Reading Files and Generating Download URLs
+
+1. **Get a Single File**:
+
+```typescript
+// Get user's avatar file
+const avatarFile = await ctx.table("users").getX(userId).edge("avatar");
+```
+
+2. **Get Multiple Files**:
+
+```typescript
+// Get all attachments for a document
+const attachments = await ctx.table("documents").getX(docId).edge("attachments");
+```
+
+3. **Generate Download URLs**:
+
+```typescript
+export const getUserAvatarUrl = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.table("users").getX(args.userId);
+    const avatarFile = await user.edge("avatar");
+    
+    if (!avatarFile) {
+      return null;
+    }
+    
+    // Generate a URL for downloading the file
+    return ctx.storage.getUrl(avatarFile._id);
+  },
+});
+```
+
+### Best Practices for File Handling
+
+1. **Verify File Metadata**: Always check file size, type, and other metadata before allowing upload operations.
+
+2. **Clean up Unused Files**: Implement a system to remove orphaned files.
+
+3. **Implement Access Control**: Apply rules on both the Ent and its associated files:
+
+```typescript
+documents: {
+  read: async (document) => {
+    return ctx.viewerId === document.ownerId;
+  }
+},
+// Rules also apply when accessing files through edges
+```
+
+4. **Handle File Deletion Properly**: When deleting Ents, consider whether associated files should also be deleted.
+
+## Best Practices
+
+1. **Use `.doc()` for returning to clients**: Convert ents to plain documents before returning them from functions.
+   ```typescript
+   return await ctx.table("users").map(async (user) => ({
+     _id: user._id,
+     name: user.name,
+     profile: await user.edge("profile").doc()
+   }));
+   ```
+
+2. **Chain edge traversals efficiently**: Use the fluent API to minimize database operations.
+
+3. **Centralize authorization logic**: Define rules in one place instead of checking permissions in each function.
+
+4. **Use field defaults for schema evolution**: When adding new fields, provide defaults to avoid breaking existing code.
+
+5. **For complex operations, consider transactions**: Remember that each edge traversal is a separate database operation.
+
+6. **Prefer `ctx.table` over `ctx.db`**: For better type safety and relationship handling.
+
+7. **Use `skipRules` with caution**: When you need to bypass authorization rules, prefer returning IDs or plain documents.

@@ -61,6 +61,8 @@
 		"arctic": "^3.5.0",
 		"arktype": "^2.1.9",
 		"convex": "^1.21.0",
+		"convex-ents": "^0.13.0",
+		"convex-helpers": "^0.1.75",
 		"convex-svelte": "^0.0.11",
 		"fauna": "^2.5.0",
 		"lucide-svelte": "^0.479.0",

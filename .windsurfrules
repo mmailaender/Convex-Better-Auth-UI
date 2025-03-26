@@ -1,16 +1,24 @@
 # Stack
-- TypeScript, 
-- Svelte 5 (with Runes), 
-- SvelteKit 2, 
-- Tailwind v4, 
-- Skeleton v3 (https://next.skeleton.dev/), 
-- Convex
+
+- TypeScript,
+- Svelte 5 (with Runes),
+- SvelteKit 2,
+- Tailwind v4,
+- Skeleton v3 (https://next.skeleton.dev/),
+- Convex (Convex Ents)
 
 Remember the following:
 Event handlers don't have colons in them anymore. on:click => onclick
 
 # General Code Style & Formatting
+
 - Always declare the type of each variable and function (parameters and return value).
 - Avoid using any.
 - Create necessary types.
 - Use JSDoc to document public classes and methods.
+
+# Convex
+
+- Prioritize the usage of convex Ents over the built-in Convex API.
+- If the task is related to convex, use the convex rules ai_rules/convex_rules.txt
+- If the task is related to convex Ents, use the convex Ents rules ai_rules/convex-ents.md.txt
