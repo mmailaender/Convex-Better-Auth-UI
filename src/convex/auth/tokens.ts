@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'crypto';
 import { v } from 'convex/values';
 
-import { internalMutation, internalQuery, mutation } from '../_generated/server';
+import { internalMutation, internalQuery, mutation } from '../functions';
 import { internal } from '../_generated/api';
 
 // Types
@@ -53,7 +53,7 @@ export const createAccessToken = internalMutation({
 		const expiresAt = Date.now() + 10 * 60 * 1000;
 
 		// Store the token hash, not the token itself
-		const tokenId = await ctx.db.insert('accessTokens', {
+		const tokenId = await ctx.table('accessTokens').insert({
 			userId: args.userId,
 			refreshTokenId: args.refreshTokenId,
 			tokenHash,
@@ -89,7 +89,7 @@ export const createRefreshToken = internalMutation({
 		const expiresAt = Date.now() + 8 * 60 * 60 * 1000;
 
 		// Store the token hash, not the token itself
-		const tokenId = await ctx.db.insert('refreshTokens', {
+		const tokenId = await ctx.table('refreshTokens').insert({
 			userId: args.userId,
 			tokenHash,
 			expiresAt
@@ -157,9 +157,8 @@ export const validateToken = internalQuery({
 		const tokenHash = hashToken(args.token);
 
 		if (args.type === 'access') {
-			const accessToken = await ctx.db
-				.query('accessTokens')
-				.withIndex('by_token_hash', (q) => q.eq('tokenHash', tokenHash))
+			const accessToken = await ctx
+				.table('accessTokens', 'by_token_hash', (q) => q.eq('tokenHash', tokenHash))
 				.first();
 
 			if (!accessToken || Date.now() >= accessToken.expiresAt) {
@@ -168,9 +167,8 @@ export const validateToken = internalQuery({
 
 			return accessToken;
 		} else {
-			const refreshToken = await ctx.db
-				.query('refreshTokens')
-				.withIndex('by_token_hash', (q) => q.eq('tokenHash', tokenHash))
+			const refreshToken = await ctx
+				.table('refreshTokens', 'by_token_hash', (q) => q.eq('tokenHash', tokenHash))
 				.first();
 
 			if (!refreshToken || Date.now() >= refreshToken.expiresAt) {
@@ -251,9 +249,8 @@ export const refreshAccessToken = mutation({
 		// Validate the refresh token
 		const tokenHash = hashToken(args.refreshToken);
 
-		const refreshToken = await ctx.db
-			.query('refreshTokens')
-			.withIndex('by_token_hash', (q) => q.eq('tokenHash', tokenHash))
+		const refreshToken = await ctx
+			.table('refreshTokens', 'by_token_hash', (q) => q.eq('tokenHash', tokenHash))
 			.first();
 
 		if (!refreshToken || Date.now() >= refreshToken.expiresAt) {
@@ -263,17 +260,18 @@ export const refreshAccessToken = mutation({
 		const userId = refreshToken.userId;
 
 		// Delete any access tokens associated with this refresh token
-		const accessTokens = await ctx.db
-			.query('accessTokens')
-			.withIndex('by_refresh_token', (q) => q.eq('refreshTokenId', refreshToken._id))
-			.collect();
+		const accessTokens = await ctx.table('accessTokens', 'refreshTokenId', (q) =>
+			q.eq('refreshTokenId', refreshToken._id)
+		);
 
 		for (const token of accessTokens) {
-			await ctx.db.delete(token._id);
+			const tokenDoc = await ctx.table('accessTokens').getX(token._id);
+			await tokenDoc.delete();
 		}
 
 		// Delete the old refresh token to prevent reuse
-		await ctx.db.delete(refreshToken._id);
+		const tokenDoc = await ctx.table('refreshTokens').getX(refreshToken._id);
+		await tokenDoc.delete();
 
 		// Create new tokens
 		return await ctx.runMutation(internal.auth.tokens.createAccessAndRefreshToken, {
@@ -291,7 +289,10 @@ export const deleteToken = internalMutation({
 		type: v.union(v.literal('access'), v.literal('refresh'))
 	},
 	handler: async (ctx, args) => {
-		await ctx.db.delete(args.tokenId);
+		const tokenDoc = await ctx
+			.table(args.type === 'access' ? 'accessTokens' : 'refreshTokens')
+			.getX(args.tokenId);
+		await tokenDoc.delete();
 	}
 });
 
@@ -306,17 +307,18 @@ export const deleteTokenByHash = internalMutation({
 	handler: async (ctx, args) => {
 		const token =
 			args.type === 'access'
-				? await ctx.db
-						.query('accessTokens')
-						.withIndex('by_token_hash', (q) => q.eq('tokenHash', args.tokenHash))
+				? await ctx
+						.table('accessTokens', 'by_token_hash', (q) => q.eq('tokenHash', args.tokenHash))
 						.first()
-				: await ctx.db
-						.query('refreshTokens')
-						.withIndex('by_token_hash', (q) => q.eq('tokenHash', args.tokenHash))
+				: await ctx
+						.table('refreshTokens', 'by_token_hash', (q) => q.eq('tokenHash', args.tokenHash))
 						.first();
 
 		if (token) {
-			await ctx.db.delete(token._id);
+			const tokenDoc = await ctx
+				.table(args.type === 'access' ? 'accessTokens' : 'refreshTokens')
+				.getX(token._id);
+			await tokenDoc.delete();
 		}
 	}
 });
@@ -329,18 +331,22 @@ export const deleteAllUserTokens = internalMutation({
 		userId: v.id('users')
 	},
 	handler: async (ctx, args) => {
-		const accessTokens = await ctx.db
-			.query('accessTokens')
-			.withIndex('by_user', (q) => q.eq('userId', args.userId))
-			.collect();
+		const accessTokens = await ctx.table('accessTokens', 'userId', (q) =>
+			q.eq('userId', args.userId)
+		);
 
-		const refreshTokens = await ctx.db
-			.query('refreshTokens')
-			.withIndex('by_user', (q) => q.eq('userId', args.userId))
-			.collect();
+		const refreshTokens = await ctx.table('refreshTokens', 'userId', (q) =>
+			q.eq('userId', args.userId)
+		);
 
-		for (const token of [...accessTokens, ...refreshTokens]) {
-			await ctx.db.delete(token._id);
+		for (const token of accessTokens) {
+			const tokenDoc = await ctx.table('accessTokens').getX(token._id);
+			await tokenDoc.delete();
+		}
+
+		for (const token of refreshTokens) {
+			const tokenDoc = await ctx.table('refreshTokens').getX(token._id);
+			await tokenDoc.delete();
 		}
 	}
 });
