@@ -1,4 +1,3 @@
-import { v } from 'convex/values';
 import { internalMutation } from './functions';
 
 // Clean up verifications that have expired
@@ -11,7 +10,7 @@ export const cleanExpiredVerifications = internalMutation({
 		);
 
 		for (const verification of expiredVerifications) {
-			await ctx.table('verifications').getX(verification._id).delete();
+			await verification.delete();
 		}
 
 		return { deleted: expiredVerifications.length };
@@ -28,7 +27,7 @@ export const cleanExpiredInvitations = internalMutation({
 		);
 
 		for (const invitation of expiredInvitations) {
-			await ctx.table('invitations').getX(invitation._id).delete();
+			await invitation.delete();
 		}
 
 		return { deleted: expiredInvitations.length };
@@ -45,7 +44,7 @@ export const cleanExpiredAccessTokens = internalMutation({
 		);
 
 		for (const token of expiredTokens) {
-			await ctx.table('accessTokens').getX(token._id).delete();
+			await token.delete();
 		}
 
 		return { deleted: expiredTokens.length };
@@ -62,7 +61,7 @@ export const cleanExpiredRefreshTokens = internalMutation({
 		);
 
 		for (const token of expiredTokens) {
-			await ctx.table('refreshTokens').getX(token._id).delete();
+			await token.delete();
 		}
 
 		return { deleted: expiredTokens.length };

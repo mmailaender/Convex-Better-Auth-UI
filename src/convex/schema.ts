@@ -8,7 +8,6 @@ const schema = defineEntSchema({
 		lastName: v.string(),
 		primaryEmail: v.string(),
 		emails: v.array(v.string()),
-		activeOrganizationId: v.optional(v.id('organizations')),
 		// We'll store roles directly instead of computing them
 		roles: v.array(v.string())
 	})
@@ -17,7 +16,7 @@ const schema = defineEntSchema({
 		.edges('accounts', { ref: true })
 		.edge('avatar', { to: '_storage', deletion: 'hard' })
 		.edges('organizations', { ref: true, deletion: undefined })
-		.edge('organizations', { field: 'activeOrganizationId', deletion: undefined }),
+		.edge('organization', { field: 'activeOrganizationId', deletion: undefined, optional: true }),
 	// Accounts table - for social and passkey auth
 	accounts: defineEnt({
 		// Social provider data
@@ -44,10 +43,10 @@ const schema = defineEntSchema({
 
 	// Email verifications
 	verifications: defineEnt({
-		email: v.string(),
 		otp: v.string(),
 		expiresAt: v.number() // TTL implementation
 	})
+		.field('email', v.string(), { unique: true })
 		.edge('user', { to: 'users', field: 'userId', optional: true })
 		.index('by_email', ['email'])
 		.index('by_expiration', ['expiresAt']),
@@ -55,10 +54,9 @@ const schema = defineEntSchema({
 	// Organizations
 	organizations: defineEnt({
 		name: v.string(),
-		slug: v.string(),
 		plan: v.union(v.literal('Free'), v.literal('Pro'), v.literal('Enterprise'))
 	})
-		.index('by_slug', ['slug'])
+		.field('slug', v.string(), { unique: true })
 		.edge('logo', { to: '_storage', deletion: 'hard' })
 		.edges('members', { to: 'organizationMembers', inverse: 'organization' })
 		.edges('invitations', { to: 'invitations', inverse: 'organization' }),
