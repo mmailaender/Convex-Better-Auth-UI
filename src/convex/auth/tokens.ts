@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding';
 import { sha256 } from '@oslojs/crypto/sha2';
+import * as jose from 'jose';
 
 import { internalMutation, internalQuery, mutation } from '../functions';
 import { internal } from '../_generated/api';
@@ -41,38 +42,18 @@ export function hashToken(token: string): string {
  * @param expiresInSeconds Token expiration time in seconds
  * @returns Signed JWT string
  */
-export function createJWT(payload: Record<string, any>, expiresInSeconds: number): string {
-	// Create the JWT header
-	const header = {
-		alg: 'HS256',
-		typ: 'JWT'
-	};
+export async function createJWT(
+	payload: Record<string, any>,
+	expiresInSeconds: number
+): Promise<string> {
+	const secret = new TextEncoder().encode('JWT_SECRET'); // In production, fetch from env
 
-	// Create the JWT payload
-	const now = Math.floor(Date.now() / 1000);
-	const exp = now + expiresInSeconds;
-
-	const jwtPayload = {
-		...payload,
-		iat: now, // Issued at
-		exp: exp, // Expiration time
-		nbf: now // Not before
-	};
-
-	// Encode header and payload
-	const encodedHeader = btoa(JSON.stringify(header));
-	const encodedPayload = btoa(JSON.stringify(jwtPayload));
-
-	// Create the content to be signed
-	const content = `${encodedHeader}.${encodedPayload}`;
-
-	// Sign the content (this would normally use a secure key from env vars)
-	// Note: In a production environment, you'd use a proper JWT library and secure key
-	const signatureBytes = sha256(new TextEncoder().encode(content + 'JWT_SECRET'));
-	const signature = encodeHexLowerCase(signatureBytes);
-
-	// Return the complete JWT
-	return `${content}.${signature}`;
+	return new jose.SignJWT(payload)
+		.setProtectedHeader({ alg: 'HS256' })
+		.setIssuedAt()
+		.setExpirationTime(`${expiresInSeconds}s`)
+		.setNotBefore(0)
+		.sign(secret);
 }
 
 /**
@@ -81,39 +62,15 @@ export function createJWT(payload: Record<string, any>, expiresInSeconds: number
  * @param jwt The JWT to verify
  * @returns The payload if valid, null otherwise
  */
-export function verifyJWT(jwt: string): Record<string, any> | null {
+export async function verifyJWT(jwt: string): Promise<Record<string, any> | null> {
 	try {
-		// Split the JWT into its components
-		const [encodedHeader, encodedPayload, signature] = jwt.split('.');
+		const secret = new TextEncoder().encode('JWT_SECRET'); // In production, fetch from env
 
-		if (!encodedHeader || !encodedPayload || !signature) {
-			return null;
-		}
+		const { payload } = await jose.jwtVerify(jwt, secret, {
+			algorithms: ['HS256']
+		});
 
-		// Verify the signature
-		const content = `${encodedHeader}.${encodedPayload}`;
-		const expectedSignatureBytes = sha256(new TextEncoder().encode(content + 'JWT_SECRET'));
-		const expectedSignature = encodeHexLowerCase(expectedSignatureBytes);
-
-		if (signature !== expectedSignature) {
-			return null;
-		}
-
-		// Decode and parse the payload
-		const payload = JSON.parse(atob(encodedPayload));
-
-		// Check if the token is expired
-		const now = Math.floor(Date.now() / 1000);
-		if (payload.exp && payload.exp < now) {
-			return null;
-		}
-
-		// Check if the token is not yet valid
-		if (payload.nbf && payload.nbf > now) {
-			return null;
-		}
-
-		return payload;
+		return payload as Record<string, any>;
 	} catch (error) {
 		console.error('JWT verification error:', error);
 		return null;
@@ -139,7 +96,7 @@ export const createAccessToken = internalMutation({
 		const expiresAt = Date.now() + expiresInSeconds * 1000;
 
 		// Create JWT with necessary claims
-		const token = createJWT(
+		const token = await createJWT(
 			{
 				sub: args.userId,
 				refreshTokenId: args.refreshTokenId,

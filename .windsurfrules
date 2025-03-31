@@ -19,6 +19,6 @@ Event handlers don't have colons in them anymore. on:click => onclick
 
 # Convex
 
-- Prioritize the usage of convex Ents over the built-in Convex API.
+- Prioritize always the usage of convex Ents over the built-in Convex API.
 - If the task is related to convex, use the convex rules ai_rules/convex_rules.txt
 - If the task is related to convex Ents, use the convex Ents rules ai_rules/convex-ents.md.txt
