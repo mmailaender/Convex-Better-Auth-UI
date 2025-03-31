@@ -65,6 +65,7 @@
 		"convex-helpers": "^0.1.75",
 		"convex-svelte": "^0.0.11",
 		"fauna": "^2.5.0",
+		"jose": "^6.0.10",
 		"lucide-svelte": "^0.479.0",
 		"resend": "^4.1.2",
 		"sharp": "^0.33.5"
