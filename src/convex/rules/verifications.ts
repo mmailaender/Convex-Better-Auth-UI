@@ -33,7 +33,7 @@ export function getVerificationRules(ctx: QueryCtx) {
 
 			// Check unique [.email] - A verification must exist only once for an email
 			if (operation === 'create' && value.email) {
-				const existingVerifications = await ctx.skipRules.table('verifications', 'by_email', (q) =>
+				const existingVerifications = await ctx.skipRules.table('verifications', 'email', (q) =>
 					q.eq('email', value.email)
 				);
 

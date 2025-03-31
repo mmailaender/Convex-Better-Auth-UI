@@ -15,8 +15,13 @@ const schema = defineEntSchema({
 		.index('by_emails', ['emails'])
 		.edges('accounts', { ref: true })
 		.edge('avatar', { to: '_storage', deletion: 'hard' })
-		.edges('organizations', { ref: true, deletion: undefined })
-		.edge('organization', { field: 'activeOrganizationId', deletion: undefined, optional: true }),
+		.edges('organizationMembers', { ref: true, deletion: undefined })
+		.edge('organization', { field: 'activeOrganizationId', deletion: undefined, optional: true })
+		.edge('verification', { ref: true })
+		.edges('invitations', { ref: true })
+		.edges('accessTokens', { ref: true })
+		.edges('refreshTokens', { ref: true })
+		.edges('roles', { ref: true, to: 'userRoles' }),
 	// Accounts table - for social and passkey auth
 	accounts: defineEnt({
 		// Social provider data
@@ -48,7 +53,6 @@ const schema = defineEntSchema({
 	})
 		.field('email', v.string(), { unique: true })
 		.edge('user', { to: 'users', field: 'userId', optional: true })
-		.index('by_email', ['email'])
 		.index('by_expiration', ['expiresAt']),
 
 	// Organizations
@@ -58,8 +62,9 @@ const schema = defineEntSchema({
 	})
 		.field('slug', v.string(), { unique: true })
 		.edge('logo', { to: '_storage', deletion: 'hard' })
-		.edges('members', { to: 'organizationMembers', inverse: 'organization' })
-		.edges('invitations', { to: 'invitations', inverse: 'organization' }),
+		.edges('members', { ref: true, to: 'organizationMembers' })
+		.edges('invitations', { ref: true })
+		.edges('users', { ref: true, deletion: undefined }),
 
 	// Organization memberships
 	organizationMembers: defineEnt({
@@ -69,8 +74,8 @@ const schema = defineEntSchema({
 			v.literal('role_organization_owner')
 		)
 	})
-		.edge('organization', { to: 'organizations' })
-		.edge('user', { to: 'users' })
+		.edge('organization')
+		.edge('user')
 		.index('by_org_and_user', ['organizationId', 'userId']),
 
 	// Invitations
@@ -105,6 +110,7 @@ const schema = defineEntSchema({
 		expiresAt: v.number() // 8 hours
 	})
 		.edge('user', { to: 'users' })
+		.edge('accessToken', { ref: true })
 		.index('by_token_hash', ['tokenHash'])
 		.index('by_expiration', ['expiresAt']),
 
