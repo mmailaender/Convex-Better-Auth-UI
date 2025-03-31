@@ -1,5 +1,6 @@
-import { createHash, randomBytes } from 'crypto';
 import { v } from 'convex/values';
+import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding';
+import { sha256 } from '@oslojs/crypto/sha2';
 
 import { internalMutation, internalQuery, mutation } from '../functions';
 import { internal } from '../_generated/api';
@@ -13,11 +14,11 @@ import { Id } from '../_generated/dataModel';
  * @param length Length of the resulting string
  * @returns Random string of specified length
  */
-export function generateRandomString(length: number = 32): string {
-	return randomBytes(Math.ceil(length * 0.75))
-		.toString('base64')
-		.replace(/[^a-zA-Z0-9]/g, '')
-		.substring(0, length);
+export function generateToken(): string {
+	const tokenBytes = new Uint8Array(20);
+	crypto.getRandomValues(tokenBytes);
+	const token = encodeBase32LowerCaseNoPadding(tokenBytes);
+	return token;
 }
 
 /**
@@ -28,7 +29,8 @@ export function generateRandomString(length: number = 32): string {
  * @returns SHA-256 hash of the token
  */
 export function hashToken(token: string): string {
-	return createHash('sha256').update(token).digest('hex');
+	return encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+	// return createHash('sha256').update(token).digest('hex');
 }
 
 /**
@@ -46,7 +48,7 @@ export const createAccessToken = internalMutation({
 		args
 	): Promise<{ token: string; id: Id<'accessTokens'>; expiresAt: number }> => {
 		// Generate a cryptographically secure random token
-		const token = generateRandomString(32);
+		const token = generateToken();
 		const tokenHash = hashToken(token);
 
 		// 10 minute expiration for access tokens
@@ -82,7 +84,7 @@ export const createRefreshToken = internalMutation({
 		args
 	): Promise<{ token: string; id: Id<'refreshTokens'>; expiresAt: number }> => {
 		// Generate a cryptographically secure random token
-		const token = generateRandomString(48);
+		const token = generateToken();
 		const tokenHash = hashToken(token);
 
 		// 8 hour expiration for refresh tokens
