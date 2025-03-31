@@ -7,6 +7,7 @@ import { internal } from '../_generated/api';
 
 // Types
 import { Id } from '../_generated/dataModel';
+import { Ent } from '../types';
 
 /**
  * Generates a cryptographically secure random string for use as a token.
@@ -34,9 +35,95 @@ export function hashToken(token: string): string {
 }
 
 /**
- * Generates a new access token and stores it in the database.
+ * Creates a JWT token for the user.
  *
- * Returns the token string for use in cookies or headers.
+ * @param userId The user ID to include in the JWT
+ * @param expiresInSeconds Token expiration time in seconds
+ * @returns Signed JWT string
+ */
+export function createJWT(payload: Record<string, any>, expiresInSeconds: number): string {
+	// Create the JWT header
+	const header = {
+		alg: 'HS256',
+		typ: 'JWT'
+	};
+
+	// Create the JWT payload
+	const now = Math.floor(Date.now() / 1000);
+	const exp = now + expiresInSeconds;
+
+	const jwtPayload = {
+		...payload,
+		iat: now, // Issued at
+		exp: exp, // Expiration time
+		nbf: now // Not before
+	};
+
+	// Encode header and payload
+	const encodedHeader = btoa(JSON.stringify(header));
+	const encodedPayload = btoa(JSON.stringify(jwtPayload));
+
+	// Create the content to be signed
+	const content = `${encodedHeader}.${encodedPayload}`;
+
+	// Sign the content (this would normally use a secure key from env vars)
+	// Note: In a production environment, you'd use a proper JWT library and secure key
+	const signatureBytes = sha256(new TextEncoder().encode(content + 'JWT_SECRET'));
+	const signature = encodeHexLowerCase(signatureBytes);
+
+	// Return the complete JWT
+	return `${content}.${signature}`;
+}
+
+/**
+ * Verifies a JWT and returns the payload if valid, null otherwise.
+ *
+ * @param jwt The JWT to verify
+ * @returns The payload if valid, null otherwise
+ */
+export function verifyJWT(jwt: string): Record<string, any> | null {
+	try {
+		// Split the JWT into its components
+		const [encodedHeader, encodedPayload, signature] = jwt.split('.');
+
+		if (!encodedHeader || !encodedPayload || !signature) {
+			return null;
+		}
+
+		// Verify the signature
+		const content = `${encodedHeader}.${encodedPayload}`;
+		const expectedSignatureBytes = sha256(new TextEncoder().encode(content + 'JWT_SECRET'));
+		const expectedSignature = encodeHexLowerCase(expectedSignatureBytes);
+
+		if (signature !== expectedSignature) {
+			return null;
+		}
+
+		// Decode and parse the payload
+		const payload = JSON.parse(atob(encodedPayload));
+
+		// Check if the token is expired
+		const now = Math.floor(Date.now() / 1000);
+		if (payload.exp && payload.exp < now) {
+			return null;
+		}
+
+		// Check if the token is not yet valid
+		if (payload.nbf && payload.nbf > now) {
+			return null;
+		}
+
+		return payload;
+	} catch (error) {
+		console.error('JWT verification error:', error);
+		return null;
+	}
+}
+
+/**
+ * Generates a new access token as a JWT and stores its hash in the database.
+ *
+ * Returns the JWT string for use in cookies or headers.
  */
 export const createAccessToken = internalMutation({
 	args: {
@@ -47,12 +134,22 @@ export const createAccessToken = internalMutation({
 		ctx,
 		args
 	): Promise<{ token: string; id: Id<'accessTokens'>; expiresAt: number }> => {
-		// Generate a cryptographically secure random token
-		const token = generateToken();
-		const tokenHash = hashToken(token);
-
 		// 10 minute expiration for access tokens
-		const expiresAt = Date.now() + 10 * 60 * 1000;
+		const expiresInSeconds = 10 * 60;
+		const expiresAt = Date.now() + expiresInSeconds * 1000;
+
+		// Create JWT with necessary claims
+		const token = createJWT(
+			{
+				sub: args.userId,
+				refreshTokenId: args.refreshTokenId,
+				type: 'access'
+			},
+			expiresInSeconds
+		);
+
+		// Hash the JWT for storage
+		const tokenHash = hashToken(token);
 
 		// Store the token hash, not the token itself
 		const tokenId = await ctx.table('accessTokens').insert({
@@ -83,12 +180,14 @@ export const createRefreshToken = internalMutation({
 		ctx,
 		args
 	): Promise<{ token: string; id: Id<'refreshTokens'>; expiresAt: number }> => {
-		// Generate a cryptographically secure random token
+		// 8 hour expiration for refresh tokens
+		const expiresInSeconds = 8 * 60 * 60;
+		const expiresAt = Date.now() + expiresInSeconds * 1000;
+
+		// For refresh tokens, we still use random tokens rather than JWTs
+		// This is a common pattern as refresh tokens don't need to be self-contained
 		const token = generateToken();
 		const tokenHash = hashToken(token);
-
-		// 8 hour expiration for refresh tokens
-		const expiresAt = Date.now() + 8 * 60 * 60 * 1000;
 
 		// Store the token hash, not the token itself
 		const tokenId = await ctx.table('refreshTokens').insert({
@@ -156,9 +255,15 @@ export const validateToken = internalQuery({
 		type: v.union(v.literal('access'), v.literal('refresh'))
 	},
 	handler: async (ctx, args) => {
-		const tokenHash = hashToken(args.token);
-
 		if (args.type === 'access') {
+			// For access tokens, first verify the JWT
+			const payload = verifyJWT(args.token);
+			if (!payload) {
+				return null;
+			}
+
+			// Then verify it exists in the database (for revocation support)
+			const tokenHash = hashToken(args.token);
 			const accessToken = await ctx
 				.table('accessTokens', 'by_token_hash', (q) => q.eq('tokenHash', tokenHash))
 				.first();
@@ -167,8 +272,13 @@ export const validateToken = internalQuery({
 				return null;
 			}
 
-			return accessToken;
+			return {
+				...accessToken,
+				payload
+			};
 		} else {
+			// For refresh tokens, check against the database
+			const tokenHash = hashToken(args.token);
 			const refreshToken = await ctx
 				.table('refreshTokens', 'by_token_hash', (q) => q.eq('tokenHash', tokenHash))
 				.first();
@@ -199,8 +309,6 @@ export const isCalledWithAccessToken = internalQuery({
 		});
 
 		if (tokenData && 'expired' in tokenData && tokenData.expired) {
-			// We know it's expired, but we don't have ctx.scheduler in a query
-			// TODO:  This will be cleaned up later by a background process
 			return false;
 		}
 
@@ -222,8 +330,6 @@ export const isCalledWithRefreshToken = internalQuery({
 		});
 
 		if (tokenData && 'expired' in tokenData && tokenData.expired) {
-			// We know it's expired, but we don't have ctx.scheduler in a query
-			// TODO: This will be cleaned up later by a background process
 			return false;
 		}
 
@@ -234,10 +340,9 @@ export const isCalledWithRefreshToken = internalQuery({
 /**
  * Uses a refresh token to generate a new access token.
  *
- * This is used when an access token expires but the refresh token is still valid.
- * For security, we also rotate the refresh token (delete old one, create new one).
+ * This is used when the access token expires and needs to be refreshed.
  */
-export const refreshAccessToken = mutation({
+export const refreshAccessTokenWithRefreshToken = mutation({
 	args: {
 		refreshToken: v.string()
 	},
@@ -247,38 +352,27 @@ export const refreshAccessToken = mutation({
 	): Promise<{
 		access: { token: string; expiresAt: number };
 		refresh: { token: string; expiresAt: number };
-	}> => {
-		// Validate the refresh token
-		const tokenHash = hashToken(args.refreshToken);
+	} | null> => {
+		// Verify the refresh token
+		const refreshTokenData = (await ctx.runQuery(internal.auth.tokens.validateToken, {
+			token: args.refreshToken,
+			type: 'refresh'
+		})) as Ent<'refreshTokens'> | null;
 
-		const refreshToken = await ctx
-			.table('refreshTokens', 'by_token_hash', (q) => q.eq('tokenHash', tokenHash))
-			.first();
-
-		if (!refreshToken || Date.now() >= refreshToken.expiresAt) {
-			throw new Error('Invalid refresh token');
-		}
-
-		const userId = refreshToken.userId;
-
-		// Delete any access tokens associated with this refresh token
-		const accessTokens = await ctx.table('accessTokens', 'refreshTokenId', (q) =>
-			q.eq('refreshTokenId', refreshToken._id)
-		);
-
-		for (const token of accessTokens) {
-			const tokenDoc = await ctx.table('accessTokens').getX(token._id);
-			await tokenDoc.delete();
+		if (!refreshTokenData) {
+			return null;
 		}
 
 		// Delete the old refresh token to prevent reuse
-		const tokenDoc = await ctx.table('refreshTokens').getX(refreshToken._id);
+		const tokenDoc = await ctx.table('refreshTokens').getX(refreshTokenData._id);
 		await tokenDoc.delete();
 
 		// Create new tokens
-		return await ctx.runMutation(internal.auth.tokens.createAccessAndRefreshToken, {
-			userId
+		const newTokens = await ctx.runMutation(internal.auth.tokens.createAccessAndRefreshToken, {
+			userId: refreshTokenData.userId
 		});
+
+		return newTokens;
 	}
 });
 
@@ -336,16 +430,14 @@ export const deleteAllUserTokens = internalMutation({
 		const accessTokens = await ctx.table('accessTokens', 'userId', (q) =>
 			q.eq('userId', args.userId)
 		);
-
-		const refreshTokens = await ctx.table('refreshTokens', 'userId', (q) =>
-			q.eq('userId', args.userId)
-		);
-
 		for (const token of accessTokens) {
 			const tokenDoc = await ctx.table('accessTokens').getX(token._id);
 			await tokenDoc.delete();
 		}
 
+		const refreshTokens = await ctx.table('refreshTokens', 'userId', (q) =>
+			q.eq('userId', args.userId)
+		);
 		for (const token of refreshTokens) {
 			const tokenDoc = await ctx.table('refreshTokens').getX(token._id);
 			await tokenDoc.delete();
