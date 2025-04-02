@@ -13,6 +13,8 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as auth_environment from "../auth/environment.js";
+import type * as auth_jwtAuth from "../auth/jwtAuth.js";
 import type * as auth_tokens from "../auth/tokens.js";
 import type * as cleanups from "../cleanups.js";
 import type * as crons from "../crons.js";
@@ -35,6 +37,8 @@ import type * as types from "../types.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "auth/environment": typeof auth_environment;
+  "auth/jwtAuth": typeof auth_jwtAuth;
   "auth/tokens": typeof auth_tokens;
   cleanups: typeof cleanups;
   crons: typeof crons;

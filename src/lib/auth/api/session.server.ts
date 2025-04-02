@@ -1,105 +1,109 @@
-import client from '$lib/db/client';
-import { fql } from 'fauna';
+import { type Cookies } from '@sveltejs/kit';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '$lib/../convex/_generated/api';
 
-import type { RequestEvent } from '@sveltejs/kit';
-import type { User } from '$lib/db/schema/types/custom';
-import type { Tokens } from './types';
+// Configure token names and options
+const ACCESS_TOKEN_NAME = 'access_token';
+const REFRESH_TOKEN_NAME = 'refresh_token';
+const COOKIE_OPTIONS = {
+	httpOnly: true,
+	path: '/',
+	secure: process.env.NODE_ENV === 'production',
+	sameSite: 'lax' as const
+};
 
-/**
- * Invalidates the current session for the user.
- * Ensures the user is signed out from the current device.
- *
- * @param {string} secret - The session secret token.
- * @returns {Promise<void>} Resolves when the session is invalidated.
- */
-export async function invalidateSession(secret: string): Promise<void> {
-	await client(secret).query(fql`signOut()`);
-}
+// Create a session manager
+export class SessionManager {
+	private client: ConvexHttpClient;
 
-/**
- * Invalidates all sessions for the user across all devices.
- * Useful for enforcing a complete logout from all logged-in locations.
- *
- * @param {string} secret - The session secret token.
- * @returns {Promise<void>} Resolves when all sessions are invalidated.
- */
-export async function invalidateAllSessions(secret: string): Promise<void> {
-	await client(secret).query(fql`signOutFromAllDevices()`);
-}
+	constructor(convexUrl: string) {
+		this.client = new ConvexHttpClient(convexUrl);
+	}
 
-/**
- * Sets an access token as an HTTP-only cookie.
- *
- * @param {RequestEvent} event - The incoming request event.
- * @param {string} token - The access token to set.
- * @param {Date} expiresAt - The expiration date of the cookie.
- */
-export function setAccessTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
-	event.cookies.set('access_token', token, {
-		httpOnly: true,
-		sameSite: 'lax',
-		expires: expiresAt,
-		path: '/'
-	});
-}
+	// Create session for a user
+	async createSession(userId: string, cookies: Cookies) {
+		// Create tokens for the user
+		const tokensResult = await this.client.mutation(api.auth.tokens.createAccessAndRefreshToken, {
+			userId
+		});
 
-/**
- * Sets a refresh token as an HTTP-only cookie.
- *
- * @param {RequestEvent} event - The incoming request event.
- * @param {string} token - The refresh token to set.
- * @param {Date} expiresAt - The expiration date of the cookie.
- */
-export function setRefreshTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
-	event.cookies.set('refresh_token', token, {
-		httpOnly: true,
-		sameSite: 'strict',
-		expires: expiresAt,
-		path: '/'
-	});
-}
+		// Set cookies
+		cookies.set(ACCESS_TOKEN_NAME, tokensResult.access.token, {
+			...COOKIE_OPTIONS,
+			maxAge: 10 * 60 // 10 minutes
+		});
 
-/**
- * Deletes the access token cookie.
- *
- * @param {RequestEvent} event - The incoming request event.
- */
-export function deleteAccessTokenCookie(event: RequestEvent): void {
-	event.cookies.delete('access_token', {
-		path: '/'
-	});
-}
+		cookies.set(REFRESH_TOKEN_NAME, tokensResult.refresh.token, {
+			...COOKIE_OPTIONS,
+			maxAge: 8 * 60 * 60 // 8 hours
+		});
 
-/**
- * Deletes the refresh token cookie.
- *
- * @param {RequestEvent} event - The incoming request event.
- */
-export function deleteRefreshTokenCookie(event: RequestEvent): void {
-	event.cookies.delete('refresh_token', {
-		path: '/'
-	});
+		return tokensResult;
+	}
 
-	// console.log("After deletion:", event.cookies.getAll());
-}
+	// Get the current user from the session
+	async getCurrentUser(cookies: Cookies) {
+		const accessToken = cookies.get(ACCESS_TOKEN_NAME);
 
-/**
- * Refreshes the access token using the provided refresh token.
- *
- * @param {string} refreshToken - The refresh token to exchange for a new access token.
- * @returns {Promise<Tokens>} The new set of tokens.
- */
-export async function refreshAccessToken(refreshToken: string): Promise<Tokens> {
-	const response = await client(refreshToken).query(fql`refreshAccessToken()`);
-	return response.data;
-}
+		if (!accessToken) {
+			return null;
+		}
 
-export type SessionValidationResult =
-	| { session: Session; user: User }
-	| { session: null; user: null };
+		// Verify with Convex
+		const user = await this.client.query(api.auth.jwtAuth.getCurrentUser, { accessToken });
 
-export interface Session {
-	id: string;
-	userId: number;
-	expiresAt: Date;
+		return user;
+	}
+
+	// Refresh tokens when access token expires
+	async refreshTokens(cookies: Cookies) {
+		const refreshToken = cookies.get(REFRESH_TOKEN_NAME);
+
+		if (!refreshToken) {
+			return null;
+		}
+
+		// Refresh tokens
+		const newTokens = await this.client.mutation(
+			api.auth.tokens.refreshAccessTokenWithRefreshToken,
+			{ refreshToken }
+		);
+
+		if (!newTokens) {
+			// Clear invalid cookies
+			cookies.delete(ACCESS_TOKEN_NAME, COOKIE_OPTIONS);
+			cookies.delete(REFRESH_TOKEN_NAME, COOKIE_OPTIONS);
+			return null;
+		}
+
+		// Set new cookies
+		cookies.set(ACCESS_TOKEN_NAME, newTokens.access.token, {
+			...COOKIE_OPTIONS,
+			maxAge: 10 * 60 // 10 minutes
+		});
+
+		cookies.set(REFRESH_TOKEN_NAME, newTokens.refresh.token, {
+			...COOKIE_OPTIONS,
+			maxAge: 8 * 60 * 60 // 8 hours
+		});
+
+		return newTokens;
+	}
+
+	// End the user's session
+	async endSession(cookies: Cookies) {
+		const accessToken = cookies.get(ACCESS_TOKEN_NAME);
+
+		// Invalidate the token on the server
+		if (accessToken) {
+			await this.client.mutation(api.auth.tokens.deleteTokenByHash, {
+				tokenHash: accessToken,
+				type: 'access'
+			});
+		}
+
+		// Clear cookies
+		cookies.delete(ACCESS_TOKEN_NAME, COOKIE_OPTIONS);
+		cookies.delete(REFRESH_TOKEN_NAME, COOKIE_OPTIONS);
+	}
 }

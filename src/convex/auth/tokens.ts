@@ -9,6 +9,7 @@ import { internal } from '../_generated/api';
 // Types
 import { Id } from '../_generated/dataModel';
 import { Ent } from '../types';
+import { getJwtSecret } from './environment';
 
 /**
  * Generates a cryptographically secure random string for use as a token.
@@ -46,7 +47,7 @@ export async function createJWT(
 	payload: Record<string, any>,
 	expiresInSeconds: number
 ): Promise<string> {
-	const secret = new TextEncoder().encode('JWT_SECRET'); // In production, fetch from env
+	const secret = await getJwtSecret();
 
 	return new jose.SignJWT(payload)
 		.setProtectedHeader({ alg: 'HS256' })
@@ -64,7 +65,7 @@ export async function createJWT(
  */
 export async function verifyJWT(jwt: string): Promise<Record<string, any> | null> {
 	try {
-		const secret = new TextEncoder().encode('JWT_SECRET'); // In production, fetch from env
+		const secret = await getJwtSecret();
 
 		const { payload } = await jose.jwtVerify(jwt, secret, {
 			algorithms: ['HS256']
