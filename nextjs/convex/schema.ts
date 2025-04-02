@@ -4,10 +4,8 @@ import {
   defineEnt,
   defineEntSchema,
   defineEntsFromTables,
-  EntDefinition,
   getEntDefinitions,
 } from "convex-ents";
-import { TableDefinition } from "convex/server";
 
 const schema = defineEntSchema({
   ...defineEntsFromTables(authTables),
