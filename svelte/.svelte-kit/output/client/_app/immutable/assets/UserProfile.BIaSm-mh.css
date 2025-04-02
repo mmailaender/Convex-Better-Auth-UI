@@ -1,0 +1,1 @@
+[data-part=item][data-highlighted].svelte-a98e9n:not([data-state=checked]){background-color:rgb(var(--color-surface-500) / .1)}[data-part=arrow]{--arrow-size: 10px}

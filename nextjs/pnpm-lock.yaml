@@ -1,0 +1,31 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      '@skeletonlabs/skeleton':
+        specifier: ^3.1.1
+        version: 3.1.1(tailwindcss@4.1.0)
+
+packages:
+
+  '@skeletonlabs/skeleton@3.1.1':
+    resolution: {integrity: sha512-qAf+qxfgj6sSySYG5WeBEKpaAAYQyC0qrD9wu+Myai5CUhSctvey7gq6aJlMWSHjte4wcRC+2f/tOzdQfPWOlA==}
+    peerDependencies:
+      tailwindcss: ^4.0.0
+
+  tailwindcss@4.1.0:
+    resolution: {integrity: sha512-vBYstoFnvUZCDxaauNGQQEvJNQgCd1vSMDRYuZZMH1xRRcTboOk1rJrW5yFkEabU9X6Yx1C4LQ+QvPOvQj4Daw==}
+
+snapshots:
+
+  '@skeletonlabs/skeleton@3.1.1(tailwindcss@4.1.0)':
+    dependencies:
+      tailwindcss: 4.1.0
+
+  tailwindcss@4.1.0: {}
