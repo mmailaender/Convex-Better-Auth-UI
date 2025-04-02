@@ -1,8 +1,0 @@
-{
-	"dependencies": {
-		"@auth/core": "0.37.0",
-		"@convex-dev/auth": "^0.0.81",
-		"convex-ents": "^0.13.0",
-		"convex-helpers": "^0.1.76"
-	}
-}
