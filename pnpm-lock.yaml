@@ -75,9 +75,6 @@ importers:
       '@skeletonlabs/skeleton':
         specifier: 3.1.1
         version: 3.1.1(tailwindcss@4.1.0)
-      '@skeletonlabs/skeleton-react':
-        specifier: ^1.0.0
-        version: 1.0.0(@skeletonlabs/skeleton@3.1.1(tailwindcss@4.1.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@skeletonlabs/skeleton-svelte':
         specifier: 1.0.0
         version: 1.0.0(@skeletonlabs/skeleton@3.1.1(tailwindcss@4.1.0))(svelte@5.25.6)
@@ -1249,13 +1246,6 @@ packages:
   '@sinclair/typebox@0.31.28':
     resolution: {integrity: sha512-/s55Jujywdw/Jpan+vsy6JZs1z2ZTGxTmbZTPiuSL2wz9mfzA2gN1zzaqmvfi4pq+uOt7Du85fkiwv5ymW84aQ==}
 
-  '@skeletonlabs/skeleton-react@1.0.0':
-    resolution: {integrity: sha512-rW7b4rvDYy9SnN5mdrHWPArVPy9s3oKFTIoQ5n/e3l2YeEf+QQ0/ppSig5KiM5YtDt1X/atuuSFtGh6142/t2Q==}
-    peerDependencies:
-      '@skeletonlabs/skeleton': ^3.0.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-
   '@skeletonlabs/skeleton-svelte@1.0.0':
     resolution: {integrity: sha512-nMk7HCVFy+DAKMHB0x7T0LdUJgCOMMTHjiFUXDP3btwpxmen60qIHfFdBy/7uYyqCi2IR0vSIzE1MtSrqmzJ+g==}
     peerDependencies:
@@ -1593,12 +1583,6 @@ packages:
 
   '@zag-js/rating-group@1.7.0':
     resolution: {integrity: sha512-jDr8M+2fXTxB9l8qm8ktA362eM6Xt6FzIz0dKlV1JsYr5KamhsZ70Y8MPB6i3b45FGdDdj02a2aaWGLRUaRnrw==}
-
-  '@zag-js/react@1.7.0':
-    resolution: {integrity: sha512-phr7WMVJcwfOkiLwtobGWkdzVGdZmVQYvF7w8awloW0j1+YF2OdMYDZK8RauHwmg+sEVmqtGeZPr40hZNnKhVQ==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
 
   '@zag-js/remove-scroll@1.7.0':
     resolution: {integrity: sha512-sjuBT/iHUZKoDaIdEa5fn0Ii6qjPbp/xO5g/2n2gI3RhRPjcc9jmrTxuvjKftB+ZoBy4GO8MbeaPKdQLIreufg==}
@@ -5298,24 +5282,6 @@ snapshots:
 
   '@sinclair/typebox@0.31.28': {}
 
-  '@skeletonlabs/skeleton-react@1.0.0(@skeletonlabs/skeleton@3.1.1(tailwindcss@4.1.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      '@skeletonlabs/skeleton': 3.1.1(tailwindcss@4.1.0)
-      '@zag-js/accordion': 1.7.0
-      '@zag-js/avatar': 1.7.0
-      '@zag-js/file-upload': 1.7.0
-      '@zag-js/pagination': 1.7.0
-      '@zag-js/progress': 1.7.0
-      '@zag-js/radio-group': 1.7.0
-      '@zag-js/rating-group': 1.7.0
-      '@zag-js/react': 1.7.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@zag-js/slider': 1.7.0
-      '@zag-js/switch': 1.7.0
-      '@zag-js/tabs': 1.7.0
-      '@zag-js/tags-input': 1.7.0
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-
   '@skeletonlabs/skeleton-svelte@1.0.0(@skeletonlabs/skeleton@3.1.1(tailwindcss@4.1.0))(svelte@5.25.6)':
     dependencies:
       '@skeletonlabs/skeleton': 3.1.1(tailwindcss@4.1.0)
@@ -5810,15 +5776,6 @@ snapshots:
       '@zag-js/dom-query': 1.7.0
       '@zag-js/types': 1.7.0
       '@zag-js/utils': 1.7.0
-
-  '@zag-js/react@1.7.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      '@zag-js/core': 1.7.0
-      '@zag-js/store': 1.7.0
-      '@zag-js/types': 1.7.0
-      '@zag-js/utils': 1.7.0
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
 
   '@zag-js/remove-scroll@1.7.0':
     dependencies:
