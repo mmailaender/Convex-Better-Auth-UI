@@ -22,11 +22,16 @@
 	function handleSignOut() {
 		openState = false;
 	}
+
+	function setOpenState(value: boolean) {
+		openState = value;
+	}
 </script>
 
 {#if user}
 	<Popover
-		bind:open={openState}
+		open={openState}
+		onOpenChange={(e) => (openState = e.open)}
 		positioning={{ placement: 'bottom-end' }}
 		triggerBase="btn"
 		contentBase="card bg-surface-200-800 max-w-100"

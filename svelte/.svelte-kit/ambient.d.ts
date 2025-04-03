@@ -39,6 +39,7 @@ declare module '$env/static/private' {
 	export const USER: string;
 	export const SHLVL: string;
 	export const HOME: string;
+	export const OLDPWD: string;
 	export const DBUS_SESSION_BUS_ADDRESS: string;
 	export const WSL_DISTRO_NAME: string;
 	export const WAYLAND_DISPLAY: string;
@@ -64,7 +65,6 @@ declare module '$env/static/private' {
 	export const FNM_NODE_DIST_MIRROR: string;
 	export const HOMEBREW_PREFIX: string;
 	export const PNPM_HOME: string;
-	export const MOTD_SHOWN: string;
 	export const FNM_COREPACK_ENABLED: string;
 	export const LS_COLORS: string;
 	export const INFOPATH: string;
@@ -81,7 +81,7 @@ declare module '$env/static/private' {
 	export const FNM_DIR: string;
 	export const FNM_MULTISHELL_PATH: string;
 	export const FNM_LOGLEVEL: string;
-	export const VSCODE_AMD_ENTRYPOINT: string;
+	export const VSCODE_ESM_ENTRYPOINT: string;
 	export const VSCODE_HANDLES_UNCAUGHT_ERRORS: string;
 	export const ELECTRON_RUN_AS_NODE: string;
 	export const VSCODE_IPC_HOOK_CLI: string;
@@ -139,6 +139,7 @@ declare module '$env/dynamic/private' {
 		USER: string;
 		SHLVL: string;
 		HOME: string;
+		OLDPWD: string;
 		DBUS_SESSION_BUS_ADDRESS: string;
 		WSL_DISTRO_NAME: string;
 		WAYLAND_DISPLAY: string;
@@ -164,7 +165,6 @@ declare module '$env/dynamic/private' {
 		FNM_NODE_DIST_MIRROR: string;
 		HOMEBREW_PREFIX: string;
 		PNPM_HOME: string;
-		MOTD_SHOWN: string;
 		FNM_COREPACK_ENABLED: string;
 		LS_COLORS: string;
 		INFOPATH: string;
@@ -181,7 +181,7 @@ declare module '$env/dynamic/private' {
 		FNM_DIR: string;
 		FNM_MULTISHELL_PATH: string;
 		FNM_LOGLEVEL: string;
-		VSCODE_AMD_ENTRYPOINT: string;
+		VSCODE_ESM_ENTRYPOINT: string;
 		VSCODE_HANDLES_UNCAUGHT_ERRORS: string;
 		ELECTRON_RUN_AS_NODE: string;
 		VSCODE_IPC_HOOK_CLI: string;
