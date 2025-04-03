@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 
 	import Sidebar from '$lib/primitives/ui/Sidebar.svelte';
-	import ProfileInfo from '$lib/user/ui/widget/ProfileInfo.svelte';
+	import UserData from '$lib/user/ui/widget/UserData.svelte';
 	import EmailAddresses from '$lib/email/ui/widget/EmailAddresses.svelte';
 	import VerificationFlow from '$lib/email/ui/widget/EmailVerification.svelte';
 	import ConnectedAccounts from '$lib/account/ui/widget/ConnectedAccounts.svelte';
@@ -24,7 +24,7 @@
 	<Sidebar currentSection="Profile" />
 	<div class="w-full p-6 md:w-3/4">
 		<h2 class="text-surface-800-200 mb-6 text-lg font-bold">Profile details</h2>
-		<ProfileInfo bind:user />
+		<UserData bind:user />
 		<EmailAddresses bind:user />
 		<VerificationFlow bind:user />
 		<ConnectedAccounts bind:user />
