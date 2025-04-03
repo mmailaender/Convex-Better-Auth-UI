@@ -1,22 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery, Authenticated, Unauthenticated } from "convex/react";
 import { Avatar } from "@skeletonlabs/skeleton-react";
 
 import { api } from "@/convex/_generated/api";
-import { useState } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverDescription,
   PopoverTrigger,
 } from "@/components/primitives/ui/Popover";
+import { Modal, ModalContent } from "@/components/primitives/ui/Modal";
+
+import ProfileInfo from "@/components/user/ui/widget/ProfileInfo";
 
 export default function UserButton() {
   const { signOut } = useAuthActions();
   const user = useQuery(api.user.functions.getUser);
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <>
@@ -43,13 +47,16 @@ export default function UserButton() {
                             <p className="text-sm">{user.email}</p>
                           </div>
                           <div className="flex space-x-2">
-                            <a
-                              href="/user-profile"
+                            <button
                               className="btn preset-outlined-surface-500"
-                              onClick={() => setOpen(false)}
+                              onClick={() => {
+                                setOpen(false);
+                                setProfileOpen(true);
+                              }}
                             >
                               Manage account
-                            </a>
+                            </button>
+
                             <button
                               className="btn preset-outlined-surface-500"
                               onClick={() => void signOut()}
@@ -64,6 +71,22 @@ export default function UserButton() {
                 </PopoverDescription>
               </PopoverContent>
             </Popover>
+
+            {/* ProfileInfo Popup */}
+            <Modal open={profileOpen} onOpenChange={setProfileOpen}>
+              <ModalContent>
+                <div className="flex justify-between items-center mb-4">
+                  <ProfileInfo />
+                  <button
+                    className="btn preset-ghost size-sm"
+                    onClick={() => setProfileOpen(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </ModalContent>
+            </Modal>
+
             <div className="relative">
               <button
                 className="btn preset-filled-primary-500"
