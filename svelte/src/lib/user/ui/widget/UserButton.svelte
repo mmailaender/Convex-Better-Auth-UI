@@ -11,21 +11,6 @@
 
 	let user: User | null = $derived(page.data.user ? JSON.parse(page.data.user) : null);
 
-	const userAccounts = $state([
-		{
-			firstName: 'Cameron',
-			lastName: 'Walker',
-			email: 'cameron@work.com',
-			avatar: 'https://via.placeholder.com/40'
-		},
-		{
-			firstName: 'Cameron',
-			lastName: 'Walker',
-			email: 'walker@personal.com',
-			avatar: 'https://via.placeholder.com/40'
-		}
-	]);
-
 	let openState = $state(false);
 	let showUserProfile = $state(false);
 

@@ -11,13 +11,15 @@ const schema = defineEntSchema({
   ...defineEntsFromTables(authTables),
 
   users: defineEnt({
-    name: v.optional(v.string()),
+    name: v.string(),
     image: v.optional(v.string()),
     emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
-  }).edges("messages", { ref: true }),
+  })
+    .field("email", v.string(), { index: true })
+    .edges("messages", { ref: true }),
 
   messages: defineEnt({
     text: v.string(),
