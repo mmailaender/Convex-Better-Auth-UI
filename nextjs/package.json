@@ -30,6 +30,7 @@
     "@types/node": "^22.13.17",
     "@types/react": "^19.0.14",
     "@types/react-dom": "^19.0.6",
+    "@zag-js/file-upload": "^1.7.0",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.2.4",
     "tailwindcss": "^4.1.0",
