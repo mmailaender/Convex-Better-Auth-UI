@@ -5,7 +5,7 @@
 - SvelteKit 2,
 - Tailwind v4,
 - Skeleton v3 (https://next.skeleton.dev/),
-- Convex (Convex Ents)
+- Convex
 
 Remember the following:
 Event handlers don't have colons in them anymore. on:click => onclick
@@ -19,6 +19,4 @@ Event handlers don't have colons in them anymore. on:click => onclick
 
 # Convex
 
-- Prioritize always the usage of convex Ents over the built-in Convex API (ctx.table over ctx.db).
 - Follow the convex rules ai_rules/convex_rules.txt
-- Follow the convex Ents rules ai_rules/convex-ents.md.txt

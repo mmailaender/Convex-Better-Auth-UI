@@ -1,33 +1,27 @@
+import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
-import {
-  defineEnt,
-  defineEntSchema,
-  defineEntsFromTables,
-  getEntDefinitions,
-} from "convex-ents";
 
-const schema = defineEntSchema({
-  ...defineEntsFromTables(authTables),
+const schema = defineSchema({
+  ...authTables,
 
-  users: defineEnt({
+  users: defineTable({
     name: v.string(),
-    image: v.optional(v.string()),
+    email: v.string(),
     emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
+    image: v.optional(v.string()),
+    imageId: v.optional(v.id("_storage")),
   })
-    .field("email", v.string(), { index: true })
-    .edges("messages", { ref: true }),
+    .index("email", ["email"])
+    .index("imageId", ["imageId"]),
 
-  messages: defineEnt({
+  messages: defineTable({
     text: v.string(),
-  }).edge("user"),
-
-  //...etc
+    userId: v.id("users"),
+  }).index("userId", ["userId"]),
 });
 
 export default schema;
-
-export const entDefinitions = getEntDefinitions(schema);

@@ -65,6 +65,7 @@ declare module '$env/static/private' {
 	export const FNM_NODE_DIST_MIRROR: string;
 	export const HOMEBREW_PREFIX: string;
 	export const PNPM_HOME: string;
+	export const MOTD_SHOWN: string;
 	export const FNM_COREPACK_ENABLED: string;
 	export const LS_COLORS: string;
 	export const INFOPATH: string;
@@ -165,6 +166,7 @@ declare module '$env/dynamic/private' {
 		FNM_NODE_DIST_MIRROR: string;
 		HOMEBREW_PREFIX: string;
 		PNPM_HOME: string;
+		MOTD_SHOWN: string;
 		FNM_COREPACK_ENABLED: string;
 		LS_COLORS: string;
 		INFOPATH: string;

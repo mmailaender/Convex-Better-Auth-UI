@@ -17,7 +17,8 @@ export async function optimizeImage(
   } else {
     // For server-side, we just return the file as-is
     // Server-side optimization would require a different approach in Next.js
-    return optimizeImageServer(file, options);
+    return file;
+    // return optimizeImageServer(file, options);
   }
 }
 
@@ -109,74 +110,74 @@ async function optimizeImageBrowser(
   });
 }
 
-async function optimizeImageServer(
-  file: File,
-  options: OptimizeImageOptions = {}
-): Promise<File> {
-  const {
-    maxWidth = 800,
-    maxHeight = 800,
-    quality = 80, // Sharp uses 1-100 scale instead of 0-1
-    maxSizeKB = 800,
-    format = "webp",
-  } = options;
+// async function optimizeImageServer(
+//   file: File,
+//   options: OptimizeImageOptions = {}
+// ): Promise<File> {
+//   const {
+//     maxWidth = 800,
+//     maxHeight = 800,
+//     quality = 80, // Sharp uses 1-100 scale instead of 0-1
+//     maxSizeKB = 800,
+//     format = "webp",
+//   } = options;
 
-  // Import sharp dynamically to avoid issues with browser environments
-  const sharp = await import("sharp");
+//   // Import sharp dynamically to avoid issues with browser environments
+//   const sharp = await import("sharp");
 
-  // Convert File to Buffer
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+//   // Convert File to Buffer
+//   const arrayBuffer = await file.arrayBuffer();
+//   const buffer = Buffer.from(arrayBuffer);
 
-  // Process the image
-  let sharpInstance = sharp.default(buffer);
+//   // Process the image
+//   let sharpInstance = sharp.default(buffer);
 
-  // Get image metadata to calculate resize dimensions
-  const metadata = await sharpInstance.metadata();
+//   // Get image metadata to calculate resize dimensions
+//   const metadata = await sharpInstance.metadata();
 
-  // Calculate new dimensions while maintaining aspect ratio
-  if (metadata.width && metadata.height) {
-    const needsResize =
-      file.size > maxSizeKB * 1024 ||
-      metadata.width > maxWidth ||
-      metadata.height > maxHeight;
+//   // Calculate new dimensions while maintaining aspect ratio
+//   if (metadata.width && metadata.height) {
+//     const needsResize =
+//       file.size > maxSizeKB * 1024 ||
+//       metadata.width > maxWidth ||
+//       metadata.height > maxHeight;
 
-    if (needsResize) {
-      const aspectRatio = metadata.width / metadata.height;
+//     if (needsResize) {
+//       const aspectRatio = metadata.width / metadata.height;
 
-      let width = metadata.width;
-      let height = metadata.height;
+//       let width = metadata.width;
+//       let height = metadata.height;
 
-      if (width > height) {
-        width = Math.min(width, maxWidth);
-        height = Math.round(width / aspectRatio);
-      } else {
-        height = Math.min(height, maxHeight);
-        width = Math.round(height * aspectRatio);
-      }
+//       if (width > height) {
+//         width = Math.min(width, maxWidth);
+//         height = Math.round(width / aspectRatio);
+//       } else {
+//         height = Math.min(height, maxHeight);
+//         width = Math.round(height * aspectRatio);
+//       }
 
-      sharpInstance = sharpInstance.resize(width, height);
-    }
-  }
+//       sharpInstance = sharpInstance.resize(width, height);
+//     }
+//   }
 
-  // Convert to desired format with quality
-  if (format === "webp") {
-    sharpInstance = sharpInstance.webp({ quality });
-  } else if (format === "jpeg" || format === "jpg") {
-    sharpInstance = sharpInstance.jpeg({ quality });
-  } else if (format === "png") {
-    sharpInstance = sharpInstance.png({ quality });
-  }
+//   // Convert to desired format with quality
+//   if (format === "webp") {
+//     sharpInstance = sharpInstance.webp({ quality });
+//   } else if (format === "jpeg" || format === "jpg") {
+//     sharpInstance = sharpInstance.jpeg({ quality });
+//   } else if (format === "png") {
+//     sharpInstance = sharpInstance.png({ quality });
+//   }
 
-  // Process and get the buffer
-  const outputBuffer = await sharpInstance.toBuffer();
+//   // Process and get the buffer
+//   const outputBuffer = await sharpInstance.toBuffer();
 
-  // Create a new file from the buffer
-  return new File(
-    [outputBuffer],
-    file.name.replace(/\.[^/.]+$/, `.${format}`),
-    {
-      type: `image/${format}`,
-    }
-  );
-}
+//   // Create a new file from the buffer
+//   return new File(
+//     [outputBuffer],
+//     file.name.replace(/\.[^/.]+$/, `.${format}`),
+//     {
+//       type: `image/${format}`,
+//     }
+//   );
+// }

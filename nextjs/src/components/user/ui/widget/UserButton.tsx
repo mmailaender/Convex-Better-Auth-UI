@@ -18,7 +18,7 @@ import ProfileInfo from "@/components/user/ui/widget/ProfileInfo";
 
 export default function UserButton() {
   const { signOut } = useAuthActions();
-  const user = useQuery(api.user.functions.getUser);
+  const user = useQuery(api.user.getUser);
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
