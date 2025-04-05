@@ -51,8 +51,10 @@ export default function ProfileInfo() {
 
       setIsEditing(false);
       setSuccessMessage("Profile updated successfully!");
-    } catch (err: any) {
-      setErrorMessage(`Failed to update profile: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setErrorMessage(`Failed to update profile: ${errorMessage}`);
     }
   };
 
@@ -104,8 +106,10 @@ export default function ProfileInfo() {
       });
 
       setSuccessMessage("Avatar updated successfully!");
-    } catch (err: any) {
-      setErrorMessage(`Failed to upload avatar: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setErrorMessage(`Failed to upload avatar: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
