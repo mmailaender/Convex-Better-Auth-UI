@@ -1,6 +1,7 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getAuthUserId, invalidateSessions } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import {
+  action,
   internalAction,
   internalMutation,
   mutation,
@@ -121,13 +122,43 @@ export const updateUser = internalMutation({
   },
 });
 
-export const deleteUser = mutation({
+export const deleteUser = internalMutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const { userId } = args;
+
+    const authAccounts = await ctx.db
+      .query("authAccounts")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .collect();
+
+    for (const account of authAccounts) {
+      await ctx.db.delete(account._id);
+    }
+
+    const user = await ctx.db.get(userId);
+    // Delete image from storage
+    if (user?.imageId) {
+      await ctx.storage.delete(user.imageId);
+    }
+
+    return await ctx.db.delete(userId);
+  },
+});
+
+export const invalidateAndDeleteUser = action({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("Not authenticated");
     }
-
-    return await ctx.db.delete(userId);
+    try {
+      await ctx.runMutation(internal.user.deleteUser, { userId });
+      await invalidateSessions(ctx, { userId });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
   },
 });
