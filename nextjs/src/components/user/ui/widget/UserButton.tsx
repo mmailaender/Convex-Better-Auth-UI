@@ -14,7 +14,7 @@ import {
 } from "@/components/primitives/ui/Popover";
 import { Modal, ModalContent } from "@/components/primitives/ui/Modal";
 
-import ProfileInfo from "@/components/user/ui/widget/ProfileInfo";
+import UserProfile from "@/components/user/ui/page/UserProfile";
 
 export default function UserButton() {
   const { signOut } = useAuthActions();
@@ -76,7 +76,7 @@ export default function UserButton() {
             <Modal open={profileOpen} onOpenChange={setProfileOpen}>
               <ModalContent>
                 <div className="flex justify-between items-center mb-4">
-                  <ProfileInfo />
+                  <UserProfile />
                   <button
                     className="btn preset-ghost size-sm"
                     onClick={() => setProfileOpen(false)}

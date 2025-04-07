@@ -13,6 +13,9 @@ import {
   useTransitionStyles,
 } from "@floating-ui/react";
 
+// Create a context to track modal nesting level
+const ModalNestingContext = React.createContext<number>(0);
+
 interface ModalOptions {
   initialOpen?: boolean;
   open?: boolean;
@@ -91,8 +94,14 @@ export function Modal({
   children: React.ReactNode;
 } & ModalOptions) {
   const modal = useModal(options);
+  const nestingLevel = React.useContext(ModalNestingContext);
+
   return (
-    <ModalContext.Provider value={modal}>{children}</ModalContext.Provider>
+    <ModalContext.Provider value={modal}>
+      <ModalNestingContext.Provider value={nestingLevel + 1}>
+        {children}
+      </ModalNestingContext.Provider>
+    </ModalContext.Provider>
   );
 }
 
@@ -112,25 +121,39 @@ export const ModalTrigger = React.forwardRef<
   ) as React.Ref<HTMLElement>[];
   const ref = useMergeRefs(refs);
 
+  // Custom click handler to prevent event bubbling to parent modals
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    // Stop propagation to prevent parent modals from capturing this event
+    e.stopPropagation();
+
+    // Manually toggle the modal state instead of relying on context handlers
+    context.setOpen(!context.open);
+
+    // If there's a click handler in props, call it
+    if (props.onClick) {
+      (props.onClick as React.MouseEventHandler<HTMLElement>)(e);
+    }
+  };
+
   // `asChild` allows the user to pass any element as the anchor
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(
-      children,
-      context.getReferenceProps({
-        ref,
-        ...props,
-        ...(children.props ?? {}),
-        "data-state": context.open ? "open" : "closed",
-      })
-    );
+    return React.cloneElement(children, {
+      ref,
+      ...props,
+      onClick: handleClick,
+      ...(children.props ?? {}),
+      "data-state": context.open ? "open" : "closed",
+    });
   }
 
   return (
     <button
       ref={ref}
+      type="button"
       // The user can style the trigger based on the state
       data-state={context.open ? "open" : "closed"}
-      {...context.getReferenceProps(props)}
+      {...props}
+      onClick={handleClick}
     >
       {children}
     </button>
@@ -143,6 +166,7 @@ export const ModalContent = React.forwardRef<
 >(function ModalContent(props, propRef) {
   const { context: floatingContext, ...context } = useModalContext();
   const ref = useMergeRefs([context.refs.setFloating, propRef]);
+  const nestingLevel = React.useContext(ModalNestingContext);
 
   // Add transition animation styles
   const { styles } = useTransitionStyles(floatingContext, {
@@ -155,11 +179,16 @@ export const ModalContent = React.forwardRef<
 
   if (!floatingContext.open) return null;
 
+  // Calculate z-index based on nesting level
+  const baseZIndex = 998;
+  const zIndex = baseZIndex + nestingLevel;
+
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className="fixed top-0 left-0 right-0 bottom-0 z-998 bg-surface-50-950/75 backdrop-blur-sm flex justify-center items-center p-4"
+        className={`fixed top-0 left-0 right-0 bottom-0 bg-surface-50-950/75 backdrop-blur-sm flex justify-center items-center p-4`}
         lockScroll
+        style={{ zIndex }}
       >
         <FloatingFocusManager context={floatingContext}>
           <div
@@ -169,7 +198,12 @@ export const ModalContent = React.forwardRef<
             className="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
             style={{
               ...styles, // Transition styles
+              zIndex: zIndex + 1, // Ensure content is above overlay
             }}
+            // Stop propagation on all clicks within modal content
+            onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+              e.stopPropagation()
+            }
             {...context.getFloatingProps(props)}
           >
             {props.children}

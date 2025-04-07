@@ -120,3 +120,14 @@ export const updateUser = internalMutation({
     return await ctx.db.patch(userId, patchData);
   },
 });
+
+export const deleteUser = mutation({
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    return await ctx.db.delete(userId);
+  },
+});
