@@ -22,6 +22,42 @@ const schema = defineSchema({
     text: v.string(),
     userId: v.id("users"),
   }).index("userId", ["userId"]),
+
+  organizations: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    logo: v.optional(v.string()),
+    logoId: v.optional(v.id("_storage")),
+    plan: v.union(v.literal("Free"), v.literal("Pro"), v.literal("Enterprise")),
+  }).index("slug", ["slug"]),
+
+  organizationMembers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),
+    role: v.union(
+      v.literal("role_organization_member"),
+      v.literal("role_organization_admin"),
+      v.literal("role_organization_owner")
+    ),
+  })
+    .index("org_and_user", ["organizationId", "userId"])
+    .index("org", ["organizationId"])
+    .index("userId", ["userId"]),
+
+  invitations: defineTable({
+    organizationId: v.id("organizations"),
+    invitedByUserId: v.id("users"),
+    email: v.string(),
+    role: v.union(
+      v.literal("role_organization_member"),
+      v.literal("role_organization_admin"),
+      v.literal("role_organization_owner")
+    ),
+    expiresAt: v.number(), // TTL implementation - 7 days
+  })
+    .index("by_org_and_email", ["organizationId", "email"])
+    .index("email", ["email"])
+    .index("expiration", ["expiresAt"]),
 });
 
 export default schema;

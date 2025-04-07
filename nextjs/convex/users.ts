@@ -93,7 +93,7 @@ export const downloadAndStoreProfileImage = internalAction({
       headers: { "Content-Type": image.type },
       body: image,
     }).then((res) => res.json());
-    await ctx.runMutation(internal.user.updateUser, {
+    await ctx.runMutation(internal.users.updateUser, {
       userId,
       data: {
         imageId: storageId,
@@ -155,7 +155,7 @@ export const invalidateAndDeleteUser = action({
       throw new Error("Not authenticated");
     }
     try {
-      await ctx.runMutation(internal.user.deleteUser, { userId });
+      await ctx.runMutation(internal.users.deleteUser, { userId });
       await invalidateSessions(ctx, { userId });
     } catch (error) {
       console.error("Error deleting user:", error);

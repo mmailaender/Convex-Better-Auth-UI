@@ -10,10 +10,10 @@ import { type FileChangeDetails } from "@zag-js/file-upload";
 
 export default function ProfileInfo() {
   // Get user data from Convex
-  const user = useQuery(api.user.getUser);
-  const generateUploadUrl = useMutation(api.user.generateUploadUrl);
-  const updateUserName = useMutation(api.user.updateUserName);
-  const updateAvatar = useMutation(api.user.updateAvatar);
+  const user = useQuery(api.users.getUser);
+  const generateUploadUrl = useMutation(api.users.generateUploadUrl);
+  const updateUserName = useMutation(api.users.updateUserName);
+  const updateAvatar = useMutation(api.users.updateAvatar);
 
   // Component state
   const [isEditing, setIsEditing] = useState<boolean>(false);

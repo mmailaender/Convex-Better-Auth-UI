@@ -11,10 +11,10 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 
       const user = await ctx.db.get(userId);
 
-      if (user.image) {
+      if (imageUrl && !user.imageId) {
         await ctx.scheduler.runAfter(
           0,
-          internal.user.downloadAndStoreProfileImage,
+          internal.users.downloadAndStoreProfileImage,
           {
             userId,
             imageUrl,

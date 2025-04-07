@@ -10,7 +10,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 
 export default function DeleteUser() {
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
-  const deleteMutation = useAction(api.user.invalidateAndDeleteUser);
+  const deleteMutation = useAction(api.users.invalidateAndDeleteUser);
   const { signOut } = useAuthActions();
 
   async function handleConfirm() {

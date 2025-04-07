@@ -22,7 +22,7 @@ import UserProfile from "@/components/user/ui/page/UserProfile";
 
 export default function UserButton() {
   const { signOut } = useAuthActions();
-  const user = useQuery(api.user.getUser);
+  const user = useQuery(api.users.getUser);
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
