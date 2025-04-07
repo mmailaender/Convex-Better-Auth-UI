@@ -41,8 +41,8 @@ const schema = defineSchema({
       v.literal("role_organization_owner")
     ),
   })
-    .index("org_and_user", ["organizationId", "userId"])
-    .index("org", ["organizationId"])
+    .index("orgId_and_userId", ["organizationId", "userId"])
+    .index("orgId", ["organizationId"])
     .index("userId", ["userId"]),
 
   invitations: defineTable({

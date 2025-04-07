@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { optimizeImage } from "@/components/primitives/utils/optimizeImage";
 import { UploadCloud } from "lucide-react";
-import { Avatar, FileUpload } from "@skeletonlabs/skeleton-react";
+import { Avatar, FileUpload, ProgressRing } from "@skeletonlabs/skeleton-react";
 
 import type { Id } from "@/convex/_generated/dataModel";
 import { type FileChangeDetails } from "@zag-js/file-upload";
@@ -138,9 +138,12 @@ export default function ProfileInfo() {
                 <UploadCloud className="size-6 text-white" />
               </div>
               {isUploading && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-                  <div className="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-                </div>
+                <ProgressRing
+                  value={null}
+                  size="size-14"
+                  meterStroke="stroke-primary-600-400"
+                  trackStroke="stroke-primary-50-950"
+                />
               )}
             </div>
           </FileUpload>

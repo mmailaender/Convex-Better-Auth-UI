@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { optimizeImage } from "@/components/primitives/utils/optimizeImage";
 import { UploadCloud } from "lucide-react";
-import { FileUpload } from "@skeletonlabs/skeleton-react";
+import { Avatar, FileUpload, ProgressRing } from "@skeletonlabs/skeleton-react";
 
 import type { Id } from "@/convex/_generated/dataModel";
 import type { FileChangeDetails } from "@zag-js/file-upload";
@@ -95,7 +94,7 @@ export default function CreateOrganization() {
 
       // Save the storage ID for later use when creating the organization
       setLogoStorageId(storageId);
-      setLogo(URL.createObjectURL(file)); // For preview
+      setLogo(URL.createObjectURL(optimizedFile)); // For preview
       setSuccessMessage("Logo uploaded successfully!");
     } catch (err: unknown) {
       const errorMessage =
@@ -153,34 +152,25 @@ export default function CreateOrganization() {
           maxFiles={1}
           onFileChange={handleFileChange}
         >
-          <div className="group relative cursor-pointer h-40 w-full border-2 border-dashed rounded-md flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
-            {logo ? (
-              <div className="relative w-full h-full">
-                {/* Using next/image instead of img */}
-                <div className="relative h-full w-full">
-                  <Image
-                    src={logo}
-                    alt="Organization logo preview"
-                    className="object-contain"
-                    fill
-                  />
-                </div>
+          <div className="group relative cursor-pointer border-2 border-dashed border-surface-600-400 rounded-md flex flex-col items-center justify-center gap-2 hover:bg-surface-50-950 transition-colors">
+            {isUploading ? (
+              <ProgressRing
+                value={null}
+                size="size-14"
+                meterStroke="stroke-primary-600-400"
+                trackStroke="stroke-primary-50-950"
+              />
+            ) : (
+              <>
+                <Avatar
+                  src={logo}
+                  name={name.length > 0 ? name : "My Organization"}
+                  size="size-16"
+                />
                 <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                   <UploadCloud className="size-6 text-white" />
                 </div>
-              </div>
-            ) : (
-              <>
-                <UploadCloud className="size-8 text-gray-400" />
-                <p className="text-sm text-gray-500">
-                  Click to upload or drag and drop
-                </p>
               </>
-            )}
-            {isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50">
-                <div className="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-              </div>
             )}
           </div>
         </FileUpload>
@@ -214,11 +204,6 @@ export default function CreateOrganization() {
           className="input w-full"
           placeholder="my-organization"
         />
-        {slug && (
-          <p className="mt-1 text-sm text-gray-500">
-            Your organization will be available at: /org/{slug}
-          </p>
-        )}
       </div>
 
       <button type="submit" className="btn preset-filled-primary-500 w-full">
