@@ -44,7 +44,8 @@
 
 {#if user && orgs && orgs.length > 0}
 	<Popover
-		bind:open={openStateSwitcher}
+		open={openStateSwitcher}
+		onOpenChange={(e) => (openStateSwitcher = e.open)}
 		positioning={{ placement: 'bottom-end' }}
 		triggerBase="btn"
 		contentBase="card bg-surface-200-800 max-w-80"
@@ -96,7 +97,8 @@
 				{/each}
 				<li>
 					<Modal
-						bind:open={openStateCreateOrganization}
+						open={openStateCreateOrganization}
+						onOpenChange={(e) => (openStateCreateOrganization = e.open)}
 						triggerBase="btn preset-tonal"
 						contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm) min-w-96"
 						backdropClasses="backdrop-blur-xs"
@@ -114,7 +116,8 @@
 		{/snippet}
 	</Popover>
 	<Modal
-		bind:open={openStateOrganizationProfile}
+		open={openStateOrganizationProfile}
+		onOpenChange={(e) => (openStateOrganizationProfile = e.open)}
 		triggerBase="btn preset-tonal"
 		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl relative"
 		backdropClasses="backdrop-blur-xs"
@@ -130,7 +133,8 @@
 	</Modal>
 {:else if user}
 	<Modal
-		bind:open={openStateCreateOrganization}
+		open={openStateCreateOrganization}
+		onOpenChange={(e) => (openStateCreateOrganization = e.open)}
 		triggerBase="btn preset-tonal"
 		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm) min-w-96"
 		backdropClasses="backdrop-blur-xs"

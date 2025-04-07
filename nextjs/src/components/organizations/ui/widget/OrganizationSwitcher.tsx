@@ -86,9 +86,7 @@ export default function OrganizationSwitcher() {
 
   // Loading state
   if (!organizations) {
-    return (
-      <div className="animate-pulse h-8 w-40 bg-gray-200 rounded-md"></div>
-    );
+    return <div className="animate-pulse h-8 w-40 placeholder"></div>;
   }
 
   // No organizations - just show the create button
