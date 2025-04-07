@@ -212,7 +212,9 @@ export default function OrganizationSwitcher() {
         onOpenChange={setOpenCreateOrganization}
       >
         <ModalContent>
-          <CreateOrganization />
+          <CreateOrganization
+            onSuccessfulCreate={() => setOpenCreateOrganization(false)}
+          />
           <ModalClose />
         </ModalContent>
       </Modal>

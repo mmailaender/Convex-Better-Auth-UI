@@ -32,6 +32,11 @@ export const createOrganization = mutation({
       role: "role_organization_owner",
     });
 
+    // Set the new organization as active
+    await ctx.db.patch(userId, {
+      activeOrganizationId: organizationId,
+    });
+
     return organizationId;
   },
 });
