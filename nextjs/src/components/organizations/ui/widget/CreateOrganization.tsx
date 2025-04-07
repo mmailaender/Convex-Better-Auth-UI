@@ -12,7 +12,19 @@ import type { FileChangeDetails } from "@zag-js/file-upload";
 /**
  * Component for creating a new organization with logo upload support
  */
-export default function CreateOrganization() {
+export default function CreateOrganization({
+  onSuccessfulCreate,
+  redirectTo,
+}: {
+  /**
+   * Optional callback that will be called when an organization is successfully created
+   */
+  onSuccessfulCreate?: () => void;
+  /**
+   * Optional redirect URL after successful creation
+   */
+  redirectTo?: string;
+}) {
   const router = useRouter();
 
   // Mutations
@@ -126,11 +138,15 @@ export default function CreateOrganization() {
 
       setSuccessMessage("Organization created successfully!");
 
-      // Navigate to the home page
-      router.push("/");
+      // Call the onSuccessfulCreate callback if provided
+      if (onSuccessfulCreate) {
+        onSuccessfulCreate();
+      }
 
-      // Force a refresh to show the new organization
-      router.refresh();
+      // Navigate to the home page
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
