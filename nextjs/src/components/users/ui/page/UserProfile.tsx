@@ -1,5 +1,5 @@
-import ProfileInfo from "@/components/user/ui/widget/ProfileInfo";
-import DeleteUser from "@/components/user/ui/widget/DeleteUser";
+import ProfileInfo from "@/components/users/ui/widget/ProfileInfo";
+import DeleteUser from "@/components/users/ui/widget/DeleteUser";
 
 export default function UserProfile() {
   return (

@@ -18,7 +18,7 @@ import {
   ModalContent,
 } from "@/components/primitives/ui/Modal";
 
-import UserProfile from "@/components/user/ui/page/UserProfile";
+import UserProfile from "@/components/users/ui/page/UserProfile";
 
 export default function UserButton() {
   const { signOut } = useAuthActions();
