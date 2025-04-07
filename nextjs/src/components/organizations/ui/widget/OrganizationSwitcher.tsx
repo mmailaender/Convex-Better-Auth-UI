@@ -176,7 +176,7 @@ export default function OrganizationSwitcher() {
                     <li key={org._id}>
                       <button
                         onClick={() => updateActiveOrg(org._id)}
-                        className="group rounded-base text-surface-700-300 hover:text-primary-600-400 flex gap-x-3 p-4 text-sm/6 font-semibold hover:bg-gray-50 w-full"
+                        className="group rounded-base text-surface-700-300 hover:text-primary-600-400 flex gap-x-3 p-4 text-sm/6 font-semibold hover:bg-surface-100-900 w-full"
                       >
                         <Avatar
                           src={org.logo || ""}
