@@ -121,39 +121,32 @@ export const ModalTrigger = React.forwardRef<
   ) as React.Ref<HTMLElement>[];
   const ref = useMergeRefs(refs);
 
-  // Custom click handler to prevent event bubbling to parent modals
+  // Handle clicks with no propagation for nested modals
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
-    // Stop propagation to prevent parent modals from capturing this event
     e.stopPropagation();
-
-    // Manually toggle the modal state instead of relying on context handlers
+    // Toggle the modal state directly
     context.setOpen(!context.open);
-
-    // If there's a click handler in props, call it
-    if (props.onClick) {
-      (props.onClick as React.MouseEventHandler<HTMLElement>)(e);
-    }
   };
 
-  // `asChild` allows the user to pass any element as the anchor
+  // For custom components passed as children
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, {
-      ref,
-      ...props,
-      onClick: handleClick,
-      ...(children.props ?? {}),
-      "data-state": context.open ? "open" : "closed",
-    });
+    // Wrap in a div that stops propagation instead of trying to clone with props
+    return (
+      <div onClick={handleClick} style={{ display: "inline-block" }}>
+        {children}
+      </div>
+    );
   }
 
+  // For normal button trigger
+  // Use normal HTML button with explicit type attribute
   return (
     <button
       ref={ref}
-      type="button"
-      // The user can style the trigger based on the state
-      data-state={context.open ? "open" : "closed"}
       {...props}
       onClick={handleClick}
+      // Explicit typing for button
+      type="button"
     >
       {children}
     </button>
@@ -183,10 +176,15 @@ export const ModalContent = React.forwardRef<
   const baseZIndex = 998;
   const zIndex = baseZIndex + nestingLevel;
 
+  // Simple handler to stop event propagation
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  };
+
   return (
     <FloatingPortal>
       <FloatingOverlay
-        className={`fixed top-0 left-0 right-0 bottom-0 bg-surface-50-950/75 backdrop-blur-sm flex justify-center items-center p-4`}
+        className="fixed top-0 left-0 right-0 bottom-0 bg-surface-50-950/75 backdrop-blur-sm flex justify-center items-center p-4"
         lockScroll
         style={{ zIndex }}
       >
@@ -200,10 +198,7 @@ export const ModalContent = React.forwardRef<
               ...styles, // Transition styles
               zIndex: zIndex + 1, // Ensure content is above overlay
             }}
-            // Stop propagation on all clicks within modal content
-            onClick={(e: React.MouseEvent<HTMLDivElement>) =>
-              e.stopPropagation()
-            }
+            onClick={handleClick}
             {...context.getFloatingProps(props)}
           >
             {props.children}
