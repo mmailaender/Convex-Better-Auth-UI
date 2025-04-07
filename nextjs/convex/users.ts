@@ -60,19 +60,6 @@ export const updateAvatar = mutation({
   },
 });
 
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    // Generate a URL for the client to upload an image directly to storage
-    return await ctx.storage.generateUploadUrl();
-  },
-});
-
 export const downloadAndStoreProfileImage = internalAction({
   args: {
     userId: v.id("users"),

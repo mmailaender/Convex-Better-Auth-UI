@@ -14,6 +14,7 @@ const schema = defineSchema({
     isAnonymous: v.optional(v.boolean()),
     image: v.optional(v.string()),
     imageId: v.optional(v.id("_storage")),
+    activeOrganizationId: v.optional(v.id("organizations")),
   })
     .index("email", ["email"])
     .index("imageId", ["imageId"]),
