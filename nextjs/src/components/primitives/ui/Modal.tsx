@@ -12,6 +12,7 @@ import {
   useId,
   useTransitionStyles,
 } from "@floating-ui/react";
+import { X } from "lucide-react";
 
 // Create a context to track modal nesting level
 const ModalNestingContext = React.createContext<number>(0);
@@ -193,7 +194,7 @@ export const ModalContent = React.forwardRef<
             ref={ref}
             aria-labelledby={context.labelId}
             aria-describedby={context.descriptionId}
-            className="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
+            className="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm relative"
             style={{
               ...styles, // Transition styles
               zIndex: zIndex + 1, // Ensure content is above overlay
@@ -254,9 +255,23 @@ export const ModalDescription = React.forwardRef<
 export const ModalClose = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
->(function ModalClose(props, ref) {
+>(function ModalClose({ className, children, ...props }, ref) {
   const { setOpen } = useModalContext();
   return (
-    <button type="button" {...props} ref={ref} onClick={() => setOpen(false)} />
+    <button
+      type="button"
+      className={
+        className ||
+        `absolute top-2 right-2 p-2 rounded-full hover:bg-surface-300-700`
+      }
+      {...props}
+      ref={ref}
+      onClick={(e) => {
+        props.onClick?.(e);
+        setOpen(false);
+      }}
+    >
+      {children || <X size={24} />}
+    </button>
   );
 });

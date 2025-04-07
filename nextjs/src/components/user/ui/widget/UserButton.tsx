@@ -12,7 +12,11 @@ import {
   PopoverDescription,
   PopoverTrigger,
 } from "@/components/primitives/ui/Popover";
-import { Modal, ModalContent } from "@/components/primitives/ui/Modal";
+import {
+  Modal,
+  ModalClose,
+  ModalContent,
+} from "@/components/primitives/ui/Modal";
 
 import UserProfile from "@/components/user/ui/page/UserProfile";
 
@@ -77,12 +81,7 @@ export default function UserButton() {
               <ModalContent>
                 <div className="flex justify-between items-center mb-4">
                   <UserProfile />
-                  <button
-                    className="btn preset-ghost size-sm"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    ✕
-                  </button>
+                  <ModalClose />
                 </div>
               </ModalContent>
             </Modal>
