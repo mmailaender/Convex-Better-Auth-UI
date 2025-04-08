@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Avatar } from "@skeletonlabs/skeleton-react";
@@ -10,17 +10,14 @@ import type { Id } from "@/convex/_generated/dataModel";
  * for users with owner or admin roles
  */
 export default function OrganizationInfo() {
+  // Always call hooks at the top level of the component
   const user = useQuery(api.users.getUser);
   const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-  // Organization update mutation
   const updateOrganization = useMutation(
     api.organizations.updateOrganizationProfile
   );
 
-  if (!user || !activeOrganization) {
-    return null;
-  }
-  // Component state
+  // Component state - these must be declared before any conditional returns
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -30,11 +27,28 @@ export default function OrganizationInfo() {
     slug: string;
     logo?: string;
   }>({
-    organizationId: activeOrganization._id,
-    name: activeOrganization.name,
-    slug: activeOrganization.slug,
-    logo: activeOrganization.logo,
+    organizationId: "" as Id<"organizations">,
+    name: "",
+    slug: "",
+    logo: "",
   });
+
+  // Use useEffect to update profileData when activeOrganization changes
+  useEffect(() => {
+    if (activeOrganization) {
+      setProfileData({
+        organizationId: activeOrganization._id,
+        name: activeOrganization.name,
+        slug: activeOrganization.slug,
+        logo: activeOrganization.logo,
+      });
+    }
+  }, [activeOrganization]);
+
+  // If data is not yet loaded, return null (after all hooks)
+  if (!user || !activeOrganization) {
+    return null;
+  }
 
   // Check if user is owner or admin
   const isOwnerOrAdmin = [
@@ -125,12 +139,12 @@ export default function OrganizationInfo() {
               }
             />
             <div className="flex gap-2">
-              <button type="submit" className="variant-filled btn">
+              <button type="submit" className="preset-filled-primary-500 btn">
                 Save
               </button>
               <button
                 type="button"
-                className="variant-ghost btn"
+                className="btn hover:preset-tonal"
                 onClick={cancelEdit}
               >
                 Cancel
