@@ -35,9 +35,7 @@ export default function CreateOrganization({
   const [name, setName] = useState<string>("");
   const [slug, setSlug] = useState<string>("");
   const [logo, setLogo] = useState<string>("");
-  const [logoStorageId, setLogoStorageId] = useState<
-    Id<"_storage"> | undefined
-  >(undefined);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -61,7 +59,7 @@ export default function CreateOrganization({
   };
 
   /**
-   * Handles file upload for organization logo
+   * Handles file selection for organization logo but doesn't upload yet
    */
   const handleFileChange = async (
     details: FileChangeDetails
@@ -74,7 +72,7 @@ export default function CreateOrganization({
       setErrorMessage("");
       setSuccessMessage("");
 
-      // Optimize the image before upload
+      // Optimize the image but don't upload yet
       const optimizedFile = await optimizeImage(file, {
         maxWidth: 512,
         maxHeight: 512,
@@ -84,34 +82,14 @@ export default function CreateOrganization({
         forceConvert: true, // Always convert to WebP
       });
 
-      // Get a storage upload URL from Convex
-      const uploadUrl = await generateUploadUrl();
-
-      // Upload the file to Convex storage
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": optimizedFile.type,
-        },
-        body: optimizedFile,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload file");
-      }
-
-      // Get the storage ID from the response
-      const result = await response.json();
-      const storageId = result.storageId as Id<"_storage">;
-
-      // Save the storage ID for later use when creating the organization
-      setLogoStorageId(storageId);
+      // Store the optimized file for later upload
+      setLogoFile(optimizedFile);
       setLogo(URL.createObjectURL(optimizedFile)); // For preview
-      setSuccessMessage("Logo uploaded successfully!");
+      setSuccessMessage("Logo ready for upload!");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
-      setErrorMessage(`Failed to upload logo: ${errorMessage}`);
+      setErrorMessage(`Failed to process logo: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -129,6 +107,32 @@ export default function CreateOrganization({
     }
 
     try {
+      setIsUploading(true);
+      let logoStorageId: Id<"_storage"> | undefined = undefined;
+
+      // Upload the logo if one was selected
+      if (logoFile) {
+        // Get a storage upload URL from Convex
+        const uploadUrl = await generateUploadUrl();
+
+        // Upload the file to Convex storage
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": logoFile.type,
+          },
+          body: logoFile,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload file");
+        }
+
+        // Get the storage ID from the response
+        const result = await response.json();
+        logoStorageId = result.storageId as Id<"_storage">;
+      }
+
       // Create the organization with Convex
       await createOrganization({
         name,
@@ -151,6 +155,8 @@ export default function CreateOrganization({
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
       setErrorMessage(`Failed to create organization: ${errorMessage}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
