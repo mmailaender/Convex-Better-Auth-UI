@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronsUpDown, Plus, Settings, X } from "lucide-react";
 import { Avatar } from "@skeletonlabs/skeleton-react";
 
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import CreateOrganization from "./CreateOrganization";
-
+// Components
 import {
   Popover,
   PopoverContent,
@@ -20,7 +17,12 @@ import {
   ModalClose,
   ModalTrigger,
 } from "@/components/primitives/ui/Modal";
+import CreateOrganization from "@/components/organizations/ui/widget/CreateOrganization";
+import OrganizationProfile from "@/components/organizations/ui/widget/OrganizationProfile";
 
+// API
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
 /**
@@ -72,16 +74,6 @@ export default function OrganizationSwitcher() {
       <X size={16} />
       <span>Leave</span>
     </button>
-  );
-
-  /**
-   * Temporary OrganizationProfile component (will be implemented separately)
-   */
-  const OrganizationProfile = () => (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Organization Profile</h2>
-      <p>This component will be implemented separately.</p>
-    </div>
   );
 
   // Loading state

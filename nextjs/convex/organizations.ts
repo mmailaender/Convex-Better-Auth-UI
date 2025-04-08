@@ -128,6 +128,9 @@ export const getActiveOrganization = query({
         q.eq("organizationId", org._id).eq("userId", userId)
       )
       .first();
+    if (!membership) {
+      return null;
+    }
 
     // Add the logo URL if applicable
     if (org.logoId) {
@@ -136,7 +139,7 @@ export const getActiveOrganization = query({
 
     return {
       ...org,
-      role: membership?.role,
+      role: membership.role,
     };
   },
 });
@@ -242,5 +245,52 @@ export const leaveOrganization = mutation({
     }
 
     return true;
+  },
+});
+
+/**
+ * Updates an organization's profile information
+ */
+export const updateOrganizationProfile = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    name: v.string(),
+    slug: v.string(),
+    logoId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    // Verify the user is a member of the organization with admin/owner role
+    const membership = await ctx.db
+      .query("organizationMembers")
+      .withIndex("orgId_and_userId", (q) =>
+        q.eq("organizationId", args.organizationId).eq("userId", userId)
+      )
+      .first();
+
+    if (!membership) {
+      throw new Error("User is not a member of this organization");
+    }
+
+    if (
+      !["role_organization_owner", "role_organization_admin"].includes(
+        membership.role
+      )
+    ) {
+      throw new Error(
+        "User does not have permission to update this organization"
+      );
+    }
+
+    // Update the organization
+    return await ctx.db.patch(args.organizationId, {
+      name: args.name,
+      slug: args.slug,
+      ...(args.logoId && { logoId: args.logoId }),
+    });
   },
 });

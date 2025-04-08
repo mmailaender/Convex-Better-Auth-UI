@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	import ProfileInfo from './ProfileInfo.svelte';
+	import OrganizationInfo from './OrganizationInfo.svelte';
 	import DeleteOrganization from './DeleteOrganization.svelte';
 	import LeaveOrganization from './LeaveOrganization.svelte';
 	import Members from './Members.svelte';
@@ -28,7 +28,8 @@
 
 {#if user.activeOrganization}
 	<Tabs
-		bind:value={group}
+		value={group}
+		onValueChange={(e) => (group = e.value)}
 		base="flex flex-row w-192 h-160"
 		listBase="flex flex-col pr-2 w-30"
 		contentBase="flex flex-col"
@@ -56,7 +57,7 @@
 		{/snippet}
 		{#snippet content()}
 			<Tabs.Panel value="general">
-				<ProfileInfo bind:user={user!} />
+				<OrganizationInfo bind:user={user!} />
 				<DeleteOrganization bind:user={user!} />
 				<LeaveOrganization bind:user={user!} />
 			</Tabs.Panel>
