@@ -3,10 +3,11 @@ import { Tabs } from "@skeletonlabs/skeleton-react";
 
 // Components
 import OrganizationInfo from "@/components/organizations/ui/widget/OrganizationInfo";
+import DeleteOrganization from "@/components/organizations/ui/widget/DeleteOrganization";
+import Members from "@/components/organizations/ui/widget/Members";
 
 // API
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
-import DeleteOrganization from "@/components/organizations/ui/widget/DeleteOrganization";
 
 interface OrganizationProfileProps {
   /**
@@ -64,7 +65,7 @@ export default function OrganizationProfile({
         {isOwnerOrAdmin && (
           <>
             <Tabs.Panel value="members">
-              {/* <Members bind:user={user!} /> */}
+              <Members />
             </Tabs.Panel>
             <Tabs.Panel value="billing">Billing Panel</Tabs.Panel>
           </>

@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as organizations_members from "../organizations/members.js";
 import type * as organizations from "../organizations.js";
 import type * as storage from "../storage.js";
 import type * as users from "../users.js";
@@ -30,6 +31,7 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  "organizations/members": typeof organizations_members;
   organizations: typeof organizations;
   storage: typeof storage;
   users: typeof users;
