@@ -7,6 +7,7 @@ import { optimizeImage } from "@/components/primitives/utils/optimizeImage";
 
 import type { Id } from "@/convex/_generated/dataModel";
 import type { FileChangeDetails } from "@zag-js/file-upload";
+import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
 
 /**
  * Component that displays organization information and allows editing
@@ -16,6 +17,7 @@ export default function OrganizationInfo() {
   // Always call hooks at the top level of the component
   const user = useQuery(api.users.getUser);
   const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+  const isOwnerOrAdmin = useIsOwnerOrAdmin();
   const updateOrganization = useMutation(
     api.organizations.updateOrganizationProfile
   );
@@ -60,12 +62,6 @@ export default function OrganizationInfo() {
   if (!user || !activeOrganization) {
     return null;
   }
-
-  // Check if user is owner or admin
-  const isOwnerOrAdmin = [
-    "role_organization_owner",
-    "role_organization_admin",
-  ].includes(activeOrganization.role);
 
   /**
    * Toggles edit mode for organization profile

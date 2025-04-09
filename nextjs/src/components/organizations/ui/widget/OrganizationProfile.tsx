@@ -5,15 +5,10 @@ import { Tabs } from "@skeletonlabs/skeleton-react";
 import OrganizationInfo from "@/components/organizations/ui/widget/OrganizationInfo";
 
 // API
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
 
 export default function OrganizationProfile() {
-  const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-  const isOwnerOrAdmin = [
-    "role_organization_owner",
-    "role_organization_admin",
-  ].includes(activeOrganization?.role || "");
+  const isOwnerOrAdmin = useIsOwnerOrAdmin();
   const [group, setGroup] = useState("general");
   return (
     <Tabs
