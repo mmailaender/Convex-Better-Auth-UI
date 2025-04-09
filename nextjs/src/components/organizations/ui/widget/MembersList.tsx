@@ -4,7 +4,6 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Shield, ShieldCheck } from "lucide-react";
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
-import Image from "next/image";
 import {
   Modal,
   ModalContent,
@@ -13,22 +12,12 @@ import {
   ModalDescription,
   ModalClose,
 } from "@/components/primitives/ui/Modal";
+import { Avatar } from "@skeletonlabs/skeleton-react";
 
 type Role =
   | "role_organization_member"
   | "role_organization_admin"
   | "role_organization_owner";
-
-// type Member = {
-//   _id: string;
-//   user: {
-//     id: Id<"users">;
-//     name: string;
-//     email: string;
-//     image?: string;
-//   };
-//   role: Role;
-// };
 
 /**
  * Component that displays a list of organization members with role management functionality
@@ -126,11 +115,10 @@ export function MembersList(): React.ReactNode {
                   <div className="avatar">
                     <div className="size-12">
                       {member.user.image ? (
-                        <Image
+                        <Avatar
                           src={member.user.image}
-                          alt={member.user.name || "Member"}
-                          width={48}
-                          height={48}
+                          name={member.user.name}
+                          size="size-12"
                         />
                       ) : (
                         <div className="flex items-center justify-center bg-primary-100 h-full w-full rounded-full text-primary-700">

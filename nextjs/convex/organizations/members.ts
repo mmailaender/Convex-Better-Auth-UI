@@ -30,13 +30,14 @@ export const getOrganizationMembers = query({
     const membersWithDetails = await Promise.all(
       memberships.map(async (membership) => {
         const memberUser = await ctx.db.get(membership.userId);
+        // Skip members whose user record doesn't exist
         if (!memberUser) {
-          return null;
+          return undefined;
         }
 
         if (memberUser.imageId) {
           memberUser.image =
-            (await ctx.storage.getUrl(memberUser.imageId)) ?? undefined;
+            (await ctx.storage.getUrl(memberUser.imageId)) || undefined;
         }
 
         return {
@@ -53,7 +54,7 @@ export const getOrganizationMembers = query({
     );
 
     // Filter out null values and return
-    return membersWithDetails.filter(Boolean);
+    return membersWithDetails.filter((member) => member !== undefined);
   },
 });
 
@@ -114,7 +115,6 @@ export const updateMemberRole = mutation({
       throw new Error("Target user is not a member of this organization");
     }
 
-    // Cannot change role of the organization owner
     if (targetMembership.role === "role_organization_owner") {
       throw new Error("Cannot change the role of an organization owner");
     }
