@@ -9,6 +9,20 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api.js";
 
+export const isUserExisting = query({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { email } = args;
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), email))
+      .first();
+    return user !== null;
+  },
+});
+
 export const getUser = query({
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
