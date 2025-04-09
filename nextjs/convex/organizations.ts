@@ -286,6 +286,24 @@ export const updateOrganizationProfile = mutation({
       );
     }
 
+    if (args.logoId !== undefined) {
+      // Logo is being updated
+      // Get the existing organization to check if we need to delete an old logo
+      const organization = await ctx.db.get(args.organizationId);
+      if (!organization) {
+        throw new Error("Organization not found");
+      }
+
+      // If the logo is being updated and there was an old one, delete it
+      if (
+        organization.logoId && // There's an existing logo
+        args.logoId !== organization.logoId // The logo is actually changing
+      ) {
+        // Delete the old logo file
+        await ctx.storage.delete(organization.logoId);
+      }
+    }
+
     // Update the organization
     return await ctx.db.patch(args.organizationId, {
       name: args.name,
