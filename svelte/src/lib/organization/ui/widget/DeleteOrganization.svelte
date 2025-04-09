@@ -40,7 +40,8 @@
 
 {#if isOwner}
 	<Modal
-		bind:open
+		{open}
+		onOpenChange={(e) => (open = e.open)}
 		triggerBase="btn text-error-500 hover:preset-tonal-error-500"
 		contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm)"
 		backdropClasses="backdrop-blur-xs"
