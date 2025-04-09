@@ -6,6 +6,7 @@ import OrganizationInfo from "@/components/organizations/ui/widget/OrganizationI
 
 // API
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
+import DeleteOrganization from "@/components/organizations/ui/widget/DeleteOrganization";
 
 export default function OrganizationProfile() {
   const isOwnerOrAdmin = useIsOwnerOrAdmin();
@@ -48,8 +49,8 @@ export default function OrganizationProfile() {
       <Tabs.Content base="flex flex-col">
         <Tabs.Panel value="general">
           <OrganizationInfo />
-          {/* <DeleteOrganization bind:user={user!} />
-				<LeaveOrganization bind:user={user!} /> */}
+          <DeleteOrganization />
+          {/* <LeaveOrganization bind:user={user!} /> */}
         </Tabs.Panel>
         {isOwnerOrAdmin && (
           <>

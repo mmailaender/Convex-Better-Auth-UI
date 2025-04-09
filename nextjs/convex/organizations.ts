@@ -312,3 +312,92 @@ export const updateOrganizationProfile = mutation({
     });
   },
 });
+
+/**
+ * Deletes an organization and updates all members' active organization
+ */
+export const deleteOrganization = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    // Verify the user is an owner of the organization
+    const membership = await ctx.db
+      .query("organizationMembers")
+      .withIndex("orgId_and_userId", (q) =>
+        q.eq("organizationId", args.organizationId).eq("userId", userId)
+      )
+      .first();
+
+    if (!membership || membership.role !== "role_organization_owner") {
+      throw new Error("Only organization owners can delete an organization");
+    }
+
+    // Get the organization
+    const organization = await ctx.db.get(args.organizationId);
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    // Delete the organization logo if it exists
+    if (organization.logoId) {
+      await ctx.storage.delete(organization.logoId);
+    }
+
+    // Get all members of the organization
+    const members = await ctx.db
+      .query("organizationMembers")
+      .withIndex("orgId", (q) => q.eq("organizationId", args.organizationId))
+      .collect();
+
+    // For each member, update their active organization if needed
+    for (const member of members) {
+      const user = await ctx.db.get(member.userId);
+      if (!user) continue;
+
+      if (user.activeOrganizationId === args.organizationId) {
+        // Find another organization to set as active
+        const otherMemberships = await ctx.db
+          .query("organizationMembers")
+          .withIndex("userId", (q) => q.eq("userId", member.userId))
+          .filter((q) => q.neq(q.field("organizationId"), args.organizationId))
+          .collect();
+
+        if (otherMemberships.length > 0) {
+          await ctx.db.patch(member.userId, {
+            activeOrganizationId: otherMemberships[0].organizationId,
+          });
+        } else {
+          await ctx.db.patch(member.userId, {
+            activeOrganizationId: undefined,
+          });
+        }
+      }
+
+      // Delete the member record
+      await ctx.db.delete(member._id);
+    }
+
+    // Delete any pending invitations for this organization
+    const invitations = await ctx.db
+      .query("invitations")
+      .withIndex("by_org_and_email", (q) =>
+        q.eq("organizationId", args.organizationId)
+      )
+      .collect();
+
+    for (const invitation of invitations) {
+      await ctx.db.delete(invitation._id);
+    }
+
+    // Finally, delete the organization
+    await ctx.db.delete(args.organizationId);
+
+    return true;
+  },
+});
