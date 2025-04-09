@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
@@ -17,9 +19,9 @@ import { useIsOwner } from "@/components/organizations/api/hooks";
  * Only available to organization owners
  */
 export default function DeleteOrganization() {
-  const router = useRouter();
   const [open, setOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const router = useRouter();
   const activeOrganization = useQuery(api.organizations.getActiveOrganization);
   const isOwner = useIsOwner();
 
