@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Shield, ShieldCheck } from "lucide-react";
+import { Shield, ShieldCheck, Search } from "lucide-react";
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
 import {
   Modal,
@@ -29,6 +29,7 @@ export function MembersList(): React.ReactNode {
   const [selectedUserId, setSelectedUserId] = useState<Id<"users"> | null>(
     null
   );
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Get current user and organization data
   const currentUser = useQuery(api.organizations.getActiveOrganization);
@@ -40,6 +41,36 @@ export function MembersList(): React.ReactNode {
     api.organizations.members.updateMemberRole
   );
   const removeMember = useMutation(api.organizations.members.removeMember);
+
+  /**
+   * Filter and sort members based on search query and role
+   */
+  const filteredMembers = useMemo(() => {
+    if (!members) return [];
+
+    return members
+      .filter((member) => {
+        if (!searchQuery) return true;
+
+        const memberName = member.user.name;
+        return memberName.toLowerCase().includes(searchQuery.toLowerCase());
+      })
+      .sort((a, b) => {
+        // Sort by role (owner first, then admin, then member)
+        const roleOrder: Record<Role, number> = {
+          role_organization_owner: 0,
+          role_organization_admin: 1,
+          role_organization_member: 2,
+        };
+
+        // Primary sort by role
+        const roleDiff = roleOrder[a.role] - roleOrder[b.role];
+        if (roleDiff !== 0) return roleDiff;
+
+        // Secondary sort by name
+        return a.user.name.localeCompare(b.user.name);
+      });
+  }, [members, searchQuery]);
 
   /**
    * Handles updating a member's role
@@ -98,6 +129,22 @@ export function MembersList(): React.ReactNode {
     <div>
       {errorMessage && <p className="text-error-500">{errorMessage}</p>}
       {successMessage && <p className="text-success-500">{successMessage}</p>}
+
+      <div className="flex items-center gap-3 mb-4">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Search className="size-4 text-surface-400-600" />
+          </div>
+          <input
+            type="text"
+            className="input pl-10 w-full"
+            placeholder="Search members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
       <table className="table caption-bottom">
         <thead>
           <tr className="border-surface-300-700 border-b">
@@ -108,7 +155,7 @@ export function MembersList(): React.ReactNode {
           </tr>
         </thead>
         <tbody>
-          {members.map((member) => (
+          {filteredMembers.map((member) => (
             <tr key={member._id}>
               <td>
                 <div className="flex items-center space-x-4">
