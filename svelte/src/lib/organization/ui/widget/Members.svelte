@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { X } from 'lucide-svelte';
 
 	import InviteForm from './InviteForm.svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
 
-	import type { User } from '$lib/db/schema/types/custom';
-	import type { MembersAndInvitations } from '$lib/organization/api/types';
 	import MembersList from './MembersList.svelte';
 	import InvitationList from './InvitationList.svelte';
-	import { X } from 'lucide-svelte';
+
+	import type { MembersAndInvitations } from '$lib/organization/api/types';
+	import type { User } from '$lib/db/schema/types/custom';
 
 	interface Props {
 		user: User;
@@ -91,7 +92,7 @@
 		<div class="animate-pulse">Loading...</div>
 	</div>
 {:else}
-	<Tabs bind:value={group}>
+	<Tabs value={group} onValueChange={(e) => (group = e.value)}>
 		{#snippet list()}
 			<Tabs.Control value="members">Members <span>({filteredMembers.length})</span></Tabs.Control>
 			<Tabs.Control value="invitations"

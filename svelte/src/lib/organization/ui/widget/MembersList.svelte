@@ -128,7 +128,8 @@
 					<div class="flex space-x-2">
 						{#if isOwnerOrAdmin && member.user.id !== user.id && member.role !== 'role_organization_owner'}
 							<Modal
-								bind:open={openModal}
+								open={openModal}
+								onOpenChange={(e) => (openModal = e.open)}
 								triggerBase="btn text-error-500 hover:preset-tonal-error-500"
 								contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-(--breakpoint-sm)"
 								backdropClasses="backdrop-blur-xs"
