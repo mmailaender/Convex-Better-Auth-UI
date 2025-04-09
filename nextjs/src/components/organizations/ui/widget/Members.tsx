@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs } from "@skeletonlabs/skeleton-react";
 import { MembersList } from "@/components/organizations/ui/widget/MembersList";
-import { InvitationList } from "@/components/organizations/ui/widget/InvitationList";
+import { InvitationsList } from "@/components/organizations/ui/widget/InvitationsList";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
@@ -32,7 +32,7 @@ export default function Members() {
         </Tabs.Panel>
         {isOwnerOrAdmin && (
           <Tabs.Panel value="invitations">
-            <InvitationList />
+            <InvitationsList />
           </Tabs.Panel>
         )}
       </Tabs.Content>
