@@ -3,7 +3,7 @@
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { X } from 'lucide-svelte';
 
-	import InviteForm from './InviteForm.svelte';
+	import InviteForm from './InviteMembers.svelte';
 	import { callForm } from '$lib/primitives/api/callForm';
 
 	import MembersList from './MembersList.svelte';

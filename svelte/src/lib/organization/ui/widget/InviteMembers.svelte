@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
 	import type { Invitation, User } from '$lib/db/schema/types/custom';
 	import { callForm } from '$lib/primitives/api/callForm';
 	import { UserPlus } from 'lucide-svelte';
