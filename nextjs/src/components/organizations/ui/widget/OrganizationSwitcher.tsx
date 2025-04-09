@@ -214,7 +214,9 @@ export default function OrganizationSwitcher() {
         onOpenChange={setOpenOrganizationProfile}
       >
         <ModalContent>
-          <OrganizationProfile />
+          <OrganizationProfile
+            onSuccessfulDelete={() => setOpenOrganizationProfile(false)}
+          />
           <ModalClose />
         </ModalContent>
       </Modal>

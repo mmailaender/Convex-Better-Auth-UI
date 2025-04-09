@@ -18,7 +18,19 @@ import { useIsOwner } from "@/components/organizations/api/hooks";
  * Component for deleting an organization
  * Only available to organization owners
  */
-export default function DeleteOrganization() {
+export default function DeleteOrganization({
+  onSuccessfulDelete,
+  redirectTo,
+}: {
+  /**
+   * Optional callback that will be called when an organization is successfully deleted
+   */
+  onSuccessfulDelete?: () => void;
+  /**
+   * Optional redirect URL after successful deletion
+   */
+  redirectTo?: string;
+}) {
   const [open, setOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const router = useRouter();
@@ -35,8 +47,18 @@ export default function DeleteOrganization() {
     try {
       await deleteOrganization({ organizationId: activeOrganization._id });
       setOpen(false);
-      // Navigate to home and force a refresh
-      router.push("/");
+      
+      // Call the onSuccessfulDelete callback if provided
+      if (onSuccessfulDelete) {
+        onSuccessfulDelete();
+      }
+      
+      // Navigate to the specified URL or home by default
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

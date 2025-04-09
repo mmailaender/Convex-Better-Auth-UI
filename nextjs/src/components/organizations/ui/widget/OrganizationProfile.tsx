@@ -8,7 +8,16 @@ import OrganizationInfo from "@/components/organizations/ui/widget/OrganizationI
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
 import DeleteOrganization from "@/components/organizations/ui/widget/DeleteOrganization";
 
-export default function OrganizationProfile() {
+interface OrganizationProfileProps {
+  /**
+   * Optional callback that will be called when an organization is successfully deleted
+   */
+  onSuccessfulDelete?: () => void;
+}
+
+export default function OrganizationProfile({
+  onSuccessfulDelete,
+}: OrganizationProfileProps) {
   const isOwnerOrAdmin = useIsOwnerOrAdmin();
   const [group, setGroup] = useState("general");
   return (
@@ -49,7 +58,7 @@ export default function OrganizationProfile() {
       <Tabs.Content base="flex flex-col">
         <Tabs.Panel value="general">
           <OrganizationInfo />
-          <DeleteOrganization />
+          <DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
           {/* <LeaveOrganization bind:user={user!} /> */}
         </Tabs.Panel>
         {isOwnerOrAdmin && (
