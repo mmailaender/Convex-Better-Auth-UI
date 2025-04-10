@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useIsOwner } from "@/components/organizations/api/hooks";
 import {
   Modal,
@@ -14,17 +15,22 @@ import {
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
- * If the user is the owner, they cannot leave and must transfer ownership first
+ * If the user is the owner, they must select a successor before leaving
  */
 export default function LeaveOrganization(): React.ReactNode {
   // State hooks
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [selectedSuccessor, setSelectedSuccessor] =
+    useState<Id<"users"> | null>(null);
 
   // Convex queries and mutations
   const activeOrganization = useQuery(api.organizations.getActiveOrganization);
   const members = useQuery(api.organizations.members.getOrganizationMembers);
-  const leaveOrganization = useMutation(api.organizations.leaveOrganization);
+  const user = useQuery(api.users.getUser);
+  const leaveOrganization = useMutation(
+    api.organizations.members.leaveOrganization
+  );
 
   // Navigation
   const router = useRouter();
@@ -32,17 +38,32 @@ export default function LeaveOrganization(): React.ReactNode {
   // Check if user is an organization owner
   const isOrgOwner = useIsOwner();
 
+  // Get organization members excluding current user for successor selection
+  const organizationMembers =
+    members?.filter(
+      (member) =>
+        // Don't include the current user
+        member.user.id !== user?._id
+    ) || [];
+
+  /**
+   * Validates form input before submission
+   */
+  const validateForm = (): boolean => {
+    if (isOrgOwner && !selectedSuccessor) {
+      setErrorMessage(
+        "As the organization owner, you must select a successor before leaving."
+      );
+      return false;
+    }
+    return true;
+  };
+
   /**
    * Handles the leave organization action
    */
   const handleLeaveOrganization = async (): Promise<void> => {
-    // If user is the owner, they cannot leave the organization
-    if (isOrgOwner) {
-      setErrorMessage(
-        "As the organization owner, you cannot leave. You must first transfer ownership or delete the organization."
-      );
-      return;
-    }
+    if (!validateForm()) return;
 
     if (!activeOrganization?._id) {
       setErrorMessage("No active organization found.");
@@ -52,6 +73,10 @@ export default function LeaveOrganization(): React.ReactNode {
     try {
       await leaveOrganization({
         organizationId: activeOrganization._id,
+        // Only send successorId if the user is an owner and a successor is selected
+        ...(isOrgOwner && selectedSuccessor
+          ? { successorId: selectedSuccessor }
+          : {}),
       });
 
       setIsOpen(false);
@@ -90,12 +115,46 @@ export default function LeaveOrganization(): React.ReactNode {
           </ModalDescription>
 
           {isOrgOwner && (
-            <div className="bg-warning-100 border-warning-300 rounded-md border p-3">
-              <p className="text-warning-800 text-sm font-medium">
-                As the organization owner, you cannot leave. You must first
-                transfer ownership to another member or delete the organization.
-              </p>
-            </div>
+            <>
+              <div className="bg-warning-100 border-warning-300 rounded-md border p-3">
+                <p className="text-warning-800 text-sm font-medium">
+                  As the organization owner, you must designate a successor
+                  before leaving.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="successor"
+                  className="text-surface-800-200 font-medium"
+                >
+                  Select a successor:
+                </label>
+                <select
+                  id="successor"
+                  value={selectedSuccessor?.toString() || ""}
+                  onChange={(e) =>
+                    setSelectedSuccessor(
+                      e.target.value ? (e.target.value as Id<"users">) : null
+                    )
+                  }
+                  className="select w-full"
+                  required={isOrgOwner}
+                >
+                  <option value="" disabled>
+                    Choose a successor
+                  </option>
+                  {organizationMembers.map((member) => (
+                    <option
+                      key={member.user.id.toString()}
+                      value={member.user.id.toString()}
+                    >
+                      {member.user.name} ({member.user.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
           )}
 
           {errorMessage && <p className="text-error-600-400">{errorMessage}</p>}
@@ -106,7 +165,7 @@ export default function LeaveOrganization(): React.ReactNode {
               type="button"
               className="btn bg-error-500 text-white hover:bg-error-600"
               onClick={handleLeaveOrganization}
-              disabled={isOrgOwner}
+              disabled={isOrgOwner && !selectedSuccessor}
             >
               Confirm
             </button>

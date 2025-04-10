@@ -1,6 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { Id } from "../_generated/dataModel";
 
 /**
  * Get all members of the current active organization
@@ -218,6 +219,91 @@ export const removeMember = mutation({
 
     // Remove the membership
     await ctx.db.delete(targetMembership._id);
+
+    return true;
+  },
+});
+
+/**
+ * Leave the current active organization
+ * If the user is the owner, a successor must be provided
+ */
+export const leaveOrganization = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    successorId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get the membership
+    const membership = await ctx.db
+      .query("organizationMembers")
+      .withIndex("orgId_and_userId", (q) =>
+        q.eq("organizationId", args.organizationId).eq("userId", userId)
+      )
+      .first();
+
+    if (!membership) {
+      throw new Error("Not a member of this organization");
+    }
+
+    // Check if user is the owner
+    if (membership.role === "role_organization_owner") {
+      // Owner must provide a successor
+      if (!args.successorId) {
+        throw new Error(
+          "As the organization owner, you must select a successor before leaving"
+        );
+      }
+
+      // Get the successor's membership
+      const successorMembership = await ctx.db
+        .query("organizationMembers")
+        .withIndex("orgId_and_userId", (q) =>
+          q
+            .eq("organizationId", args.organizationId)
+            .eq("userId", args.successorId as Id<"users">)
+        )
+        .first();
+
+      if (!successorMembership) {
+        throw new Error(
+          "Selected successor is not a member of this organization"
+        );
+      }
+
+      // Update successor's role to owner
+      await ctx.db.patch(successorMembership._id, {
+        role: "role_organization_owner",
+      });
+    }
+
+    // Remove the user's membership
+    await ctx.db.delete(membership._id);
+
+    // If this was the user's active organization, unset it
+    const user = await ctx.db.get(userId);
+    if (user && user.activeOrganizationId === args.organizationId) {
+      // Find another organization to set as active
+      const otherMemberships = await ctx.db
+        .query("organizationMembers")
+        .withIndex("userId", (q) => q.eq("userId", userId))
+        .collect();
+
+      if (otherMemberships.length > 0) {
+        await ctx.db.patch(userId, {
+          activeOrganizationId: otherMemberships[0].organizationId,
+        });
+      } else {
+        await ctx.db.patch(userId, {
+          activeOrganizationId: undefined,
+        });
+      }
+    }
 
     return true;
   },
