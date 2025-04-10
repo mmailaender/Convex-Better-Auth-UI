@@ -6,7 +6,7 @@ import {
   generateOrganizationInvitationEmail,
   type OrganizationInvitationParams,
 } from "./templates/organizationInvitation";
-import { type SendEmailResponse } from "./send";
+import { sendEmail, type SendEmailResponse } from "./send";
 import { api } from "../_generated/api";
 
 /**
@@ -39,7 +39,7 @@ export const sendVerificationEmail = action({
       const html = await processEmailHtml(rawHtml);
 
       // Send the email
-      return await ctx.runAction(api.email.send.default, {
+      return await sendEmail({
         from: fromEmail,
         to: email,
         subject: `${otp} is your verification code`,
@@ -95,7 +95,7 @@ export const sendOrganizationInvitationEmail = action({
       const html = await processEmailHtml(rawHtml);
 
       // Send the email
-      return await ctx.runAction(api.email.send.default, {
+      return await sendEmail({
         from: fromEmail,
         to: email,
         subject: `Invitation to join ${organizationName}`,

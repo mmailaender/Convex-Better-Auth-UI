@@ -33,9 +33,7 @@ export function InvitationsList(): React.ReactNode {
   const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
   // Get invitations data and mutations
-  const invitations = useQuery(
-    api.organizations.invitations.getOrganizationInvitations
-  );
+  const invitations = useQuery(api.organizations.invitations.getInvitations);
   const revokeInvitation = useMutation(
     api.organizations.invitations.revokeInvitation
   );

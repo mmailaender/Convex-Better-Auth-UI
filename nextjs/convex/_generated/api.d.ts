@@ -14,7 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as auth from "../auth.js";
-import type * as email_index from "../email/index.js";
+import type * as email_handlers from "../email/handlers.js";
 import type * as email_process from "../email/process.js";
 import type * as email_send from "../email/send.js";
 import type * as email_templates_organizationInvitation from "../email/templates/organizationInvitation.js";
@@ -36,7 +36,7 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "email/index": typeof email_index;
+  "email/handlers": typeof email_handlers;
   "email/process": typeof email_process;
   "email/send": typeof email_send;
   "email/templates/organizationInvitation": typeof email_templates_organizationInvitation;

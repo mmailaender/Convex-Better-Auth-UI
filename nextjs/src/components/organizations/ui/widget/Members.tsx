@@ -9,9 +9,7 @@ import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
 export default function Members() {
   const [group, setGroup] = useState("members");
   const members = useQuery(api.organizations.members.getOrganizationMembers);
-  const invitations = useQuery(
-    api.organizations.invitations.getOrganizationInvitations
-  );
+  const invitations = useQuery(api.organizations.invitations.getInvitations);
   const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
   return (
