@@ -39,8 +39,10 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 
         // Redirect to home page
         return NextResponse.redirect(new URL("/", request.url));
-      } catch (error) {
-        // Handle error
+      } catch (error: unknown) {
+        // Extract error message and redirect to error page
+
+        console.error("Error accepting invitation: ", error);
         return NextResponse.error();
       }
     }
