@@ -1,6 +1,6 @@
 "use node";
 
-import { render as maizzleRender } from "@maizzle/framework";
+import { render } from "@maizzle/framework";
 
 /**
  * Maizzle configuration for processing HTML templates
@@ -23,9 +23,13 @@ export function createMaizzleConfig(input: string) {
 
 /**
  * Process HTML with Maizzle for consistent email styling
- * @param html - Raw HTML string to process
+ * @param rawHtml - Raw HTML string to process
  * @returns Processed HTML with inlined CSS and optimizations
  */
-export async function processEmailHtml(html: string) {
-  return (await maizzleRender(html, createMaizzleConfig(html))).html;
+export async function processEmailHtml(rawHtml: string) {
+  console.log("Before");
+  const processedHtml = (await render(rawHtml, createMaizzleConfig(rawHtml)))
+    .html;
+  console.log("After");
+  return processedHtml;
 }

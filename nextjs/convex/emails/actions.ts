@@ -1,8 +1,5 @@
-"use node";
-
 import { v } from "convex/values";
 import { action, ActionCtx } from "../_generated/server";
-import { processEmailHtml } from "./process";
 import { generateVerificationEmail } from "./templates/verification";
 import {
   generateOrganizationInvitationEmail,
@@ -105,10 +102,7 @@ export const sendVerificationEmail = action({
 
     try {
       // Generate the email content
-      const rawHtml = generateVerificationEmail(otp);
-
-      // Process the HTML with Maizzle
-      const html = await processEmailHtml(rawHtml);
+      const html = generateVerificationEmail(otp);
 
       // Send the email
       return await sendEmail({
@@ -161,10 +155,7 @@ export async function sendOrganizationInvitationEmail(params: {
       acceptUrl,
     };
 
-    const rawHtml = generateOrganizationInvitationEmail(invitationParams);
-
-    // Process the HTML with Maizzle
-    const html = await processEmailHtml(rawHtml);
+    const html = generateOrganizationInvitationEmail(invitationParams);
 
     // Send the email
     return await sendEmail({
