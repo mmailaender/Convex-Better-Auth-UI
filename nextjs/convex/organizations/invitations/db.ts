@@ -1,7 +1,7 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { mutation, query } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
+import { mutation, query, internalMutation } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
 
 /**
  * Get pending invitations for the current active organization
@@ -106,5 +106,75 @@ export const revokeInvitation = mutation({
     // Delete the invitation
     await ctx.db.delete(args.invitationId);
     return { success: true };
+  },
+});
+
+/**
+ * Creates a new organization invitation
+ */
+export const createInvitation = internalMutation({
+  args: {
+    email: v.string(),
+    role: v.union(
+      v.literal("role_organization_member"),
+      v.literal("role_organization_admin"),
+      v.literal("role_organization_owner")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const { email, role } = args;
+
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+    // Get the user's active organization
+    const user = await ctx.db.get(userId);
+    if (!user || !user.activeOrganizationId) {
+      throw new Error("User has no active organization");
+    }
+
+    const organization = await ctx.db.get(user.activeOrganizationId);
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    // Check if an invitation is already existing and if yes return the invitation id
+    const existingInvitation = await ctx.db
+      .query("invitations")
+      .withIndex("by_org_and_email", (q) =>
+        q.eq("organizationId", organization._id).eq("email", email)
+      )
+      .first();
+
+    if (existingInvitation) {
+      return {
+        _id: existingInvitation._id,
+        invitedByUserId: userId,
+        invitedByName: user.name,
+        organizationId: organization._id,
+        organizationName: organization.name,
+      };
+    } else {
+      // Create the invitation
+      const invitationId = await ctx.db.insert("invitations", {
+        email,
+        role,
+        invitedByUserId: userId,
+        organizationId: organization._id,
+        expiresAt: expiresAt.getTime(),
+      });
+
+      return {
+        _id: invitationId,
+        invitedByUserId: userId,
+        invitedByName: user.name,
+        organizationId: organization._id,
+        organizationName: organization.name,
+      };
+    }
   },
 });

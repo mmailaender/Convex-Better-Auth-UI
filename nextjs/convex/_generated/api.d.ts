@@ -14,13 +14,14 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as auth from "../auth.js";
-import type * as emails_handlers from "../emails/handlers.js";
+import type * as emails_actions from "../emails/actions.js";
 import type * as emails_process from "../emails/process.js";
 import type * as emails_send from "../emails/send.js";
 import type * as emails_templates_organizationInvitation from "../emails/templates/organizationInvitation.js";
 import type * as emails_templates_verification from "../emails/templates/verification.js";
 import type * as http from "../http.js";
-import type * as organizations_invitations from "../organizations/invitations.js";
+import type * as organizations_invitations_actions from "../organizations/invitations/actions.js";
+import type * as organizations_invitations_db from "../organizations/invitations/db.js";
 import type * as organizations_members from "../organizations/members.js";
 import type * as organizations from "../organizations.js";
 import type * as storage from "../storage.js";
@@ -36,13 +37,14 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "emails/handlers": typeof emails_handlers;
+  "emails/actions": typeof emails_actions;
   "emails/process": typeof emails_process;
   "emails/send": typeof emails_send;
   "emails/templates/organizationInvitation": typeof emails_templates_organizationInvitation;
   "emails/templates/verification": typeof emails_templates_verification;
   http: typeof http;
-  "organizations/invitations": typeof organizations_invitations;
+  "organizations/invitations/actions": typeof organizations_invitations_actions;
+  "organizations/invitations/db": typeof organizations_invitations_db;
   "organizations/members": typeof organizations_members;
   organizations: typeof organizations;
   storage: typeof storage;

@@ -59,6 +59,36 @@ export const getOrganizationMembers = query({
 });
 
 /**
+ * Check if the current user is an admin or owner of the specified organization
+ */
+export const isOwnerOrAdmin = query({
+  args: {
+    organizationId: v.id("organizations"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return false;
+    }
+
+    // Get the membership
+    const membership = await ctx.db
+      .query("organizationMembers")
+      .withIndex("orgId_and_userId", (q) =>
+        q.eq("organizationId", args.organizationId).eq("userId", userId)
+      )
+      .first();
+
+    return (
+      !!membership &&
+      ["role_organization_owner", "role_organization_admin"].includes(
+        membership.role
+      )
+    );
+  },
+});
+
+/**
  * Update the role of a member in the current active organization
  */
 export const updateMemberRole = mutation({

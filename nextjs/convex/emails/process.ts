@@ -1,3 +1,5 @@
+"use node";
+
 import { render as maizzleRender } from "@maizzle/framework";
 
 /**

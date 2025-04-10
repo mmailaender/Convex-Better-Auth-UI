@@ -4,7 +4,7 @@ import { Tabs } from "@skeletonlabs/skeleton-react";
 // Components
 import OrganizationInfo from "@/components/organizations/ui/widget/OrganizationInfo";
 import DeleteOrganization from "@/components/organizations/ui/widget/DeleteOrganization";
-import Members from "@/components/organizations/ui/widget/Members";
+import Members from "@/components/organizations/ui/widget/MembersAndInvitations";
 
 // API
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
