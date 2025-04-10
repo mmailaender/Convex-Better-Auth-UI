@@ -51,6 +51,7 @@ export default function InviteMembers() {
     try {
       // Split and clean email addresses
       const emails = emailInput
+        .replace(/[,;\s]+/g, ",") // Replace all delimiters (commas, semicolons, spaces) with a single comma
         .split(",")
         .map((email: string) => email.trim())
         .filter((email: string) => email.length > 0);
@@ -150,7 +151,7 @@ export default function InviteMembers() {
       <div className="mt-3 text-xs text-surface-500-500">
         <p>
           You can invite multiple people by separating email addresses with
-          commas.
+          commas, semicolons, or spaces.
         </p>
       </div>
     </div>
