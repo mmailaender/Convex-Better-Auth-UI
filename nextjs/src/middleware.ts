@@ -1,6 +1,54 @@
-import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
+import { api } from "@/convex/_generated/api";
+import {
+  convexAuthNextjsMiddleware,
+  convexAuthNextjsToken,
+  createRouteMatcher,
+} from "@convex-dev/auth/nextjs/server";
+import { fetchMutation } from "convex/nextjs";
+import { NextResponse } from "next/server";
 
-export default convexAuthNextjsMiddleware();
+const isInvitationAcceptRoute = createRouteMatcher(["/api/invitations/accept"]);
+
+export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+  if (isInvitationAcceptRoute(request)) {
+    const isAuthenticated = await convexAuth.isAuthenticated();
+
+    if (!isAuthenticated) {
+      // If not authenticated, redirect to login with return URL
+      const url = new URL(request.url);
+      return NextResponse.redirect(
+        new URL(
+          `/login?returnTo=${encodeURIComponent(url.pathname)}`,
+          request.url
+        )
+      );
+    }
+
+    // Get invitation ID from query params
+    const url = new URL(request.url);
+    const invitationId = url.searchParams.get("id");
+
+    if (invitationId) {
+      try {
+        // Call the mutation directly with the auth token
+        await fetchMutation(
+          api.organizations.invitations.db.acceptInvitation,
+          { invitationId },
+          { token: await convexAuthNextjsToken() }
+        );
+
+        // Redirect to home page
+        return NextResponse.redirect(new URL("/", request.url));
+      } catch (error) {
+        // Handle error
+        return NextResponse.error();
+      }
+    }
+  }
+
+  // For other routes, no special handling
+  return;
+});
 
 export const config = {
   // The following matcher runs middleware on all routes

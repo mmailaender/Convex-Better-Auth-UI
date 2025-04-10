@@ -178,3 +178,86 @@ export const createInvitation = internalMutation({
     }
   },
 });
+
+/**
+ * Accepts an organization invitation
+ *
+ * This mutation is called by the HTTP action when a user clicks on the
+ * invitation acceptance link in their email. It adds the user to the
+ * organization with the specified role, sets it as their active organization,
+ * and deletes the invitation.
+ */
+export const acceptInvitation = mutation({
+  args: {
+    invitationId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    // Get the user
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Get the invitation
+    const invitation = await ctx.db
+      .query("invitations")
+      .filter((q) => q.eq(q.field("_id"), args.invitationId))
+      .first();
+
+    if (!invitation) {
+      throw new Error("Invitation not found");
+    }
+
+    // Check if invitation has expired
+    if (invitation.expiresAt < Date.now()) {
+      throw new Error("Invitation has expired");
+    }
+
+    // Check if user's email matches the invitation email
+    if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
+      throw new Error("This invitation was not sent to your email address");
+    }
+
+    // Check if the user is already a member of the organization
+    const existingMembership = await ctx.db
+      .query("organizationMembers")
+      .withIndex("orgId_and_userId", (q) =>
+        q.eq("organizationId", invitation.organizationId).eq("userId", userId)
+      )
+      .first();
+
+    if (existingMembership) {
+      // User is already a member, so delete the invitation
+      await ctx.db.delete(invitation._id);
+
+      // Set this organization as the user's active organization
+      await ctx.db.patch(userId, {
+        activeOrganizationId: invitation.organizationId,
+      });
+
+      return { success: true };
+    }
+
+    // Add the user to the organization with the role from the invitation
+    await ctx.db.insert("organizationMembers", {
+      organizationId: invitation.organizationId,
+      userId: userId,
+      role: invitation.role,
+    });
+
+    // Set this organization as the user's active organization
+    await ctx.db.patch(userId, {
+      activeOrganizationId: invitation.organizationId,
+    });
+
+    // Delete the invitation
+    await ctx.db.delete(invitation._id);
+
+    return { success: true };
+  },
+});
