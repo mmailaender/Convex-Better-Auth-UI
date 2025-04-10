@@ -5,6 +5,7 @@ import { Tabs } from "@skeletonlabs/skeleton-react";
 import OrganizationInfo from "@/components/organizations/ui/widget/OrganizationInfo";
 import DeleteOrganization from "@/components/organizations/ui/widget/DeleteOrganization";
 import Members from "@/components/organizations/ui/widget/MembersAndInvitations";
+import LeaveOrganization from "@/components/organizations/ui/widget/LeaveOrganization";
 
 // API
 import { useIsOwnerOrAdmin } from "@/components/organizations/api/hooks";
@@ -60,7 +61,7 @@ export default function OrganizationProfile({
         <Tabs.Panel value="general">
           <OrganizationInfo />
           <DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
-          {/* <LeaveOrganization bind:user={user!} /> */}
+          <LeaveOrganization />
         </Tabs.Panel>
         {isOwnerOrAdmin && (
           <>
