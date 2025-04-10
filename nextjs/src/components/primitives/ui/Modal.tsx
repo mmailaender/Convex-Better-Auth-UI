@@ -127,6 +127,10 @@ export const ModalTrigger = React.forwardRef<
     e.stopPropagation();
     // Toggle the modal state directly
     context.setOpen(!context.open);
+    // Call the user's onClick handler if provided
+    if (props.onClick && typeof props.onClick === "function") {
+      props.onClick(e);
+    }
   };
 
   // For custom components passed as children
