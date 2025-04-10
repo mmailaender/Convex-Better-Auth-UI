@@ -12,14 +12,9 @@ type Role =
   | "role_organization_owner";
 
 type InvitationResponse = {
-  _id: Id<"invitations">;
+  _id: Id<"invitations"> | null;
   email: string;
   role: string;
-};
-
-type InvitationResult = {
-  email: string;
-  invitation?: InvitationResponse;
   success: boolean;
   error?: string;
 };
@@ -29,17 +24,17 @@ type InvitationResult = {
  */
 export default function InviteMembers() {
   // State variables
-  const [emailInput, setEmailInput] = useState("");
+  const [emailInput, setEmailInput] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<Role>(
     "role_organization_member"
   );
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
-  // Convex action for inviting a member
-  const inviteMember = useAction(
-    api.organizations.invitations.actions.inviteMember
+  // Convex action for inviting members
+  const inviteMembers = useAction(
+    api.organizations.invitations.actions.inviteMembers
   );
 
   /**
@@ -66,35 +61,20 @@ export default function InviteMembers() {
         return;
       }
 
-      // Send invitations for each email
-      const invitationPromises = emails.map(async (email: string) => {
-        try {
-          // Call the inviteMember action for each email
-          const invitation = await inviteMember({
-            email,
-            role: selectedRole,
-          });
-
-          return { email, invitation, success: true } as InvitationResult;
-        } catch (err) {
-          return {
-            email,
-            success: false,
-            error: err instanceof Error ? err.message : "Unknown error",
-          } as InvitationResult;
-        }
+      // Send invitations for all emails at once
+      const results = await inviteMembers({
+        emails,
+        role: selectedRole,
       });
 
-      const results = await Promise.all(invitationPromises);
-
       // Process results
-      const successful = results.filter((r: InvitationResult) => r.success);
-      const failed = results.filter((r: InvitationResult) => !r.success);
+      const successful = results.filter((r: InvitationResponse) => r.success);
+      const failed = results.filter((r: InvitationResponse) => !r.success);
 
       if (successful.length > 0) {
         setSuccessMessage(
           `Successfully sent ${successful.length} invitation(s) to: ${successful
-            .map((r: InvitationResult) => r.email)
+            .map((r: InvitationResponse) => r.email)
             .join(", ")}`
         );
         setEmailInput("");
@@ -102,7 +82,7 @@ export default function InviteMembers() {
 
       if (failed.length > 0) {
         setErrorMessage(
-          `Failed to send invitation(s) to: ${failed.map((r: InvitationResult) => r.email).join(", ")}`
+          `Failed to send invitation(s) to: ${failed.map((r: InvitationResponse) => r.email).join(", ")}`
         );
       }
     } catch (err) {
