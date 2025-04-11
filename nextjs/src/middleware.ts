@@ -26,7 +26,7 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
       const url = new URL(request.url);
       return NextResponse.redirect(
         new URL(
-          `/login?returnTo=${encodeURIComponent(url.pathname + url.search)}`,
+          `/login?redirectTo=${encodeURIComponent(url.pathname + url.search)}`,
           request.url
         )
       );
@@ -34,7 +34,7 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 
     // Get invitation ID from query params
     const url = new URL(request.url);
-    const invitationId = url.searchParams.get("id");
+    const invitationId = url.searchParams.get("invitationId");
 
     if (invitationId) {
       try {
