@@ -31,8 +31,8 @@ export function MembersList(): React.ReactNode {
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Get current user and organization data
-  const currentUser = useQuery(api.organizations.getActiveOrganization);
+  // Get current organization data
+  const currentOrganization = useQuery(api.organizations.getActiveOrganization);
   const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
   // Get members data and mutations
@@ -157,6 +157,7 @@ export function MembersList(): React.ReactNode {
         <tbody>
           {filteredMembers.map((member) => (
             <tr key={member._id}>
+              {/* Member Name */}
               <td>
                 <div className="flex items-center space-x-4">
                   <div className="avatar">
@@ -177,12 +178,15 @@ export function MembersList(): React.ReactNode {
                   <span className="font-semibold">{member.user.name}</span>
                 </div>
               </td>
+              {/* Member Email */}
               <td>{member.user.email}</td>
+              {/* Member Role */}
               <td>
                 <div className="flex items-center">
                   {isOwnerOrAdmin &&
-                  currentUser &&
-                  member.user.id.toString() !== currentUser._id.toString() &&
+                  currentOrganization &&
+                  member.user.id.toString() !==
+                    currentOrganization._id.toString() &&
                   member.role !== "role_organization_owner" ? (
                     <select
                       value={member.role}
@@ -209,11 +213,13 @@ export function MembersList(): React.ReactNode {
                   )}
                 </div>
               </td>
+              {/* Member Actions */}
               <td>
                 <div className="flex space-x-2 justify-end">
                   {isOwnerOrAdmin &&
-                    currentUser &&
-                    member.user.id.toString() !== currentUser._id.toString() &&
+                    currentOrganization &&
+                    member.user.id.toString() !==
+                      currentOrganization._id.toString() &&
                     member.role !== "role_organization_owner" && (
                       <Modal>
                         <ModalTrigger

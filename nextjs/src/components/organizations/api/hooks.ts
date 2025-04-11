@@ -16,3 +16,9 @@ export const useIsOwner = () => {
   const isOwner = activeOrganization?.role === "role_organization_owner";
   return isOwner;
 };
+
+export const useIsAdmin = () => {
+  const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+  const isAdmin = activeOrganization?.role === "role_organization_admin";
+  return isAdmin;
+};

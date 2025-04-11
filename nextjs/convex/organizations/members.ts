@@ -106,6 +106,11 @@ export const updateMemberRole = mutation({
       throw new Error("Not authenticated");
     }
 
+    // Prevent users from changing their own role
+    if (actorId.toString() === args.userId.toString()) {
+      throw new Error("Cannot change your own role");
+    }
+
     // Get user to find active organization
     const actor = await ctx.db.get(actorId);
     if (!actor || !actor.activeOrganizationId) {
