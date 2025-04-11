@@ -7,9 +7,17 @@ import {
 import { fetchMutation } from "convex/nextjs";
 import { NextResponse } from "next/server";
 
+const isLoginPage = createRouteMatcher(["/login"]);
 const isInvitationAcceptRoute = createRouteMatcher(["/api/invitations/accept"]);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+  if (isLoginPage(request)) {
+    const isAuthenticated = await convexAuth.isAuthenticated();
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (isInvitationAcceptRoute(request)) {
     const isAuthenticated = await convexAuth.isAuthenticated();
 
@@ -18,7 +26,7 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
       const url = new URL(request.url);
       return NextResponse.redirect(
         new URL(
-          `/login?returnTo=${encodeURIComponent(url.pathname)}`,
+          `/login?returnTo=${encodeURIComponent(url.pathname + url.search)}`,
           request.url
         )
       );

@@ -21,16 +21,18 @@ import CreateOrganization from "@/components/organizations/ui/widget/CreateOrgan
 import OrganizationProfile from "@/components/organizations/ui/widget/OrganizationProfile";
 
 // API
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
 /**
  * Organization switcher component that allows switching between organizations,
  * creating new organizations, and accessing organization settings.
+ * Only displayed when the user is authenticated.
  */
 export default function OrganizationSwitcher() {
   const router = useRouter();
+  const { isLoading, isAuthenticated } = useConvexAuth();
 
   // Queries and mutations
   const organizations = useQuery(api.organizations.getUserOrganizations);
@@ -76,8 +78,13 @@ export default function OrganizationSwitcher() {
     </button>
   );
 
+  // Not authenticated - don't show anything
+  if (!isAuthenticated) {
+    return null;
+  }
+
   // Loading state
-  if (!organizations) {
+  if (isLoading || !organizations) {
     return <div className="animate-pulse h-8 w-40 placeholder"></div>;
   }
 

@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { optimizeImage } from "@/components/primitives/utils/optimizeImage";
-import { UploadCloud } from "lucide-react";
+import { UploadCloud, LogIn } from "lucide-react";
 import { Avatar, FileUpload, ProgressRing } from "@skeletonlabs/skeleton-react";
+
+import { optimizeImage } from "@/components/primitives/utils/optimizeImage";
 
 import type { Id } from "@/convex/_generated/dataModel";
 import type { FileChangeDetails } from "@zag-js/file-upload";
 
 /**
  * Component for creating a new organization with logo upload support
+ * Requires authentication to access the form
  */
 export default function CreateOrganization({
   onSuccessfulCreate,
@@ -26,6 +28,7 @@ export default function CreateOrganization({
   redirectTo?: string;
 }) {
   const router = useRouter();
+  const { isLoading, isAuthenticated } = useConvexAuth();
 
   // Mutations
   const createOrganization = useMutation(api.organizations.createOrganization);
@@ -159,6 +162,31 @@ export default function CreateOrganization({
       setIsUploading(false);
     }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-md mx-auto animate-pulse">
+        <div className="h-8 w-64 placeholder mb-4"></div>
+        <div className="h-40 w-full placeholder mb-4"></div>
+        <div className="h-10 w-full placeholder mb-2"></div>
+        <div className="h-10 w-full placeholder"></div>
+      </div>
+    );
+  }
+
+  // Show message for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="w-full max-w-md mx-auto p-6 border border-surface-200-800 rounded-lg text-center">
+        <LogIn className="mx-auto mb-4 size-10 text-surface-400-600" />
+        <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+        <p className="text-surface-600-400 mb-4">
+          Please sign in to create an organization
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
