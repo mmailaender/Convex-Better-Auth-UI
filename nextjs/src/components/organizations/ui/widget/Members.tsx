@@ -189,7 +189,6 @@ export function MembersList(): React.ReactNode {
               <td>
                 <div className="flex items-center">
                   {isOwnerOrAdmin &&
-                  currentOrganization &&
                   member.user._id !== currentUser._id &&
                   member.role !== "role_organization_owner" ? (
                     <select
@@ -224,9 +223,7 @@ export function MembersList(): React.ReactNode {
               <td>
                 <div className="flex space-x-2 justify-end">
                   {isOwnerOrAdmin &&
-                    currentOrganization &&
-                    member.user._id.toString() !==
-                      currentOrganization._id.toString() &&
+                    member.user._id !== currentUser._id &&
                     member.role !== "role_organization_owner" && (
                       <Modal>
                         <ModalTrigger
