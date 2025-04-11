@@ -44,7 +44,7 @@ export const getOrganizationMembers = query({
         return {
           _id: membership._id,
           user: {
-            id: memberUser._id,
+            _id: memberUser._id,
             name: memberUser.name,
             email: memberUser.email,
             image: memberUser.image,

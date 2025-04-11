@@ -43,7 +43,7 @@ export default function LeaveOrganization(): React.ReactNode {
     members?.filter(
       (member) =>
         // Don't include the current user
-        member.user.id !== user?._id
+        member.user._id !== user?._id
     ) || [];
 
   /**
@@ -146,8 +146,8 @@ export default function LeaveOrganization(): React.ReactNode {
                   </option>
                   {organizationMembers.map((member) => (
                     <option
-                      key={member.user.id.toString()}
-                      value={member.user.id.toString()}
+                      key={member.user._id.toString()}
+                      value={member.user._id.toString()}
                     >
                       {member.user.name} ({member.user.email})
                     </option>

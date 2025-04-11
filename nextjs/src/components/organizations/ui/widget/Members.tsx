@@ -32,6 +32,7 @@ export function MembersList(): React.ReactNode {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Get current organization data
+  const currentUser = useQuery(api.users.getUser);
   const currentOrganization = useQuery(api.organizations.getActiveOrganization);
   const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
@@ -125,6 +126,10 @@ export function MembersList(): React.ReactNode {
     return <div>Loading members...</div>;
   }
 
+  if (!currentOrganization || !currentUser) {
+    return <div>Failed to load members</div>;
+  }
+
   return (
     <div>
       {errorMessage && <p className="text-error-500">{errorMessage}</p>}
@@ -185,13 +190,15 @@ export function MembersList(): React.ReactNode {
                 <div className="flex items-center">
                   {isOwnerOrAdmin &&
                   currentOrganization &&
-                  member.user.id.toString() !==
-                    currentOrganization._id.toString() &&
+                  member.user._id !== currentUser._id &&
                   member.role !== "role_organization_owner" ? (
                     <select
                       value={member.role}
                       onChange={(e) =>
-                        handleUpdateRole(member.user.id, e.target.value as Role)
+                        handleUpdateRole(
+                          member.user._id,
+                          e.target.value as Role
+                        )
                       }
                       className="select"
                     >
@@ -218,13 +225,13 @@ export function MembersList(): React.ReactNode {
                 <div className="flex space-x-2 justify-end">
                   {isOwnerOrAdmin &&
                     currentOrganization &&
-                    member.user.id.toString() !==
+                    member.user._id.toString() !==
                       currentOrganization._id.toString() &&
                     member.role !== "role_organization_owner" && (
                       <Modal>
                         <ModalTrigger
                           className="btn text-error-500 hover:preset-tonal-error-500"
-                          onClick={() => setSelectedUserId(member.user.id)}
+                          onClick={() => setSelectedUserId(member.user._id)}
                         >
                           Remove
                         </ModalTrigger>
