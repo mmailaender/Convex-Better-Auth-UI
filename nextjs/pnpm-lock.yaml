@@ -29,6 +29,9 @@ importers:
       convex-helpers:
         specifier: ^0.1.76
         version: 0.1.76(convex@1.22.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      fsevents:
+        specifier: ^2.3.3
+        version: 2.3.3
       install:
         specifier: ^0.13.0
         version: 0.13.0
@@ -6328,8 +6331,7 @@ snapshots:
   fs-monkey@1.0.6:
     optional: true
 
-  fsevents@2.3.3:
-    optional: true
+  fsevents@2.3.3: {}
 
   function-bind@1.1.2: {}
 
