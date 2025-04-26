@@ -15,7 +15,6 @@ import type {
 } from "convex/server";
 import type * as auth from "../auth.js";
 import type * as emails_actions from "../emails/actions.js";
-import type * as emails_process from "../emails/process.js";
 import type * as emails_send from "../emails/send.js";
 import type * as emails_templates_organizationInvitation from "../emails/templates/organizationInvitation.js";
 import type * as emails_templates_verification from "../emails/templates/verification.js";
@@ -38,7 +37,6 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "emails/actions": typeof emails_actions;
-  "emails/process": typeof emails_process;
   "emails/send": typeof emails_send;
   "emails/templates/organizationInvitation": typeof emails_templates_organizationInvitation;
   "emails/templates/verification": typeof emails_templates_verification;
