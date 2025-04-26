@@ -39,7 +39,6 @@ declare module '$env/static/private' {
 	export const USER: string;
 	export const SHLVL: string;
 	export const HOME: string;
-	export const OLDPWD: string;
 	export const DBUS_SESSION_BUS_ADDRESS: string;
 	export const WSL_DISTRO_NAME: string;
 	export const WAYLAND_DISPLAY: string;
@@ -86,6 +85,7 @@ declare module '$env/static/private' {
 	export const VSCODE_HANDLES_UNCAUGHT_ERRORS: string;
 	export const ELECTRON_RUN_AS_NODE: string;
 	export const VSCODE_IPC_HOOK_CLI: string;
+	export const VSCODE_L10N_BUNDLE_LOCATION: string;
 	export const VITEST_VSCODE_LOG: string;
 	export const VITEST_VSCODE: string;
 	export const TEST: string;
@@ -140,7 +140,6 @@ declare module '$env/dynamic/private' {
 		USER: string;
 		SHLVL: string;
 		HOME: string;
-		OLDPWD: string;
 		DBUS_SESSION_BUS_ADDRESS: string;
 		WSL_DISTRO_NAME: string;
 		WAYLAND_DISPLAY: string;
@@ -187,6 +186,7 @@ declare module '$env/dynamic/private' {
 		VSCODE_HANDLES_UNCAUGHT_ERRORS: string;
 		ELECTRON_RUN_AS_NODE: string;
 		VSCODE_IPC_HOOK_CLI: string;
+		VSCODE_L10N_BUNDLE_LOCATION: string;
 		VITEST_VSCODE_LOG: string;
 		VITEST_VSCODE: string;
 		TEST: string;
