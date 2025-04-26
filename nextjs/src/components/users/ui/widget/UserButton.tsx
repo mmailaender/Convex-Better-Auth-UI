@@ -19,8 +19,13 @@ import {
 } from "@/components/primitives/ui/Modal";
 
 import UserProfile from "@/components/users/ui/page/UserProfile";
+import { Placement } from "@floating-ui/react";
 
-export default function UserButton() {
+export default function UserButton({
+  popoverPlacement = "bottom-end",
+}: {
+  popoverPlacement?: Placement;
+}) {
   const { signOut } = useAuthActions();
   const user = useQuery(api.users.getUser);
   const [open, setOpen] = useState(false);
@@ -31,7 +36,7 @@ export default function UserButton() {
       <Authenticated>
         {user ? (
           <>
-            <Popover open={open} onOpenChange={setOpen} placement="bottom-end">
+            <Popover open={open} onOpenChange={setOpen} placement={popoverPlacement}>
               <PopoverTrigger onClick={() => setOpen((v) => !v)}>
                 <Avatar src={user.image} name={user.name} size="size-10" />
               </PopoverTrigger>
