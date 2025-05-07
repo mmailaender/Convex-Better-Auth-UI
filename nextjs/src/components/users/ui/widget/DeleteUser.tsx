@@ -31,8 +31,9 @@ export default function DeleteUser() {
       open={deleteConfirmationOpen}
       onOpenChange={setDeleteConfirmationOpen}
     >
-      <ModalTrigger className="btn text-error-500 hover:preset-tonal-error-500">
-        Delete account
+      <ModalTrigger className=" w-full" >
+        <button className="btn preset-faded-surface-50-950 justify-between hover:bg-error-200-800 hover:text-error-950-50 gap-1 text-sm w-full h-10">Delete account</button>
+        
       </ModalTrigger>
       <ModalContent>
         <header className="flex justify-between">

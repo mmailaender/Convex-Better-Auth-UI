@@ -266,7 +266,7 @@ export const ModalClose = React.forwardRef<
       type="button"
       className={
         className ||
-        `absolute top-2 right-2 p-2 rounded-full hover:bg-surface-300-700`
+        `absolute top-3 right-3 px-1 btn btn-sm preset-faded-surface hover:preset-filled-surface-200-800 ease-in-out duration-200`
       }
       {...props}
       ref={ref}
@@ -275,7 +275,7 @@ export const ModalClose = React.forwardRef<
         setOpen(false);
       }}
     >
-      {children || <X size={24} />}
+      {children || <X size={16} />}
     </button>
   );
 });

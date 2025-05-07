@@ -124,19 +124,25 @@ export default function ProfileInfo() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center gap-4">
-        <div className="relative">
+      <div className=" flex flex-col items-center gap-1">
+       <p className="w-full pl-4 py-2 font-semibold">Profile</p>
+        <div className="flex justify-center items-center rounded-lg p-0 w-full bg-surface-50-950 py-4">
           <FileUpload
             accept="image/*"
             allowDrop
             maxFiles={1}
             onFileChange={handleFileChange}
           >
-            <div className="group relative cursor-pointer">
-              <Avatar src={user.image || ""} name={user.name} size="size-16" />
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="group relative cursor-pointer flex flex-col gap-2">
+              <Avatar src={user.image || ""} name={user.name} size="size-20" />
+             
+                <span className="text-sm font-semibold text-center text-surface-950-50 hover:underline">Upload</span>
+                
+              
+              
+              {/* <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                 <UploadCloud className="size-6 text-white" />
-              </div>
+              </div> */}
               {isUploading && (
                 <ProgressRing
                   value={null}
@@ -150,11 +156,13 @@ export default function ProfileInfo() {
         </div>
 
         {!isEditing ? (
-          <button onClick={toggleEdit} className="flex flex-col">
-            <span className="text-surface-800-200 text-lg font-medium">
+          <button onClick={toggleEdit} className="flex flex-col items-start w-full bg-surface-50-950 rounded-lg px-4 py-2">
+            <span className="text-xs text-surface-600-400">Name</span>
+            <span className="text-surface-800-200 font-medium">
               {user.name}
             </span>
           </button>
+          
         ) : (
           <form onSubmit={handleSubmit} className="w-full">
             <div className="flex flex-col gap-2">
