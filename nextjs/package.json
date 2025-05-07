@@ -5,7 +5,7 @@
   "scripts": {
     "dev:frontend": "next dev --turbopack",
     "dev:backend": "npx convex dev",
-    "dev": "pnpm dev:frontend & pnpm dev:backend",
+    "dev": "concurrently --kill-others \"pnpm dev:frontend\" \"pnpm dev:backend\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -34,6 +34,7 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@zag-js/file-upload": "^1.11.0",
+    "concurrently": "^9.1.2",
     "eslint": "^9.25.1",
     "eslint-config-next": "15.3.1",
     "tailwindcss": "^4.1.4",
