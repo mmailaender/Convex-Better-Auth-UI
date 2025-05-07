@@ -26,16 +26,7 @@
  * ```
  */
 declare module '$env/static/private' {
-	export const BLOB_READ_WRITE_TOKEN: string;
 	export const CONVEX_DEPLOYMENT: string;
-	export const CONVEX_URL: string;
-	export const CUSTOM_DOMAINS: string;
-	export const EMAIL_SEND_FROM: string;
-	export const FAUNA_SIGNIN_KEY: string;
-	export const GITHUB_CLIENT_ID: string;
-	export const GITHUB_CLIENT_SECRET: string;
-	export const REOON_EMAIL_VERIFIER_TOKEN: string;
-	export const RESEND_API_KEY: string;
 	export const LESSOPEN: string;
 	export const npm_package_devDependencies__eslint_compat: string;
 	export const npm_package_devDependencies__types_node: string;
@@ -105,7 +96,6 @@ declare module '$env/static/private' {
 	export const npm_config_registry: string;
 	export const TERM: string;
 	export const npm_package_scripts_vercel_pull: string;
-	export const npm_package_scripts_pull_convex_auth: string;
 	export const npm_package_devDependencies_prettier_plugin_tailwindcss: string;
 	export const npm_package_dependencies__oslojs_webauthn: string;
 	export const npm_config_node_gyp: string;
@@ -186,7 +176,7 @@ declare module '$env/static/private' {
  * ```
  */
 declare module '$env/static/public' {
-	export const PUBLIC_APP_NAME: string;
+	export const PUBLIC_CONVEX_URL: string;
 }
 
 /**
@@ -205,16 +195,7 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
-		BLOB_READ_WRITE_TOKEN: string;
 		CONVEX_DEPLOYMENT: string;
-		CONVEX_URL: string;
-		CUSTOM_DOMAINS: string;
-		EMAIL_SEND_FROM: string;
-		FAUNA_SIGNIN_KEY: string;
-		GITHUB_CLIENT_ID: string;
-		GITHUB_CLIENT_SECRET: string;
-		REOON_EMAIL_VERIFIER_TOKEN: string;
-		RESEND_API_KEY: string;
 		LESSOPEN: string;
 		npm_package_devDependencies__eslint_compat: string;
 		npm_package_devDependencies__types_node: string;
@@ -284,7 +265,6 @@ declare module '$env/dynamic/private' {
 		npm_config_registry: string;
 		TERM: string;
 		npm_package_scripts_vercel_pull: string;
-		npm_package_scripts_pull_convex_auth: string;
 		npm_package_devDependencies_prettier_plugin_tailwindcss: string;
 		npm_package_dependencies__oslojs_webauthn: string;
 		npm_config_node_gyp: string;
@@ -372,7 +352,7 @@ declare module '$env/dynamic/private' {
  */
 declare module '$env/dynamic/public' {
 	export const env: {
-		PUBLIC_APP_NAME: string;
+		PUBLIC_CONVEX_URL: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }

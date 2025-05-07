@@ -3,48 +3,8 @@
 		"src/routes/+layout.server.ts",
 		"src/routes/+layout.server.ts"
 	],
-	"/api/auth/emails/verification": [
-		"src/routes/api/auth/emails/verification/+server.ts"
-	],
-	"/api/auth/oauth/github": [
-		"src/routes/api/auth/oauth/github/+server.ts"
-	],
-	"/api/auth/oauth/github/callback": [
-		"src/routes/api/auth/oauth/github/callback/+server.ts"
-	],
-	"/api/auth/passkey/challenge": [
-		"src/routes/api/auth/passkey/challenge/+server.ts"
-	],
-	"/api/auth/passkey/sign-in": [
-		"src/routes/api/auth/passkey/sign-in/+server.ts"
-	],
-	"/api/auth/passkey/sign-up": [
-		"src/routes/api/auth/passkey/sign-up/+server.ts"
-	],
-	"/api/auth/sign-out": [
-		"src/routes/api/auth/sign-out/+server.ts"
-	],
-	"/api/org": [
-		"src/routes/api/org/+page.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/api/org/invitation/accept": [
-		"src/routes/api/org/invitation/accept/+server.ts"
-	],
-	"/api/primitives": [
-		"src/routes/api/primitives/+page.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/api/user": [
-		"src/routes/api/user/+page.server.ts",
-		"src/routes/+layout.server.ts"
-	],
 	"/login": [
 		"src/routes/login/+page.server.ts",
-		"src/routes/+layout.server.ts"
-	],
-	"/user-profile": [
-		"src/routes/user-profile/+page.server.ts",
 		"src/routes/+layout.server.ts"
 	]
 }

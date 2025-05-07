@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createConvexAuthHandlers } from '@convex-dev/auth/sveltekit/server';
 import type { LayoutServerLoad } from './$types';
 
@@ -5,6 +6,6 @@ import type { LayoutServerLoad } from './$types';
 const { getAuthState } = createConvexAuthHandlers();
 
 // Export load function to provide auth state to layout
-export const load: LayoutServerLoad = async (event) => {
+export const load = async (event: Parameters<LayoutServerLoad>[0]) => {
 	return { authState: await getAuthState(event) };
 };

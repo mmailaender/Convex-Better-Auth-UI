@@ -17,8 +17,7 @@
 		"vercel:link": "cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie\"",
 		"vercel:pull": "cross-env-shell \"vercel env pull --token $VERCEL_TOKEN --scope etesie\"",
 		"init:repo": "pnpm config set auto-install-peers true && pnpm install && cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie && vercel env pull --token $VERCEL_TOKEN --scope etesie\" && pnpm dev",
-		"pull:convex": "rm -rf ./src/convex && cp -r ../convex ./src/convex",
-		"pull:convex-auth": "rm -rf ../dist/convex-auth && mkdir -p ../dist/convex-auth && cp -r ../../convex-auth/dist/* ../dist/convex-auth/"
+		"pull:convex": "rm -rf ./src/convex && cp -r ../convex ./src/convex"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.8",
@@ -53,7 +52,7 @@
 	},
 	"dependencies": {
 		"@auth/core": "^0.39.0",
-		"@convex-dev/auth": "file:../../convex-auth",
+		"@convex-dev/auth": "link:../../convex-auth",
 		"@inlang/paraglide-sveltekit": "^0.16.1",
 		"@maizzle/framework": "^5.0.6",
 		"@oslojs/binary": "^1.0.0",
