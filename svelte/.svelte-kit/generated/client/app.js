@@ -20,7 +20,7 @@ export const dictionary = {
 		"/api/org": [~3],
 		"/api/primitives": [~4],
 		"/api/user": [~5],
-		"/sign-in": [~6],
+		"/login": [~6],
 		"/user-profile": [~7]
 	};
 

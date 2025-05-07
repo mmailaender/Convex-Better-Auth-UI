@@ -3,7 +3,9 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"dev:frontend": "vite dev",
+		"dev:backend": "npx convex dev",
+		"dev": "concurrently --kill-others \"pnpm dev:frontend\" \"pnpm dev:backend\"",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -15,7 +17,8 @@
 		"vercel:link": "cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie\"",
 		"vercel:pull": "cross-env-shell \"vercel env pull --token $VERCEL_TOKEN --scope etesie\"",
 		"init:repo": "pnpm config set auto-install-peers true && pnpm install && cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie && vercel env pull --token $VERCEL_TOKEN --scope etesie\" && pnpm dev",
-		"fauna:generate": "npx fauna-typed --dir='src/lib/db/schema/types'"
+		"pull:convex": "rm -rf ./src/convex && cp -r ../convex ./src/convex",
+		"pull:convex-auth": "rm -rf ../dist/convex-auth && mkdir -p ../dist/convex-auth && cp -r ../../convex-auth/dist/* ../dist/convex-auth/"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.8",
@@ -30,11 +33,11 @@
 		"@tailwindcss/typography": "^0.5.16",
 		"@types/node": "^22.13.17",
 		"@zag-js/file-upload": "^1.7.0",
+		"concurrently": "^9.1.2",
 		"cross-env": "^7.0.3",
 		"eslint": "^9.23.0",
 		"eslint-config-prettier": "^10.1.1",
 		"eslint-plugin-svelte": "^3.5.0",
-		"fauna-typed": "^0.3.6",
 		"globals": "^16.0.0",
 		"prettier": "^3.5.3",
 		"prettier-plugin-svelte": "^3.3.3",
@@ -49,6 +52,8 @@
 		"vitest": "^3.1.1"
 	},
 	"dependencies": {
+		"@auth/core": "^0.39.0",
+		"@convex-dev/auth": "file:../../convex-auth",
 		"@inlang/paraglide-sveltekit": "^0.16.1",
 		"@maizzle/framework": "^5.0.6",
 		"@oslojs/binary": "^1.0.0",
