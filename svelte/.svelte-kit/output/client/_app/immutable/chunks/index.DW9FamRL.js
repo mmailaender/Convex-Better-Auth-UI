@@ -1,1 +1,0 @@
-import{n as t,b as e,o as r}from"./entry.BCpqZHYJ.js";const a={get data(){return r.data},get error(){return r.error},get form(){return r.form},get params(){return r.params},get route(){return r.route},get state(){return r.state},get status(){return r.status},get url(){return r.url}};e.updated.check;const s=a;export{s as p};
