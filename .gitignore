@@ -6,7 +6,7 @@ cert
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
+/svelte/.svelte-kit
 /build
 
 # OS
@@ -22,7 +22,3 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-
-# Paraglide
-src/lib/paraglide
-.env*.local
