@@ -1,6 +1,12 @@
 {
 	"compilerOptions": {
 		"paths": {
+			"$convex": [
+				"../src/convex"
+			],
+			"$convex/*": [
+				"../src/convex/*"
+			],
 			"$lib": [
 				"../src/lib"
 			],
