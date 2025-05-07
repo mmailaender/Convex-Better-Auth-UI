@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev:frontend": "next dev --turbopack",
+    "dev:backend": "npx convex dev",
+    "dev": "pnpm dev:frontend & pnpm dev:backend",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
