@@ -8,7 +8,8 @@
     "dev": "concurrently --kill-others \"pnpm dev:frontend\" \"pnpm dev:backend\"",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pull:convex": "rm -rf ./convex && cp -r ../convex ./convex"
   },
   "dependencies": {
     "@auth/core": "0.39.0",
