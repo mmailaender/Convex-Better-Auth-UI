@@ -52,8 +52,7 @@
 	},
 	"dependencies": {
 		"@auth/core": "^0.39.0",
-		"@convex-dev/auth": "link:../../convex-auth",
-		"@inlang/paraglide-sveltekit": "^0.16.1",
+		"@convex-dev/auth": "file:../../convex-auth",
 		"@maizzle/framework": "^5.0.8",
 		"@oslojs/binary": "^1.0.0",
 		"@oslojs/crypto": "^1.0.1",
