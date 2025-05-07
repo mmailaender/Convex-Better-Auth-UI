@@ -6,6 +6,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import OrganizationSwitcher from "@/components/organizations/ui/widget/OrganizationSwitcher";
 
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,7 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en" data-theme="cerberus">
+      <html lang="en" data-theme="authapp">
+        <head>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+          </style>
+          </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
