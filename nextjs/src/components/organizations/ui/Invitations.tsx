@@ -18,7 +18,7 @@ type Role = Doc<'organizationMembers'>['role'];
 /**
  * Component that displays a list of organization invitations with revoke functionality
  */
-export function InvitationsList(): React.ReactNode {
+export function Invitations(): React.ReactNode {
 	// State hooks
 	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [successMessage, setSuccessMessage] = useState<string>('');

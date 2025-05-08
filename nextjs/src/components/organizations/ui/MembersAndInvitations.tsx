@@ -1,13 +1,17 @@
 import { useState } from 'react';
+
+// Components
 import { Tabs } from '@skeletonlabs/skeleton-react';
-import { MembersList } from '@/components/organizations/ui/Members';
-import { InvitationsList } from '@/components/organizations/ui/Invitations';
+import { Members } from '@/components/organizations/ui/Members';
+import { Invitations } from '@/components/organizations/ui/Invitations';
+import InviteMembers from './InviteMembers';
+
+// API
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import InviteMembers from './InviteMembers';
 
-export default function Members() {
+export default function MembersAndInvitations() {
 	const [group, setGroup] = useState('members');
 	const members = useQuery(api.organizations.members.getOrganizationMembers);
 	const invitations = useQuery(api.organizations.invitations.db.getInvitations);
@@ -26,11 +30,11 @@ export default function Members() {
 			<Tabs.Content>
 				<Tabs.Panel value="members">
 					<InviteMembers />
-					<MembersList />
+					<Members />
 				</Tabs.Panel>
 				{isOwnerOrAdmin && (
 					<Tabs.Panel value="invitations">
-						<InvitationsList />
+						<Invitations />
 					</Tabs.Panel>
 				)}
 			</Tabs.Content>

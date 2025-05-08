@@ -19,7 +19,7 @@ type Role = Doc<'organizationMembers'>['role'];
 /**
  * Component that displays a list of organization members with role management functionality
  */
-export function MembersList(): React.ReactNode {
+export function Members(): React.ReactNode {
 	// State hooks
 	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [successMessage, setSuccessMessage] = useState<string>('');
