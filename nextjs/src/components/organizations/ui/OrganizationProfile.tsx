@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Tabs } from '@skeletonlabs/skeleton-react';
 
 // Components
+import { Tabs } from '@skeletonlabs/skeleton-react';
 import OrganizationInfo from '@/components/organizations/ui/OrganizationInfo';
 import DeleteOrganization from '@/components/organizations/ui/DeleteOrganization';
 import MembersAndInvitations from '@/components/organizations/ui/MembersAndInvitations';
