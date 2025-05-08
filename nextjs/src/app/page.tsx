@@ -1,4 +1,4 @@
-import UserButton from '@/components/users/ui/widget/UserButton';
+import UserButton from '@/components/users/ui/UserButton';
 import Image from 'next/image';
 
 export default function Home() {

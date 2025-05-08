@@ -14,7 +14,7 @@ import {
 } from '@/components/primitives/ui/Popover';
 import { Modal, ModalClose, ModalContent } from '@/components/primitives/ui/Modal';
 
-import UserProfile from '@/components/users/ui/page/UserProfile';
+import UserProfile from '@/components/users/ui/UserProfile';
 import { Placement } from '@floating-ui/react';
 import { ChevronRight } from 'lucide-react';
 
