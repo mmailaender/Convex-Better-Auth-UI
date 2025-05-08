@@ -7,7 +7,7 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
 
 	// Types
@@ -30,6 +30,7 @@
 	const currentUser = $derived(currentUserResponse.data);
 	const currentOrganization = $derived(currentOrganizationResponse.data);
 	const members = $derived(membersResponse.data);
+	const roles = createRoles();
 
 	/**
 	 * Filter and sort members based on search query and role
@@ -151,7 +152,7 @@
 					<th class="p-2 text-left">Name</th>
 					<th class="p-2 text-left">Email</th>
 					<th class="p-2 text-left">Role</th>
-					{#if isOwnerOrAdmin}
+					{#if roles.isOwnerOrAdmin}
 						<th class="p-2 text-right">Actions</th>
 					{/if}
 				</tr>
@@ -183,7 +184,7 @@
 						<!-- Member Role -->
 						<td>
 							<div class="flex items-center">
-								{#if isOwnerOrAdmin && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+								{#if roles.isOwnerOrAdmin && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
 									<select
 										value={member.role}
 										onchange={(e) => handleRoleChange(e, member.user._id)}
@@ -204,7 +205,7 @@
 							</div>
 						</td>
 						<!-- Member Actions -->
-						{#if isOwnerOrAdmin}
+						{#if roles.isOwnerOrAdmin}
 							<td>
 								<div class="flex justify-end space-x-2">
 									{#if member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}

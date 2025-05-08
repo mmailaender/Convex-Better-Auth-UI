@@ -6,8 +6,10 @@
 	// API
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { isOwner } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	import { goto } from '$app/navigation';
+	
+	const roles = createRoles();
 	const client = useConvexClient();
 
 	// Types
@@ -41,7 +43,7 @@
 	 * Validates form input before submission
 	 */
 	function validateForm(): boolean {
-		if (isOwner && !selectedSuccessor) {
+		if (roles.isOwner && !selectedSuccessor) {
 			errorMessage = 'As the organization owner, you must select a successor before leaving.';
 			return false;
 		}
@@ -63,7 +65,7 @@
 			await client.mutation(api.organizations.members.leaveOrganization, {
 				organizationId: activeOrganization._id,
 				// Only send successorId if the user is an owner and a successor is selected
-				...(isOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
+				...(roles.isOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
 			});
 
 			modalOpen = false;
@@ -124,7 +126,7 @@
 					resources.
 				</p>
 
-				{#if isOwner}
+				{#if roles.isOwner}
 					<div class="border-warning-300 bg-warning-100 rounded-md border p-3">
 						<p class="text-warning-800 text-sm font-medium">
 							As the organization owner, you must designate a successor before leaving.
@@ -140,7 +142,7 @@
 							value={selectedSuccessor?.toString() || ''}
 							onchange={handleSuccessorChange}
 							class="select w-full"
-							required={isOwner}
+							required={roles.isOwner}
 						>
 							<option value="" disabled>Choose a successor</option>
 							{#each organizationMembers as member}
@@ -162,7 +164,7 @@
 						type="button"
 						class="btn bg-error-500 hover:bg-error-600 text-white"
 						onclick={handleLeaveOrganization}
-						disabled={isOwner && !selectedSuccessor}
+						disabled={roles.isOwner && !selectedSuccessor}
 					>
 						Confirm
 					</button>

@@ -9,8 +9,10 @@
 
 	// Components
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
-	import { isOwner } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	import { X } from 'lucide-svelte';
+
+	const roles = createRoles();
 
 	const { onSuccessfulDelete, redirectTo } = $props<{
 		onSuccessfulDelete?: () => void;
@@ -68,7 +70,7 @@
 	}
 </script>
 
-{#if isOwner && activeOrganization}
+{#if roles.isOwner && activeOrganization}
 	<Modal
 		open={modalOpen}
 		onOpenChange={(e) => (modalOpen = e.open)}

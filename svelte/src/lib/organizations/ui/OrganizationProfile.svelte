@@ -7,7 +7,9 @@
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
 
 	// API
-	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
+
+	const roles = createRoles();
 
 	// Types
 	type OrganizationProfileProps = {
@@ -40,7 +42,7 @@
 		>
 			General
 		</Tabs.Control>
-		{#if isOwnerOrAdmin}
+		{#if roles.isOwnerOrAdmin}
 			<Tabs.Control
 				value="members"
 				base="border-r-1 border-transparent"
@@ -64,7 +66,7 @@
 			<DeleteOrganization {onSuccessfulDelete} />
 			<LeaveOrganization />
 		</Tabs.Panel>
-		{#if isOwnerOrAdmin}
+		{#if roles.isOwnerOrAdmin}
 			<Tabs.Panel value="members">
 				<MembersAndInvitations />
 			</Tabs.Panel>

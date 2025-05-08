@@ -1,6 +1,6 @@
 <script>
-	// import UserButton from '$lib/user/ui/widget/UserButton.svelte';
-	// import OrganizationSwitcher from './organization/ui/widget/OrganizationSwitcher.svelte';
+	import OrganizationSwitcher from '$lib/organizations/ui/OrganizationSwitcher.svelte';
+	import UserButton from '$lib/users/ui/UserButton.svelte';
 </script>
 
 <nav class="bg-surface-200-800">
@@ -102,11 +102,11 @@
 					</svg>
 				</button>
 
-				<!-- <OrganizationSwitcher /> -->
+				<OrganizationSwitcher />
 
 				<!-- Profile dropdown -->
 				<div class="relative">
-					<!-- <UserButton /> -->
+					<UserButton />
 				</div>
 			</div>
 		</div>

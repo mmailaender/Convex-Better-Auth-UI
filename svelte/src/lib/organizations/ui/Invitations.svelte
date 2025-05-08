@@ -6,7 +6,7 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
 
 	// Types
@@ -25,6 +25,7 @@
 
 	// Derived data
 	const invitations = $derived(invitationsResponse.data);
+	const roles = createRoles();
 
 	/**
 	 * Filter invitations based on search query
@@ -126,7 +127,7 @@
 						<th class="p-2 text-left">Email</th>
 						<th class="p-2 text-left">Role</th>
 						<th class="p-2 text-left">Invited By</th>
-						{#if isOwnerOrAdmin}
+						{#if roles.isOwnerOrAdmin}
 							<th class="p-2 text-right">Actions</th>
 						{/if}
 					</tr>
@@ -149,7 +150,7 @@
 								</div>
 							</td>
 							<td class="p-2">{invitation.invitedBy.name}</td>
-							{#if isOwnerOrAdmin}
+							{#if roles.isOwnerOrAdmin}
 								<td class="p-2 text-right">
 									<Modal
 										open={revokeModalOpen}

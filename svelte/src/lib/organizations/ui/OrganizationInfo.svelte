@@ -2,8 +2,10 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
+
+	const roles = createRoles();
 
 	// Components
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
@@ -55,7 +57,7 @@
 	 * Toggles edit mode for organization profile
 	 */
 	function toggleEdit(): void {
-		if (!isOwnerOrAdmin) return;
+		if (!roles.isOwnerOrAdmin) return;
 		isEditing = true;
 		success = '';
 		error = '';
@@ -175,7 +177,7 @@
 		{#if !isEditing}
 			<Avatar src={activeOrganization.logo} name={activeOrganization.name} />
 			<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
-			{#if isOwnerOrAdmin}
+			{#if roles.isOwnerOrAdmin}
 				<button onclick={toggleEdit} class="btn">Edit</button>
 			{/if}
 		{:else}

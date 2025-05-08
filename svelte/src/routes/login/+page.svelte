@@ -17,8 +17,8 @@
 	}
 </script>
 
-<div class="flex w-full flex-col items-stretch gap-2 min-[460px]:flex-row">
-	<button class="btn btn-lg variant-filled-primary" onclick={handleSignIn}>
+<div class="flex w-full items-center justify-center">
+	<button class="btn preset-filled-primary-500" onclick={handleSignIn}>
 		Sign in with GitHub
 	</button>
 </div>

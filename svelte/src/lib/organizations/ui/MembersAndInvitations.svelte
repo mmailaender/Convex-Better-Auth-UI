@@ -8,7 +8,9 @@
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
+
+	const roles = createRoles();
 
 	// Queries
 	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
@@ -25,7 +27,7 @@
 <Tabs value={currentTab} onValueChange={(e) => (currentTab = e.value)}>
 	{#snippet list()}
 		<Tabs.Control value="members">Members {members && `(${members.length})`}</Tabs.Control>
-		{#if isOwnerOrAdmin}
+		{#if roles.isOwnerOrAdmin}
 			<Tabs.Control value="invitations">
 				Invitations {invitations && `(${invitations.length})`}
 			</Tabs.Control>
@@ -40,7 +42,7 @@
 			</div>
 		</Tabs.Panel>
 
-		{#if isOwnerOrAdmin}
+		{#if roles.isOwnerOrAdmin}
 			<Tabs.Panel value="invitations">
 				<div class="mt-4">
 					<Invitations />
