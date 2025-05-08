@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Tabs } from '@skeletonlabs/skeleton-react';
-import { MembersList } from '@/components/organizations/ui/widget/Members';
-import { InvitationsList } from '@/components/organizations/ui/widget/Invitations';
+import { MembersList } from '@/components/organizations/ui/Members';
+import { InvitationsList } from '@/components/organizations/ui/Invitations';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';

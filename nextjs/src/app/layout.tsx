@@ -4,7 +4,7 @@ import { ConvexClientProvider } from './ConvexClientProvider';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import OrganizationSwitcher from '@/components/organizations/ui/widget/OrganizationSwitcher';
+import OrganizationSwitcher from '@/components/organizations/ui/OrganizationSwitcher';
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',

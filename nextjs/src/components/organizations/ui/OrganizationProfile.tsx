@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Tabs } from '@skeletonlabs/skeleton-react';
 
 // Components
-import OrganizationInfo from '@/components/organizations/ui/widget/OrganizationInfo';
-import DeleteOrganization from '@/components/organizations/ui/widget/DeleteOrganization';
-import Members from '@/components/organizations/ui/widget/MembersAndInvitations';
-import LeaveOrganization from '@/components/organizations/ui/widget/LeaveOrganization';
+import OrganizationInfo from '@/components/organizations/ui/OrganizationInfo';
+import DeleteOrganization from '@/components/organizations/ui/DeleteOrganization';
+import Members from '@/components/organizations/ui/MembersAndInvitations';
+import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 
 // API
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';

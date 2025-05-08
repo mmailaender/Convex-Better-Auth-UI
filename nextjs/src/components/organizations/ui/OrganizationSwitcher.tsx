@@ -8,8 +8,8 @@ import { Avatar } from '@skeletonlabs/skeleton-react';
 // Components
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/Popover';
 import { Modal, ModalContent, ModalClose, ModalTrigger } from '@/components/primitives/ui/Modal';
-import CreateOrganization from '@/components/organizations/ui/widget/CreateOrganization';
-import OrganizationProfile from '@/components/organizations/ui/widget/OrganizationProfile';
+import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
+import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
 
 // API
 import { useQuery, useMutation, useConvexAuth } from 'convex/react';
