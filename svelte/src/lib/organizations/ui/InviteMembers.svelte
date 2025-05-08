@@ -61,7 +61,6 @@
 
 			// Process results
 			const successful = results.filter((r: InvitationResponse) => r.success);
-			// const successful = results.filter((r: FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers>) => r.success);
 			const failed = results.filter((r: InvitationResponse) => !r.success);
 
 			if (successful.length > 0) {
