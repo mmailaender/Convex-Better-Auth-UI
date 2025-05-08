@@ -12,7 +12,8 @@
 	const client = useConvexClient();
 
 	// Query for user data
-	const { data: userData } = useQuery(api.users.getUser, {});
+	const response = useQuery(api.users.getUser, {});
+	const userData = $derived(response.data);
 
 	// Component state
 	let isEditing: boolean = $state(false);

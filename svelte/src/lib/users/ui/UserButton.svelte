@@ -24,10 +24,9 @@
 	const { signOut } = useAuth();
 	const isAuthenticated = $derived(useAuth().isAuthenticated);
 
-	$inspect('isAuthenticated: ', isAuthenticated);
-
 	// User data from Convex
-	const { data: user } = useQuery(api.users.getUser, {});
+	const response = useQuery(api.users.getUser, {});
+	const user = $derived(response.data);
 
 	/**
 	 * Open profile modal and close popover
