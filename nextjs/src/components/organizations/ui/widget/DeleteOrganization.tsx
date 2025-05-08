@@ -1,121 +1,110 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import {
-  Modal,
-  ModalTrigger,
-  ModalContent,
-  ModalHeading,
-  ModalClose,
-} from "@/components/primitives/ui/Modal";
+	Modal,
+	ModalTrigger,
+	ModalContent,
+	ModalHeading,
+	ModalClose
+} from '@/components/primitives/ui/Modal';
 
-import { useIsOwner } from "@/components/organizations/api/hooks";
+import { useIsOwner } from '@/components/organizations/api/hooks';
 
 /**
  * Component for deleting an organization
  * Only available to organization owners
  */
 export default function DeleteOrganization({
-  onSuccessfulDelete,
-  redirectTo,
+	onSuccessfulDelete,
+	redirectTo
 }: {
-  /**
-   * Optional callback that will be called when an organization is successfully deleted
-   */
-  onSuccessfulDelete?: () => void;
-  /**
-   * Optional redirect URL after successful deletion
-   */
-  redirectTo?: string;
+	/**
+	 * Optional callback that will be called when an organization is successfully deleted
+	 */
+	onSuccessfulDelete?: () => void;
+	/**
+	 * Optional redirect URL after successful deletion
+	 */
+	redirectTo?: string;
 }) {
-  const [open, setOpen] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const router = useRouter();
-  const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-  const isOwner = useIsOwner();
+	const [open, setOpen] = useState<boolean>(false);
+	const [error, setError] = useState<string>('');
+	const router = useRouter();
+	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+	const isOwner = useIsOwner();
 
-  const deleteOrganization = useMutation(api.organizations.deleteOrganization);
+	const deleteOrganization = useMutation(api.organizations.deleteOrganization);
 
-  if (!activeOrganization) {
-    return null;
-  }
+	if (!activeOrganization) {
+		return null;
+	}
 
-  const handleConfirm = async (): Promise<void> => {
-    try {
-      await deleteOrganization({ organizationId: activeOrganization._id });
-      setOpen(false);
-      
-      // Call the onSuccessfulDelete callback if provided
-      if (onSuccessfulDelete) {
-        onSuccessfulDelete();
-      }
-      
-      // Navigate to the specified URL or home by default
-      if (redirectTo) {
-        router.push(redirectTo);
-      } else {
-        router.push("/");
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(
-          "Unknown error. Please try again. If it persists, contact support."
-        );
-      }
-    }
-  };
+	const handleConfirm = async (): Promise<void> => {
+		try {
+			await deleteOrganization({ organizationId: activeOrganization._id });
+			setOpen(false);
 
-  const handleCancel = (): void => {
-    setOpen(false);
-  };
+			// Call the onSuccessfulDelete callback if provided
+			if (onSuccessfulDelete) {
+				onSuccessfulDelete();
+			}
 
-  // If user is not an owner, don't render anything
-  if (!isOwner) {
-    return null;
-  }
+			// Navigate to the specified URL or home by default
+			if (redirectTo) {
+				router.push(redirectTo);
+			} else {
+				router.push('/');
+			}
+		} catch (err) {
+			if (err instanceof Error) {
+				setError(err.message);
+			} else {
+				setError('Unknown error. Please try again. If it persists, contact support.');
+			}
+		}
+	};
 
-  return (
-    <Modal open={open} onOpenChange={(open) => setOpen(open)}>
-      <ModalTrigger className="btn text-error-500 hover:preset-tonal-error-500">
-        Delete organization
-      </ModalTrigger>
+	const handleCancel = (): void => {
+		setOpen(false);
+	};
 
-      <ModalContent>
-        <ModalClose />
-        <ModalHeading className="h2">Delete organization</ModalHeading>
+	// If user is not an owner, don't render anything
+	if (!isOwner) {
+		return null;
+	}
 
-        <article>
-          <p className="opacity-60">
-            Are you sure you want to delete the organization{" "}
-            {activeOrganization.name}? All organization data will be permanently
-            deleted.
-          </p>
-        </article>
+	return (
+		<Modal open={open} onOpenChange={(open) => setOpen(open)}>
+			<ModalTrigger className="btn text-error-500 hover:preset-tonal-error-500">
+				Delete organization
+			</ModalTrigger>
 
-        <footer className="flex justify-end gap-4 mt-4">
-          <button
-            type="button"
-            className="btn preset-tonal"
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="btn preset-filled-error-500"
-            onClick={handleConfirm}
-          >
-            Confirm
-          </button>
-        </footer>
+			<ModalContent>
+				<ModalClose />
+				<ModalHeading className="h2">Delete organization</ModalHeading>
 
-        {error && <p className="text-error-600-400 mt-2">{error}</p>}
-      </ModalContent>
-    </Modal>
-  );
+				<article>
+					<p className="opacity-60">
+						Are you sure you want to delete the organization {activeOrganization.name}? All
+						organization data will be permanently deleted.
+					</p>
+				</article>
+
+				<footer className="mt-4 flex justify-end gap-4">
+					<button type="button" className="btn preset-tonal" onClick={handleCancel}>
+						Cancel
+					</button>
+					<button type="button" className="btn preset-filled-error-500" onClick={handleConfirm}>
+						Confirm
+					</button>
+				</footer>
+
+				{error && <p className="text-error-600-400 mt-2">{error}</p>}
+			</ModalContent>
+		</Modal>
+	);
 }
