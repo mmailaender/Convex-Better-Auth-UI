@@ -8,6 +8,7 @@
 
 	// Types
 	import type { ComponentProps } from 'svelte';
+	import { X } from 'lucide-svelte';
 	type PopoverProps = ComponentProps<typeof Popover>;
 	type PlacementType = NonNullable<PopoverProps['positioning']>['placement'];
 
@@ -81,17 +82,17 @@
 		<Modal
 			open={profileModalOpen}
 			onOpenChange={(e) => (profileModalOpen = e.open)}
-			contentBase="bg-surface-200-800 rounded-xl relative p-1"
+			contentBase="bg-surface-200-800 relative rounded-xl p-1"
 		>
 			{#snippet content()}
 				<div class="flex items-center justify-between p-0">
 					<UserProfile />
 					<button
-						class="btn-icon btn-icon-sm preset-tonal absolute top-2 right-2"
+						class="btn-icon btn-icon-sm preset-tonal absolute top-2 right-2 rounded-full"
 						onclick={() => (profileModalOpen = false)}
 						aria-label="Close"
 					>
-						<span>×</span>
+						<X />
 					</button>
 				</div>
 			{/snippet}
@@ -100,5 +101,5 @@
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
 {:else}
-	<a href="/login" class="btn preset-filled-primary-500"> Sign in </a>
+	<a href="/login" class="btn preset-filled-primary-500">Sign in </a>
 {/if}
