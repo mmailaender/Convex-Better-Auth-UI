@@ -1,0 +1,42 @@
+{
+  "recommendations": [
+    "christian-kohler.npm-intellisense",
+    "esbenp.prettier-vscode",
+    "christian-kohler.path-intellisense",
+    "aaron-bond.better-comments",
+    "meganrogge.template-string-converter",
+    "leodevbro.blockman",
+    "gruntfuggly.todo-tree",
+    "pkief.material-icon-theme",
+    "wix.vscode-import-cost",
+    "wallabyjs.console-ninja",
+    "MS-vsliveshare.vsliveshare",
+    "sebsojeda.vscode-svx",
+    //  Git
+    "eamodio.gitlens",
+    //## Language Support
+    // Svelte
+    "svelte.svelte-vscode",
+    "fivethree.vscode-svelte-snippets",
+    "garlandcrow.vscode-svelte-pluskit-snippets",
+    "rafaelmartinez.svelte-preview",
+    // Tailwind
+    "bradlc.vscode-tailwindcss",
+    // Env
+    "irongeek.vscode-env",
+    // Vitest
+    "vitest.explorer",
+    // ArkType
+    "arktypeio.arkdark",
+    "YoavBls.pretty-ts-errors"
+  ],
+  // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
+  "unwantedRecommendations": [
+    "ms-azuretools.vscode-docker",
+    "firefox-devtools.vscode-firefox-debug",
+    "ms-edgedevtools.vscode-edge-devtools",
+    "github.copilot",
+    "github.vscode-pull-request-github",
+    "davidanson.vscode-markdownlint"
+  ]
+}
