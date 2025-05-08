@@ -1,5 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import UserButton from '$lib/users/ui/UserButton.svelte';
 </script>
 
-<div class="flex min-h-screen flex-col items-center justify-center gap-6">Hello</div>
+<div
+	class="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20"
+>
+	<main class="row-start-2 flex flex-col items-center gap-[32px] sm:items-start">
+		<UserButton />
+	</main>
+</div>
