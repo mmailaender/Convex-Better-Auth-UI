@@ -30,7 +30,7 @@
 	/**
 	 * Filter invitations based on search query
 	 */
-	const filteredInvitations = $derived(() => {
+	const filteredInvitations = $derived.by(() => {
 		if (!invitations) return [];
 
 		return invitations

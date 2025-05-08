@@ -35,7 +35,7 @@
 	/**
 	 * Filter and sort members based on search query and role
 	 */
-	const filteredMembers = $derived(() => {
+	const filteredMembers = $derived.by(() => {
 		if (!members) return [];
 
 		return members
