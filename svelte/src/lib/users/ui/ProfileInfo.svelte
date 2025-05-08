@@ -118,16 +118,16 @@
 	{#if !userData}
 		<div class="h-16 w-full animate-pulse rounded-md bg-gray-200"></div>
 	{:else}
-		<div class="mb-6 flex items-center gap-4">
-			<div class="relative">
+		<div class="flex flex-col items-center gap-1">
+			<p class="w-full py-2 pl-4 font-semibold">Profile</p>
+			<div class="bg-surface-50-950 flex w-full items-center justify-center rounded-lg p-0 py-4">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div class="group relative cursor-pointer">
-						<Avatar src={userData.image || ''} name={userData.name} size="size-16" />
-						<div
-							class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
-						>
-							<UploadCloud class="size-6 text-white" />
-						</div>
+					<div class="group relative flex cursor-pointer flex-col gap-2">
+						<Avatar src={userData.image || ''} name={userData.name} size="size-20" />
+						<span class="text-surface-950-50 text-center text-sm font-semibold hover:underline">
+							Upload
+						</span>
+
 						{#if isUploading}
 							<ProgressRing
 								value={null}
@@ -141,8 +141,12 @@
 			</div>
 
 			{#if !isEditing}
-				<button onclick={toggleEdit} class="flex flex-col">
-					<span class="text-surface-800-200 text-lg font-medium">
+				<button
+					onclick={toggleEdit}
+					class="bg-surface-50-950 flex w-full flex-col items-start rounded-lg px-4 py-2"
+				>
+					<span class="text-surface-600-400 text-xs">Name</span>
+					<span class="text-surface-800-200 font-medium">
 						{userData.name}
 					</span>
 				</button>
@@ -153,8 +157,8 @@
 							<input type="text" class="input" bind:value={name} />
 						</div>
 						<div class="flex gap-2">
-							<button type="submit" class="btn preset-filled-primary-500"> Save </button>
-							<button type="button" class="btn preset-tonal" onclick={cancelEdit}> Cancel </button>
+							<button type="submit" class="btn preset-filled-primary-500">Save</button>
+							<button type="button" class="btn preset-tonal" onclick={cancelEdit}>Cancel</button>
 						</div>
 					</div>
 				</form>
