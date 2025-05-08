@@ -1,27 +1,24 @@
 <script lang="ts">
+	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	const client = useConvexClient();
+
+	// Components
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 	import { UploadCloud } from 'lucide-svelte';
-
-	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 
-	const client = useConvexClient();
-
-	// Query for user and organization data
+	// Queries
 	const userResponse = useQuery(api.users.getUser, {});
 	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
 
-	// Derived data
-	const user = $derived(userResponse.data);
-	const activeOrganization = $derived(organizationResponse.data);
-
-	// Component state with Runes
+	// State
 	let isEditing: boolean = $state(false);
 	let success: string = $state('');
 	let error: string = $state('');
@@ -35,6 +32,10 @@
 		logo: '',
 		logoId: undefined as Id<'_storage'> | undefined
 	});
+
+	// Derived data
+	const user = $derived(userResponse.data);
+	const activeOrganization = $derived(organizationResponse.data);
 
 	// Update profile data when activeOrganization changes
 	$effect(() => {

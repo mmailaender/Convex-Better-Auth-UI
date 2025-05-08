@@ -7,25 +7,23 @@
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	const client = useConvexClient();
 
 	// Types
 	import type { Doc, Id } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
 
-	// State variables with Runes
+	// Queries
+	const invitationsResponse = useQuery(api.organizations.invitations.db.getInvitations, {});
+
+	// State
 	let errorMessage: string = $state('');
 	let successMessage: string = $state('');
 	let selectedInvitationId: Id<'invitations'> | null = $state(null);
 	let searchQuery: string = $state('');
 	let revokeModalOpen: boolean = $state(false);
 
-	// Convex client for API calls
-	const client = useConvexClient();
-
-	// Convex queries
-	const invitationsResponse = useQuery(api.organizations.invitations.db.getInvitations, {});
-
-	// Derived state
+	// Derived data
 	const invitations = $derived(invitationsResponse.data);
 
 	/**

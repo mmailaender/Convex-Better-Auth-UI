@@ -8,27 +8,25 @@
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
+	const client = useConvexClient();
 
 	// Types
 	import type { Doc, Id } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
 
-	// State variables with Runes
+	// Queries
+	const currentUserResponse = useQuery(api.users.getUser, {});
+	const currentOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
+
+	// State
 	let errorMessage: string = $state('');
 	let successMessage: string = $state('');
 	let selectedUserId: Id<'users'> | null = $state(null);
 	let searchQuery: string = $state('');
 	let removeModalOpen: boolean = $state(false);
 
-	// Convex client for API calls
-	const client = useConvexClient();
-
-	// Convex queries
-	const currentUserResponse = useQuery(api.users.getUser, {});
-	const currentOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
-	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
-
-	// Derived state
+	// Derived data
 	const currentUser = $derived(currentUserResponse.data);
 	const currentOrganization = $derived(currentOrganizationResponse.data);
 	const members = $derived(membersResponse.data);

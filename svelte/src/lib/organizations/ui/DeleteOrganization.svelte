@@ -1,7 +1,13 @@
 <script lang="ts">
+	// Navigation
+	import { goto } from '$app/navigation';
+
+	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { goto } from '$app/navigation';
+	const client = useConvexClient();
+
+	// Components
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { isOwner } from '$lib/organizations/api/roles.svelte';
 	import { X } from 'lucide-svelte';
@@ -11,15 +17,14 @@
 		redirectTo?: string;
 	}>();
 
-	// Client for Convex API calls
-	const client = useConvexClient();
+	// Queries
+	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
 
 	// State
 	let modalOpen: boolean = $state(false);
 	let error: string = $state('');
 
-	// Get active organization from Convex
-	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	// Derived data
 	const activeOrganization = $derived(organizationResponse.data);
 
 	/**

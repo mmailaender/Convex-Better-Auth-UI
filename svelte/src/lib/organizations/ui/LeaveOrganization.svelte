@@ -13,15 +13,15 @@
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 
-	// State
-	let modalOpen: boolean = $state(false);
-	let errorMessage: string = $state('');
-	let selectedSuccessor: Id<'users'> | null = $state(null);
-
 	// Queries
 	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
 	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
 	const userResponse = useQuery(api.users.getUser, {});
+
+	// State
+	let modalOpen: boolean = $state(false);
+	let errorMessage: string = $state('');
+	let selectedSuccessor: Id<'users'> | null = $state(null);
 
 	// Derived data
 	const activeOrganization = $derived(organizationResponse.data);

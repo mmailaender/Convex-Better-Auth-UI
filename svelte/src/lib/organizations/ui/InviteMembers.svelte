@@ -5,12 +5,12 @@
 	// API
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	const client = useConvexClient();
 
 	// Types
 	import type { FunctionReturnType } from 'convex/server';
 	import type { Doc } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
-
 	type InvitationResponse =
 		FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<
 			infer T
@@ -18,15 +18,12 @@
 			? T
 			: never;
 
-	// State variables with Runes
+	// State
 	let emailInput: string = $state('');
 	let selectedRole: Role = $state('role_organization_member');
 	let isProcessing: boolean = $state(false);
 	let errorMessage: string = $state('');
 	let successMessage: string = $state('');
-
-	// Convex client for calling actions
-	const client = useConvexClient();
 
 	/**
 	 * Handles the submission of the invitation form

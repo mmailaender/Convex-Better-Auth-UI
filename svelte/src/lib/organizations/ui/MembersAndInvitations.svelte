@@ -10,15 +10,16 @@
 	import { api } from '$convex/_generated/api';
 	import { isOwnerOrAdmin } from '$lib/organizations/api/roles.svelte';
 
-	// Convex queries
+	// Queries
 	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
 	const invitationsResponse = useQuery(api.organizations.invitations.db.getInvitations, {});
+
+	// State
+	let currentTab: string = $state('members');
 
 	// Derived data
 	const members = $derived(membersResponse.data);
 	const invitations = $derived(invitationsResponse.data);
-
-	let currentTab: string = $state('members');
 </script>
 
 <Tabs value={currentTab} onValueChange={(e) => (currentTab = e.value)}>
