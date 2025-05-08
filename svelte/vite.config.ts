@@ -7,7 +7,7 @@ export default defineConfig({
 	server: {
 		fs: {
 			// Allow serving files from one level up from the project root (includes node_modules)
-			allow: ['../../convex-auth']
+			allow: ['..', '../../convex-auth']
 		}
 	},
 	test: {

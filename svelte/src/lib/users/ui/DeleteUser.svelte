@@ -34,15 +34,12 @@
 <Modal
 	open={modalOpen}
 	onOpenChange={(e) => (modalOpen = e.open)}
+	triggerBase="btn preset-faded-surface-50-950 hover:bg-error-200-800 hover:text-error-950-50 h-10 w-full justify-between gap-1 text-sm"
 	contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
 	backdropClasses="backdrop-blur-sm"
 >
 	{#snippet trigger()}
-		<button
-			class="btn preset-faded-surface-50-950 hover:bg-error-200-800 hover:text-error-950-50 h-10 w-full justify-between gap-1 text-sm"
-		>
-			Delete account
-		</button>
+		Delete account
 	{/snippet}
 
 	{#snippet content()}
