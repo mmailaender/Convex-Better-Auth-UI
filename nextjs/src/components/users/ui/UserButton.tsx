@@ -73,7 +73,7 @@ export default function UserButton({
 
 						{/* ProfileInfo Popup */}
 						<Modal open={profileOpen} onOpenChange={setProfileOpen}>
-							<ModalContent className="bg-surface-200-800 relative rounded-xl p-1">
+							<ModalContent className="bg-surface-200-800 relative rounded-xl p-1 w-full md:w-120">
 								<div className="flex items-center justify-between p-0">
 									<UserProfile />
 									<ModalClose />

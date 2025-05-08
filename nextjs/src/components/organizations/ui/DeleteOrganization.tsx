@@ -83,22 +83,24 @@ export default function DeleteOrganization({
 				Delete organization
 			</ModalTrigger>
 
-			<ModalContent>
+			<ModalContent className='flex flex-col relative md:w-80 p-2 bg-surface-200-800 rounded-xl w-full gap-2'>
 				<ModalClose />
-				<ModalHeading className="h2">Delete organization</ModalHeading>
-
-				<article>
-					<p className="opacity-60">
+				
+				<header className="w-full py-2 pl-2 font-semibold">
+				<p className="w-full font-semibold text-xl">Delete organization</p>
+				</header>
+				<article className='pb-8'>
+					<p className='px-2 text-sm text-surface-700-300 '>
 						Are you sure you want to delete the organization {activeOrganization.name}? All
 						organization data will be permanently deleted.
 					</p>
 				</article>
 
-				<footer className="mt-4 flex justify-end gap-4">
-					<button type="button" className="btn preset-tonal" onClick={handleCancel}>
+				<footer className="bg-surface-50-950 p-2 rounded-xl flex flex-row gap-2">
+					<button type="button" className="btn preset-tonal w-full" onClick={handleCancel}>
 						Cancel
 					</button>
-					<button type="button" className="btn preset-filled-error-500" onClick={handleConfirm}>
+					<button type="button" className="btn preset-filled-error-500 w-full" onClick={handleConfirm}>
 						Confirm
 					</button>
 				</footer>

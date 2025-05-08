@@ -190,7 +190,7 @@ export const ModalContent = React.forwardRef<HTMLDivElement, React.HTMLProps<HTM
 							ref={ref}
 							aria-labelledby={context.labelId}
 							aria-describedby={context.descriptionId}
-							className="card bg-surface-100-900 relative space-y-4 p-4 shadow-xl"
+							className="card bg-surface-200-800 relative p-2 shadow-xl "
 							style={{
 								...styles, // Transition styles
 								zIndex: zIndex + 1 // Ensure content is above overlay
