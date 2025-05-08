@@ -81,6 +81,7 @@
 		<Modal
 			open={profileModalOpen}
 			onOpenChange={(e) => (profileModalOpen = e.open)}
+			backdropBase="bg-surface-50-950/75 fixed top-0 right-0 bottom-0 left-0 flex items-center justify-center p-4 backdrop-blur-sm"
 			contentBase="bg-surface-200-800 relative rounded-xl p-1"
 		>
 			{#snippet content()}
