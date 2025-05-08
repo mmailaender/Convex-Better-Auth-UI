@@ -4,6 +4,7 @@ import { action } from '../../_generated/server';
 import { Id } from '../../_generated/dataModel';
 import { api, internal } from '../../_generated/api';
 import { sendOrganizationInvitationEmail, verifyEmail } from '../../emails/actions';
+import { roleValidator } from '../../schema';
 
 /**
  * Creates an invitation and sends an invitation email
@@ -11,11 +12,7 @@ import { sendOrganizationInvitationEmail, verifyEmail } from '../../emails/actio
 export const inviteMember = action({
 	args: {
 		email: v.string(),
-		role: v.union(
-			v.literal('role_organization_member'),
-			v.literal('role_organization_admin'),
-			v.literal('role_organization_owner')
-		)
+		role: roleValidator
 	},
 	handler: async (ctx, args): Promise<{ _id: Id<'invitations'>; email: string; role: string }> => {
 		const { email, role } = args;
@@ -98,11 +95,7 @@ export const inviteMember = action({
 export const inviteMembers = action({
 	args: {
 		emails: v.array(v.string()),
-		role: v.union(
-			v.literal('role_organization_member'),
-			v.literal('role_organization_admin'),
-			v.literal('role_organization_owner')
-		)
+		role: roleValidator
 	},
 	handler: async (
 		ctx,

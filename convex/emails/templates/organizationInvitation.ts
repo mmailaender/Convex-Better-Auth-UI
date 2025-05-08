@@ -6,9 +6,9 @@
  * Interface for organization invitation email parameters
  */
 export interface OrganizationInvitationParams {
-  organizationName: string;
-  inviterName: string;
-  acceptUrl: string;
+	organizationName: string;
+	inviterName: string;
+	acceptUrl: string;
 }
 
 /**
@@ -16,14 +16,12 @@ export interface OrganizationInvitationParams {
  * @param params - Parameters for the invitation email
  * @returns HTML string for the organization invitation email
  */
-export function generateOrganizationInvitationEmail(
-  params: OrganizationInvitationParams
-): string {
-  const { organizationName, inviterName, acceptUrl } = params;
+export function generateOrganizationInvitationEmail(params: OrganizationInvitationParams): string {
+	const { organizationName, inviterName, acceptUrl } = params;
 
-  const appName = process.env.APP_NAME;
+	const appName = process.env.APP_NAME;
 
-  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html dir="ltr" lang="en">
       <head>
         <link

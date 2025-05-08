@@ -1,20 +1,22 @@
 'use client';
 
+import { UserPlus } from 'lucide-react';
+
 import { useState, FormEvent } from 'react';
 import { useAction } from 'convex/react';
-import { UserPlus } from 'lucide-react';
-import { Id } from '@/convex/_generated/dataModel';
 import { api } from '@/convex/_generated/api';
 
-type Role = 'role_organization_member' | 'role_organization_admin' | 'role_organization_owner';
+// Types
+import { FunctionReturnType } from 'convex/server';
+import { Doc } from '@/convex/_generated/dataModel';
+type Role = Doc<'organizationMembers'>['role'];
 
-type InvitationResponse = {
-	_id: Id<'invitations'> | null;
-	email: string;
-	role: string;
-	success: boolean;
-	error?: string;
-};
+type InvitationResponse =
+	FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<
+		infer T
+	>
+		? T
+		: never;
 
 /**
  * InviteMembers component that allows organization admins to invite new members

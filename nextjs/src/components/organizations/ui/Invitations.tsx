@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { Doc, Id } from '@/convex/_generated/dataModel';
 import { Shield, ShieldCheck, Search } from 'lucide-react';
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 import {
@@ -13,7 +13,7 @@ import {
 	ModalClose
 } from '@/components/primitives/ui/Modal';
 
-type Role = 'role_organization_member' | 'role_organization_admin' | 'role_organization_owner';
+type Role = Doc<'organizationMembers'>['role'];
 
 /**
  * Component that displays a list of organization invitations with revoke functionality

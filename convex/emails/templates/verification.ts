@@ -8,7 +8,7 @@
  * @returns HTML string for the verification email
  */
 export function generateVerificationEmail(OTP: string): string {
-  return `
+	return `
     <!doctype html>
     <html>
     <head>
