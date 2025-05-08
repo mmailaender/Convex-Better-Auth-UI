@@ -3,7 +3,7 @@
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
 @import '@skeletonlabs/skeleton/themes/cerberus';
-@import '../authapptheme.css';
+@import '../../../authapptheme.css';
 
 @source '../../node_modules/@skeletonlabs/skeleton-react/dist';
 
@@ -17,11 +17,6 @@
 	--color-foreground: var(--foreground);
 	--font-sans: var(--font-geist-sans);
 	--font-mono: var(--font-geist-mono);
-}
-
-[data-theme='authapp'] {
-	--text-scaling: 1.067;
-	--radius-base: 0.75rem;
 }
 
 @media (prefers-color-scheme: dark) {
