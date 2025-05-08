@@ -20,7 +20,6 @@
 	// Derived data
 	const user = $derived(userResponse.data);
 	const activeOrganization = $derived(organizationResponse.data);
-	const hasPermission = $derived(isOwnerOrAdmin);
 
 	// Component state with Runes
 	let isEditing: boolean = $state(false);
@@ -55,7 +54,7 @@
 	 * Toggles edit mode for organization profile
 	 */
 	function toggleEdit(): void {
-		if (!hasPermission) return;
+		if (!isOwnerOrAdmin) return;
 		isEditing = true;
 		success = '';
 		error = '';
@@ -175,7 +174,7 @@
 		{#if !isEditing}
 			<Avatar src={activeOrganization.logo} name={activeOrganization.name} />
 			<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
-			{#if hasPermission}
+			{#if isOwnerOrAdmin}
 				<button onclick={toggleEdit} class="btn">Edit</button>
 			{/if}
 		{:else}
