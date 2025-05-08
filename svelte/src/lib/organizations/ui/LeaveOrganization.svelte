@@ -8,19 +8,17 @@
 	import { api } from '$convex/_generated/api';
 	import { isOwner } from '$lib/organizations/api/roles.svelte';
 	import { goto } from '$app/navigation';
+	const client = useConvexClient();
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
-
-	// Client for Convex API calls
-	const client = useConvexClient();
 
 	// State
 	let modalOpen: boolean = $state(false);
 	let errorMessage: string = $state('');
 	let selectedSuccessor: Id<'users'> | null = $state(null);
 
-	// Convex queries
+	// Queries
 	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
 	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
 	const userResponse = useQuery(api.users.getUser, {});

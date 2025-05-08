@@ -2,14 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronsUpDown, Plus, Settings, X } from 'lucide-react';
-import { Avatar } from '@skeletonlabs/skeleton-react';
 
 // Components
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/Popover';
 import { Modal, ModalContent, ModalClose, ModalTrigger } from '@/components/primitives/ui/Modal';
 import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
 import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
+import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
+import { ChevronsUpDown, Plus, Settings } from 'lucide-react';
+import { Avatar } from '@skeletonlabs/skeleton-react';
+import { Placement } from '@floating-ui/react';
 
 // API
 import { useQuery, useMutation, useConvexAuth } from 'convex/react';
@@ -21,7 +23,15 @@ import type { Id } from '@/convex/_generated/dataModel';
  * creating new organizations, and accessing organization settings.
  * Only displayed when the user is authenticated.
  */
-export default function OrganizationSwitcher() {
+export default function OrganizationSwitcher({
+	popoverPlacement = 'bottom-end'
+}: {
+	/**
+	 * Optional placement for the popover
+	 * Defaults to 'bottom-end'
+	 */
+	popoverPlacement?: Placement;
+}) {
 	const router = useRouter();
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
@@ -49,19 +59,6 @@ export default function OrganizationSwitcher() {
 			console.error(err);
 		}
 	};
-
-	/**
-	 * Temporary LeaveOrganization component (will be implemented separately)
-	 */
-	const LeaveOrganization = ({ organizationId }: { organizationId: Id<'organizations'> }) => (
-		<button
-			onClick={() => console.log('Leave organization:', organizationId)}
-			className="btn preset-outlined-error-500 flex gap-2"
-		>
-			<X size={16} />
-			<span>Leave</span>
-		</button>
-	);
 
 	// Not authenticated - don't show anything
 	if (!isAuthenticated) {
@@ -92,7 +89,7 @@ export default function OrganizationSwitcher() {
 	// Has organizations - show the switcher
 	return (
 		<>
-			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher} placement="bottom-end">
+			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher} placement={popoverPlacement}>
 				<PopoverTrigger onClick={() => setOpenSwitcher(!openSwitcher)}>
 					<div className="flex items-center gap-2">
 						<Avatar
@@ -103,7 +100,7 @@ export default function OrganizationSwitcher() {
 						<span className="text-surface-700-300 text-base font-semibold">
 							{activeOrganization?.name}
 						</span>
-						<ChevronsUpDown size={12} />
+						<ChevronsUpDown className="size-3" />
 					</div>
 				</PopoverTrigger>
 
@@ -128,13 +125,11 @@ export default function OrganizationSwitcher() {
 										}}
 										className="btn preset-outlined-surface-500 flex gap-2"
 									>
-										<Settings size={16} />
+										<Settings className="size-4" />
 										<span>Manage</span>
 									</button>
 								) : (
-									activeOrganization && (
-										<LeaveOrganization organizationId={activeOrganization._id} />
-									)
+									activeOrganization && <LeaveOrganization />
 								)}
 							</div>
 						</li>
@@ -166,7 +161,7 @@ export default function OrganizationSwitcher() {
 								}}
 								className="btn preset-tonal flex w-full items-center gap-2"
 							>
-								<Plus size={16} />
+								<Plus className="size-4" />
 								<span>Create Organization</span>
 							</button>
 						</li>

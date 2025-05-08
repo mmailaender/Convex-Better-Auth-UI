@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+// Components
+import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
+import { UploadCloud, LogIn } from 'lucide-react';
+
+// API
 import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { UploadCloud, LogIn } from 'lucide-react';
-import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
 
+// Utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
+// Types
 import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
 
