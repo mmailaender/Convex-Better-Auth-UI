@@ -1,17 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+
+// API
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import {
-	Modal,
-	ModalTrigger,
-	ModalContent,
-	ModalHeading,
-	ModalClose
-} from '@/components/primitives/ui/Modal';
 
+// Components
+import {
+	Dialog,
+	DialogTrigger,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogClose,
+	DialogFooter
+} from '@/components/primitives/ui/dialog';
+
+// Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
 
 /**
@@ -78,35 +85,39 @@ export default function DeleteOrganization({
 	}
 
 	return (
-		<Modal open={open} onOpenChange={(open) => setOpen(open)}>
-			<ModalTrigger className="btn text-error-500 hover:preset-tonal-error-500">
+		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
+			<DialogTrigger className="btn text-error-500 hover:preset-tonal-error-500">
 				Delete organization
-			</ModalTrigger>
+			</DialogTrigger>
 
-			<ModalContent className='flex flex-col relative md:w-80 p-2 bg-surface-200-800 rounded-xl w-full gap-2'>
-				<ModalClose />
-				
-				<header className="w-full py-2 pl-2 font-semibold">
-				<p className="w-full font-semibold text-xl">Delete organization</p>
-				</header>
-				<article className='pb-8'>
-					<p className='px-2 text-sm text-surface-700-300 '>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Delete organization</DialogTitle>
+				</DialogHeader>
+				<DialogClose />
+
+				<article className="pb-8">
+					<p className="text-surface-700-300 px-2 text-sm">
 						Are you sure you want to delete the organization {activeOrganization.name}? All
 						organization data will be permanently deleted.
 					</p>
 				</article>
 
-				<footer className="bg-surface-50-950 p-2 rounded-xl flex flex-row gap-2">
+				<DialogFooter>
 					<button type="button" className="btn preset-tonal w-full" onClick={handleCancel}>
 						Cancel
 					</button>
-					<button type="button" className="btn preset-filled-error-500 w-full" onClick={handleConfirm}>
+					<button
+						type="button"
+						className="btn preset-filled-error-500 w-full"
+						onClick={handleConfirm}
+					>
 						Confirm
 					</button>
-				</footer>
+				</DialogFooter>
 
 				{error && <p className="text-error-600-400 mt-2">{error}</p>}
-			</ModalContent>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 	);
 }

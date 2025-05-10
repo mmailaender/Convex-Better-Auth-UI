@@ -1,20 +1,28 @@
 import { useState, useMemo } from 'react';
+
+// API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Doc, Id } from '@/convex/_generated/dataModel';
-import { Shield, ShieldCheck, Search } from 'lucide-react';
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import {
-	Modal,
-	ModalContent,
-	ModalTrigger,
-	ModalHeading,
-	ModalDescription,
-	ModalClose
-} from '@/components/primitives/ui/Modal';
-import { Avatar } from '@skeletonlabs/skeleton-react';
 
+// Components
+import {
+	Dialog,
+	DialogTrigger,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogClose,
+	DialogFooter
+} from '@/components/primitives/ui/dialog';
+import { Avatar } from '@skeletonlabs/skeleton-react';
+import { Shield, ShieldCheck, Search } from 'lucide-react';
+
+// Types
+import { Doc, Id } from '@/convex/_generated/dataModel';
 type Role = Doc<'organizationMembers'>['role'];
+
+// Hooks
+import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 
 /**
  * Component that displays a list of organization members with role management functionality
@@ -204,25 +212,25 @@ export function Members(): React.ReactNode {
 									{isOwnerOrAdmin &&
 										member.user._id !== currentUser._id &&
 										member.role !== 'role_organization_owner' && (
-											<Modal>
-												<ModalTrigger
+											<Dialog>
+												<DialogTrigger
 													className="btn text-error-500 hover:preset-tonal-error-500"
 													onClick={() => setSelectedUserId(member.user._id)}
 												>
 													Remove
-												</ModalTrigger>
-												<ModalContent className="card bg-surface-100-900 max-w-(--breakpoint-sm) space-y-4 p-4 shadow-xl">
-													<ModalClose />
-													<header className="flex justify-between">
-														<ModalHeading className="h2">Remove member</ModalHeading>
-													</header>
+												</DialogTrigger>
+												<DialogContent className="card bg-surface-100-900 max-w-(--breakpoint-sm) space-y-4 p-4 shadow-xl">
+													<DialogClose />
+													<DialogHeader>
+														<DialogTitle className="h2">Remove member</DialogTitle>
+													</DialogHeader>
 													<article>
-														<ModalDescription className="opacity-60">
+														<p className="opacity-60">
 															Are you sure you want to remove the member {member.user.name}?
-														</ModalDescription>
+														</p>
 													</article>
-													<footer className="flex justify-end gap-4">
-														<ModalClose className="btn preset-tonal">Cancel</ModalClose>
+													<DialogFooter>
+														<DialogClose className="btn preset-tonal">Cancel</DialogClose>
 														<button
 															type="button"
 															className="btn preset-filled-error-400-600"
@@ -230,10 +238,10 @@ export function Members(): React.ReactNode {
 														>
 															Confirm
 														</button>
-													</footer>
+													</DialogFooter>
 													{errorMessage && <p className="text-error-600-400">{errorMessage}</p>}
-												</ModalContent>
-											</Modal>
+												</DialogContent>
+											</Dialog>
 										)}
 								</div>
 							</td>

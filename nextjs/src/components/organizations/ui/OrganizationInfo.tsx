@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
+
+// API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+
+// Components
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
 import { UploadCloud } from 'lucide-react';
+
+// Utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
+// Types
 import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
+
+// Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 
 /**

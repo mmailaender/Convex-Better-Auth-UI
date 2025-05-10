@@ -4,14 +4,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Components
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/Popover';
-import { Modal, ModalContent, ModalClose, ModalTrigger } from '@/components/primitives/ui/Modal';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/popover';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogClose,
+	DialogTrigger
+} from '@/components/primitives/ui/dialog';
 import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
 import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 import { ChevronsUpDown, Plus, Settings } from 'lucide-react';
 import { Avatar } from '@skeletonlabs/skeleton-react';
-import { Placement } from '@floating-ui/react';
 
 // API
 import { useQuery, useMutation, useConvexAuth } from 'convex/react';
@@ -21,16 +27,15 @@ import type { Id } from '@/convex/_generated/dataModel';
 /**
  * Organization switcher component that allows switching between organizations,
  * creating new organizations, and accessing organization settings.
- * Only displayed when the user is authenticated.
  */
 export default function OrganizationSwitcher({
-	popoverPlacement = 'bottom-end'
+	popoverSide = 'bottom',
+	popoverAlign = 'end'
 }: {
-	/**
-	 * Optional placement for the popover
-	 * Defaults to 'bottom-end'
-	 */
-	popoverPlacement?: Placement;
+	/** Side the popover appears on relative to the trigger */
+	popoverSide?: 'top' | 'right' | 'bottom' | 'left';
+	/** Alignment of the popover relative to the trigger */
+	popoverAlign?: 'start' | 'end' | 'center';
 }) {
 	const router = useRouter();
 	const { isLoading, isAuthenticated } = useConvexAuth();
@@ -73,23 +78,26 @@ export default function OrganizationSwitcher({
 	// No organizations - just show the create button
 	if (organizations.length === 0) {
 		return (
-			<Modal open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<ModalTrigger className="btn preset-tonal flex items-center gap-2">
+			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
+				<DialogTrigger className="btn preset-tonal flex items-center gap-2">
 					<Plus size={16} />
 					<span>Create Organization</span>
-				</ModalTrigger>
-				<ModalContent>
+				</DialogTrigger>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Create Organization</DialogTitle>
+					</DialogHeader>
 					<CreateOrganization onSuccessfulCreate={() => setOpenCreateOrganization(false)} />
-					<ModalClose />
-				</ModalContent>
-			</Modal>
+					<DialogClose />
+				</DialogContent>
+			</Dialog>
 		);
 	}
 
 	// Has organizations - show the switcher
 	return (
 		<>
-			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher} placement={popoverPlacement}>
+			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher}>
 				<PopoverTrigger onClick={() => setOpenSwitcher(!openSwitcher)}>
 					<div className="flex items-center gap-2">
 						<Avatar
@@ -104,7 +112,7 @@ export default function OrganizationSwitcher({
 					</div>
 				</PopoverTrigger>
 
-				<PopoverContent>
+				<PopoverContent side={popoverSide} align={popoverAlign}>
 					<ul role="list" className="space-y-1">
 						<li>
 							<div className="rounded-base text-surface-700-300 flex items-center gap-x-3 p-4 text-sm/6 font-semibold">
@@ -169,19 +177,25 @@ export default function OrganizationSwitcher({
 				</PopoverContent>
 			</Popover>
 
-			<Modal open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<ModalContent>
+			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Create Organization</DialogTitle>
+					</DialogHeader>
 					<CreateOrganization onSuccessfulCreate={() => setOpenCreateOrganization(false)} />
-					<ModalClose />
-				</ModalContent>
-			</Modal>
+					<DialogClose />
+				</DialogContent>
+			</Dialog>
 
-			<Modal open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
-				<ModalContent>
+			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Organization Profile</DialogTitle>
+					</DialogHeader>
 					<OrganizationProfile onSuccessfulDelete={() => setOpenOrganizationProfile(false)} />
-					<ModalClose />
-				</ModalContent>
-			</Modal>
+					<DialogClose />
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 }

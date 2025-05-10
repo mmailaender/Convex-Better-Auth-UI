@@ -1,7 +1,5 @@
-import { useState } from 'react';
-
 // Components
-import { Tabs } from '@skeletonlabs/skeleton-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/ui/tabs';
 import OrganizationInfo from '@/components/organizations/ui/OrganizationInfo';
 import DeleteOrganization from '@/components/organizations/ui/DeleteOrganization';
 import MembersAndInvitations from '@/components/organizations/ui/MembersAndInvitations';
@@ -19,53 +17,32 @@ interface OrganizationProfileProps {
 
 export default function OrganizationProfile({ onSuccessfulDelete }: OrganizationProfileProps) {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
-	const [group, setGroup] = useState('general');
 	return (
-		<Tabs value={group} onValueChange={(e) => setGroup(e.value)} base="flex flex-row w-192 h-160">
-			<Tabs.List base="flex flex-col pr-2 w-30">
+		<Tabs defaultValue="general" orientation="vertical">
+			<TabsList>
 				<h1>Organization</h1>
 				<h4>Manage your organization.</h4>
-				<Tabs.Control
-					value="general"
-					base="border-r-1 border-transparent"
-					stateActive="border-r-surface-950-50 opacity-100"
-				>
-					General
-				</Tabs.Control>
+				<TabsTrigger value="general">General</TabsTrigger>
 				{isOwnerOrAdmin && (
 					<>
-						<Tabs.Control
-							value="members"
-							base="border-r-1 border-transparent"
-							stateActive="border-r-surface-950-50 opacity-100"
-						>
-							Members
-						</Tabs.Control>
-						<Tabs.Control
-							value="billing"
-							base="border-r-1 border-transparent"
-							stateActive="border-r-surface-950-50 opacity-100"
-						>
-							Billing
-						</Tabs.Control>
+						<TabsTrigger value="members">Members</TabsTrigger>
+						<TabsTrigger value="billing">Billing</TabsTrigger>
 					</>
 				)}
-			</Tabs.List>
-			<Tabs.Content base="flex flex-col">
-				<Tabs.Panel value="general">
-					<OrganizationInfo />
-					<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
-					<LeaveOrganization />
-				</Tabs.Panel>
-				{isOwnerOrAdmin && (
-					<>
-						<Tabs.Panel value="members">
-							<MembersAndInvitations />
-						</Tabs.Panel>
-						<Tabs.Panel value="billing">Billing Panel</Tabs.Panel>
-					</>
-				)}
-			</Tabs.Content>
+			</TabsList>
+			<TabsContent value="general">
+				<OrganizationInfo />
+				<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
+				<LeaveOrganization />
+			</TabsContent>
+			{isOwnerOrAdmin && (
+				<>
+					<TabsContent value="members">
+						<MembersAndInvitations />
+					</TabsContent>
+					<TabsContent value="billing">Billing Panel</TabsContent>
+				</>
+			)}
 		</Tabs>
 	);
 }

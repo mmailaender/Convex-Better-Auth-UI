@@ -1,16 +1,18 @@
 'use client';
 
-import { UserPlus } from 'lucide-react';
-
 import { useState, FormEvent } from 'react';
+
+// API
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+
+// Components
+import { UserPlus } from 'lucide-react';
 
 // Types
 import { FunctionReturnType } from 'convex/server';
 import { Doc } from '@/convex/_generated/dataModel';
 type Role = Doc<'organizationMembers'>['role'];
-
 type InvitationResponse =
 	FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<
 		infer T

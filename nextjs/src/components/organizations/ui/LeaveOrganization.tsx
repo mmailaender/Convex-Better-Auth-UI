@@ -1,17 +1,26 @@
 import { useState } from 'react';
+
+// API
 import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-import { useIsOwner } from '@/components/organizations/api/hooks';
+
+// Components
 import {
-	Modal,
-	ModalContent,
-	ModalTrigger,
-	ModalHeading,
-	ModalDescription,
-	ModalClose
-} from '@/components/primitives/ui/Modal';
+	Dialog,
+	DialogTrigger,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogClose,
+	DialogFooter
+} from '@/components/primitives/ui/dialog';
+
+// Types
+import { Id } from '@/convex/_generated/dataModel';
+
+// Hooks
+import { useIsOwner } from '@/components/organizations/api/hooks';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -91,19 +100,21 @@ export default function LeaveOrganization(): React.ReactNode {
 	}
 
 	return (
-		<Modal open={isOpen} onOpenChange={setIsOpen}>
-			<ModalTrigger className="btn text-error-500 hover:bg-error-100 hover:text-error-600">
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+			<DialogTrigger className="btn text-error-500 hover:bg-error-100 hover:text-error-600">
 				Leave organization
-			</ModalTrigger>
+			</DialogTrigger>
 
-			<ModalContent>
-				<ModalHeading>Leave organization</ModalHeading>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Leave organization</DialogTitle>
+				</DialogHeader>
 
 				<div className="space-y-4">
-					<ModalDescription>
+					<p>
 						Are you sure you want to leave your organization? You will lose access to all projects
 						and resources.
-					</ModalDescription>
+					</p>
 
 					{isOrgOwner && (
 						<>
@@ -141,8 +152,8 @@ export default function LeaveOrganization(): React.ReactNode {
 
 					{errorMessage && <p className="text-error-600-400">{errorMessage}</p>}
 
-					<div className="mt-6 flex justify-end gap-4">
-						<ModalClose className="btn bg-surface-300">Cancel</ModalClose>
+					<DialogFooter>
+						<DialogClose className="btn bg-surface-300">Cancel</DialogClose>
 						<button
 							type="button"
 							className="btn bg-error-500 hover:bg-error-600 text-white"
@@ -151,9 +162,9 @@ export default function LeaveOrganization(): React.ReactNode {
 						>
 							Confirm
 						</button>
-					</div>
+					</DialogFooter>
 				</div>
-			</ModalContent>
-		</Modal>
+			</DialogContent>
+		</Dialog>
 	);
 }
