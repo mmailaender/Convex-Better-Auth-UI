@@ -169,10 +169,10 @@ export function Invitations(): React.ReactNode {
 											>
 												Revoke
 											</DialogTrigger>
-											<DialogContent className="card bg-surface-100-900 max-w-(--breakpoint-sm) space-y-4 p-4 shadow-xl">
+											<DialogContent>
 												<DialogClose />
 												<DialogHeader>
-													<DialogTitle className="h2">Revoke invitation</DialogTitle>
+													<DialogTitle>Revoke invitation</DialogTitle>
 												</DialogHeader>
 												<article>
 													<p className="opacity-60">

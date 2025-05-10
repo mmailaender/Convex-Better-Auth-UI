@@ -219,10 +219,10 @@ export function Members(): React.ReactNode {
 												>
 													Remove
 												</DialogTrigger>
-												<DialogContent className="card bg-surface-100-900 max-w-(--breakpoint-sm) space-y-4 p-4 shadow-xl">
+												<DialogContent>
 													<DialogClose />
 													<DialogHeader>
-														<DialogTitle className="h2">Remove member</DialogTitle>
+														<DialogTitle>Remove member</DialogTitle>
 													</DialogHeader>
 													<article>
 														<p className="opacity-60">

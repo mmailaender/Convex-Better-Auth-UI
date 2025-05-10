@@ -37,18 +37,14 @@ export default function UserButton({
 				{user ? (
 					<>
 						<Popover open={open} onOpenChange={setOpen}>
-							<PopoverTrigger onClick={() => setOpen((v) => !v)}>
+							<PopoverTrigger>
 								<Avatar
 									src={user.image}
 									name={user.name}
 									size="size-10 ring-0 hover:ring-4 ring-surface-100-900 ease-out duration-200"
 								/>
 							</PopoverTrigger>
-							<PopoverContent
-								side={popoverSide}
-								align={popoverAlign}
-								className="bg-surface-200-800 w-80 rounded-xl p-1 transition-all duration-300 ease-in-out"
-							>
+							<PopoverContent side={popoverSide} align={popoverAlign}>
 								<div className="0 flex flex-col gap-1 p-0">
 									<button
 										className="bg-surface-50-950 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
@@ -87,12 +83,6 @@ export default function UserButton({
 								</div>
 							</DialogContent>
 						</Dialog>
-
-						<div className="relative">
-							<button className="btn preset-filled-primary-500" onClick={() => void signOut()}>
-								Sign out
-							</button>
-						</div>
 					</>
 				) : (
 					<div className="placeholder-circle size-10 animate-pulse" />

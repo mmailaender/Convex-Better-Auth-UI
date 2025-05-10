@@ -159,16 +159,14 @@ export default function ProfileInfo() {
 
 			{isDesktop ? (
 				<Dialog open={isEditing} onOpenChange={setIsEditing}>
-					<DialogTrigger asChild>
-						<button
-							onClick={() => setIsEditing(true)}
-							className="hidden w-full flex-col items-start rounded-lg px-4 py-2 md:flex"
-						>
-							<span className="text-surface-600-400 text-xs">Name</span>
-							<span className="text-surface-800-200 font-medium">{user.name}</span>
-						</button>
+					<DialogTrigger
+						className="hidden w-full flex-col items-start rounded-lg px-4 py-2 md:flex"
+						onClick={() => setIsEditing(true)}
+					>
+						<span className="text-surface-600-400 text-xs">Name</span>
+						<span className="text-surface-800-200 font-medium">{user.name}</span>
 					</DialogTrigger>
-					<DialogContent className="z-999 sm:max-w-[425px]">
+					<DialogContent className="sm:max-w-108">
 						<DialogHeader>
 							<DialogTitle>Edit profile</DialogTitle>
 							<DialogDescription>
@@ -180,25 +178,23 @@ export default function ProfileInfo() {
 				</Dialog>
 			) : (
 				<Drawer open={isEditing} onOpenChange={setIsEditing}>
-					<DrawerTrigger asChild>
-						<button
-							onClick={() => setIsEditing(true)}
-							className="flex w-full flex-col items-start rounded-lg px-4 py-2"
-						>
-							<span className="text-surface-600-400 text-xs">Name</span>
-							<span className="text-surface-800-200 font-medium">{user.name}</span>
-						</button>
+					<DrawerTrigger
+						onClick={() => setIsEditing(true)}
+						className="flex w-full flex-col items-start rounded-lg px-4 py-2"
+					>
+						<span className="text-surface-600-400 text-xs">Name</span>
+						<span className="text-surface-800-200 font-medium">{user.name}</span>
 					</DrawerTrigger>
-					<DrawerContent className="z-999">
-						<DrawerHeader className="text-left">
+					<DrawerContent>
+						<DrawerHeader>
 							<DrawerTitle>Edit profile</DrawerTitle>
 							<DrawerDescription>
 								Make changes to your profile here. Click save when you&apos;re done.
 							</DrawerDescription>
 						</DrawerHeader>
 						{form}
-						<DrawerFooter className="pt-2">
-							<DrawerClose asChild>
+						<DrawerFooter>
+							<DrawerClose>
 								<button className="btn preset-tonal">Cancel</button>
 							</DrawerClose>
 						</DrawerFooter>
