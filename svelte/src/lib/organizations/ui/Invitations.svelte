@@ -12,9 +12,20 @@
 	// Types
 	import type { Doc, Id } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
+	import type { FunctionReturnType } from 'convex/server';
+	type InvitationResponse = FunctionReturnType<
+		typeof api.organizations.invitations.db.getInvitations
+	>;
+
+	// Props
+	let { initialData }: { initialData?: InvitationResponse } = $props();
 
 	// Queries
-	const invitationsResponse = useQuery(api.organizations.invitations.db.getInvitations, {});
+	const invitationsResponse = useQuery(
+		api.organizations.invitations.db.getInvitations,
+		{},
+		{ initialData }
+	);
 
 	// State
 	let errorMessage: string = $state('');

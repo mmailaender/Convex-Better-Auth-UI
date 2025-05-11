@@ -1,7 +1,10 @@
 <script lang="ts">
+	// API
 	import { useAuth } from '@convex-dev/auth/sveltekit';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+
+	// Components
 	import { Popover, Modal, Avatar } from '@skeletonlabs/skeleton-svelte';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
@@ -11,10 +14,17 @@
 	import { X } from 'lucide-svelte';
 	type PopoverProps = ComponentProps<typeof Popover>;
 	type PlacementType = NonNullable<PopoverProps['positioning']>['placement'];
+	import type { FunctionReturnType } from 'convex/server';
+	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
 
-	const props: { popoverPlacement?: PlacementType } = $props();
-	// Default to 'bottom-end' if no placement provided
-	const popoverPlacement = props.popoverPlacement || 'bottom-end';
+	// Props
+	const {
+		popoverPlacement = 'bottom-end',
+		initialData
+	}: {
+		popoverPlacement?: PlacementType;
+		initialData?: UserResponse;
+	} = $props();
 
 	// State
 	let popoverOpen: boolean = $state(false);
@@ -24,8 +34,8 @@
 	const { signOut } = useAuth();
 	const isAuthenticated = $derived(useAuth().isAuthenticated);
 
-	// User data from Convex
-	const response = useQuery(api.users.getUser, {});
+	// Query
+	const response = useQuery(api.users.getUser, {}, { initialData });
 	const user = $derived(response.data);
 
 	/**

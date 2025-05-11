@@ -13,11 +13,38 @@
 	// Types
 	import type { Doc, Id } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
+	import type { FunctionReturnType } from 'convex/server';
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.getActiveOrganization
+	>;
+	type MembersResponse = FunctionReturnType<
+		typeof api.organizations.members.getOrganizationMembers
+	>;
+	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+
+	// Props
+	let {
+		initialData
+	}: {
+		initialData?: {
+			activeOrganization: ActiveOrganizationResponse;
+			members: MembersResponse;
+			user: UserResponse;
+		};
+	} = $props();
 
 	// Queries
-	const currentUserResponse = useQuery(api.users.getUser, {});
-	const currentOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
-	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
+	const currentUserResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const currentOrganizationResponse = useQuery(
+		api.organizations.getActiveOrganization,
+		{},
+		{ initialData: initialData?.activeOrganization }
+	);
+	const membersResponse = useQuery(
+		api.organizations.members.getOrganizationMembers,
+		{},
+		{ initialData: initialData?.members }
+	);
 
 	// State
 	let errorMessage: string = $state('');

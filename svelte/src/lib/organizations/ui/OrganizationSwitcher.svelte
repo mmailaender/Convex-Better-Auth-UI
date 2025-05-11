@@ -20,19 +20,41 @@
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover>;
 	type PlacementType = NonNullable<PopoverProps['positioning']>['placement'];
+	import type { FunctionReturnType } from 'convex/server';
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.getActiveOrganization
+	>;
+	type UserOrganizationsResponse = FunctionReturnType<
+		typeof api.organizations.getUserOrganizations
+	>;
 
 	// Props
-	const props: { popoverPlacement?: PlacementType } = $props();
-	// Default to 'bottom-end' if no placement provided
-	const popoverPlacement = props.popoverPlacement || 'bottom-end';
+	const {
+		popoverPlacement = 'bottom-end',
+		initialData
+	}: {
+		popoverPlacement?: PlacementType;
+		initialData?: {
+			userOrganizations: UserOrganizationsResponse;
+			activeOrganization: ActiveOrganizationResponse;
+		};
+	} = $props();
 
 	// Authentication state
 	const isLoading = $derived(useAuth().isLoading);
 	const isAuthenticated = $derived(useAuth().isAuthenticated);
 
 	// Queries
-	const organizationsResponse = useQuery(api.organizations.getUserOrganizations, {});
-	const activeOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const organizationsResponse = useQuery(
+		api.organizations.getUserOrganizations,
+		{},
+		{ initialData: initialData?.userOrganizations }
+	);
+	const activeOrganizationResponse = useQuery(
+		api.organizations.getActiveOrganization,
+		{},
+		{ initialData: initialData?.activeOrganization }
+	);
 
 	// Derived state
 	const organizations = $derived(organizationsResponse.data);

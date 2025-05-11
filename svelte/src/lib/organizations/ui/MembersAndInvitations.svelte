@@ -9,12 +9,38 @@
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { createRoles } from '$lib/organizations/api/roles.svelte';
-
 	const roles = createRoles();
 
+	// Types
+	import type { FunctionReturnType } from 'convex/server';
+	type MembersResponse = FunctionReturnType<
+		typeof api.organizations.members.getOrganizationMembers
+	>;
+	type InvitationsResponse = FunctionReturnType<
+		typeof api.organizations.invitations.db.getInvitations
+	>;
+
+	// Props
+	let {
+		initialData
+	}: {
+		initialData?: {
+			members: MembersResponse;
+			invitations: InvitationsResponse;
+		};
+	} = $props();
+
 	// Queries
-	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
-	const invitationsResponse = useQuery(api.organizations.invitations.db.getInvitations, {});
+	const membersResponse = useQuery(
+		api.organizations.members.getOrganizationMembers,
+		{},
+		{ initialData: initialData?.members }
+	);
+	const invitationsResponse = useQuery(
+		api.organizations.invitations.db.getInvitations,
+		{},
+		{ initialData: initialData?.invitations }
+	);
 
 	// State
 	let currentTab: string = $state('members');

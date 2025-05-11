@@ -1,26 +1,34 @@
 <script lang="ts">
+	// API
 	import { api } from '$convex/_generated/api';
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { UploadCloud } from 'lucide-svelte';
+	const client = useConvexClient();
+
+	// Components
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
+	import type { FunctionReturnType } from 'convex/server';
+	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
 
-	const client = useConvexClient();
+	// Props
+	let { initialData }: { initialData?: UserResponse } = $props();
 
-	// Query for user data
-	const response = useQuery(api.users.getUser, {});
-	const userData = $derived(response.data);
+	// Query
+	const response = useQuery(api.users.getUser, {}, { initialData });
 
-	// Component state
+	// State
 	let isEditing: boolean = $state(false);
 	let successMessage: string = $state('');
 	let errorMessage: string = $state('');
 	let isUploading: boolean = $state(false);
 	let name: string = $state('');
+
+	// Derived state
+	const userData = $derived(response.data);
 
 	// Initialize name when user data is available
 	$effect(() => {

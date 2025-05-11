@@ -1,8 +1,15 @@
+// API
 import { useQuery } from 'convex-svelte';
 import { api } from '$convex/_generated/api';
 
-export function createRoles() {
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization, {});
+// Types
+import type { FunctionReturnType } from 'convex/server';
+type ActiveOrganizationResponse = FunctionReturnType<
+	typeof api.organizations.getActiveOrganization
+>;
+
+export function createRoles(initialData?: ActiveOrganizationResponse) {
+	const activeOrganization = useQuery(api.organizations.getActiveOrganization, {}, { initialData });
 
 	const _isOwner = $derived(activeOrganization?.data?.role === 'role_organization_owner');
 	const _isAdmin = $derived(activeOrganization?.data?.role === 'role_organization_admin');

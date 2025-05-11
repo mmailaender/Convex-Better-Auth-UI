@@ -15,10 +15,25 @@
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
+	import type { FunctionReturnType } from 'convex/server';
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.getActiveOrganization
+	>;
+	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+
+	// Props
+	let {
+		initialData
+	}: { initialData?: { user: UserResponse; activeOrganization: ActiveOrganizationResponse } } =
+		$props();
 
 	// Queries
-	const userResponse = useQuery(api.users.getUser, {});
-	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const userResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const organizationResponse = useQuery(
+		api.organizations.getActiveOrganization,
+		{},
+		{ initialData: initialData?.activeOrganization }
+	);
 
 	// State
 	let isEditing: boolean = $state(false);

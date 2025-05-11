@@ -8,17 +8,43 @@
 	import { api } from '$convex/_generated/api';
 	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	import { goto } from '$app/navigation';
-	
 	const roles = createRoles();
 	const client = useConvexClient();
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
+	import type { FunctionReturnType } from 'convex/server';
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.getActiveOrganization
+	>;
+	type MembersResponse = FunctionReturnType<
+		typeof api.organizations.members.getOrganizationMembers
+	>;
+	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+
+	// Props
+	let {
+		initialData
+	}: {
+		initialData?: {
+			activeOrganization: ActiveOrganizationResponse;
+			members: MembersResponse;
+			user: UserResponse;
+		};
+	} = $props();
 
 	// Queries
-	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
-	const membersResponse = useQuery(api.organizations.members.getOrganizationMembers, {});
-	const userResponse = useQuery(api.users.getUser, {});
+	const userResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const organizationResponse = useQuery(
+		api.organizations.getActiveOrganization,
+		{},
+		{ initialData: initialData?.activeOrganization }
+	);
+	const membersResponse = useQuery(
+		api.organizations.members.getOrganizationMembers,
+		{},
+		{ initialData: initialData?.members }
+	);
 
 	// State
 	let modalOpen: boolean = $state(false);
@@ -26,16 +52,16 @@
 	let selectedSuccessor: Id<'users'> | null = $state(null);
 
 	// Derived data
+	const currentUser = $derived(userResponse.data);
 	const activeOrganization = $derived(organizationResponse.data);
 	const members = $derived(membersResponse.data);
-	const user = $derived(userResponse.data);
 
 	// Organization members excluding current user for successor selection
 	const organizationMembers = $derived(
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.user._id !== user?._id
+				member.user._id !== currentUser?._id
 		) || []
 	);
 
