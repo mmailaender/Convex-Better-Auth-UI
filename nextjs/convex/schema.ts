@@ -25,11 +25,6 @@ const schema = defineSchema({
 		.index('email', ['email'])
 		.index('imageId', ['imageId']),
 
-	messages: defineTable({
-		text: v.string(),
-		userId: v.id('users')
-	}).index('userId', ['userId']),
-
 	organizations: defineTable({
 		name: v.string(),
 		slug: v.string(),
