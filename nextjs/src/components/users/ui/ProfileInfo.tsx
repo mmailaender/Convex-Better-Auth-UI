@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 // API
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { Pencil } from 'lucide-react';
 
 // Utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
@@ -137,7 +138,6 @@ export default function ProfileInfo() {
 
 	return (
 		<div className="flex flex-col items-center gap-1">
-			<p className="w-full py-2 pl-4 font-semibold">Profile</p>
 			<div className="bg-surface-50-950 flex w-full items-center justify-center rounded-lg py-4">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
@@ -160,11 +160,14 @@ export default function ProfileInfo() {
 			{isDesktop ? (
 				<Dialog open={isEditing} onOpenChange={setIsEditing}>
 					<DialogTrigger
-						className="hidden w-full flex-col items-start rounded-lg px-4 py-2 md:flex"
+						className="bg-surface-50-950 hidden w-full flex-row items-center rounded-lg pl-4 pr-2 py-2 md:flex content-center"
 						onClick={() => setIsEditing(true)}
 					>
+						<div className='flex flex-col gap-1 w-full text-left'>
 						<span className="text-surface-600-400 text-xs">Name</span>
 						<span className="text-surface-800-200 font-medium">{user.name}</span>
+						</div>
+						<button className='btn preset-tonal-surface'> <Pencil size={16} color='currentColor'/></button>
 					</DialogTrigger>
 					<DialogContent className="sm:max-w-108">
 						<DialogHeader>
@@ -180,10 +183,13 @@ export default function ProfileInfo() {
 				<Drawer open={isEditing} onOpenChange={setIsEditing}>
 					<DrawerTrigger
 						onClick={() => setIsEditing(true)}
-						className="flex w-full flex-col items-start rounded-lg px-4 py-2"
+						className="bg-surface-50-950 md:hidden w-full flex-row items-center rounded-lg pl-4 pr-2 py-2 flex content-center"
 					>
+						<div className='flex flex-col gap-1 w-full text-left'>
 						<span className="text-surface-600-400 text-xs">Name</span>
 						<span className="text-surface-800-200 font-medium">{user.name}</span>
+						</div>
+						<button className='btn preset-tonal-surface'> <Pencil size={16} color='currentColor'/></button>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>

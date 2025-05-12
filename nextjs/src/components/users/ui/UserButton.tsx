@@ -47,7 +47,7 @@ export default function UserButton({
 							<PopoverContent side={popoverSide} align={popoverAlign}>
 								<div className="0 flex flex-col gap-1 p-0">
 									<button
-										className="bg-surface-50-950 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
+										className="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
 										onClick={() => {
 											setOpen(false);
 											setProfileOpen(true);
@@ -76,7 +76,7 @@ export default function UserButton({
 						<Dialog open={profileOpen} onOpenChange={setProfileOpen}>
 							<DialogContent>
 								<DialogHeader>
-									<DialogTitle>User Profile</DialogTitle>
+									<DialogTitle className='text-sm p-2'>Profile</DialogTitle>
 								</DialogHeader>
 								<div className="flex items-center justify-between p-0">
 									<UserProfile />

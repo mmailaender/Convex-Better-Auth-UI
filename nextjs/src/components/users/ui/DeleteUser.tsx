@@ -34,7 +34,7 @@ export default function DeleteUser() {
 
 	return (
 		<Dialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
-			<DialogTrigger className="btn preset-faded-surface-50-950 hover:bg-error-200-800 hover:text-error-950-50 h-10 w-full justify-between gap-1 text-sm">
+			<DialogTrigger className="btn preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50 h-10 w-full justify-between gap-1 text-sm rounded-lg">
 				Delete account
 			</DialogTrigger>
 			<DialogContent>
