@@ -115,7 +115,7 @@ export default function ProfileInfo() {
 	const form = (
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="flex flex-col">
-				<div className="flex flex-col gap-1 px-4 pt-2 pb-4">
+				<div className="flex flex-col gap-1 px-6 pt-6 md:pt-2 pb-4">
 					<label className="label text-xs font-medium">Name</label>
 					<input
 						type="text"
@@ -125,7 +125,7 @@ export default function ProfileInfo() {
 					/>
 				</div>
 				<DialogFooter>
-					<button type="button" className="btn preset-tonal" onClick={cancelEdit}>
+					<button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
 						Cancel
 					</button>
 					<button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit">
@@ -137,14 +137,14 @@ export default function ProfileInfo() {
 	);
 
 	return (
-		<div className="flex flex-col items-center gap-1">
-			<div className="bg-surface-50-950 flex w-full items-center justify-center rounded-lg py-4">
+		<div className="flex flex-col items-center gap-6 p-6">
+			<div className=" flex w-full items-center justify-start rounded-lg pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
-						<Avatar src={user.image || ''} name={user.name} size="size-16" />
-						<span className="text-surface-800-200 text-center text-sm font-medium hover:underline">
-							Upload
-						</span>
+						<Avatar src={user.image || ''} name={user.name} size="size-20" />
+						<div className="btn-icon size-3 preset-filled-surface-300-700 absolute -bottom-1.5 -right-1.5 rounded-full border-2 border-surface-200-800">
+							<Pencil size={16} color="currentColor" />
+						</div>
 						{isUploading && (
 							<ProgressRing
 								value={null}
@@ -160,17 +160,18 @@ export default function ProfileInfo() {
 			{isDesktop ? (
 				<Dialog open={isEditing} onOpenChange={setIsEditing}>
 					<DialogTrigger
-						className="bg-surface-50-950 hidden w-full flex-row content-center items-center rounded-lg py-2 pr-3 pl-4 md:flex"
+						className="border border-surface-300-700 hidden w-full flex-row content-center items-center rounded-xl py-2 pr-3 pl-4 md:flex hover:bg-surface-50-950 hover:border-surface-50-950 ease-in-out duration-300"
 						onClick={() => setIsEditing(true)}
 					>
 						<div className="flex w-full flex-col gap-1 text-left">
 							<span className="text-surface-600-400 text-xs">Name</span>
 							<span className="text-surface-800-200 font-medium">{user.name}</span>
 						</div>
-						<div className="btn preset-tonal-surface p-2">
+						<div className="btn preset-filled-surface-200-800 p-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
 					</DialogTrigger>
+					
 					<DialogContent className="md:max-w-108">
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
@@ -182,13 +183,13 @@ export default function ProfileInfo() {
 				<Drawer open={isEditing} onOpenChange={setIsEditing}>
 					<DrawerTrigger
 						onClick={() => setIsEditing(true)}
-						className="bg-surface-50-950 flex w-full flex-row content-center items-center rounded-lg py-2 pr-2 pl-4 md:hidden"
+						className=" flex w-full flex-row content-center items-center rounded-xl py-2 pr-3 pl-4 md:hidden border border-surface-300-700"
 					>
 						<div className="flex w-full flex-col gap-1 text-left">
 							<span className="text-surface-600-400 text-xs">Name</span>
 							<span className="text-surface-800-200 font-medium">{user.name}</span>
 						</div>
-						<button className="btn preset-tonal-surface">
+						<button className="btn-icon preset-faded-surface-50-950">
 							{' '}
 							<Pencil size={16} color="currentColor" />
 						</button>

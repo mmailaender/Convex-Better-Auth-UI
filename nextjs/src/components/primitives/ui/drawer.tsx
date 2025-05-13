@@ -62,7 +62,7 @@ function DrawerContent({
 			>
 				<div/>
 				{children}
-					<DrawerPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-2 right-2  opacity-70 transition-opacity hover:bg-surface-300-700 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 p-2 rounded-lg">
+					<DrawerPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4  opacity-70 transition-opacity hover:bg-surface-300-700 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 p-2 rounded-lg">
 									<XIcon />
 									<span className="sr-only">Close</span>
 								</DrawerPrimitive.Close>
@@ -75,7 +75,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
 		<div
 			data-slot="drawer-header"
-			className={cn('flex flex-col p-4 gap-4', className)}
+			className={cn('flex flex-col gap-4', className)}
 			{...props}
 		/>
 	);
@@ -95,7 +95,7 @@ function DrawerTitle({ className, ...props }: React.ComponentProps<typeof Drawer
 	return (
 		<DrawerPrimitive.Title
 			data-slot="drawer-title"
-			className={cn('text-surface-950-50 font-semibold', className)}
+			className={cn('p-6 text-left text-xl leading-none tracking-tight', className)}
 			{...props}
 		/>
 	);
