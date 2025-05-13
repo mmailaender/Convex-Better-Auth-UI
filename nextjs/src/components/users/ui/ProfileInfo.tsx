@@ -116,19 +116,22 @@ export default function ProfileInfo() {
 	if (!user) return <div className="h-16 w-full animate-pulse rounded-md bg-gray-200"></div>;
 
 	const form = (
-		<form onSubmit={handleSubmit} className="w-full p-4">
-			<div className="flex flex-col gap-2">
+		<form onSubmit={handleSubmit} className="w-full">
+			<div className="flex flex-col">
+				<div className='flex flex-col gap-1 pt-2 pb-4 px-4'>
+				<label className="label text-xs font-medium">Name</label>
 				<input
 					type="text"
-					className="input"
+					className="input border border-surface-400-600"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 				/>
-				<div className="flex gap-2">
-					<button type="button" className="btn preset-tonal" onClick={cancelEdit}>
+				</div>
+				<div className="flex gap-2 w-full justify-end bg-surface-100-900 p-2 rounded-xl rounded-tl-none rounded-tr-none">
+					<button type="button" className="btn preset-tonal " onClick={cancelEdit}>
 						Cancel
 					</button>
-					<button type="submit" className="btn preset-filled-primary-500">
+					<button type="submit" className="btn preset-filled-primary-500 ">
 						Save
 					</button>
 				</div>
@@ -171,10 +174,8 @@ export default function ProfileInfo() {
 					</DialogTrigger>
 					<DialogContent className="sm:max-w-108">
 						<DialogHeader>
-							<DialogTitle>Edit profile</DialogTitle>
-							<DialogDescription>
-								Make changes to your profile here. Click save when you&apos;re done.
-							</DialogDescription>
+							<DialogTitle>Edit name</DialogTitle>
+							
 						</DialogHeader>
 						{form}
 					</DialogContent>

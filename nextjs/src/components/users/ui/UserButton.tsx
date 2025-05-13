@@ -76,7 +76,7 @@ export default function UserButton({
 						<Dialog open={profileOpen} onOpenChange={setProfileOpen}>
 							<DialogContent>
 								<DialogHeader>
-									<DialogTitle className='text-sm p-2'>Profile</DialogTitle>
+									<DialogTitle >Profile</DialogTitle>
 								</DialogHeader>
 								<div className="flex items-center justify-between p-0">
 									<UserProfile />

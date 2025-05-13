@@ -38,9 +38,9 @@ export default function DeleteUser() {
 				Delete account
 			</DialogTrigger>
 			<DialogContent>
-				<div className="flex w-full flex-col gap-2 md:w-80">
+				<div className="flex w-full flex-col gap-2	">
 					<DialogHeader>
-						<DialogTitle>Delete your account</DialogTitle>
+						<DialogTitle >Delete your account</DialogTitle>
 					</DialogHeader>
 					<article className="pb-4">
 						<p className="text-surface-700-300 px-2 text-sm">
