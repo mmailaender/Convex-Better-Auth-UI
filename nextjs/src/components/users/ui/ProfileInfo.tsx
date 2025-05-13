@@ -9,10 +9,7 @@ import { Pencil } from 'lucide-react';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 import {
 	Drawer,
-	DrawerClose,
 	DrawerContent,
-	DrawerDescription,
-	DrawerFooter,
 	DrawerHeader,
 	DrawerTitle,
 	DrawerTrigger
@@ -20,10 +17,9 @@ import {
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
-	DialogFooter,
 	DialogHeader,
 	DialogTitle,
+	DialogFooter,
 	DialogTrigger
 } from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
@@ -114,29 +110,27 @@ export default function ProfileInfo() {
 		}
 	};
 
-	if (!user) return <div className="h-16 w-full animate-pulse rounded-md bg-success-200-800"></div>;
+	if (!user) return <div className="bg-success-200-800 h-16 w-full animate-pulse rounded-md"></div>;
 
 	const form = (
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="flex flex-col">
-				<div className='flex flex-col gap-1 pt-2 pb-4 px-4'>
-				<label className="label text-xs font-medium">Name</label>
-				<input
-					type="text"
-					className="input border border-surface-400-600"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-				/>
+				<div className="flex flex-col gap-1 px-4 pt-2 pb-4">
+					<label className="label text-xs font-medium">Name</label>
+					<input
+						type="text"
+						className="input border-surface-400-600 border"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+					/>
 				</div>
 				<DialogFooter>
-			
-					<button type="button" className="btn preset-tonal " onClick={cancelEdit}>
+					<button type="button" className="btn preset-tonal" onClick={cancelEdit}>
 						Cancel
 					</button>
-					<button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit ">
+					<button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit">
 						Save
 					</button>
-			
 				</DialogFooter>
 			</div>
 		</form>
@@ -166,19 +160,20 @@ export default function ProfileInfo() {
 			{isDesktop ? (
 				<Dialog open={isEditing} onOpenChange={setIsEditing}>
 					<DialogTrigger
-						className="bg-surface-50-950 hidden w-full flex-row items-center rounded-lg pl-4 pr-3 py-2 md:flex content-center"
+						className="bg-surface-50-950 hidden w-full flex-row content-center items-center rounded-lg py-2 pr-3 pl-4 md:flex"
 						onClick={() => setIsEditing(true)}
 					>
-						<div className='flex flex-col gap-1 w-full text-left'>
-						<span className="text-surface-600-400 text-xs">Name</span>
-						<span className="text-surface-800-200 font-medium">{user.name}</span>
+						<div className="flex w-full flex-col gap-1 text-left">
+							<span className="text-surface-600-400 text-xs">Name</span>
+							<span className="text-surface-800-200 font-medium">{user.name}</span>
 						</div>
-						<button className='btn p-2 preset-tonal-surface'> <Pencil size={16} color='currentColor'/></button>
+						<div className="btn preset-tonal-surface p-2">
+							<Pencil size={16} color="currentColor" />
+						</div>
 					</DialogTrigger>
 					<DialogContent className="md:max-w-108">
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
-							
 						</DialogHeader>
 						{form}
 					</DialogContent>
@@ -187,13 +182,16 @@ export default function ProfileInfo() {
 				<Drawer open={isEditing} onOpenChange={setIsEditing}>
 					<DrawerTrigger
 						onClick={() => setIsEditing(true)}
-						className="bg-surface-50-950 md:hidden w-full flex-row items-center rounded-lg pl-4 pr-2 py-2 flex content-center"
+						className="bg-surface-50-950 flex w-full flex-row content-center items-center rounded-lg py-2 pr-2 pl-4 md:hidden"
 					>
-						<div className='flex flex-col gap-1 w-full text-left'>
-						<span className="text-surface-600-400 text-xs">Name</span>
-						<span className="text-surface-800-200 font-medium">{user.name}</span>
+						<div className="flex w-full flex-col gap-1 text-left">
+							<span className="text-surface-600-400 text-xs">Name</span>
+							<span className="text-surface-800-200 font-medium">{user.name}</span>
 						</div>
-						<button className='btn preset-tonal-surface'> <Pencil size={16} color='currentColor'/></button>
+						<button className="btn preset-tonal-surface">
+							{' '}
+							<Pencil size={16} color="currentColor" />
+						</button>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>
