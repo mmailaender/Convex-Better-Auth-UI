@@ -3,7 +3,7 @@ import DeleteUser from '@/components/users/ui/DeleteUser';
 
 export default function UserProfile() {
 	return (
-		<div className="w-full">
+		<div className="w-full px-1 pb-1">
 			<ProfileInfo />
 			<div className="flex pt-10">
 				<DeleteUser />

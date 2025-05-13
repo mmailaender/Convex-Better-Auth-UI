@@ -11,7 +11,8 @@ import {
 	DialogTrigger,
 	DialogContent,
 	DialogHeader,
-	DialogTitle
+	DialogTitle,
+	DialogFooter
 } from '@/components/primitives/ui/dialog';
 
 export default function DeleteUser() {
@@ -37,29 +38,30 @@ export default function DeleteUser() {
 			<DialogTrigger className="btn preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50 h-10 w-full justify-between gap-1 text-sm rounded-lg">
 				Delete account
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent className="md:max-w-108">
 				<div className="flex w-full flex-col gap-2	">
 					<DialogHeader>
 						<DialogTitle >Delete your account</DialogTitle>
 					</DialogHeader>
 					<article className="pb-4">
-						<p className="text-surface-700-300 px-2 text-sm">
+						<p className="text-surface-700-300 px-4 text-sm">
 							Are you sure you want to delete your account? All of your data will be permanently
 							deleted.
 						</p>
 					</article>
-					<footer className="bg-surface-50-950 flex flex-row gap-2 rounded-xl p-2">
-						<button type="button" className="btn preset-tonal w-full" onClick={handleCancel}>
+					<DialogFooter>
+						<button type="button" className="btn preset-tonal" onClick={handleCancel}>
 							Cancel
 						</button>
 						<button
 							type="button"
-							className="btn preset-filled-error-500 w-full"
+							className="btn preset-filled-error-500"
 							onClick={handleConfirm}
 						>
 							Confirm
 						</button>
-					</footer>
+					
+					</DialogFooter>
 				</div>
 			</DialogContent>
 		</Dialog>
