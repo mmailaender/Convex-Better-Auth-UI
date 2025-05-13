@@ -45,7 +45,7 @@ export default function UserButton({
 								/>
 							</PopoverTrigger>
 							<PopoverContent side={popoverSide} align={popoverAlign}>
-								<div className="0 flex flex-col gap-1 p-0">
+								<div className="flex flex-col gap-1 p-0">
 									<button
 										className="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
 										onClick={() => {
