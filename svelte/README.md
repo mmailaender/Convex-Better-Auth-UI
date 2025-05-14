@@ -1,3 +1,46 @@
+1. Install convex-svelte
+2. Install convex-auth
+3. Add convex alias to svelte.config.js
+
+```ts
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+	kit: {
+		alias: {
+			$convex: './src/convex'
+		}
+	}
+};
+```
+
+4. Create /login page
+5. Add handleAuthRedirect function to hooks.server.ts
+
+```ts
+import { redirect, type Handle } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { createConvexAuthHooks, createRouteMatcher } from '@convex-dev/auth/sveltekit/server';
+
+const { handleAuth, isAuthenticated: isAuthenticatedPromise } = createConvexAuthHooks();
+
+const isSignInRoute = createRouteMatcher('/login');
+
+export const handleAuthRedirect: Handle = async ({ event, resolve }) => {
+	if (isSignInRoute(event.url.pathname)) {
+		const isAuthenticated = await isAuthenticatedPromise(event);
+		if (isAuthenticated) {
+			return redirect(307, '/');
+		}
+	}
+
+	return resolve(event);
+};
+
+// [...]
+
+export const handle = sequence(handleAuth, handleAuthRedirect);
+```
+
 1. Add Social Provider
 2. Add for every social provider you want to use the environment variables `<socialprovider>_CLIENT_ID` and `<socialprovider>_CLIENT_SECRET`
 3. uncomment the social provider you want in `src/lib/auth/social/oauth.ts`

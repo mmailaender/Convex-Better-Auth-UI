@@ -20,8 +20,6 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 	return (
 		<Tabs defaultValue="general" orientation="vertical">
 			<TabsList>
-				<h1>Organization</h1>
-				<h4>Manage your organization.</h4>
 				<TabsTrigger value="general">General</TabsTrigger>
 				{isOwnerOrAdmin && (
 					<>
