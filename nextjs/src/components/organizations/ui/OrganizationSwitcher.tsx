@@ -98,18 +98,19 @@ export default function OrganizationSwitcher({
 	return (
 		<>
 			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher}>
-				<PopoverTrigger onClick={() => setOpenSwitcher(!openSwitcher)}>
-					<div className="flex items-center gap-2">
+				<PopoverTrigger onClick={() => setOpenSwitcher(!openSwitcher)} className='flex items-center justify-between flex-row p-1 pr-2 hover:bg-surface-200-800 rounded-lg ease-in-out duration-200 border border-surface-200-800	w-40 '>
+					<div className="flex items-center gap-3 w-full max-w-64 overflow-hidden">
 						<Avatar
 							src={activeOrganization?.logo || ''}
 							name={activeOrganization?.name || ''}
-							size="size-6"
+							size="size-8 shrink-0 rounded-md"
 						/>
-						<span className="text-surface-700-300 text-base font-semibold">
+						<span className="text-surface-700-300 text-sm font-semibold truncate">
 							{activeOrganization?.name}
 						</span>
-						<ChevronsUpDown className="size-3" />
+					
 					</div>
+					<ChevronsUpDown className="size-4 opacity-40" color='currentColor' />
 				</PopoverTrigger>
 
 				<PopoverContent side={popoverSide} align={popoverAlign}>
