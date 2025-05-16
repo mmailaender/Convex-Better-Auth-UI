@@ -114,13 +114,14 @@ export default function OrganizationSwitcher({
 				</PopoverTrigger>
 
 				<PopoverContent side={popoverSide} align={popoverAlign}>
-					<div role="list" className="flex bg-surface-50-950 rounded-base flex-col gap-0">
+					<div className='flex flex-col gap-1'>
+						<div role="list" className="flex bg-surface-50-950 rounded-base flex-col ">
 						
 							<div className=" text-surface-700-300 flex items-center gap-3  p-3 text-sm/6  border-b border-surface-200-800 max-w-80">
 								<Avatar
 									src={activeOrganization?.logo || ''}
 									name={activeOrganization?.name || ''}
-									size="size-10 shrink-0 rounded-lg"
+									size="size-8 shrink-0 rounded-lg"
 								/>
 								<span className="text-surface-700-300 text-base w-full truncate">
 									{activeOrganization?.name}
@@ -150,9 +151,9 @@ export default function OrganizationSwitcher({
 										<div key={org._id}>
 											<button
 												onClick={() => updateActiveOrg(org._id)}
-												className="group hover:bg-surface-100-900 flex items-center w-full p-3 gap-3 max-w-80 "
+												className="group hover:bg-surface-100-900/50 flex items-center w-full p-3 gap-3 max-w-80 "
 											>
-												<Avatar src={org.logo || ''} name={org.name} size="size-10 rounded-lg shrink-0" />
+												<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-lg shrink-0" />
 												<span className="text-surface-700-300 text-base truncate ">
 													{org.name}
 												</span>
@@ -170,12 +171,13 @@ export default function OrganizationSwitcher({
 									setOpenCreateOrganization(true);
 									setOpenSwitcher(false);
 								}}
-								className="btn bg-transparent hover:bg-surface-50-950 flex w-full items-center justify-start gap-3 p-3"
+								className="btn bg-transparent hover:bg-surface-50-950 flex w-full items-center justify-start gap-4 p-3"
 							>
 								
-								<div className='flex items-center justify-center shrink-0 size-10 bg-surface-200-800 border border-surface-300-700 rounded-base'><Plus className="size-4" /></div>
-								<span>Create Organization</span>
+								<div className='flex items-center justify-center shrink-0 size-8 bg-surface-200-800 border border-surface-300-700 border-dashed rounded-base'><Plus className="size-4" /></div>
+								<span className='text-surface-700-300 text-sm'>Create Organization</span>
 							</button>
+							</div>
 				</PopoverContent>
 			</Popover>
 

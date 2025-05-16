@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 
 // Components
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
-import { UploadCloud, LogIn } from 'lucide-react';
+import { UploadCloud, LogIn, Pencil } from 'lucide-react';
 
 // API
 import { useConvexAuth, useMutation } from 'convex/react';
@@ -167,7 +167,7 @@ export default function CreateOrganization({
 	if (isLoading) {
 		return (
 			<div className="mx-auto w-full max-w-md animate-pulse">
-				<div className="placeholder mb-4 h-8 w-64"></div>
+				<div className="placeholder mb-4 h-8 w-full"></div>
 				<div className="placeholder mb-4 h-40 w-full"></div>
 				<div className="placeholder mb-2 h-10 w-full"></div>
 				<div className="placeholder h-10 w-full"></div>
@@ -187,15 +187,13 @@ export default function CreateOrganization({
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="mx-auto w-full max-w-md">
-			<h2 className="mb-4 text-2xl font-bold">Create Organization</h2>
-
+		<form onSubmit={handleSubmit} className="mx-auto w-full p-6">
 			<div className="mb-4">
-				<label htmlFor="logo" className="mb-1 block font-medium">
+				{/* <label htmlFor="logo" className="mb-1 block font-medium">
 					Logo
-				</label>
+				</label> */}
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group border-surface-600-400 hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed transition-colors">
+					<div className="group  hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl transition-colors">
 						{isUploading ? (
 							<ProgressRing
 								value={null}
@@ -208,19 +206,23 @@ export default function CreateOrganization({
 								<Avatar
 									src={logo}
 									name={name.length > 0 ? name : 'My Organization'}
-									size="size-16"
+									size="size-20 rounded-xl"
 								/>
-								<div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+									<div className="btn-icon size-3 preset-filled-surface-300-700 absolute -bottom-1.5 -right-1.5 rounded-full border-2 border-surface-200-800">
+							<Pencil size={16} color="currentColor" />
+						</div>
+								{/* <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
 									<UploadCloud className="size-6 text-white" />
-								</div>
+								</div> */}
 							</>
 						)}
 					</div>
 				</FileUpload>
 			</div>
-
+			
+			<div className='flex flex-col gap-2 py-4'>
 			<div className="mb-4">
-				<label htmlFor="name" className="mb-1 block font-medium">
+				<label htmlFor="name" className="mb-1 label text-xs font-medium">
 					Name
 				</label>
 				<input
@@ -229,13 +231,13 @@ export default function CreateOrganization({
 					value={name}
 					onChange={handleNameInput}
 					required
-					className="input w-full"
+					className="input w-full border-surface-400-600 border placeholder:text-surface-400-600 hover:border-surface-500 ease-in-out duration-300"
 					placeholder="My Organization"
 				/>
 			</div>
 
-			<div className="mb-4">
-				<label htmlFor="slug" className="mb-1 block font-medium">
+			<div>
+				<label htmlFor="slug" className="mb-1 label text-xs font-medium">
 					Slug URL
 				</label>
 				<input
@@ -244,9 +246,10 @@ export default function CreateOrganization({
 					value={slug}
 					onChange={(e) => setSlug(e.target.value)}
 					required
-					className="input w-full"
+					className="input w-full border-surface-400-600 border"
 					placeholder="my-organization"
 				/>
+			</div>
 			</div>
 
 			<button type="submit" className="btn preset-filled-primary-500 w-full">
