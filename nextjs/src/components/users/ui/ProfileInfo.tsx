@@ -12,7 +12,8 @@ import {
 	DrawerContent,
 	DrawerHeader,
 	DrawerTitle,
-	DrawerTrigger
+	DrawerTrigger,
+	DrawerDescription
 } from '@/components/primitives/ui/drawer';
 import {
 	Dialog,
@@ -20,13 +21,15 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-	DialogTrigger
+	DialogTrigger,
+	DialogDescription
 } from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import { type FileChangeDetails } from '@zag-js/file-upload';
+
 
 export default function ProfileInfo() {
 	const [isDesktop, setIsDesktop] = useState<boolean>(
@@ -115,11 +118,11 @@ export default function ProfileInfo() {
 	const form = (
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="flex flex-col">
-				<div className="flex flex-col gap-1 px-6 pt-6 md:pt-2 pb-4">
-					<label className="label text-xs font-medium">Name</label>
+				<div className="flex flex-col">
+					<label className="label">Name</label>
 					<input
 						type="text"
-						className="input border-surface-400-600 border"
+						className="input w-full"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 					/>
@@ -137,7 +140,7 @@ export default function ProfileInfo() {
 	);
 
 	return (
-		<div className="flex flex-col items-center gap-6 p-6">
+		<DialogDescription className='flex flex-col gap-6'>
 			<div className=" flex w-full items-center justify-start rounded-lg pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
@@ -176,7 +179,9 @@ export default function ProfileInfo() {
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
 						</DialogHeader>
+						<DialogDescription>
 						{form}
+						</DialogDescription>
 					</DialogContent>
 				</Dialog>
 			) : (
@@ -198,13 +203,15 @@ export default function ProfileInfo() {
 						<DrawerHeader>
 							<DrawerTitle>Edit name</DrawerTitle>
 						</DrawerHeader>
+						<DrawerDescription>
 						{form}
+						</DrawerDescription>
 					</DrawerContent>
 				</Drawer>
 			)}
 
 			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
 			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
-		</div>
+		</DialogDescription>
 	);
 }

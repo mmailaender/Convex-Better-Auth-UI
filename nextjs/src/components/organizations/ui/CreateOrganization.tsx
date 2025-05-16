@@ -15,6 +15,14 @@ import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
+import {
+	Dialog,
+	DialogTrigger,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter
+} from '@/components/primitives/ui/dialog';
 
 /**
  * Component for creating a new organization with logo upload support
@@ -187,8 +195,9 @@ export default function CreateOrganization({
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="mx-auto w-full p-6">
-			<div className="mb-4">
+		
+			<form onSubmit={handleSubmit} className="mx-auto w-full">
+			<div className="my-6">
 				{/* <label htmlFor="logo" className="mb-1 block font-medium">
 					Logo
 				</label> */}
@@ -220,9 +229,9 @@ export default function CreateOrganization({
 				</FileUpload>
 			</div>
 			
-			<div className='flex flex-col gap-2 py-4'>
-			<div className="mb-4">
-				<label htmlFor="name" className="mb-1 label text-xs font-medium">
+			<div className='flex flex-col gap-2'>
+				<div className="mb-4">
+				<label htmlFor="name" className=" label">
 					Name
 				</label>
 				<input
@@ -231,13 +240,13 @@ export default function CreateOrganization({
 					value={name}
 					onChange={handleNameInput}
 					required
-					className="input w-full border-surface-400-600 border placeholder:text-surface-400-600 hover:border-surface-500 ease-in-out duration-300"
-					placeholder="My Organization"
+					className="input w-full"
+					placeholder="My Organization..."
 				/>
-			</div>
+				</div>
 
-			<div>
-				<label htmlFor="slug" className="mb-1 label text-xs font-medium">
+				<div className="mb-4">
+				<label htmlFor="slug" className="label">
 					Slug URL
 				</label>
 				<input
@@ -246,18 +255,24 @@ export default function CreateOrganization({
 					value={slug}
 					onChange={(e) => setSlug(e.target.value)}
 					required
-					className="input w-full border-surface-400-600 border"
+					className="input w-full"
 					placeholder="my-organization"
 				/>
-			</div>
+				</div>
 			</div>
 
-			<button type="submit" className="btn preset-filled-primary-500 w-full">
-				Create Organization
-			</button>
+		
+			<DialogFooter>
+					<button type="submit" className="btn preset-filled-primary-500 w-full">
+							Create Organization
+					</button>
+			</DialogFooter>
+			
+
 
 			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
 			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
 		</form>
+	
 	);
 }

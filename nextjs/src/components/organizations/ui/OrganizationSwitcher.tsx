@@ -171,7 +171,7 @@ export default function OrganizationSwitcher({
 									setOpenCreateOrganization(true);
 									setOpenSwitcher(false);
 								}}
-								className="btn bg-transparent hover:bg-surface-50-950 flex w-full items-center justify-start gap-4 p-3"
+								className="btn bg-transparent hover:bg-surface-50-950 flex w-full items-center justify-start gap-3 p-3"
 							>
 								
 								<div className='flex items-center justify-center shrink-0 size-8 bg-surface-200-800 border border-surface-300-700 border-dashed rounded-base'><Plus className="size-4" /></div>

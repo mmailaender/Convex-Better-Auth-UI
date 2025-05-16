@@ -9,10 +9,11 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import {
 	Dialog,
 	DialogTrigger,
-	DialogContent,
-	DialogHeader,
 	DialogTitle,
-	DialogFooter
+	DialogHeader,
+	DialogDescription,
+	DialogContent,
+	DialogFooter,
 } from '@/components/primitives/ui/dialog';
 
 export default function DeleteUser() {
@@ -39,16 +40,18 @@ export default function DeleteUser() {
 				Delete account
 			</DialogTrigger>
 			<DialogContent className="md:max-w-108">
-				<div className="flex w-full flex-col">
-					<DialogHeader>
+				<DialogHeader>
 						<DialogTitle>Delete your account</DialogTitle>
-					</DialogHeader>
-					<article className="pb-4">
-						<p className="text-surface-700-300 px-6 text-sm">
+						<DialogDescription>
+							<article>
+								<p className="text-surface-700-300 text-sm">
 							Are you sure you want to delete your account? All of your data will be permanently
 							deleted.
-						</p>
-					</article>
+								</p>
+							</article>
+					</DialogDescription>
+					</DialogHeader>
+				
 					<DialogFooter>
 						<button type="button" className="btn preset-tonal" onClick={handleCancel}>
 							Cancel
@@ -57,7 +60,7 @@ export default function DeleteUser() {
 							Confirm
 						</button>
 					</DialogFooter>
-				</div>
+			
 			</DialogContent>
 		</Dialog>
 	);

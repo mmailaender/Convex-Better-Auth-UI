@@ -7,3 +7,12 @@
 @import 'tw-animate-css';
 
 @source '../../node_modules/@skeletonlabs/skeleton-react/dist';
+
+@utility input {
+  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out;
+}
+
+@utility label {
+  @apply mb-1 text-xs font-medium;
+}
+
