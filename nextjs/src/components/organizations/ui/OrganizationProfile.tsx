@@ -7,6 +7,15 @@ import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 
 // API
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+	DialogTrigger,
+	DialogDescription
+} from '@/components/primitives/ui/dialog';
 
 interface OrganizationProfileProps {
 	/**
@@ -18,6 +27,7 @@ interface OrganizationProfileProps {
 export default function OrganizationProfile({ onSuccessfulDelete }: OrganizationProfileProps) {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 	return (
+		
 		<Tabs defaultValue="general" orientation="vertical">
 			<TabsList>
 				<TabsTrigger value="general">General</TabsTrigger>
@@ -42,5 +52,6 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 				</>
 			)}
 		</Tabs>
+		
 	);
 }
