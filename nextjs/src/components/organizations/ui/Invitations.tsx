@@ -109,7 +109,7 @@ export function Invitations(): React.ReactNode {
 			{errorMessage && <p className="text-error-500">{errorMessage}</p>}
 			{successMessage && <p className="text-success-500">{successMessage}</p>}
 
-			<div className="mb-4 flex items-center gap-3">
+			<div className="mb-16 flex items-center gap-3">
 				<div className="relative flex-1">
 					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 						<Search className="text-surface-400-600 size-4" />
@@ -132,17 +132,17 @@ export function Invitations(): React.ReactNode {
 				<table className="table caption-bottom">
 					<thead>
 						<tr className="border-surface-300-700 border-b">
-							<th className="p-2 text-left">Email</th>
-							<th className="p-2 text-left">Role</th>
-							<th className="p-2 text-left">Invited By</th>
-							{isOwnerOrAdmin && <th className="p-2 text-right">Actions</th>}
+							<th className="p-2 text-left text-xs  text-surface-500">Email</th>
+							<th className="p-2 text-left text-xs  text-surface-500">Role</th>
+							<th className="p-2 text-left text-xs  text-surface-500">Invited By</th>
+							{isOwnerOrAdmin && <th className="p-2 text-right"></th>}
 						</tr>
 					</thead>
 					<tbody>
 						{filteredInvitations.map((invitation) => (
 							<tr key={invitation._id} className="border-surface-300-700 border-b">
-								<td className="p-2">{invitation.email}</td>
-								<td className="p-2">
+								<td className="">{invitation.email}</td>
+								<td className="">
 									<div className="flex items-center">
 										{invitation.role === 'role_organization_owner' ? (
 											<>
@@ -160,16 +160,16 @@ export function Invitations(): React.ReactNode {
 									</div>
 								</td>
 								<td className="p-2">{invitation.invitedBy.name}</td>
-								<td className="p-2 text-right">
+								<td className="text-right">
 									{isOwnerOrAdmin && (
 										<Dialog>
 											<DialogTrigger
-												className="btn text-error-500 hover:preset-tonal-error-500"
+												className="btn btn-sm preset-filled-surface-300-700"
 												onClick={() => setSelectedInvitationId(invitation._id)}
 											>
 												Revoke
 											</DialogTrigger>
-											<DialogContent>
+											<DialogContent className='w-full max-w-md'>
 												<DialogClose />
 												<DialogHeader>
 													<DialogTitle>Revoke invitation</DialogTitle>

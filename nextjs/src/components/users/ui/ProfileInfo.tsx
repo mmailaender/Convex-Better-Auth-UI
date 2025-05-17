@@ -141,7 +141,7 @@ export default function ProfileInfo() {
 
 	return (
 		<DialogDescription className='flex flex-col gap-6'>
-			<div className=" flex w-full items-center justify-start rounded-lg pl-0.5">
+			<div className=" flex  items-center justify-start rounded-lg pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
 						<Avatar src={user.image || ''} name={user.name} size="size-20" />
@@ -175,7 +175,7 @@ export default function ProfileInfo() {
 						</div>
 					</DialogTrigger>
 					
-					<DialogContent className="md:max-w-108">
+					<DialogContent className="w-full max-w-md">
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
 						</DialogHeader>

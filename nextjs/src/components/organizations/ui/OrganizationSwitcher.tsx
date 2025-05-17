@@ -184,18 +184,16 @@ export default function OrganizationSwitcher({
 			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Create Organization</DialogTitle>
+						<DialogTitle >Create Organization</DialogTitle>
 					</DialogHeader>
 					<CreateOrganization onSuccessfulCreate={() => setOpenCreateOrganization(false)} />
 					<DialogClose />
 				</DialogContent>
 			</Dialog>
 
-			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Organization Profile</DialogTitle>
-					</DialogHeader>
+			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile} >
+				<DialogContent className='w-4xl p-0 h-[70vh]' >
+				
 					<OrganizationProfile onSuccessfulDelete={() => setOpenOrganizationProfile(false)} />
 					<DialogClose />
 				</DialogContent>

@@ -1,154 +1,193 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-
-// API
+import { useState, useEffect, FormEvent } from 'react';
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-
-// Components
 import { UserPlus } from 'lucide-react';
-
-// Types
 import { FunctionReturnType } from 'convex/server';
 import { Doc } from '@/convex/_generated/dataModel';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/primitives/ui/dialog';
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription
+} from '@/components/primitives/ui/drawer';
+
 type Role = Doc<'organizationMembers'>['role'];
 type InvitationResponse =
-	FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<
-		infer T
-	>
-		? T
-		: never;
+  FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<infer T>
+    ? T
+    : never;
 
-/**
- * InviteMembers component that allows organization admins to invite new members
- */
 export default function InviteMembers() {
-	// State variables
-	const [emailInput, setEmailInput] = useState<string>('');
-	const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
-	const [isProcessing, setIsProcessing] = useState<boolean>(false);
-	const [errorMessage, setErrorMessage] = useState<string>('');
-	const [successMessage, setSuccessMessage] = useState<string>('');
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
+  );
 
-	// Convex action for inviting members
-	const inviteMembers = useAction(api.organizations.invitations.actions.inviteMembers);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const handleChange = () => setIsDesktop(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
-	/**
-	 * Handles the submission of the invitation form
-	 */
-	const handleInvite = async (event: FormEvent) => {
-		event.preventDefault();
+  const [isOpen, setIsOpen] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-		if (isProcessing) return;
-		setIsProcessing(true);
-		setErrorMessage('');
-		setSuccessMessage('');
+  const inviteMembers = useAction(api.organizations.invitations.actions.inviteMembers);
 
-		try {
-			// Split and clean email addresses
-			const emails = emailInput
-				.replace(/[,;\s]+/g, ',') // Replace all delimiters (commas, semicolons, spaces) with a single comma
-				.split(',')
-				.map((email: string) => email.trim())
-				.filter((email: string) => email.length > 0);
+  const handleInvite = async (event: FormEvent) => {
+    event.preventDefault();
+    if (isProcessing) return;
+    setIsProcessing(true);
+    setErrorMessage('');
+    setSuccessMessage('');
 
-			if (emails.length === 0) {
-				setErrorMessage('Please enter at least one email address');
-				setIsProcessing(false);
-				return;
-			}
+    try {
+      const emails = emailInput
+        .replace(/[,;\s]+/g, ',')
+        .split(',')
+        .map((email) => email.trim())
+        .filter((email) => email.length > 0);
 
-			// Send invitations for all emails at once
-			const results = await inviteMembers({
-				emails,
-				role: selectedRole
-			});
+      if (emails.length === 0) {
+        setErrorMessage('Please enter at least one email address');
+        setIsProcessing(false);
+        return;
+      }
 
-			// Process results
-			const successful = results.filter((r: InvitationResponse) => r.success);
-			const failed = results.filter((r: InvitationResponse) => !r.success);
+      const results = await inviteMembers({ emails, role: selectedRole });
+      const successful = results.filter((r) => r.success);
+      const failed = results.filter((r) => !r.success);
 
-			if (successful.length > 0) {
-				setSuccessMessage(
-					`Successfully sent ${successful.length} invitation(s) to: ${successful
-						.map((r: InvitationResponse) => r.email)
-						.join(', ')}`
-				);
-				setEmailInput('');
-			}
+      if (successful.length > 0) {
+        setSuccessMessage(
+          `Successfully sent ${successful.length} invitation(s) to: ${successful
+            .map((r) => r.email)
+            .join(', ')}`
+        );
+        setEmailInput('');
+      }
 
-			if (failed.length > 0) {
-				setErrorMessage(
-					`Failed to send invitation(s) to: ${failed.map((r: InvitationResponse) => r.email).join(', ')}`
-				);
-			}
-		} catch (err) {
-			console.error('An error occurred while processing invitations: ', err);
-			setErrorMessage(
-				err instanceof Error ? err.message : 'An error occurred while processing invitations'
-			);
-		} finally {
-			setIsProcessing(false);
-		}
-	};
+      if (failed.length > 0) {
+        setErrorMessage(
+          `Failed to send invitation(s) to: ${failed.map((r) => r.email).join(', ')}`
+        );
+      }
+    } catch (err) {
+      console.error('An error occurred while processing invitations: ', err);
+      setErrorMessage(
+        err instanceof Error ? err.message : 'An error occurred while processing invitations'
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
-	return (
-		<div className="border-surface-300-700 mb-8 rounded-lg border p-4">
-			<h3 className="mb-4 flex items-center text-xl font-semibold">
-				<UserPlus className="mr-2 size-5" />
-				Invite new members
-			</h3>
-
-			<form onSubmit={handleInvite} className="flex flex-col gap-4">
-				<div className="flex flex-col gap-4 md:flex-row">
-					<textarea
-						value={emailInput}
-						onChange={(e) => setEmailInput(e.target.value)}
-						placeholder="example@email.com, example2@email.com"
-						className="textarea min-h-24 grow"
-						required
-					></textarea>
-
-					<div className="flex flex-col gap-3">
-						<select
-							value={selectedRole}
-							onChange={(e) => setSelectedRole(e.target.value as Role)}
-							className="select w-full md:w-48"
-						>
-							<option value="role_organization_member">Member</option>
-							<option value="role_organization_admin">Admin</option>
-						</select>
-
-						<button
-							type="submit"
-							className="btn variant-filled-primary w-full"
-							disabled={isProcessing}
-						>
-							{isProcessing ? 'Sending...' : 'Send Invitations'}
-						</button>
+  const form = (
+    <form onSubmit={handleInvite} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
+				<div className='flex flex-col'>
+				<label className='label'>Role</label>
+					<select
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.target.value as Role)}
+            className="select w-full "
+          >
+            <option value="role_organization_member">Member</option>
+            <option value="role_organization_admin">Admin</option>
+          </select>
 					</div>
+				<div className='flex flex-col gap-2'>
+					<div>
+					<label className='label'>Email(s)</label>
+        	<textarea
+          value={emailInput}
+          onChange={(e) => setEmailInput(e.target.value)}
+          placeholder="example@email.com, example2@email.com"
+          className="textarea min-h-24 grow"
+          required
+       		 ></textarea>
+					 </div>
+				  	<p className='text-xs text-surface-500 px-1'>
+          You can invite multiple people by separating email addresses with commas, semicolons, or
+          spaces.
+        	</p>
 				</div>
-			</form>
 
-			{successMessage && (
-				<div className="bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 mt-3 rounded-lg p-3">
-					{successMessage}
-				</div>
-			)}
+       
+        
 
-			{errorMessage && (
-				<div className="bg-error-100 text-error-800 dark:bg-error-900 dark:text-error-200 mt-3 rounded-lg p-3">
-					{errorMessage}
-				</div>
-			)}
+         
+        <DialogFooter>
+					<button
+            type="submit"
+            className="btn preset-filled-primary-500 w-full"
+            disabled={isProcessing}
+          >
+            {isProcessing ? 'Sending...' : 'Send Invitations'}
+          </button>
+					</DialogFooter>
+      </div>
 
-			<div className="text-surface-500-500 mt-3 text-xs">
-				<p>
-					You can invite multiple people by separating email addresses with commas, semicolons, or
-					spaces.
-				</p>
-			</div>
-		</div>
-	);
+      {successMessage && (
+        <div className="bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 mt-3 rounded-lg p-3">
+          {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="bg-error-100 text-error-800 dark:bg-error-900 dark:text-error-200 mt-3 rounded-lg p-3">
+          {errorMessage}
+        </div>
+      )}
+
+   
+    </form>
+  );
+
+  return (
+    <div >
+      {isDesktop ? (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger onClick={() => setIsOpen(true)} className="btn preset-filled-surface-950-50 text-sm h-10">
+             Invite members
+          </DialogTrigger>
+          <DialogContent className="md:max-w-108">
+            <DialogHeader>
+              <DialogTitle>Invite new members</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>{form}</DialogDescription>
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger onClick={() => setIsOpen(true)} className="btn w-full">
+            <UserPlus className="mr-2 size-5" /> Invite members
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Invite new members</DrawerTitle>
+            </DrawerHeader>
+            <DrawerDescription>{form}</DrawerDescription>
+          </DrawerContent>
+        </Drawer>
+      )}
+    </div>
+  );
 }

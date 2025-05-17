@@ -181,8 +181,9 @@ export default function OrganizationInfo() {
 
   const form = (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="flex flex-col gap-4">
-        <label htmlFor="name">Name</label>
+      <div className="flex flex-col gap-4 ">
+        <div>
+        <label htmlFor="name" className='label'>Name</label>
         <input
           type="text"
           name="name"
@@ -190,8 +191,9 @@ export default function OrganizationInfo() {
           value={formState.name}
           onChange={(e) => setFormState({ ...formState, name: e.target.value })}
         />
-
-        <label htmlFor="slug">Slug URL</label>
+        </div>
+        <div>
+        <label htmlFor="slug" className='label'>Slug URL</label>
         <input
           type="text"
           name="slug"
@@ -202,6 +204,7 @@ export default function OrganizationInfo() {
             setFormState({ ...formState, slug: e.target.value });
           }}
         />
+        </div>
 
         <DialogFooter>
           <button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
@@ -216,17 +219,19 @@ export default function OrganizationInfo() {
   );
 
   return (
-    <div className="mb-6 flex flex-col w-full items-start gap-4">
+    <div>
+			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300'>General settings</h6>
+			<div className='pt-6 flex flex-col items-start gap-6'>
       <FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-        <div className="group relative flex cursor-pointer flex-col items-center justify-center gap-2">
+        <div className="group relative flex cursor-pointer flex-col items-center justify-center gap-2 ">
           <Avatar
             src={logoPreview || orgData.logo}
             name={orgData.logo || newLogoUploaded ? orgData.name : orgData.name || 'Organization'}
-            size="size-16"
+            size="size-20 rounded-xl"
           />
-          <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-            <UploadCloud className="size-6 text-white" />
-          </div>
+          <div className="btn-icon size-3 preset-filled-surface-300-700 absolute -bottom-1.5 -right-1.5 rounded-full border-2 border-surface-200-800">
+							<Pencil size={16} color="currentColor" />
+						</div>
           {isUploading && (
             <ProgressRing
               value={null}
@@ -237,6 +242,7 @@ export default function OrganizationInfo() {
           )}
         </div>
       </FileUpload>
+			
 
       {isDesktop ? (
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
@@ -281,6 +287,7 @@ export default function OrganizationInfo() {
           </DrawerContent>
         </Drawer>
       )}
+			</div>
       {success && <p className="text-success-600-400 mt-2">{success}</p>}
       {error && <p className="text-error-600-400 mt-2">{error}</p>}
     </div>

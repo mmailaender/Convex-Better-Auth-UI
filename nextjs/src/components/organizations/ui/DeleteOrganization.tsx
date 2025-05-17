@@ -86,30 +86,30 @@ export default function DeleteOrganization({
 
 	return (
 		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
-			<DialogTrigger className="btn text-error-500 hover:preset-tonal-error-500">
+			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm w-fit">
 				Delete organization
 			</DialogTrigger>
 
-			<DialogContent>
+			<DialogContent className='w-full max-w-md'>
 				<DialogHeader>
 					<DialogTitle>Delete organization</DialogTitle>
 				</DialogHeader>
 				<DialogClose />
 
-				<article className="pb-8">
-					<p className="text-surface-700-300 px-2 text-sm">
+				<article >
+					<p className="text-surface-700-300 text-sm">
 						Are you sure you want to delete the organization {activeOrganization.name}? All
 						organization data will be permanently deleted.
 					</p>
 				</article>
 
 				<DialogFooter>
-					<button type="button" className="btn preset-tonal w-full" onClick={handleCancel}>
+					<button type="button" className="btn preset-tonal " onClick={handleCancel}>
 						Cancel
 					</button>
 					<button
 						type="button"
-						className="btn preset-filled-error-500 w-full"
+						className="btn preset-filled-error-500 "
 						onClick={handleConfirm}
 					>
 						Confirm

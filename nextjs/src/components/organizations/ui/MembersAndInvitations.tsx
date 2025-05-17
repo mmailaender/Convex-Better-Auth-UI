@@ -16,16 +16,20 @@ export default function MembersAndInvitations() {
 
 	return (
 		<Tabs defaultValue="members">
-			<TabsList>
-				<TabsTrigger value="members">Members {members && `(${members.length})`}</TabsTrigger>
-				{isOwnerOrAdmin && (
-					<TabsTrigger value="invitations">
-						Invitations {invitations && `(${invitations.length})`}
+			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300'>Members</h6>
+			<div className='flex flex-row justify-between align-middle w-full py-4 '>
+					<TabsList>
+						<TabsTrigger value="members" className='gap-2'>Members <span className='badge preset-filled-surface-300-700 size-6 rounded-full'>{members && `${members.length}`} </span></TabsTrigger>
+						{isOwnerOrAdmin && (
+						<TabsTrigger value="invitations" className='gap-2'>
+						Invitations <span className='badge preset-filled-surface-300-700 size-6 rounded-full'>{invitations && `${invitations.length}`}</span>
 					</TabsTrigger>
 				)}
-			</TabsList>
-			<TabsContent value="members">
+					</TabsList>
 				<InviteMembers />
+			</div>
+			<TabsContent value="members">
+				
 				<Members />
 			</TabsContent>
 			{isOwnerOrAdmin && (

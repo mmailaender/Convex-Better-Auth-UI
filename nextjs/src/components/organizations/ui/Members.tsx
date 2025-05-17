@@ -131,8 +131,8 @@ export function Members(): React.ReactNode {
 			{errorMessage && <p className="text-error-500">{errorMessage}</p>}
 			{successMessage && <p className="text-success-500">{successMessage}</p>}
 
-			<div className="mb-4 flex items-center gap-3">
-				<div className="relative flex-1">
+			<div className="mb-16 flex items-center gap-3">
+				<div className="relative flex-1 ">
 					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
 						<Search className="text-surface-400-600 size-4" />
 					</div>
@@ -149,30 +149,31 @@ export function Members(): React.ReactNode {
 			<table className="table caption-bottom">
 				<thead>
 					<tr className="border-surface-300-700 border-b">
-						<th className="p-2 text-left">Name</th>
-						<th className="p-2 text-left">Email</th>
-						<th className="p-2 text-left">Role</th>
-						{isOwnerOrAdmin && <th className="p-2 text-right">Actions</th>}
+						<th className="p-2 text-left text-xs  text-surface-500">Name</th>
+						<th className="p-2 text-left text-xs  text-surface-500">Email</th>
+						<th className="p-2 text-left text-xs  text-surface-500">Role</th>
+						{isOwnerOrAdmin && <th className="p-2 text-right"></th>}
 					</tr>
 				</thead>
 				<tbody>
 					{filteredMembers.map((member) => (
-						<tr key={member._id}>
+						<tr key={member._id} className='border-surface-300-700 border-b'>
 							{/* Member Name */}
-							<td>
-								<div className="flex items-center space-x-4">
+							<td className='w-60 max-w-60'>
+								<div className="flex items-center space-x-2">
 									<div className="avatar">
-										<div className="size-12">
+										<div className="size-8">
 											{member.user.image ? (
-												<Avatar src={member.user.image} name={member.user.name} size="size-12" />
+												<Avatar src={member.user.image} name={member.user.name} size="size-8" />
 											) : (
-												<div className="bg-primary-100 text-primary-700 flex h-full w-full items-center justify-center rounded-full">
+												<div className=" text-primary-700 flex h-full w-full items-center justify-center rounded-full">
 													{member.user.name?.charAt(0) || 'U'}
 												</div>
 											)}
 										</div>
 									</div>
-									<span className="font-semibold">{member.user.name}</span>
+									
+									<span className="font-medium truncate">{member.user.name}</span>
 								</div>
 							</td>
 							{/* Member Email */}

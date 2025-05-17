@@ -27,20 +27,27 @@ interface OrganizationProfileProps {
 export default function OrganizationProfile({ onSuccessfulDelete }: OrganizationProfileProps) {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 	return (
-		
+	
 		<Tabs defaultValue="general" orientation="vertical">
-			<TabsList>
-				<TabsTrigger value="general">General</TabsTrigger>
-				{isOwnerOrAdmin && (
+			<div className='p-2 bg-surface-300-700 w-72 h-full'>
+				<DialogHeader className='py-4 px-3'>
+					<DialogTitle >Organization</DialogTitle>
+				</DialogHeader>
+				<TabsList>
+					<TabsTrigger value="general">General</TabsTrigger>
+					{isOwnerOrAdmin && (
 					<>
 						<TabsTrigger value="members">Members</TabsTrigger>
 						<TabsTrigger value="billing">Billing</TabsTrigger>
 					</>
 				)}
-			</TabsList>
-			<TabsContent value="general">
+				</TabsList>
+			</div>
+			<TabsContent value="general" className='flex flex-col h-full'>
 				<OrganizationInfo />
+				<div className='pt-16'>
 				<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
+				</div>
 				<LeaveOrganization />
 			</TabsContent>
 			{isOwnerOrAdmin && (
@@ -52,6 +59,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 				</>
 			)}
 		</Tabs>
+		
 		
 	);
 }
