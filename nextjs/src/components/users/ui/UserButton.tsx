@@ -13,13 +13,11 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogTitle,
-	DialogDescription
+	DialogTitle
 } from '@/components/primitives/ui/dialog';
 import UserProfile from '@/components/users/ui/UserProfile';
 import { Avatar } from '@skeletonlabs/skeleton-react';
 import { ChevronRight } from 'lucide-react';
-
 
 export default function UserButton({
 	popoverSide = 'bottom',
@@ -76,15 +74,11 @@ export default function UserButton({
 
 						{/* ProfileInfo Popup */}
 						<Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-							<DialogContent className='max-w-xl'>
+							<DialogContent className="max-w-xl">
 								<DialogHeader>
 									<DialogTitle>Profile</DialogTitle>
 								</DialogHeader>
-								<DialogDescription >
-							
-									<UserProfile />
-								
-								</DialogDescription>
+								<UserProfile />
 							</DialogContent>
 						</Dialog>
 					</>

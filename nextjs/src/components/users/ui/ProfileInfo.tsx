@@ -21,15 +21,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-	DialogTrigger,
-	DialogDescription
+	DialogTrigger
 } from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import { type FileChangeDetails } from '@zag-js/file-upload';
-
 
 export default function ProfileInfo() {
 	const [isDesktop, setIsDesktop] = useState<boolean>(
@@ -140,12 +138,12 @@ export default function ProfileInfo() {
 	);
 
 	return (
-		<DialogDescription className='flex flex-col gap-6'>
-			<div className=" flex  items-center justify-start rounded-lg pl-0.5 pt-6">
+		<div className="flex flex-col gap-6">
+			<div className="flex items-center justify-start rounded-lg pt-6 pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
 						<Avatar src={user.image || ''} name={user.name} size="size-20" />
-						<div className="btn-icon size-3 preset-filled-surface-300-700 absolute -bottom-1.5 -right-1.5 rounded-full border-2 border-surface-200-800">
+						<div className="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
 						{isUploading && (
@@ -163,7 +161,7 @@ export default function ProfileInfo() {
 			{isDesktop ? (
 				<Dialog open={isEditing} onOpenChange={setIsEditing}>
 					<DialogTrigger
-						className="border border-surface-300-700 hidden w-full flex-row content-center items-center rounded-xl py-2 pr-3 pl-4 md:flex hover:bg-surface-50-950 hover:border-surface-50-950 ease-in-out duration-300"
+						className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 						onClick={() => setIsEditing(true)}
 					>
 						<div className="flex w-full flex-col gap-1 text-left">
@@ -174,21 +172,19 @@ export default function ProfileInfo() {
 							<Pencil size={16} color="currentColor" />
 						</div>
 					</DialogTrigger>
-					
+
 					<DialogContent className="w-full max-w-md">
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
 						</DialogHeader>
-						<DialogDescription>
 						{form}
-						</DialogDescription>
 					</DialogContent>
 				</Dialog>
 			) : (
 				<Drawer open={isEditing} onOpenChange={setIsEditing}>
 					<DrawerTrigger
 						onClick={() => setIsEditing(true)}
-						className=" flex w-full flex-row content-center items-center rounded-xl py-2 pr-3 pl-4 md:hidden border border-surface-300-700"
+						className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
 					>
 						<div className="flex w-full flex-col gap-1 text-left">
 							<span className="text-surface-600-400 text-xs">Name</span>
@@ -203,15 +199,13 @@ export default function ProfileInfo() {
 						<DrawerHeader>
 							<DrawerTitle>Edit name</DrawerTitle>
 						</DrawerHeader>
-						<DrawerDescription>
-						{form}
-						</DrawerDescription>
+						<DrawerDescription>{form}</DrawerDescription>
 					</DrawerContent>
 				</Drawer>
 			)}
 
 			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
 			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
-		</DialogDescription>
+		</div>
 	);
 }
