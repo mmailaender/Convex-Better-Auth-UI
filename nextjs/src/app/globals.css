@@ -9,14 +9,14 @@
 @source '../../node_modules/@skeletonlabs/skeleton-react/dist';
 
 @utility input {
-  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out;
+  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out text-surface-950-50;
 }
 @utility textarea {
-  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out;
+  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out text-surface-950-50;
 }
 
 @utility select {
-  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out px-2;
+  @apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 w-full border duration-300 ease-in-out px-2 text-surface-950-50;
 }
 
 @utility label {

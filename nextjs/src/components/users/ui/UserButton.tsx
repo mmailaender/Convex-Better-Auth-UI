@@ -76,11 +76,11 @@ export default function UserButton({
 
 						{/* ProfileInfo Popup */}
 						<Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-							<DialogContent>
+							<DialogContent className='max-w-xl'>
 								<DialogHeader>
-									<DialogTitle className='pb-10'>Profile</DialogTitle>
+									<DialogTitle>Profile</DialogTitle>
 								</DialogHeader>
-								<DialogDescription>
+								<DialogDescription >
 							
 									<UserProfile />
 								

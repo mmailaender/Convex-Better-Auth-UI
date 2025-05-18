@@ -131,14 +131,14 @@ export function Members(): React.ReactNode {
 			{errorMessage && <p className="text-error-500">{errorMessage}</p>}
 			{successMessage && <p className="text-success-500">{successMessage}</p>}
 
-			<div className="mb-16 flex items-center gap-3">
+			<div className="py-4 flex items-center gap-3">
 				<div className="relative flex-1 ">
-					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center ">
 						<Search className="text-surface-400-600 size-4" />
 					</div>
 					<input
 						type="text"
-						className="input w-full pl-10"
+						className="input w-full pl-6 border-0 w-hug text-sm"
 						placeholder="Search members..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
@@ -147,11 +147,11 @@ export function Members(): React.ReactNode {
 			</div>
 
 			<table className="table caption-bottom">
-				<thead>
+				<thead className='bg-surface-300-700/50'>
 					<tr className="border-surface-300-700 border-b">
-						<th className="p-2 text-left text-xs  text-surface-500">Name</th>
-						<th className="p-2 text-left text-xs  text-surface-500">Email</th>
-						<th className="p-2 text-left text-xs  text-surface-500">Role</th>
+						<th className="p-2 text-left text-xs  text-surface-700-300">Name</th>
+						<th className="p-2 text-left text-xs  text-surface-700-300">Email</th>
+						<th className="p-2 text-left text-xs  text-surface-700-300">Role</th>
 						{isOwnerOrAdmin && <th className="p-2 text-right"></th>}
 					</tr>
 				</thead>

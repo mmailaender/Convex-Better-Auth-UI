@@ -109,14 +109,14 @@ export function Invitations(): React.ReactNode {
 			{errorMessage && <p className="text-error-500">{errorMessage}</p>}
 			{successMessage && <p className="text-success-500">{successMessage}</p>}
 
-			<div className="mb-16 flex items-center gap-3">
+			<div className="py-4 flex items-center gap-3">
 				<div className="relative flex-1">
-					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center ">
 						<Search className="text-surface-400-600 size-4" />
 					</div>
 					<input
 						type="text"
-						className="input w-full pl-10"
+						className="input w-full pl-6 border-0 w-hug text-sm"
 						placeholder="Search invitations..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
@@ -130,13 +130,17 @@ export function Invitations(): React.ReactNode {
 				</div>
 			) : (
 				<table className="table caption-bottom">
-					<thead>
-						<tr className="border-surface-300-700 border-b">
-							<th className="p-2 text-left text-xs  text-surface-500">Email</th>
-							<th className="p-2 text-left text-xs  text-surface-500">Role</th>
-							<th className="p-2 text-left text-xs  text-surface-500">Invited By</th>
+					<thead className='bg-surface-300-700/50'>
+						<tr>
+												<th className="p-2 text-left text-xs  text-surface-700-300">Email</th>
+							<th className="p-2 text-left text-xs  text-surface-700-300">Role</th>
+							<th className="p-2 text-left text-xs  text-surface-700-300">Invited By</th>
+							
+
 							{isOwnerOrAdmin && <th className="p-2 text-right"></th>}
+							
 						</tr>
+						
 					</thead>
 					<tbody>
 						{filteredInvitations.map((invitation) => (
@@ -184,7 +188,7 @@ export function Invitations(): React.ReactNode {
 													<DialogClose className="btn preset-tonal">Cancel</DialogClose>
 													<button
 														type="button"
-														className="btn preset-filled-error-400-600"
+														className="btn preset-filled-error-500"
 														onClick={handleRevokeInvitation}
 													>
 														Confirm

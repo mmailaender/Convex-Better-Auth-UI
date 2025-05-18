@@ -55,7 +55,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 					<TabsContent value="members">
 						<MembersAndInvitations />
 					</TabsContent>
-					<TabsContent value="billing">Billing Panel</TabsContent>
+					<TabsContent value="billing"><h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300'>Billing</h6></TabsContent>
 				</>
 			)}
 		</Tabs>

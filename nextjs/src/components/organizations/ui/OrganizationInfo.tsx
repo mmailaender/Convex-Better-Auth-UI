@@ -219,6 +219,7 @@ export default function OrganizationInfo() {
   );
 
   return (
+   
     <div>
 			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300'>General settings</h6>
 			<div className='pt-6 flex flex-col items-start gap-6'>

@@ -137,7 +137,7 @@ export default function InviteMembers() {
         <DialogFooter>
 					<button
             type="submit"
-            className="btn preset-filled-primary-500 w-full"
+            className="btn preset-filled-primary-500 "
             disabled={isProcessing}
           >
             {isProcessing ? 'Sending...' : 'Send Invitations'}
@@ -165,7 +165,7 @@ export default function InviteMembers() {
     <div >
       {isDesktop ? (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger onClick={() => setIsOpen(true)} className="btn preset-filled-surface-950-50 text-sm h-10">
+          <DialogTrigger onClick={() => setIsOpen(true)} className="btn preset-filled-primary-500 text-sm h-10">
              Invite members
           </DialogTrigger>
           <DialogContent className="md:max-w-108">
