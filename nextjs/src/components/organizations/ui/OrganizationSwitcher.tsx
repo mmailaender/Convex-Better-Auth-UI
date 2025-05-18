@@ -98,32 +98,33 @@ export default function OrganizationSwitcher({
 	return (
 		<>
 			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher}>
-				<PopoverTrigger onClick={() => setOpenSwitcher(!openSwitcher)} className='flex items-center justify-between flex-row p-1 pr-2 hover:bg-surface-200-800 rounded-lg ease-in-out duration-200 border border-surface-200-800 w-40 '>
-					<div className="flex items-center gap-3 w-full max-w-64 overflow-hidden">
+				<PopoverTrigger
+					onClick={() => setOpenSwitcher(!openSwitcher)}
+					className="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-lg border p-1 pr-2 duration-200 ease-in-out"
+				>
+					<div className="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 						<Avatar
 							src={activeOrganization?.logo || ''}
 							name={activeOrganization?.name || ''}
 							size="size-8 shrink-0 rounded-md"
 						/>
-						<span className="text-surface-700-300 text-sm  truncate">
+						<span className="text-surface-700-300 truncate text-sm">
 							{activeOrganization?.name}
 						</span>
-					
 					</div>
-					<ChevronsUpDown className="size-4 opacity-40" color='currentColor' />
+					<ChevronsUpDown className="size-4 opacity-40" color="currentColor" />
 				</PopoverTrigger>
 
 				<PopoverContent side={popoverSide} align={popoverAlign}>
-					<div className='flex flex-col gap-1'>
-						<div role="list" className="flex bg-surface-50-950 rounded-base flex-col ">
-						
-							<div className=" text-surface-700-300 flex items-center gap-3  p-3 text-sm/6  border-b border-surface-200-800 max-w-80">
+					<div className="flex flex-col gap-1">
+						<div role="list" className="bg-surface-50-950 rounded-base flex flex-col">
+							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
 								<Avatar
 									src={activeOrganization?.logo || ''}
 									name={activeOrganization?.name || ''}
 									size="size-8 shrink-0 rounded-lg"
 								/>
-								<span className="text-surface-700-300 text-base w-full truncate">
+								<span className="text-surface-700-300 w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
 								{activeOrganization?.role === 'role_organization_owner' ||
@@ -141,59 +142,58 @@ export default function OrganizationSwitcher({
 									activeOrganization && <LeaveOrganization />
 								)}
 							</div>
-					
 
-						{organizations
-							.filter((org) => org && org._id !== activeOrganization?._id)
-							.map(
-								(org) =>
-									org && (
-										<div key={org._id}>
-											<button
-												onClick={() => updateActiveOrg(org._id)}
-												className="group hover:bg-surface-100-900/50 flex items-center w-full p-3 gap-3 max-w-80 "
-											>
-												<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-lg shrink-0" />
-												<span className="text-surface-700-300 text-base truncate ">
-													{org.name}
-												</span>
-											</button>
-										</div>
-									)
-							)}
-
-					
-						
-						
-					</div>
-					<button
-								onClick={() => {
-									setOpenCreateOrganization(true);
-									setOpenSwitcher(false);
-								}}
-								className="btn bg-transparent hover:bg-surface-50-950 flex w-full items-center justify-start gap-3 p-3"
-							>
-								
-								<div className='flex items-center justify-center shrink-0 size-8 bg-surface-200-800 border border-surface-300-700 border-dashed rounded-base'><Plus className="size-4" /></div>
-								<span className='text-surface-700-300 text-sm'>Create Organization</span>
-							</button>
+							{organizations
+								.filter((org) => org && org._id !== activeOrganization?._id)
+								.map(
+									(org) =>
+										org && (
+											<div key={org._id}>
+												<button
+													onClick={() => updateActiveOrg(org._id)}
+													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
+												>
+													<Avatar
+														src={org.logo || ''}
+														name={org.name}
+														size="size-8 rounded-lg shrink-0"
+													/>
+													<span className="text-surface-700-300 truncate text-base">
+														{org.name}
+													</span>
+												</button>
+											</div>
+										)
+								)}
+						</div>
+						<button
+							onClick={() => {
+								setOpenCreateOrganization(true);
+								setOpenSwitcher(false);
+							}}
+							className="btn hover:bg-surface-50-950 flex w-full items-center justify-start gap-3 bg-transparent p-3"
+						>
+							<div className="bg-surface-200-800 border-surface-300-700 rounded-base flex size-8 shrink-0 items-center justify-center border border-dashed">
+								<Plus className="size-4" />
 							</div>
+							<span className="text-surface-700-300 text-sm">Create Organization</span>
+						</button>
+					</div>
 				</PopoverContent>
 			</Popover>
 
 			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle >Create Organization</DialogTitle>
+						<DialogTitle>Create Organization</DialogTitle>
 					</DialogHeader>
 					<CreateOrganization onSuccessfulCreate={() => setOpenCreateOrganization(false)} />
 					<DialogClose />
 				</DialogContent>
 			</Dialog>
 
-			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile} >
-				<DialogContent className='w-4xl p-0 h-[70vh]' >
-				
+			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
+				<DialogContent className="h-[70vh] w-4xl p-0">
 					<OrganizationProfile onSuccessfulDelete={() => setOpenOrganizationProfile(false)} />
 					<DialogClose />
 				</DialogContent>

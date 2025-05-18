@@ -12,7 +12,6 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogClose,
 	DialogFooter
 } from '@/components/primitives/ui/dialog';
 
@@ -153,7 +152,9 @@ export default function LeaveOrganization(): React.ReactNode {
 					{errorMessage && <p className="text-error-600-400">{errorMessage}</p>}
 
 					<DialogFooter>
-						<DialogClose className="btn bg-surface-300">Cancel</DialogClose>
+						<button className="btn preset-tonal" onClick={() => setIsOpen(false)}>
+							Cancel
+						</button>
 						<button
 							type="button"
 							className="btn bg-error-500 hover:bg-error-600 text-white"

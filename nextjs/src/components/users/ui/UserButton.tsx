@@ -11,6 +11,7 @@ import { api } from '@/convex/_generated/api';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/popover';
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogHeader,
 	DialogTitle
@@ -79,6 +80,7 @@ export default function UserButton({
 									<DialogTitle>Profile</DialogTitle>
 								</DialogHeader>
 								<UserProfile />
+								<DialogClose />
 							</DialogContent>
 						</Dialog>
 					</>
