@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { UserPlus } from 'lucide-react';
+import { Plus, UserPlus } from 'lucide-react';
 import { FunctionReturnType } from 'convex/server';
 import { Doc } from '@/convex/_generated/dataModel';
 import {
@@ -166,19 +166,19 @@ export default function InviteMembers() {
       {isDesktop ? (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger onClick={() => setIsOpen(true)} className="btn preset-filled-primary-500 text-sm h-10">
-             Invite members
+          <Plus size={20}/> Invite members
           </DialogTrigger>
           <DialogContent className="md:max-w-108">
             <DialogHeader>
               <DialogTitle>Invite new members</DialogTitle>
             </DialogHeader>
-            <DialogDescription>{form}</DialogDescription>
+            {form}
           </DialogContent>
         </Dialog>
       ) : (
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-          <DrawerTrigger onClick={() => setIsOpen(true)} className="btn w-full">
-            <UserPlus className="mr-2 size-5" /> Invite members
+          <DrawerTrigger onClick={() => setIsOpen(true)} className="btn preset-filled-primary-500 text-sm h-10">
+           <Plus size={20}/> Invite members
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>

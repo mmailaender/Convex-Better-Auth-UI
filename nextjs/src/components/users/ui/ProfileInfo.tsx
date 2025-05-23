@@ -190,16 +190,16 @@ export default function ProfileInfo() {
 							<span className="text-surface-600-400 text-xs">Name</span>
 							<span className="text-surface-800-200 font-medium">{user.name}</span>
 						</div>
-						<button className="btn-icon preset-faded-surface-50-950">
+						<div className="btn-icon preset-faded-surface-50-950">
 							{' '}
 							<Pencil size={16} color="currentColor" />
-						</button>
+						</div>
 					</DrawerTrigger>
 					<DrawerContent>
 						<DrawerHeader>
 							<DrawerTitle>Edit name</DrawerTitle>
 						</DrawerHeader>
-						<DrawerDescription>{form}</DrawerDescription>
+						{form}
 					</DrawerContent>
 				</Drawer>
 			)}

@@ -193,7 +193,10 @@ export default function OrganizationSwitcher({
 			</Dialog>
 
 			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
-				<DialogContent className="h-[70vh] w-4xl p-0">
+				<DialogContent className="h-[100dvh] max-h-[100dvh w-[100dvw] md:h-[70vh] md:w-4xl p-0 rounded-none md:rounded-container" >
+				<DialogHeader className='hidden'>
+					<DialogTitle></DialogTitle>
+				</DialogHeader>
 					<OrganizationProfile onSuccessfulDelete={() => setOpenOrganizationProfile(false)} />
 					<DialogClose />
 				</DialogContent>

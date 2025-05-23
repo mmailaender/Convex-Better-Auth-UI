@@ -16,7 +16,7 @@ export default function MembersAndInvitations() {
 
 	return (
 		<Tabs defaultValue="members">
-			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300'>Members</h6>
+			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300 text-center sm:text-left'>Members</h6>
 			<div className='flex flex-row justify-between align-middle w-full  py-4 border-b border-surface-300-700 '>
 					<TabsList>
 						<TabsTrigger value="members" className='gap-2'>Members <span className='badge preset-filled-surface-300-700 size-6 rounded-full'>{members && `${members.length}`} </span></TabsTrigger>
