@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Pencil } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
@@ -29,7 +30,6 @@ import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import { type FileChangeDetails } from '@zag-js/file-upload';
-
 
 export default function ProfileInfo() {
 	const [isDesktop, setIsDesktop] = useState<boolean>(
@@ -70,7 +70,7 @@ export default function ProfileInfo() {
 		try {
 			await updateUserName({ name });
 			setIsEditing(false);
-			setSuccessMessage('Profile updated successfully!');
+			toast.success('Profile name updated successfully');
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			setErrorMessage(`Failed to update profile: ${errorMessage}`);
@@ -84,6 +84,7 @@ export default function ProfileInfo() {
 			setIsUploading(true);
 			setErrorMessage('');
 			setSuccessMessage('');
+
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
@@ -92,6 +93,7 @@ export default function ProfileInfo() {
 				format: 'webp',
 				forceConvert: true
 			});
+
 			const uploadUrl = await generateUploadUrl();
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
@@ -100,11 +102,13 @@ export default function ProfileInfo() {
 				},
 				body: optimizedFile
 			});
+
 			if (!response.ok) throw new Error('Failed to upload file');
 			const result = await response.json();
 			const storageId = result.storageId as Id<'_storage'>;
+
 			await updateAvatar({ storageId });
-			setSuccessMessage('Avatar updated successfully!');
+			toast.success('Avatar updated successfully');
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			setErrorMessage(`Failed to upload avatar: ${errorMessage}`);
@@ -148,14 +152,6 @@ export default function ProfileInfo() {
 						<div className="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
-						{isUploading && (
-							<ProgressRing
-								value={null}
-								size="size-14"
-								meterStroke="stroke-primary-600-400"
-								trackStroke="stroke-primary-50-950"
-							/>
-						)}
 					</div>
 				</FileUpload>
 			</div>
@@ -176,7 +172,6 @@ export default function ProfileInfo() {
 					</DialogTrigger>
 
 					<DialogContent className="w-full max-w-md">
-					
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
 						</DialogHeader>
@@ -204,7 +199,7 @@ export default function ProfileInfo() {
 							<DrawerTitle>Edit name</DrawerTitle>
 						</DrawerHeader>
 						{form}
-						<DrawerClose/>
+						<DrawerClose />
 					</DrawerContent>
 				</Drawer>
 			)}

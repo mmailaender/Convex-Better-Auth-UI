@@ -27,6 +27,7 @@ import {
 	DrawerDescription,
 	DrawerClose
 } from '@/components/primitives/ui/drawer';
+import { toast } from 'sonner';
 
 export default function OrganizationInfo() {
 	const user = useQuery(api.users.getUser);
@@ -125,7 +126,6 @@ export default function OrganizationInfo() {
 			setIsUploading(true);
 			setError('');
 
-			// Optimize image
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
@@ -135,7 +135,6 @@ export default function OrganizationInfo() {
 				forceConvert: true
 			});
 
-			// Upload immediately
 			const uploadUrl = await generateUploadUrl();
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
@@ -147,15 +146,13 @@ export default function OrganizationInfo() {
 			const result = await response.json();
 			const logoStorageId = result.storageId as Id<'_storage'>;
 
-			// Auto-save logo with current organization data
 			await updateOrganization({
 				organizationId: orgData.organizationId,
-				name: orgData.name, // Include current name
-				slug: orgData.slug, // Include current slug
+				name: orgData.name,
+				slug: orgData.slug,
 				logoId: logoStorageId
 			});
 
-			// Update local state
 			const newLogoUrl = URL.createObjectURL(optimizedFile);
 			setOrgData((prev) => ({
 				...prev,
@@ -163,7 +160,7 @@ export default function OrganizationInfo() {
 				logo: newLogoUrl
 			}));
 
-			setSuccess('Logo updated successfully!');
+			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			setError(`Failed to update logo: ${errorMessage}`);
@@ -179,12 +176,10 @@ export default function OrganizationInfo() {
 			setSuccess('');
 			setError('');
 
-			// Update name and slug (logo is already saved separately)
 			await updateOrganization({
 				organizationId: orgData.organizationId,
 				name: formState.name,
 				slug: formState.slug
-				// Don't include logoId here - it's already saved
 			});
 
 			setOrgData((prev) => ({
@@ -194,7 +189,7 @@ export default function OrganizationInfo() {
 			}));
 
 			setIsEditing(false);
-			setSuccess('Organization updated successfully!');
+			toast.success('Organization details updated successfully');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			setError(`Failed to update organization: ${errorMessage}`);
@@ -257,7 +252,7 @@ export default function OrganizationInfo() {
 			</h6>
 			<div className="flex flex-col items-start gap-6 pt-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group relative flex cursor-pointer flex-col items-center justify-center gap-2">
+					<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
 						<Avatar
 							src={logoPreview || orgData.logo}
 							name={orgData.logo || newLogoUploaded ? orgData.name : orgData.name || 'Organization'}

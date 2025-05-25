@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 // Components
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
@@ -24,59 +25,36 @@ import {
 	DialogFooter
 } from '@/components/primitives/ui/dialog';
 
-/**
- * Component for creating a new organization with logo upload support
- * Requires authentication to access the form
- */
 export default function CreateOrganization({
 	onSuccessfulCreate,
 	redirectTo
 }: {
-	/**
-	 * Optional callback that will be called when an organization is successfully created
-	 */
 	onSuccessfulCreate?: () => void;
-	/**
-	 * Optional redirect URL after successful creation
-	 */
 	redirectTo?: string;
 }) {
 	const router = useRouter();
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
-	// Mutations
 	const createOrganization = useMutation(api.organizations.createOrganization);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
-	// Component state
-	const [name, setName] = useState<string>('');
-	const [slug, setSlug] = useState<string>('');
-	const [logo, setLogo] = useState<string>('');
+	const [name, setName] = useState('');
+	const [slug, setSlug] = useState('');
+	const [logo, setLogo] = useState('');
 	const [logoFile, setLogoFile] = useState<File | null>(null);
-	const [isUploading, setIsUploading] = useState<boolean>(false);
-	const [errorMessage, setErrorMessage] = useState<string>('');
-	const [successMessage, setSuccessMessage] = useState<string>('');
+	const [isUploading, setIsUploading] = useState(false);
+	const [errorMessage, setErrorMessage] = useState('');
+	const [successMessage, setSuccessMessage] = useState('');
 
-	/**
-	 * Generates a URL-friendly slug from the provided input string
-	 */
-	const generateSlug = (input: string): string => {
-		return input.toLowerCase().replace(/\s+/g, '-');
-	};
+	const generateSlug = (input: string): string => input.toLowerCase().replace(/\s+/g, '-');
 
-	/**
-	 * Updates the name state and automatically generates a slug
-	 */
-	const handleNameInput = (event: React.ChangeEvent<HTMLInputElement>): void => {
+	const handleNameInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const input = event.target.value;
 		setName(input);
 		setSlug(generateSlug(input));
 	};
 
-	/**
-	 * Handles file selection for organization logo but doesn't upload yet
-	 */
-	const handleFileChange = async (details: FileChangeDetails): Promise<void> => {
+	const handleFileChange = async (details: FileChangeDetails) => {
 		const file = details.acceptedFiles.at(0);
 		if (!file) return;
 
@@ -97,7 +75,6 @@ export default function CreateOrganization({
 			const previewUrl = URL.createObjectURL(optimizedFile);
 			setLogo(previewUrl);
 			setLogoFile(optimizedFile);
-			setSuccessMessage('Uploading logo...');
 
 			const uploadUrl = await generateUploadUrl();
 			const response = await fetch(uploadUrl, {
@@ -112,18 +89,14 @@ export default function CreateOrganization({
 			const result = await response.json();
 			const logoStorageId = result.storageId as Id<'_storage'>;
 
-			// Save logo immediately if name and slug exist
+			toast.success('Logo uploaded successfully');
+
 			if (name && slug) {
-				await createOrganization({
-					name,
-					slug,
-					logoId: logoStorageId
-				});
-				setSuccessMessage('Organization created with uploaded logo!');
+				await createOrganization({ name, slug, logoId: logoStorageId });
+				toast.success('Organization created with uploaded logo');
 				if (onSuccessfulCreate) onSuccessfulCreate();
 				if (redirectTo) router.push(redirectTo);
 			} else {
-				setSuccessMessage('Logo uploaded successfully. Complete name & slug to finish.');
 			}
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -133,10 +106,7 @@ export default function CreateOrganization({
 		}
 	};
 
-	/**
-	 * Handles form submission to create a new organization
-	 */
-	const handleSubmit = async (event: React.FormEvent): Promise<void> => {
+	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
 
 		if (!name || !slug) {
@@ -146,49 +116,25 @@ export default function CreateOrganization({
 
 		try {
 			setIsUploading(true);
-			let logoStorageId: Id<'_storage'> | undefined = undefined;
+			let logoStorageId: Id<'_storage'> | undefined;
 
-			// Upload the logo if one was selected
 			if (logoFile) {
-				// Get a storage upload URL from Convex
 				const uploadUrl = await generateUploadUrl();
-
-				// Upload the file to Convex storage
 				const response = await fetch(uploadUrl, {
 					method: 'POST',
-					headers: {
-						'Content-Type': logoFile.type
-					},
+					headers: { 'Content-Type': logoFile.type },
 					body: logoFile
 				});
-
-				if (!response.ok) {
-					throw new Error('Failed to upload file');
-				}
-
-				// Get the storage ID from the response
+				if (!response.ok) throw new Error('Failed to upload file');
 				const result = await response.json();
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
-			// Create the organization with Convex
-			await createOrganization({
-				name,
-				slug,
-				logoId: logoStorageId
-			});
-
+			await createOrganization({ name, slug, logoId: logoStorageId });
 			setSuccessMessage('Organization created successfully!');
-
-			// Call the onSuccessfulCreate callback if provided
-			if (onSuccessfulCreate) {
-				onSuccessfulCreate();
-			}
-
-			// Navigate to the home page
-			if (redirectTo) {
-				router.push(redirectTo);
-			}
+			toast.success('Organization created successfully');
+			if (onSuccessfulCreate) onSuccessfulCreate();
+			if (redirectTo) router.push(redirectTo);
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			setErrorMessage(`Failed to create organization: ${errorMessage}`);
@@ -197,7 +143,6 @@ export default function CreateOrganization({
 		}
 	};
 
-	// Show loading state
 	if (isLoading) {
 		return (
 			<div className="mx-auto w-full max-w-md animate-pulse">
@@ -209,7 +154,6 @@ export default function CreateOrganization({
 		);
 	}
 
-	// Show message for unauthenticated users
 	if (!isAuthenticated) {
 		return (
 			<div className="border-surface-200-800 mx-auto w-full max-w-md rounded-lg border p-6 text-center">
@@ -223,11 +167,8 @@ export default function CreateOrganization({
 	return (
 		<form onSubmit={handleSubmit} className="mx-auto w-full">
 			<div className="my-6">
-				{/* <label htmlFor="logo" className="mb-1 block font-medium">
-					Logo
-				</label> */}
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group relating hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl transition-colors">
+					<div className="group hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl transition-colors">
 						<Avatar
 							src={logo}
 							name={name.length > 0 ? name : 'My Organization'}
@@ -255,7 +196,6 @@ export default function CreateOrganization({
 						placeholder="My Organization..."
 					/>
 				</div>
-
 				<div className="mb-4">
 					<label htmlFor="slug" className="label">
 						Slug URL

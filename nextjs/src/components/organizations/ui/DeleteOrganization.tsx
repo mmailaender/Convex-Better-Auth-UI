@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { toast } from 'sonner';
 
 // Components
 import {
@@ -55,12 +56,12 @@ export default function DeleteOrganization({
 			await deleteOrganization({ organizationId: activeOrganization._id });
 			setOpen(false);
 
-			// Call the onSuccessfulDelete callback if provided
+			toast.success('Organization deleted successfully');
+
 			if (onSuccessfulDelete) {
 				onSuccessfulDelete();
 			}
 
-			// Navigate to the specified URL or home by default
 			if (redirectTo) {
 				router.push(redirectTo);
 			} else {
@@ -90,7 +91,7 @@ export default function DeleteOrganization({
 				Delete organization
 			</DialogTrigger>
 
-			<DialogContent className="w-full max-w-md">
+			<DialogContent className="w-[90%] max-w-md">
 				<DialogHeader>
 					<DialogTitle>Delete organization</DialogTitle>
 				</DialogHeader>

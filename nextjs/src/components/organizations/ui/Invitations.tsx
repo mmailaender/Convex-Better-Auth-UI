@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { toast } from 'sonner';
 
 // Components
 import {
@@ -76,12 +77,10 @@ export function Invitations(): React.ReactNode {
 		if (!selectedInvitationId) return;
 
 		try {
-			await revokeInvitation({
-				invitationId: selectedInvitationId
-			});
-
+			await revokeInvitation({ invitationId: selectedInvitationId });
 			setErrorMessage('');
 			setSuccessMessage('Invitation revoked successfully!');
+			toast.success('Invitation revoked successfully');
 		} catch (err) {
 			setSuccessMessage('');
 			setErrorMessage(
@@ -170,7 +169,7 @@ export function Invitations(): React.ReactNode {
 											>
 												Revoke
 											</DialogTrigger>
-											<DialogContent className="w-full max-w-md">
+											<DialogContent className="w-[90%] max-w-md">
 												<DialogClose />
 												<DialogHeader>
 													<DialogTitle>Revoke invitation</DialogTitle>

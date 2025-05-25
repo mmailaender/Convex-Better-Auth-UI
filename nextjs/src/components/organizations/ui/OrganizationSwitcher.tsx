@@ -124,7 +124,7 @@ export default function OrganizationSwitcher({
 									name={activeOrganization?.name || ''}
 									size="size-8 shrink-0 rounded-lg"
 								/>
-								<span className="text-surface-700-300 w-full truncate text-base">
+								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
 								{activeOrganization?.role === 'role_organization_owner' ||

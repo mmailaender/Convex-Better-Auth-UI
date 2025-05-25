@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import OrganizationSwitcher from '@/components/organizations/ui/OrganizationSwitcher';
+import { Toaster } from '@/components/primitives/ui/sonner';
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -31,11 +32,12 @@ export default function RootLayout({
 			<html lang="en" data-theme="authapp">
 				<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 					<ConvexClientProvider>
-						<div className='flex p-10'>
-						<OrganizationSwitcher />
+						<div className="flex p-10">
+							<OrganizationSwitcher />
 						</div>
 						{children}
 					</ConvexClientProvider>
+					<Toaster />
 				</body>
 			</html>
 		</ConvexAuthNextjsServerProvider>
