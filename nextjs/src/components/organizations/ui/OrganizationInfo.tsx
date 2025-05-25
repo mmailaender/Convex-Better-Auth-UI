@@ -8,289 +8,315 @@ import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
+	Dialog,
+	DialogTrigger,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogFooter,
+	DialogClose
 } from '@/components/primitives/ui/dialog';
+import { Toaster, createToaster } from '@skeletonlabs/skeleton-react';
 import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription
+	Drawer,
+	DrawerTrigger,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerDescription,
+	DrawerClose
 } from '@/components/primitives/ui/drawer';
 
 export default function OrganizationInfo() {
-  const user = useQuery(api.users.getUser);
-  const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-  const isOwnerOrAdmin = useIsOwnerOrAdmin();
-  const updateOrganization = useMutation(api.organizations.updateOrganizationProfile);
-  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+	const user = useQuery(api.users.getUser);
+	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const updateOrganization = useMutation(api.organizations.updateOrganizationProfile);
+	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
-  );
+	const [isDesktop, setIsDesktop] = useState(
+		typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
+	);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    const handleChange = () => setIsDesktop(mediaQuery.matches);
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+	useEffect(() => {
+		const mediaQuery = window.matchMedia('(min-width: 768px)');
+		const handleChange = () => setIsDesktop(mediaQuery.matches);
+		mediaQuery.addEventListener('change', handleChange);
+		return () => mediaQuery.removeEventListener('change', handleChange);
+	}, []);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState('');
-  const [manualSlugEdit, setManualSlugEdit] = useState(false);
-  const [newLogoUploaded, setNewLogoUploaded] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [success, setSuccess] = useState('');
+	const [error, setError] = useState('');
+	const [isUploading, setIsUploading] = useState(false);
+	const [logoFile, setLogoFile] = useState<File | null>(null);
+	const [logoPreview, setLogoPreview] = useState('');
+	const [manualSlugEdit, setManualSlugEdit] = useState(false);
+	const [newLogoUploaded, setNewLogoUploaded] = useState(false);
 
-  const [formState, setFormState] = useState({
-    name: '',
-    slug: ''
-  });
+	const [formState, setFormState] = useState({
+		name: '',
+		slug: ''
+	});
 
-  const [orgData, setOrgData] = useState({
-    organizationId: '' as Id<'organizations'>,
-    name: '',
-    slug: '',
-    logo: '',
-    logoId: '' as Id<'_storage'> | undefined
-  });
+	const [orgData, setOrgData] = useState({
+		organizationId: '' as Id<'organizations'>,
+		name: '',
+		slug: '',
+		logo: '',
+		logoId: '' as Id<'_storage'> | undefined
+	});
 
-  useEffect(() => {
-    if (activeOrganization) {
-      setOrgData({
-        organizationId: activeOrganization._id,
-        name: activeOrganization.name,
-        slug: activeOrganization.slug || '',
-        logo: activeOrganization.logo || '',
-        logoId: activeOrganization.logoId
-      });
-      setFormState({
-        name: activeOrganization.name,
-        slug: activeOrganization.slug || ''
-      });
-      setLogoPreview(activeOrganization.logo || '');
-    }
-  }, [activeOrganization]);
+	useEffect(() => {
+		if (activeOrganization) {
+			setOrgData({
+				organizationId: activeOrganization._id,
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || '',
+				logo: activeOrganization.logo || '',
+				logoId: activeOrganization.logoId
+			});
+			setFormState({
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || ''
+			});
+			setLogoPreview(activeOrganization.logo || '');
+		}
+	}, [activeOrganization]);
 
-  useEffect(() => {
-    if (!manualSlugEdit) {
-      const formattedSlug = formState.name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-      setFormState((prev) => ({ ...prev, slug: formattedSlug }));
-    }
-  }, [formState.name, manualSlugEdit]);
+	useEffect(() => {
+		if (!manualSlugEdit) {
+			const formattedSlug = formState.name
+				.toLowerCase()
+				.trim()
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/^-+|-+$/g, '');
+			setFormState((prev) => ({ ...prev, slug: formattedSlug }));
+		}
+	}, [formState.name, manualSlugEdit]);
 
-  if (!user || !activeOrganization) return null;
+	if (!user || !activeOrganization) return null;
 
-  const toggleEdit = () => {
-    if (!isOwnerOrAdmin) return;
-    setIsEditing(true);
-    setSuccess('');
-    setError('');
-    setManualSlugEdit(false);
-  };
+	const toggleEdit = () => {
+		if (!isOwnerOrAdmin) return;
+		setIsEditing(true);
+		setSuccess('');
+		setError('');
+		setManualSlugEdit(false);
+	};
 
-  const cancelEdit = () => {
-    setIsEditing(false);
-    setSuccess('');
-    setError('');
-    setLogoFile(null);
-    setLogoPreview(orgData.logo || '');
-    setFormState({ name: orgData.name, slug: orgData.slug });
-    setManualSlugEdit(false);
-    setNewLogoUploaded(false);
-  };
+	const cancelEdit = () => {
+		setIsEditing(false);
+		setSuccess('');
+		setError('');
+		setLogoFile(null);
+		setLogoPreview(orgData.logo || '');
+		setFormState({ name: orgData.name, slug: orgData.slug });
+		setManualSlugEdit(false);
+		setNewLogoUploaded(false);
+	};
 
-  const handleFileChange = async (details: FileChangeDetails) => {
-    const file = details.acceptedFiles.at(0);
-    if (!file) return;
-    try {
-      setIsUploading(true);
-      setError('');
-      setSuccess('');
-      const optimizedFile = await optimizeImage(file, {
-        maxWidth: 512,
-        maxHeight: 512,
-        maxSizeKB: 500,
-        quality: 0.85,
-        format: 'webp',
-        forceConvert: true
-      });
-      setLogoFile(optimizedFile);
-      setLogoPreview(URL.createObjectURL(optimizedFile));
-      setSuccess('Logo ready for upload!');
-      setNewLogoUploaded(true);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(`Failed to process logo: ${errorMessage}`);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+	const handleFileChange = async (details: FileChangeDetails) => {
+		const file = details.acceptedFiles.at(0);
+		if (!file) return;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    try {
-      setIsUploading(true);
-      setSuccess('');
-      setError('');
-      let logoStorageId = orgData.logoId;
-      if (logoFile) {
-        const uploadUrl = await generateUploadUrl();
-        const response = await fetch(uploadUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': logoFile.type },
-          body: logoFile
-        });
-        if (!response.ok) throw new Error('Failed to upload file');
-        const result = await response.json();
-        logoStorageId = result.storageId as Id<'_storage'>;
-      }
-      await updateOrganization({
-        organizationId: orgData.organizationId,
-        name: formState.name,
-        slug: formState.slug,
-        logoId: logoStorageId
-      });
-      setOrgData((prev) => ({ ...prev, name: formState.name, slug: formState.slug, logoId: logoStorageId, logo: logoPreview }));
-      setIsEditing(false);
-      setSuccess('Profile updated successfully!');
-      setError('');
-      setLogoFile(null);
-      setNewLogoUploaded(false);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(`Failed to update profile: ${errorMessage}`);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+		try {
+			setIsUploading(true);
+			setError('');
 
-  const form = (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div className="flex flex-col gap-4 ">
-        <div>
-        <label htmlFor="name" className='label'>Name</label>
-        <input
-          type="text"
-          name="name"
-          className="input"
-          value={formState.name}
-          onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-        />
-        </div>
-        <div>
-        <label htmlFor="slug" className='label'>Slug URL</label>
-        <input
-          type="text"
-          name="slug"
-          className="input"
-          value={formState.slug}
-          onChange={(e) => {
-            setManualSlugEdit(true);
-            setFormState({ ...formState, slug: e.target.value });
-          }}
-        />
-        </div>
+			// Optimize image
+			const optimizedFile = await optimizeImage(file, {
+				maxWidth: 512,
+				maxHeight: 512,
+				maxSizeKB: 500,
+				quality: 0.85,
+				format: 'webp',
+				forceConvert: true
+			});
 
-        <DialogFooter>
-          <button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
-            Cancel
-          </button>
-          <button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit" disabled={isUploading}>
-            Save
-          </button>
-        </DialogFooter>
-      </div>
-    </form>
-  );
+			// Upload immediately
+			const uploadUrl = await generateUploadUrl();
+			const response = await fetch(uploadUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': optimizedFile.type },
+				body: optimizedFile
+			});
 
-  return (
-   
-    <div className='h-full'>
-			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300 text-center md:text-left'>General settings</h6>
-			<div className='pt-6 flex flex-col items-start gap-6'>
-      <FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-        <div className="group relative flex cursor-pointer flex-col items-center justify-center gap-2 ">
-          <Avatar
-            src={logoPreview || orgData.logo}
-            name={orgData.logo || newLogoUploaded ? orgData.name : orgData.name || 'Organization'}
-            size="size-20 rounded-xl"
-          />
-          <div className="btn-icon size-3 preset-filled-surface-300-700 absolute -bottom-1.5 -right-1.5 rounded-full border-2 border-surface-200-800">
+			if (!response.ok) throw new Error('Failed to upload file');
+			const result = await response.json();
+			const logoStorageId = result.storageId as Id<'_storage'>;
+
+			// Auto-save logo with current organization data
+			await updateOrganization({
+				organizationId: orgData.organizationId,
+				name: orgData.name, // Include current name
+				slug: orgData.slug, // Include current slug
+				logoId: logoStorageId
+			});
+
+			// Update local state
+			const newLogoUrl = URL.createObjectURL(optimizedFile);
+			setOrgData((prev) => ({
+				...prev,
+				logoId: logoStorageId,
+				logo: newLogoUrl
+			}));
+
+			setSuccess('Logo updated successfully!');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+			setError(`Failed to update logo: ${errorMessage}`);
+		} finally {
+			setIsUploading(false);
+		}
+	};
+
+	const handleSubmit = async (event: React.FormEvent) => {
+		event.preventDefault();
+		try {
+			setIsUploading(true);
+			setSuccess('');
+			setError('');
+
+			// Update name and slug (logo is already saved separately)
+			await updateOrganization({
+				organizationId: orgData.organizationId,
+				name: formState.name,
+				slug: formState.slug
+				// Don't include logoId here - it's already saved
+			});
+
+			setOrgData((prev) => ({
+				...prev,
+				name: formState.name,
+				slug: formState.slug
+			}));
+
+			setIsEditing(false);
+			setSuccess('Organization updated successfully!');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+			setError(`Failed to update organization: ${errorMessage}`);
+		} finally {
+			setIsUploading(false);
+		}
+	};
+
+	const form = (
+		<form onSubmit={handleSubmit} className="w-full">
+			<div className="flex flex-col gap-4">
+				<div>
+					<label htmlFor="name" className="label">
+						Name
+					</label>
+					<input
+						type="text"
+						name="name"
+						className="input"
+						value={formState.name}
+						onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+					/>
+				</div>
+				<div>
+					<label htmlFor="slug" className="label">
+						Slug URL
+					</label>
+					<input
+						type="text"
+						name="slug"
+						className="input"
+						value={formState.slug}
+						onChange={(e) => {
+							setManualSlugEdit(true);
+							setFormState({ ...formState, slug: e.target.value });
+						}}
+					/>
+				</div>
+
+				<DialogFooter>
+					<button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
+						Cancel
+					</button>
+					<button
+						type="submit"
+						className="btn preset-filled-primary-500 w-full md:w-fit"
+						disabled={isUploading}
+					>
+						Save
+					</button>
+				</DialogFooter>
+			</div>
+		</form>
+	);
+
+	return (
+		<div className="h-full">
+			<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left">
+				General settings
+			</h6>
+			<div className="flex flex-col items-start gap-6 pt-6">
+				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
+					<div className="group relative flex cursor-pointer flex-col items-center justify-center gap-2">
+						<Avatar
+							src={logoPreview || orgData.logo}
+							name={orgData.logo || newLogoUploaded ? orgData.name : orgData.name || 'Organization'}
+							size="size-20 rounded-xl"
+						/>
+						<div className="btn-icon preset-filled-surface-300-700 border-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
-          {isUploading && (
-            <ProgressRing
-              value={null}
-              size="size-14"
-              meterStroke="stroke-primary-600-400"
-              trackStroke="stroke-primary-50-950"
-            />
-          )}
-        </div>
-      </FileUpload>
-			
+					</div>
+				</FileUpload>
 
-      {isDesktop ? (
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogTrigger
-            className="border border-surface-300-700 hidden w-full flex-row content-center items-center rounded-xl py-2 pr-3 pl-4 md:flex hover:bg-surface-50-950 hover:border-surface-50-950 ease-in-out duration-300"
-            onClick={toggleEdit}
-          >
-            <div className="flex w-full flex-col gap-1 text-left">
-              <span className="text-surface-600-400 text-xs">Organization name</span>
-              <span className="text-surface-800-200 font-medium">{orgData.name}</span>
-            </div>
-            <div className="btn preset-filled-surface-200-800 p-2">
-              <Pencil size={16} color="currentColor" />
-            </div>
-          </DialogTrigger>
-          <DialogContent className="md:max-w-108">
-            <DialogHeader>
-              <DialogTitle>Edit Organization</DialogTitle>
-            </DialogHeader>
-            {form}
-          </DialogContent>
-        </Dialog>
-      ) : (
-        <Drawer open={isEditing} onOpenChange={setIsEditing}>
-          <DrawerTrigger
-            onClick={toggleEdit}
-            className="flex w-full flex-row content-center items-center rounded-xl py-2 pr-3 pl-4 md:hidden border border-surface-300-700"
-          >
-            <div className="flex w-full flex-col gap-1 text-left">
-              <span className="text-surface-600-400 text-xs">Organization name</span>
-              <span className="text-surface-800-200 font-medium">{orgData.name}</span>
-            </div>
-            <div className="btn-icon preset-filled-surface-200-800">
-              <Pencil size={16} color="currentColor" />
-            </div>
-          </DrawerTrigger>
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle>Edit Organization</DrawerTitle>
-            </DrawerHeader>
-            <DrawerDescription>{form}</DrawerDescription>
-          </DrawerContent>
-        </Drawer>
-      )}
+				{isDesktop ? (
+					<Dialog open={isEditing} onOpenChange={setIsEditing}>
+						<DialogTrigger
+							className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+							onClick={toggleEdit}
+						>
+							<div className="flex w-full flex-col gap-1 text-left">
+								<span className="text-surface-600-400 text-xs">Organization name</span>
+								<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+							</div>
+							<div className="btn preset-filled-surface-200-800 p-2">
+								<Pencil size={16} color="currentColor" />
+							</div>
+						</DialogTrigger>
+						<DialogContent className="md:max-w-108">
+							<DialogHeader>
+								<DialogTitle>Edit Organization</DialogTitle>
+							</DialogHeader>
+							{form}
+							<DialogClose />
+						</DialogContent>
+					</Dialog>
+				) : (
+					<Drawer open={isEditing} onOpenChange={setIsEditing}>
+						<DrawerTrigger
+							onClick={toggleEdit}
+							className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+						>
+							<div className="flex w-full flex-col gap-1 text-left">
+								<span className="text-surface-600-400 text-xs">Organization name</span>
+								<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+							</div>
+							<div className="btn-icon preset-filled-surface-200-800">
+								<Pencil size={16} color="currentColor" />
+							</div>
+						</DrawerTrigger>
+						<DrawerContent>
+							<DrawerHeader>
+								<DrawerTitle>Edit Organization</DrawerTitle>
+							</DrawerHeader>
+							{form}
+							<DrawerClose />
+						</DrawerContent>
+					</Drawer>
+				)}
 			</div>
-      {success && <p className="text-success-600-400 mt-2">{success}</p>}
-      {error && <p className="text-error-600-400 mt-2">{error}</p>}
-    </div>
-  );
+			{success && <p className="text-error-600-400 mt-2">{success}</p>}
+			{error && <p className="text-error-600-400 mt-2">{error}</p>}
+		</div>
+	);
 }

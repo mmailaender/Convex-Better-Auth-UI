@@ -12,7 +12,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogClose,
   DialogFooter
 } from '@/components/primitives/ui/dialog';
 import {
@@ -21,7 +21,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription
+  DrawerClose
 } from '@/components/primitives/ui/drawer';
 
 type Role = Doc<'organizationMembers'>['role'];
@@ -124,7 +124,7 @@ export default function InviteMembers() {
           required
        		 ></textarea>
 					 </div>
-				  	<p className='text-xs text-surface-500 px-1'>
+				  	<p className='text-xs text-surface-600-400 px-1'>
           You can invite multiple people by separating email addresses with commas, semicolons, or
           spaces.
         	</p>
@@ -135,6 +135,7 @@ export default function InviteMembers() {
 
          
         <DialogFooter>
+        
 					<button
             type="submit"
             className="btn preset-filled-primary-500 "
@@ -173,6 +174,7 @@ export default function InviteMembers() {
               <DialogTitle>Invite new members</DialogTitle>
             </DialogHeader>
             {form}
+             <DialogClose />
           </DialogContent>
         </Dialog>
       ) : (
@@ -184,7 +186,8 @@ export default function InviteMembers() {
             <DrawerHeader>
               <DrawerTitle>Invite new members</DrawerTitle>
             </DrawerHeader>
-            <DrawerDescription>{form}</DrawerDescription>
+            {form}
+             <DrawerClose />
           </DrawerContent>
         </Drawer>
       )}

@@ -14,7 +14,8 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogFooter
+	DialogFooter,
+	DialogClose
 } from '@/components/primitives/ui/dialog';
 
 // Hooks
@@ -109,6 +110,7 @@ export default function DeleteOrganization({
 						Confirm
 					</button>
 				</DialogFooter>
+				<DialogClose />
 
 				{error && <p className="text-error-600-400 mt-2">{error}</p>}
 			</DialogContent>

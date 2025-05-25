@@ -171,7 +171,7 @@ export default function OrganizationSwitcher({
 								setOpenCreateOrganization(true);
 								setOpenSwitcher(false);
 							}}
-							className="btn hover:bg-surface-50-950 flex w-full items-center justify-start gap-3 bg-transparent p-3"
+							className="btn hover:bg-surface-50-950/50 flex w-full items-center justify-start gap-3 bg-transparent p-3"
 						>
 							<div className="bg-surface-200-800 border-surface-300-700 rounded-base flex size-8 shrink-0 items-center justify-center border border-dashed">
 								<Plus className="size-4" />
@@ -183,7 +183,7 @@ export default function OrganizationSwitcher({
 			</Popover>
 
 			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<DialogContent>
+				<DialogContent className="max-w-xl">
 					<DialogHeader>
 						<DialogTitle>Create Organization</DialogTitle>
 					</DialogHeader>
@@ -193,10 +193,10 @@ export default function OrganizationSwitcher({
 			</Dialog>
 
 			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
-				<DialogContent className="h-[100dvh] max-h-[100dvh w-[100dvw] md:h-[70vh] md:w-4xl p-0 rounded-none md:rounded-container" >
-				<DialogHeader className='hidden'>
-					<DialogTitle></DialogTitle>
-				</DialogHeader>
+				<DialogContent className="max-h-[100dvh md:rounded-container h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl">
+					<DialogHeader className="hidden">
+						<DialogTitle></DialogTitle>
+					</DialogHeader>
 					<OrganizationProfile onSuccessfulDelete={() => setOpenOrganizationProfile(false)} />
 					<DialogClose />
 				</DialogContent>

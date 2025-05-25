@@ -85,23 +85,49 @@ export default function CreateOrganization({
 			setErrorMessage('');
 			setSuccessMessage('');
 
-			// Optimize the image but don't upload yet
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
 				quality: 0.85,
 				format: 'webp',
-				forceConvert: true // Always convert to WebP
+				forceConvert: true
 			});
 
-			// Store the optimized file for later upload
+			const previewUrl = URL.createObjectURL(optimizedFile);
+			setLogo(previewUrl);
 			setLogoFile(optimizedFile);
-			setLogo(URL.createObjectURL(optimizedFile)); // For preview
-			setSuccessMessage('Logo ready for upload!');
+			setSuccessMessage('Uploading logo...');
+
+			const uploadUrl = await generateUploadUrl();
+			const response = await fetch(uploadUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': optimizedFile.type
+				},
+				body: optimizedFile
+			});
+
+			if (!response.ok) throw new Error('Failed to upload file');
+			const result = await response.json();
+			const logoStorageId = result.storageId as Id<'_storage'>;
+
+			// Save logo immediately if name and slug exist
+			if (name && slug) {
+				await createOrganization({
+					name,
+					slug,
+					logoId: logoStorageId
+				});
+				setSuccessMessage('Organization created with uploaded logo!');
+				if (onSuccessfulCreate) onSuccessfulCreate();
+				if (redirectTo) router.push(redirectTo);
+			} else {
+				setSuccessMessage('Logo uploaded successfully. Complete name & slug to finish.');
+			}
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to process logo: ${errorMessage}`);
+			setErrorMessage(`Failed to upload and save logo: ${errorMessage}`);
 		} finally {
 			setIsUploading(false);
 		}
@@ -195,84 +221,65 @@ export default function CreateOrganization({
 	}
 
 	return (
-		
-			<form onSubmit={handleSubmit} className="mx-auto w-full">
+		<form onSubmit={handleSubmit} className="mx-auto w-full">
 			<div className="my-6">
 				{/* <label htmlFor="logo" className="mb-1 block font-medium">
 					Logo
 				</label> */}
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group  hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl transition-colors">
-						{isUploading ? (
-							<ProgressRing
-								value={null}
-								size="size-14"
-								meterStroke="stroke-primary-600-400"
-								trackStroke="stroke-primary-50-950"
-							/>
-						) : (
-							<>
-								<Avatar
-									src={logo}
-									name={name.length > 0 ? name : 'My Organization'}
-									size="size-20 rounded-xl"
-								/>
-									<div className="btn-icon size-3 preset-filled-surface-300-700 absolute -bottom-1.5 -right-1.5 rounded-full border-2 border-surface-200-800">
+					<div className="group relating hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl transition-colors">
+						<Avatar
+							src={logo}
+							name={name.length > 0 ? name : 'My Organization'}
+							size="size-20 rounded-xl"
+						/>
+						<div className="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
-								{/* <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-									<UploadCloud className="size-6 text-white" />
-								</div> */}
-							</>
-						)}
 					</div>
 				</FileUpload>
 			</div>
-			
-			<div className='flex flex-col gap-2'>
+
+			<div className="flex flex-col gap-2">
 				<div className="mb-4">
-				<label htmlFor="name" className=" label">
-					Name
-				</label>
-				<input
-					type="text"
-					id="name"
-					value={name}
-					onChange={handleNameInput}
-					required
-					className="input w-full"
-					placeholder="My Organization..."
-				/>
+					<label htmlFor="name" className="label">
+						Name
+					</label>
+					<input
+						type="text"
+						id="name"
+						value={name}
+						onChange={handleNameInput}
+						required
+						className="input w-full"
+						placeholder="My Organization..."
+					/>
 				</div>
 
 				<div className="mb-4">
-				<label htmlFor="slug" className="label">
-					Slug URL
-				</label>
-				<input
-					type="text"
-					id="slug"
-					value={slug}
-					onChange={(e) => setSlug(e.target.value)}
-					required
-					className="input w-full"
-					placeholder="my-organization"
-				/>
+					<label htmlFor="slug" className="label">
+						Slug URL
+					</label>
+					<input
+						type="text"
+						id="slug"
+						value={slug}
+						onChange={(e) => setSlug(e.target.value)}
+						required
+						className="input w-full"
+						placeholder="my-organization"
+					/>
 				</div>
 			</div>
 
-		
 			<DialogFooter>
-					<button type="submit" className="btn preset-filled-primary-500 w-full">
-							Create Organization
-					</button>
+				<button type="submit" className="btn preset-filled-primary-500">
+					Create Organization
+				</button>
 			</DialogFooter>
-			
-
 
 			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
 			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
 		</form>
-	
 	);
 }

@@ -13,7 +13,7 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 	DrawerTrigger,
-	DrawerDescription
+	DrawerClose
 } from '@/components/primitives/ui/drawer';
 import {
 	Dialog,
@@ -21,13 +21,15 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-	DialogTrigger
+	DialogTrigger,
+	DialogClose
 } from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import { type FileChangeDetails } from '@zag-js/file-upload';
+
 
 export default function ProfileInfo() {
 	const [isDesktop, setIsDesktop] = useState<boolean>(
@@ -174,10 +176,12 @@ export default function ProfileInfo() {
 					</DialogTrigger>
 
 					<DialogContent className="w-full max-w-md">
+					
 						<DialogHeader>
 							<DialogTitle>Edit name</DialogTitle>
 						</DialogHeader>
 						{form}
+						<DialogClose />
 					</DialogContent>
 				</Dialog>
 			) : (
@@ -200,6 +204,7 @@ export default function ProfileInfo() {
 							<DrawerTitle>Edit name</DrawerTitle>
 						</DrawerHeader>
 						{form}
+						<DrawerClose/>
 					</DrawerContent>
 				</Drawer>
 			)}

@@ -13,7 +13,8 @@ import {
 	DialogHeader,
 	DialogDescription,
 	DialogContent,
-	DialogFooter
+	DialogFooter,
+	DialogClose
 } from '@/components/primitives/ui/dialog';
 
 export default function DeleteUser() {
@@ -46,6 +47,7 @@ export default function DeleteUser() {
 						Are you sure you want to delete your account? All of your data will be permanently
 						deleted.
 					</DialogDescription>
+					 <DialogClose />
 				</DialogHeader>
 
 				<DialogFooter>
