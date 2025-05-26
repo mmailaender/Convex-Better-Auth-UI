@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Pencil } from 'lucide-react';
@@ -25,23 +27,25 @@ import {
 	DrawerClose
 } from '@/components/primitives/ui/drawer';
 import { toast } from 'sonner';
+import { preloadImage } from '@/components/primitives/utils/preloadImage';
 
 export default function OrganizationInfo() {
+	/* ───────────────────────────────────────────── state & queries ── */
 	const user = useQuery(api.users.getUser);
 	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+
 	const updateOrganization = useMutation(api.organizations.updateOrganizationProfile);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
 	const [isDesktop, setIsDesktop] = useState(
 		typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
 	);
-
 	useEffect(() => {
-		const mediaQuery = window.matchMedia('(min-width: 768px)');
-		const handleChange = () => setIsDesktop(mediaQuery.matches);
-		mediaQuery.addEventListener('change', handleChange);
-		return () => mediaQuery.removeEventListener('change', handleChange);
+		const mq = window.matchMedia('(min-width: 768px)');
+		const onChange = () => setIsDesktop(mq.matches);
+		mq.addEventListener('change', onChange);
+		return () => mq.removeEventListener('change', onChange);
 	}, []);
 
 	const [isEditing, setIsEditing] = useState(false);
@@ -50,10 +54,7 @@ export default function OrganizationInfo() {
 	const [isUploading, setIsUploading] = useState(false);
 	const [manualSlugEdit, setManualSlugEdit] = useState(false);
 
-	const [formState, setFormState] = useState({
-		name: '',
-		slug: ''
-	});
+	const [formState, setFormState] = useState({ name: '', slug: '' });
 
 	const [orgData, setOrgData] = useState({
 		organizationId: '' as Id<'organizations'>,
@@ -63,35 +64,64 @@ export default function OrganizationInfo() {
 		logoId: '' as Id<'_storage'> | undefined
 	});
 
-	useEffect(() => {
-		if (activeOrganization) {
-			setOrgData({
-				organizationId: activeOrganization._id,
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || '',
-				logo: activeOrganization.logo || '',
-				logoId: activeOrganization.logoId
-			});
-			setFormState({
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || ''
-			});
-		}
-	}, [activeOrganization]);
+	/** Single source of truth for what the UI shows; never undefined */
+	const [logoSrc, setLogoSrc] = useState<string>(activeOrganization?.logo ?? '');
 
+	/* ───────────────────────────────────────────── sync with server ── */
+	useEffect(() => {
+		if (!activeOrganization) return;
+
+		setOrgData({
+			organizationId: activeOrganization._id,
+			name: activeOrganization.name,
+			slug: activeOrganization.slug || '',
+			logo: activeOrganization.logo || '',
+			logoId: activeOrganization.logoId
+		});
+		setFormState({
+			name: activeOrganization.name,
+			slug: activeOrganization.slug || ''
+		});
+
+		// swap to fresh logo only after it's fully loaded
+		if (activeOrganization.logo && activeOrganization.logo !== logoSrc) {
+			let revoked: string | undefined;
+
+			preloadImage(activeOrganization.logo)
+				.then(() => {
+					if (logoSrc.startsWith('blob:')) revoked = logoSrc;
+					setLogoSrc(activeOrganization!.logo!);
+				})
+				.catch(() => void 0);
+
+			return () => {
+				if (revoked) URL.revokeObjectURL(revoked);
+			};
+		}
+	}, [activeOrganization?.logo]);
+
+	// tidy up any leftover blob on unmount
+	useEffect(() => {
+		return () => {
+			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
+		};
+	}, [logoSrc]);
+
+	/* auto-generate slug unless the user touched it */
 	useEffect(() => {
 		if (!manualSlugEdit) {
-			const formattedSlug = formState.name
+			const formatted = formState.name
 				.toLowerCase()
 				.trim()
 				.replace(/[^a-z0-9]+/g, '-')
 				.replace(/^-+|-+$/g, '');
-			setFormState((prev) => ({ ...prev, slug: formattedSlug }));
+			setFormState((p) => ({ ...p, slug: formatted }));
 		}
 	}, [formState.name, manualSlugEdit]);
 
 	if (!user || !activeOrganization) return null;
 
+	/* ───────────────────────────────────────────── handlers ────────── */
 	const toggleEdit = () => {
 		if (!isOwnerOrAdmin) return;
 		setIsEditing(true);
@@ -115,8 +145,9 @@ export default function OrganizationInfo() {
 		try {
 			setError('');
 			setSuccess('');
+			setIsUploading(true);
 
-			const optimizedFile = await optimizeImage(file, {
+			const optimised = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -125,21 +156,24 @@ export default function OrganizationInfo() {
 				forceConvert: true
 			});
 
-			const newLogoUrl = URL.createObjectURL(optimizedFile);
-			setOrgData((prev) => ({
-				...prev,
-				logo: newLogoUrl
-			}));
-			const uploadUrl = await generateUploadUrl();
-			const response = await fetch(uploadUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': optimizedFile.type },
-				body: optimizedFile
-			});
+			const newLogoUrl = URL.createObjectURL(optimised);
 
-			if (!response.ok) throw new Error('Failed to upload file');
-			const result = await response.json();
-			const logoStorageId = result.storageId as Id<'_storage'>;
+			// clean up prior blob
+			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
+
+			/* optimistic UI swap */
+			setLogoSrc(newLogoUrl);
+
+			const uploadUrl = await generateUploadUrl();
+			const res = await fetch(uploadUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': optimised.type },
+				body: optimised
+			});
+			if (!res.ok) throw new Error('Failed to upload file');
+
+			const { storageId } = await res.json();
+			const logoStorageId = storageId as Id<'_storage'>;
 
 			await updateOrganization({
 				organizationId: orgData.organizationId,
@@ -150,15 +184,18 @@ export default function OrganizationInfo() {
 
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setError(`Failed to update logo: ${errorMessage}`);
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			setError(`Failed to update logo: ${message}`);
+
+			// revert to server image
+			setLogoSrc(activeOrganization.logo || '');
 		} finally {
 			setIsUploading(false);
 		}
 	};
 
-	const handleSubmit = async (event: React.FormEvent) => {
-		event.preventDefault();
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
 		try {
 			setIsUploading(true);
 			setSuccess('');
@@ -170,22 +207,18 @@ export default function OrganizationInfo() {
 				slug: formState.slug
 			});
 
-			setOrgData((prev) => ({
-				...prev,
-				name: formState.name,
-				slug: formState.slug
-			}));
-
+			setOrgData((p) => ({ ...p, name: formState.name, slug: formState.slug }));
 			setIsEditing(false);
 			toast.success('Organization details updated successfully');
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setError(`Failed to update organization: ${errorMessage}`);
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			setError(`Failed to update organization: ${message}`);
 		} finally {
 			setIsUploading(false);
 		}
 	};
 
+	/* ───────────────────────────────────────────── view ────────────── */
 	const form = (
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="flex flex-col gap-4">
@@ -202,6 +235,7 @@ export default function OrganizationInfo() {
 						required
 					/>
 				</div>
+
 				<div>
 					<label htmlFor="slug" className="label">
 						Slug URL
@@ -239,14 +273,18 @@ export default function OrganizationInfo() {
 			<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left">
 				General settings
 			</h6>
+
 			<div className="flex flex-col items-start gap-6 pt-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
-						<Avatar
-							src={orgData.logo}
-							name={orgData.name || 'Organization'}
-							size="size-20 rounded-xl"
-						/>
+						<div key={logoSrc} className="fade-img">
+							<Avatar
+								src={logoSrc}
+								name={orgData.name || 'Organization'}
+								size="size-20 rounded-xl"
+							/>
+						</div>
+
 						<div className="btn-icon preset-filled-surface-300-700 border-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
@@ -267,6 +305,7 @@ export default function OrganizationInfo() {
 								<Pencil size={16} color="currentColor" />
 							</div>
 						</DialogTrigger>
+
 						<DialogContent className="md:max-w-108">
 							<DialogHeader>
 								<DialogTitle>Edit Organization</DialogTitle>
@@ -289,6 +328,7 @@ export default function OrganizationInfo() {
 								<Pencil size={16} color="currentColor" />
 							</div>
 						</DrawerTrigger>
+
 						<DrawerContent>
 							<DrawerHeader>
 								<DrawerTitle>Edit Organization</DrawerTitle>
@@ -299,6 +339,7 @@ export default function OrganizationInfo() {
 					</Drawer>
 				)}
 			</div>
+
 			{success && <p className="text-error-600-400 mt-2">{success}</p>}
 			{error && <p className="text-error-600-400 mt-2">{error}</p>}
 		</div>
