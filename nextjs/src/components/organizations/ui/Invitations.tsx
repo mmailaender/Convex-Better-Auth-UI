@@ -33,6 +33,7 @@ export function Invitations(): React.ReactNode {
 	const [successMessage, setSuccessMessage] = useState<string>('');
 	const [selectedInvitationId, setSelectedInvitationId] = useState<Id<'invitations'> | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	// Check if current user is an owner or admin
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
@@ -162,7 +163,7 @@ export function Invitations(): React.ReactNode {
 								<td className="p-2">{invitation.invitedBy.name}</td>
 								<td className="text-right">
 									{isOwnerOrAdmin && (
-										<Dialog>
+										<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 											<DialogTrigger
 												className="btn btn-sm preset-filled-surface-300-700"
 												onClick={() => setSelectedInvitationId(invitation._id)}
@@ -170,7 +171,6 @@ export function Invitations(): React.ReactNode {
 												Revoke
 											</DialogTrigger>
 											<DialogContent className="w-[90%] max-w-md">
-												<DialogClose />
 												<DialogHeader>
 													<DialogTitle>Revoke invitation</DialogTitle>
 												</DialogHeader>
@@ -181,7 +181,13 @@ export function Invitations(): React.ReactNode {
 													</p>
 												</article>
 												<DialogFooter>
-													<DialogClose className="btn preset-tonal">Cancel</DialogClose>
+													<button
+														type="button"
+														className="btn preset-tonal"
+														onClick={() => setIsDialogOpen(false)}
+													>
+														Cancel
+													</button>
 													<button
 														type="button"
 														className="btn preset-filled-error-500"

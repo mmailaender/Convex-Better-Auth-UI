@@ -33,6 +33,7 @@ export function Members(): React.ReactNode {
 	const [successMessage, setSuccessMessage] = useState<string>('');
 	const [selectedUserId, setSelectedUserId] = useState<Id<'users'> | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	// Get current organization data
 	const currentUser = useQuery(api.users.getUser);
@@ -131,14 +132,14 @@ export function Members(): React.ReactNode {
 			{errorMessage && <p className="text-error-500">{errorMessage}</p>}
 			{successMessage && <p className="text-success-500">{successMessage}</p>}
 
-			<div className="py-4 flex items-center gap-3">
-				<div className="relative flex-1 ">
-					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center ">
+			<div className="flex items-center gap-3 py-4">
+				<div className="relative flex-1">
+					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center">
 						<Search className="text-surface-400-600 size-4" />
 					</div>
 					<input
 						type="text"
-						className="input w-full pl-6 border-0 w-hug text-sm"
+						className="input w-hug w-full border-0 pl-6 text-sm"
 						placeholder="Search members..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
@@ -147,33 +148,33 @@ export function Members(): React.ReactNode {
 			</div>
 
 			<table className="table caption-bottom">
-				<thead className='bg-surface-300-700/50'>
+				<thead className="bg-surface-300-700/50">
 					<tr className="border-surface-300-700 border-b">
-						<th className="p-2 text-left text-xs  text-surface-700-300">Name</th>
-						<th className="p-2 text-left text-xs  text-surface-700-300">Email</th>
-						<th className="p-2 text-left text-xs  text-surface-700-300">Role</th>
+						<th className="text-surface-700-300 p-2 text-left text-xs">Name</th>
+						<th className="text-surface-700-300 p-2 text-left text-xs">Email</th>
+						<th className="text-surface-700-300 p-2 text-left text-xs">Role</th>
 						{isOwnerOrAdmin && <th className="p-2 text-right"></th>}
 					</tr>
 				</thead>
 				<tbody>
 					{filteredMembers.map((member) => (
-						<tr key={member._id} className='border-surface-300-700 border-b'>
+						<tr key={member._id} className="border-surface-300-700 border-b">
 							{/* Member Name */}
-							<td className='w-60 max-w-60'>
+							<td className="w-60 max-w-60">
 								<div className="flex items-center space-x-2">
 									<div className="avatar">
 										<div className="size-8">
 											{member.user.image ? (
 												<Avatar src={member.user.image} name={member.user.name} size="size-8" />
 											) : (
-												<div className=" text-primary-700 flex h-full w-full items-center justify-center rounded-full">
+												<div className="text-primary-700 flex h-full w-full items-center justify-center rounded-full">
 													{member.user.name?.charAt(0) || 'U'}
 												</div>
 											)}
 										</div>
 									</div>
-									
-									<span className="font-medium truncate">{member.user.name}</span>
+
+									<span className="truncate font-medium">{member.user.name}</span>
 								</div>
 							</td>
 							{/* Member Email */}
@@ -213,7 +214,7 @@ export function Members(): React.ReactNode {
 									{isOwnerOrAdmin &&
 										member.user._id !== currentUser._id &&
 										member.role !== 'role_organization_owner' && (
-											<Dialog>
+											<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 												<DialogTrigger
 													className="btn text-error-500 hover:preset-tonal-error-500"
 													onClick={() => setSelectedUserId(member.user._id)}
@@ -221,7 +222,6 @@ export function Members(): React.ReactNode {
 													Remove
 												</DialogTrigger>
 												<DialogContent>
-													<DialogClose />
 													<DialogHeader>
 														<DialogTitle>Remove member</DialogTitle>
 													</DialogHeader>
@@ -231,7 +231,13 @@ export function Members(): React.ReactNode {
 														</p>
 													</article>
 													<DialogFooter>
-														<DialogClose className="btn preset-tonal">Cancel</DialogClose>
+														<button
+															type="button"
+															className="btn preset-tonal"
+															onClick={() => setIsDialogOpen(false)}
+														>
+															Cancel
+														</button>
 														<button
 															type="button"
 															className="btn preset-filled-error-400-600"
