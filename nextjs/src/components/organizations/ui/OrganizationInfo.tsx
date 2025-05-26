@@ -203,7 +203,7 @@ export default function OrganizationInfo() {
 			<div className="flex flex-col gap-4">
 				<div>
 					<label htmlFor="name" className="label">
-						Name
+						Organization Name
 					</label>
 					<input
 						type="text"
@@ -211,6 +211,7 @@ export default function OrganizationInfo() {
 						className="input"
 						value={formState.name}
 						onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+						required
 					/>
 				</div>
 				<div>

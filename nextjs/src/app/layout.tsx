@@ -32,7 +32,7 @@ export default function RootLayout({
 			<html lang="en" data-theme="authapp">
 				<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 					<ConvexClientProvider>
-						<div className="flex p-10">
+						<div>
 							<OrganizationSwitcher />
 						</div>
 						{children}
