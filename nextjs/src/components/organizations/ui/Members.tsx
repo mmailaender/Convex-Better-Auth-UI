@@ -22,14 +22,13 @@ type Role = Doc<'organizationMembers'>['role'];
 
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { toast } from 'sonner';
 
 /**
  * Component that displays a list of organization members with role management functionality
  */
 export function Members(): React.ReactNode {
 	// State hooks
-	const [errorMessage, setErrorMessage] = useState<string>('');
-	const [successMessage, setSuccessMessage] = useState<string>('');
 	const [selectedUserId, setSelectedUserId] = useState<Id<'users'> | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,11 +85,9 @@ export function Members(): React.ReactNode {
 				newRole
 			});
 
-			setErrorMessage('');
-			setSuccessMessage('Role updated successfully!');
+			toast.success('Role updated successfully!');
 		} catch (err) {
-			setSuccessMessage('');
-			setErrorMessage(err instanceof Error ? err.message : 'Failed to update role');
+			toast.error(err instanceof Error ? err.message : 'Failed to update role');
 			console.error(err);
 		}
 	};
@@ -106,11 +103,9 @@ export function Members(): React.ReactNode {
 				userId: selectedUserId
 			});
 
-			setErrorMessage('');
-			setSuccessMessage('Member removed successfully!');
+			toast.success('Member removed successfully!');
 		} catch (err) {
-			setSuccessMessage('');
-			setErrorMessage(
+			toast.error(
 				err instanceof Error
 					? err.message
 					: 'Unknown error. Please try again. If it persists, contact support.'
@@ -128,9 +123,6 @@ export function Members(): React.ReactNode {
 
 	return (
 		<div>
-			{errorMessage && <p className="text-error-500">{errorMessage}</p>}
-			{successMessage && <p className="text-success-500">{successMessage}</p>}
-
 			<div className="flex items-center gap-3 py-4">
 				<div className="relative flex-1">
 					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center">
@@ -245,7 +237,6 @@ export function Members(): React.ReactNode {
 															Confirm
 														</button>
 													</DialogFooter>
-													{errorMessage && <p className="text-error-600-400">{errorMessage}</p>}
 												</DialogContent>
 											</Dialog>
 										)}

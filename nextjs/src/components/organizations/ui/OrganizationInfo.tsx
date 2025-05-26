@@ -40,8 +40,6 @@ export default function OrganizationInfo() {
 
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [success, setSuccess] = useState('');
-	const [error, setError] = useState('');
 	const [isUploading, setIsUploading] = useState(false);
 	const [manualSlugEdit, setManualSlugEdit] = useState(false);
 
@@ -123,16 +121,12 @@ export default function OrganizationInfo() {
 		if (!isOwnerOrAdmin) return;
 		setIsDialogOpen(true);
 		setIsDrawerOpen(true);
-		setSuccess('');
-		setError('');
 		setManualSlugEdit(false);
 	};
 
 	const cancelEdit = () => {
 		setIsDialogOpen(false);
 		setIsDrawerOpen(false);
-		setSuccess('');
-		setError('');
 		setFormState({ name: orgData.name, slug: orgData.slug });
 		setManualSlugEdit(false);
 	};
@@ -142,8 +136,6 @@ export default function OrganizationInfo() {
 		if (!file) return;
 
 		try {
-			setError('');
-			setSuccess('');
 			setIsUploading(true);
 
 			const optimised = await optimizeImage(file, {
@@ -184,7 +176,7 @@ export default function OrganizationInfo() {
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
-			setError(`Failed to update logo: ${message}`);
+			toast.error(`Failed to update logo: ${message}`);
 
 			// revert to server image
 			setLogoSrc(activeOrganization.logo || '');
@@ -197,8 +189,6 @@ export default function OrganizationInfo() {
 		e.preventDefault();
 		try {
 			setIsUploading(true);
-			setSuccess('');
-			setError('');
 
 			await updateOrganization({
 				organizationId: orgData.organizationId,
@@ -212,7 +202,7 @@ export default function OrganizationInfo() {
 			toast.success('Organization details updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
-			setError(`Failed to update organization: ${message}`);
+			toast.error(`Failed to update organization: ${message}`);
 		} finally {
 			setIsUploading(false);
 		}
@@ -339,9 +329,6 @@ export default function OrganizationInfo() {
 					</DrawerContent>
 				</Drawer>
 			</div>
-
-			{success && <p className="text-error-600-400 mt-2">{success}</p>}
-			{error && <p className="text-error-600-400 mt-2">{error}</p>}
 		</div>
 	);
 }

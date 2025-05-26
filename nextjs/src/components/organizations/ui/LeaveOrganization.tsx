@@ -20,6 +20,7 @@ import { Id } from '@/convex/_generated/dataModel';
 
 // Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
+import { toast } from 'sonner';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -27,7 +28,6 @@ import { useIsOwner } from '@/components/organizations/api/hooks';
  */
 export default function LeaveOrganization(): React.ReactNode {
 	// State hooks
-	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [selectedSuccessor, setSelectedSuccessor] = useState<Id<'users'> | null>(null);
 
@@ -56,7 +56,7 @@ export default function LeaveOrganization(): React.ReactNode {
 	 */
 	const validateForm = (): boolean => {
 		if (isOrgOwner && !selectedSuccessor) {
-			setErrorMessage('As the organization owner, you must select a successor before leaving.');
+			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
 		return true;
@@ -69,7 +69,7 @@ export default function LeaveOrganization(): React.ReactNode {
 		if (!validateForm()) return;
 
 		if (!activeOrganization?._id) {
-			setErrorMessage('No active organization found.');
+			toast.error('No active organization found.');
 			return;
 		}
 
@@ -86,7 +86,7 @@ export default function LeaveOrganization(): React.ReactNode {
 			router.push('/');
 			router.refresh();
 		} catch (err) {
-			setErrorMessage(
+			toast.error(
 				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
 			);
 			console.error(err);
@@ -148,8 +148,6 @@ export default function LeaveOrganization(): React.ReactNode {
 							</div>
 						</>
 					)}
-
-					{errorMessage && <p className="text-error-600-400">{errorMessage}</p>}
 
 					<DialogFooter>
 						<button className="btn preset-tonal" onClick={() => setIsOpen(false)}>

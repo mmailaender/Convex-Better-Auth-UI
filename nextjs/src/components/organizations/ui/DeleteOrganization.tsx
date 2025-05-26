@@ -40,7 +40,6 @@ export default function DeleteOrganization({
 	redirectTo?: string;
 }) {
 	const [open, setOpen] = useState<boolean>(false);
-	const [error, setError] = useState<string>('');
 	const router = useRouter();
 	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
 	const isOwner = useIsOwner();
@@ -69,9 +68,9 @@ export default function DeleteOrganization({
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				setError(err.message);
+				toast.error(err.message);
 			} else {
-				setError('Unknown error. Please try again. If it persists, contact support.');
+				toast.error('Unknown error. Please try again. If it persists, contact support.');
 			}
 		}
 	};
@@ -112,8 +111,6 @@ export default function DeleteOrganization({
 					</button>
 				</DialogFooter>
 				<DialogClose />
-
-				{error && <p className="text-error-600-400 mt-2">{error}</p>}
 			</DialogContent>
 		</Dialog>
 	);

@@ -32,8 +32,6 @@ export default function InviteMembers() {
 	const [emailInput, setEmailInput] = useState('');
 	const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
-	const [successMessage, setSuccessMessage] = useState('');
 
 	const inviteMembers = useAction(api.organizations.invitations.actions.inviteMembers);
 
@@ -41,8 +39,6 @@ export default function InviteMembers() {
 		event.preventDefault();
 		if (isProcessing) return;
 		setIsProcessing(true);
-		setErrorMessage('');
-		setSuccessMessage('');
 
 		try {
 			const emails = emailInput
@@ -52,7 +48,7 @@ export default function InviteMembers() {
 				.filter((email) => email.length > 0);
 
 			if (emails.length === 0) {
-				setErrorMessage('Please enter at least one email address');
+				toast.error('Please enter at least one email address');
 				setIsProcessing(false);
 				return;
 			}
@@ -117,18 +113,6 @@ export default function InviteMembers() {
 					</button>
 				</DialogFooter>
 			</div>
-
-			{successMessage && (
-				<div className="bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 mt-3 rounded-lg p-3">
-					{successMessage}
-				</div>
-			)}
-
-			{errorMessage && (
-				<div className="bg-error-100 text-error-800 dark:bg-error-900 dark:text-error-200 mt-3 rounded-lg p-3">
-					{errorMessage}
-				</div>
-			)}
 		</form>
 	);
 

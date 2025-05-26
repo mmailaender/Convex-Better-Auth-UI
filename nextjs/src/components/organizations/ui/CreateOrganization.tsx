@@ -3,8 +3,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 // Components
-import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
-import { UploadCloud, LogIn, Pencil } from 'lucide-react';
+import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+import { LogIn, Pencil } from 'lucide-react';
 
 // API
 import { useConvexAuth, useMutation } from 'convex/react';
@@ -16,14 +16,7 @@ import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter
-} from '@/components/primitives/ui/dialog';
+import { DialogFooter } from '@/components/primitives/ui/dialog';
 
 export default function CreateOrganization({
 	onSuccessfulCreate,
@@ -42,9 +35,6 @@ export default function CreateOrganization({
 	const [slug, setSlug] = useState('');
 	const [logo, setLogo] = useState('');
 	const [logoFile, setLogoFile] = useState<File | null>(null);
-	const [isUploading, setIsUploading] = useState(false);
-	const [errorMessage, setErrorMessage] = useState('');
-	const [successMessage, setSuccessMessage] = useState('');
 
 	const generateSlug = (input: string): string => input.toLowerCase().replace(/\s+/g, '-');
 
@@ -59,10 +49,6 @@ export default function CreateOrganization({
 		if (!file) return;
 
 		try {
-			setIsUploading(true);
-			setErrorMessage('');
-			setSuccessMessage('');
-
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
@@ -100,9 +86,7 @@ export default function CreateOrganization({
 			}
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to upload and save logo: ${errorMessage}`);
-		} finally {
-			setIsUploading(false);
+			toast.error(`Failed to upload and save logo: ${errorMessage}`);
 		}
 	};
 
@@ -110,12 +94,11 @@ export default function CreateOrganization({
 		event.preventDefault();
 
 		if (!name || !slug) {
-			setErrorMessage('Name and slug are required');
+			toast.error('Name and slug are required');
 			return;
 		}
 
 		try {
-			setIsUploading(true);
 			let logoStorageId: Id<'_storage'> | undefined;
 
 			if (logoFile) {
@@ -131,15 +114,12 @@ export default function CreateOrganization({
 			}
 
 			await createOrganization({ name, slug, logoId: logoStorageId });
-			setSuccessMessage('Organization created successfully!');
 			toast.success('Organization created successfully');
 			if (onSuccessfulCreate) onSuccessfulCreate();
 			if (redirectTo) router.push(redirectTo);
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to create organization: ${errorMessage}`);
-		} finally {
-			setIsUploading(false);
+			toast.error(`Failed to create organization: ${errorMessage}`);
 		}
 	};
 
@@ -217,9 +197,6 @@ export default function CreateOrganization({
 					Create Organization
 				</button>
 			</DialogFooter>
-
-			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
-			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
 		</form>
 	);
 }

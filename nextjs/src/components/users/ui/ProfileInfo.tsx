@@ -45,8 +45,6 @@ export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  local state       */
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [successMessage, setSuccessMessage] = useState('');
-	const [errorMessage, setErrorMessage] = useState('');
 	const [name, setName] = useState('');
 
 	/** single source of truth for avatar shown in the UI */
@@ -80,8 +78,6 @@ export default function ProfileInfo() {
 	const cancelEdit = () => {
 		setIsDialogOpen(false);
 		setIsDrawerOpen(false);
-		setSuccessMessage('');
-		setErrorMessage('');
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -93,7 +89,7 @@ export default function ProfileInfo() {
 			toast.success('Profile name updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to update profile: ${message}`);
+			toast.error(`Failed to update profile: ${message}`);
 		}
 	};
 
@@ -102,9 +98,6 @@ export default function ProfileInfo() {
 		if (!file) return;
 
 		try {
-			setErrorMessage('');
-			setSuccessMessage('');
-
 			const optimised = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
@@ -137,7 +130,7 @@ export default function ProfileInfo() {
 			toast.success('Avatar updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to upload avatar: ${message}`);
+			toast.error(`Failed to upload avatar: ${message}`);
 
 			// revert to server image
 			setAvatarSrc(user?.image || '');
@@ -238,10 +231,6 @@ export default function ProfileInfo() {
 					<DrawerClose />
 				</DrawerContent>
 			</Drawer>
-
-			{/* messages */}
-			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
-			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
 		</div>
 	);
 }
