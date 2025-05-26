@@ -31,6 +31,7 @@
 		"react-dom": "^19.1.0",
 		"resend": "^4.4.1",
 		"sharp": "^0.34.1",
+		"sonner": "^2.0.3",
 		"tailwind-merge": "^3.2.0",
 		"vaul": "^1.1.2"
 	},
