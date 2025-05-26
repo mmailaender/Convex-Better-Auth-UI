@@ -22,10 +22,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-	DialogTrigger,
-	DialogClose
+	DialogTrigger
 } from '@/components/primitives/ui/dialog';
-import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
+import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
@@ -52,7 +51,6 @@ export default function ProfileInfo() {
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [successMessage, setSuccessMessage] = useState<string>('');
 	const [errorMessage, setErrorMessage] = useState<string>('');
-	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const [name, setName] = useState<string>('');
 
 	if (user && name === '') {
@@ -81,7 +79,6 @@ export default function ProfileInfo() {
 		const file = details.acceptedFiles.at(0);
 		if (!file) return;
 		try {
-			setIsUploading(true);
 			setErrorMessage('');
 			setSuccessMessage('');
 
@@ -112,8 +109,6 @@ export default function ProfileInfo() {
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			setErrorMessage(`Failed to upload avatar: ${errorMessage}`);
-		} finally {
-			setIsUploading(false);
 		}
 	};
 
@@ -176,7 +171,6 @@ export default function ProfileInfo() {
 							<DialogTitle>Edit name</DialogTitle>
 						</DialogHeader>
 						{form}
-						<DialogClose />
 					</DialogContent>
 				</Dialog>
 			) : (

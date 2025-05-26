@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Pencil, UploadCloud } from 'lucide-react';
-import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-react';
+import { Pencil } from 'lucide-react';
+import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
@@ -13,18 +13,15 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogDescription,
 	DialogFooter,
 	DialogClose
 } from '@/components/primitives/ui/dialog';
-import { Toaster, createToaster } from '@skeletonlabs/skeleton-react';
 import {
 	Drawer,
 	DrawerTrigger,
 	DrawerContent,
 	DrawerHeader,
 	DrawerTitle,
-	DrawerDescription,
 	DrawerClose
 } from '@/components/primitives/ui/drawer';
 import { toast } from 'sonner';
