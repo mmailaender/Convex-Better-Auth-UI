@@ -1,5 +1,5 @@
 // Components
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/ui/tabs';
 import OrganizationInfo from '@/components/organizations/ui/OrganizationInfo';
 import DeleteOrganization from '@/components/organizations/ui/DeleteOrganization';
@@ -14,84 +14,63 @@ interface OrganizationProfileProps {
 
 export default function OrganizationProfile({ onSuccessfulDelete }: OrganizationProfileProps) {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
-	const [isDesktop, setIsDesktop] = useState(true);
 	const [mobileTab, setMobileTab] = useState('');
 
-	useEffect(() => {
-		const mediaQuery = window.matchMedia('(min-width: 768px)');
-		const updateMatch = () => setIsDesktop(mediaQuery.matches);
-		updateMatch();
-		mediaQuery.addEventListener('change', updateMatch);
-		return () => mediaQuery.removeEventListener('change', updateMatch);
-	}, []);
-
 	const handleTabChange = (value: string) => {
-		setTimeout(() => {
-			setMobileTab(value);
-		}, 10);
+		// slight delay to allow tab state to update before closing
+		setTimeout(() => setMobileTab(value), 10);
 	};
 
 	const navigation = (
 		<div
-			className={`bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full p-2 transition-transform duration-300 ${mobileTab && !isDesktop ? '-translate-x-full' : 'translate-x-0'}`}
+			className={`bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full transform p-2 transition-transform duration-300 ${mobileTab ? '-translate-x-full' : 'translate-x-0'} md:translate-x-0`}
 		>
 			<div className="px-3 py-4 text-2xl font-medium md:text-xl">Organization</div>
 			<TabsList className="flex flex-col pt-8 md:pt-0">
 				<TabsTrigger
 					value="general"
 					onClick={() => handleTabChange('general')}
-					className={
-						!isDesktop
-							? 'gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit'
-							: 'gap-2 px-2'
-					}
+					className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
 				>
 					<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent">
-						{' '}
 						<Bolt />
 					</div>
-					<span className="w-full">General </span>
-					<ChevronRight className="flex sm:hidden" />
+					<span className="w-full">General</span>
+					<ChevronRight className="flex md:hidden" />
 				</TabsTrigger>
-				<div className="flex h-2 w-full items-center justify-center px-3 sm:hidden">
+
+				<div className="flex h-2 w-full items-center justify-center px-3 md:hidden">
 					<hr className="border-0.5 border-surface-200-800 w-full" />
 				</div>
+
 				{isOwnerOrAdmin && (
 					<>
 						<TabsTrigger
 							value="members"
 							onClick={() => handleTabChange('members')}
-							className={
-								!isDesktop
-									? 'gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit'
-									: 'gap-2 px-2'
-							}
+							className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
 						>
 							<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent">
-								{' '}
 								<UserIcon />
 							</div>
-							<span className="w-full">Members </span>
-							<ChevronRight className="flex sm:hidden" />
+							<span className="w-full">Members</span>
+							<ChevronRight className="flex md:hidden" />
 						</TabsTrigger>
-						<div className="flex h-2 w-full items-center justify-center px-3 sm:hidden">
+
+						<div className="flex h-2 w-full items-center justify-center px-3 md:hidden">
 							<hr className="border-0.5 border-surface-200-800 w-full" />
 						</div>
+
 						<TabsTrigger
 							value="billing"
 							onClick={() => handleTabChange('billing')}
-							className={
-								!isDesktop
-									? 'gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit'
-									: 'gap-2 px-2'
-							}
+							className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
 						>
 							<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent">
-								{' '}
 								<Wallet />
 							</div>
-							<span className="w-full">Billing </span>
-							<ChevronRight className="flex sm:hidden" />
+							<span className="w-full">Billing</span>
+							<ChevronRight className="flex md:hidden" />
 						</TabsTrigger>
 					</>
 				)}
@@ -101,10 +80,10 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 
 	const content = (
 		<div
-			className={`flex flex-col gap-4 px-4 py-6 transition-transform duration-300 ${mobileTab && !isDesktop ? 'translate-x-0' : 'translate-x-full'} bg-surface-100-900 absolute inset-0`}
+			className={`flex transform flex-col gap-4 px-4 py-6 transition-transform duration-300 ${mobileTab ? 'translate-x-0' : 'translate-x-full'} bg-surface-100-900 absolute inset-0 md:translate-x-full`}
 		>
 			<button
-				className="ring-offset-background focus:ring-ring data-[state=open]:bg-primary-500 data-[state=open]:text-surface-700-300 hover:bg-surface-300-700 absolute top-5 left-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+				className="ring-offset-background focus:ring-ring hover:bg-surface-300-700 absolute top-5 left-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 				onClick={() => setMobileTab('')}
 			>
 				<ChevronLeft />
@@ -127,37 +106,37 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 
 	return (
 		<Tabs defaultValue="general" orientation="vertical" className="relative h-full overflow-hidden">
-			{isDesktop ? (
-				<div className="flex h-full w-full">
-					<div className="w-56">{navigation}</div>
-					<div className="flex-1">
-						<TabsContent value="general" className="flex h-full flex-col">
-							<OrganizationInfo />
-							<div className="pt-16">
-								<LeaveOrganization />
-								<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
-							</div>
-						</TabsContent>
-						{isOwnerOrAdmin && (
-							<>
-								<TabsContent value="members">
-									<MembersAndInvitations />
-								</TabsContent>
-								<TabsContent value="billing">
-									<h6 className="border-surface-300-700 text-surface-700-300 w-full border-b pb-6 text-center text-sm font-medium sm:text-left">
-										Billing
-									</h6>
-								</TabsContent>
-							</>
-						)}
-					</div>
+			{/* Desktop layout */}
+			<div className="hidden h-full w-full md:flex">
+				<div className="w-56">{navigation}</div>
+				<div className="flex-1">
+					<TabsContent value="general" className="flex h-full flex-col">
+						<OrganizationInfo />
+						<div className="pt-16">
+							<LeaveOrganization />
+							<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
+						</div>
+					</TabsContent>
+					{isOwnerOrAdmin && (
+						<>
+							<TabsContent value="members">
+								<MembersAndInvitations />
+							</TabsContent>
+							<TabsContent value="billing">
+								<h6 className="border-surface-300-700 text-surface-700-300 w-full border-b pb-6 text-center text-sm font-medium sm:text-left">
+									Billing
+								</h6>
+							</TabsContent>
+						</>
+					)}
 				</div>
-			) : (
-				<div className="relative h-full w-full md:w-72">
-					{navigation}
-					{mobileTab && content}
-				</div>
-			)}
+			</div>
+
+			{/* Mobile layout */}
+			<div className="relative h-full w-full md:hidden">
+				{navigation}
+				{mobileTab && content}
+			</div>
 		</Tabs>
 	);
 }

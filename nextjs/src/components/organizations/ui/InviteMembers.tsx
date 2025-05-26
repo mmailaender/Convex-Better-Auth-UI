@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Plus, UserPlus } from 'lucide-react';
-import { FunctionReturnType } from 'convex/server';
+import { Plus } from 'lucide-react';
 import { Doc } from '@/convex/_generated/dataModel';
 import {
 	Dialog,
@@ -26,26 +25,10 @@ import {
 import { toast } from 'sonner';
 
 type Role = Doc<'organizationMembers'>['role'];
-type InvitationResponse =
-	FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<
-		infer T
-	>
-		? T
-		: never;
 
 export default function InviteMembers() {
-	const [isDesktop, setIsDesktop] = useState(
-		typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
-	);
-
-	useEffect(() => {
-		const mediaQuery = window.matchMedia('(min-width: 768px)');
-		const handleChange = () => setIsDesktop(mediaQuery.matches);
-		mediaQuery.addEventListener('change', handleChange);
-		return () => mediaQuery.removeEventListener('change', handleChange);
-	}, []);
-
-	const [isOpen, setIsOpen] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [emailInput, setEmailInput] = useState('');
 	const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -150,40 +133,37 @@ export default function InviteMembers() {
 	);
 
 	return (
-		<div>
-			{isDesktop ? (
-				<Dialog open={isOpen} onOpenChange={setIsOpen}>
-					<DialogTrigger
-						onClick={() => setIsOpen(true)}
-						className="btn preset-filled-primary-500 h-10 text-sm"
-					>
-						<Plus size={20} /> Invite members
-					</DialogTrigger>
-					<DialogContent className="md:max-w-108">
-						<DialogHeader>
-							<DialogTitle>Invite new members</DialogTitle>
-						</DialogHeader>
-						{form}
-						<DialogClose />
-					</DialogContent>
-				</Dialog>
-			) : (
-				<Drawer open={isOpen} onOpenChange={setIsOpen}>
-					<DrawerTrigger
-						onClick={() => setIsOpen(true)}
-						className="btn preset-filled-primary-500 absolute right-4 bottom-4 h-10 text-sm"
-					>
-						<Plus size={20} /> Invite members
-					</DrawerTrigger>
-					<DrawerContent>
-						<DrawerHeader>
-							<DrawerTitle>Invite new members</DrawerTitle>
-						</DrawerHeader>
-						{form}
-						<DrawerClose />
-					</DrawerContent>
-				</Drawer>
-			)}
-		</div>
+		<>
+			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<DialogTrigger
+					onClick={() => setIsDialogOpen(true)}
+					className="btn preset-filled-primary-500 hidden h-10 text-sm md:block"
+				>
+					<Plus size={20} /> Invite members
+				</DialogTrigger>
+				<DialogContent className="max-w-108">
+					<DialogHeader>
+						<DialogTitle>Invite new members</DialogTitle>
+					</DialogHeader>
+					{form}
+					<DialogClose />
+				</DialogContent>
+			</Dialog>
+			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<DrawerTrigger
+					onClick={() => setIsDrawerOpen(true)}
+					className="btn preset-filled-primary-500 absolute right-4 bottom-4 h-10 text-sm md:hidden"
+				>
+					<Plus size={20} /> Invite members
+				</DrawerTrigger>
+				<DrawerContent>
+					<DrawerHeader>
+						<DrawerTitle>Invite new members</DrawerTitle>
+					</DrawerHeader>
+					{form}
+					<DrawerClose />
+				</DrawerContent>
+			</Drawer>
+		</>
 	);
 }

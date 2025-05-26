@@ -36,17 +36,6 @@ import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
-	/* ─────────────────────────────────────────────  layout breakpoint */
-	const [isDesktop, setIsDesktop] = useState(
-		typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
-	);
-	useEffect(() => {
-		const mq = window.matchMedia('(min-width: 768px)');
-		const onChange = () => setIsDesktop(mq.matches);
-		mq.addEventListener('change', onChange);
-		return () => mq.removeEventListener('change', onChange);
-	}, []);
-
 	/* ─────────────────────────────────────────────  Convex queries    */
 	const user = useQuery(api.users.getUser);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
@@ -54,7 +43,8 @@ export default function ProfileInfo() {
 	const updateAvatar = useMutation(api.users.updateAvatar);
 
 	/* ─────────────────────────────────────────────  local state       */
-	const [isEditing, setIsEditing] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [successMessage, setSuccessMessage] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [name, setName] = useState('');
@@ -88,7 +78,8 @@ export default function ProfileInfo() {
 
 	/* ─────────────────────────────────────────────  handlers          */
 	const cancelEdit = () => {
-		setIsEditing(false);
+		setIsDialogOpen(false);
+		setIsDrawerOpen(false);
 		setSuccessMessage('');
 		setErrorMessage('');
 	};
@@ -97,7 +88,8 @@ export default function ProfileInfo() {
 		e.preventDefault();
 		try {
 			await updateUserName({ name });
-			setIsEditing(false);
+			setIsDialogOpen(false);
+			setIsDrawerOpen(false);
 			toast.success('Profile name updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -201,52 +193,51 @@ export default function ProfileInfo() {
 				</FileUpload>
 			</div>
 
-			{/* name edit trigger (Dialog on desktop, Drawer on mobile) */}
-			{isDesktop ? (
-				<Dialog open={isEditing} onOpenChange={setIsEditing}>
-					<DialogTrigger
-						className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-						onClick={() => setIsEditing(true)}
-					>
-						<div className="flex w-full flex-col gap-1 text-left">
-							<span className="text-surface-600-400 text-xs">Name</span>
-							<span className="text-surface-800-200 font-medium">{user.name}</span>
-						</div>
-						<div className="btn preset-filled-surface-200-800 p-2">
-							<Pencil size={16} color="currentColor" />
-						</div>
-					</DialogTrigger>
+			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
+			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<DialogTrigger
+					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+					onClick={() => setIsDialogOpen(true)}
+				>
+					<div className="flex w-full flex-col gap-1 text-left">
+						<span className="text-surface-600-400 text-xs">Name</span>
+						<span className="text-surface-800-200 font-medium">{user.name}</span>
+					</div>
+					<div className="btn preset-filled-surface-200-800 p-2">
+						<Pencil size={16} color="currentColor" />
+					</div>
+				</DialogTrigger>
 
-					<DialogContent className="w-full max-w-md">
-						<DialogHeader>
-							<DialogTitle>Edit name</DialogTitle>
-						</DialogHeader>
-						{form}
-					</DialogContent>
-				</Dialog>
-			) : (
-				<Drawer open={isEditing} onOpenChange={setIsEditing}>
-					<DrawerTrigger
-						onClick={() => setIsEditing(true)}
-						className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
-					>
-						<div className="flex w-full flex-col gap-1 text-left">
-							<span className="text-surface-600-400 text-xs">Name</span>
-							<span className="text-surface-800-200 font-medium">{user.name}</span>
-						</div>
-						<div className="btn-icon preset-faded-surface-50-950">
-							<Pencil size={16} color="currentColor" />
-						</div>
-					</DrawerTrigger>
-					<DrawerContent>
-						<DrawerHeader>
-							<DrawerTitle>Edit name</DrawerTitle>
-						</DrawerHeader>
-						{form}
-						<DrawerClose />
-					</DrawerContent>
-				</Drawer>
-			)}
+				<DialogContent className="w-full max-w-md">
+					<DialogHeader>
+						<DialogTitle>Edit name</DialogTitle>
+					</DialogHeader>
+					{form}
+				</DialogContent>
+			</Dialog>
+
+			{/* Mobile Drawer - shown on mobile, hidden on desktop */}
+			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<DrawerTrigger
+					onClick={() => setIsDrawerOpen(true)}
+					className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+				>
+					<div className="flex w-full flex-col gap-1 text-left">
+						<span className="text-surface-600-400 text-xs">Name</span>
+						<span className="text-surface-800-200 font-medium">{user.name}</span>
+					</div>
+					<div className="btn-icon preset-faded-surface-50-950">
+						<Pencil size={16} color="currentColor" />
+					</div>
+				</DrawerTrigger>
+				<DrawerContent>
+					<DrawerHeader>
+						<DrawerTitle>Edit name</DrawerTitle>
+					</DrawerHeader>
+					{form}
+					<DrawerClose />
+				</DrawerContent>
+			</Drawer>
 
 			{/* messages */}
 			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}

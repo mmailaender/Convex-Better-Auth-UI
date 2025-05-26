@@ -38,17 +38,8 @@ export default function OrganizationInfo() {
 	const updateOrganization = useMutation(api.organizations.updateOrganizationProfile);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
-	const [isDesktop, setIsDesktop] = useState(
-		typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
-	);
-	useEffect(() => {
-		const mq = window.matchMedia('(min-width: 768px)');
-		const onChange = () => setIsDesktop(mq.matches);
-		mq.addEventListener('change', onChange);
-		return () => mq.removeEventListener('change', onChange);
-	}, []);
-
-	const [isEditing, setIsEditing] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [success, setSuccess] = useState('');
 	const [error, setError] = useState('');
 	const [isUploading, setIsUploading] = useState(false);
@@ -130,14 +121,16 @@ export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── handlers ────────── */
 	const toggleEdit = () => {
 		if (!isOwnerOrAdmin) return;
-		setIsEditing(true);
+		setIsDialogOpen(true);
+		setIsDrawerOpen(true);
 		setSuccess('');
 		setError('');
 		setManualSlugEdit(false);
 	};
 
 	const cancelEdit = () => {
-		setIsEditing(false);
+		setIsDialogOpen(false);
+		setIsDrawerOpen(false);
 		setSuccess('');
 		setError('');
 		setFormState({ name: orgData.name, slug: orgData.slug });
@@ -214,7 +207,8 @@ export default function OrganizationInfo() {
 			});
 
 			setOrgData((p) => ({ ...p, name: formState.name, slug: formState.slug }));
-			setIsEditing(false);
+			setIsDialogOpen(false);
+			setIsDrawerOpen(false);
 			toast.success('Organization details updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -297,53 +291,53 @@ export default function OrganizationInfo() {
 					</div>
 				</FileUpload>
 
-				{isDesktop ? (
-					<Dialog open={isEditing} onOpenChange={setIsEditing}>
-						<DialogTrigger
-							className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-							onClick={toggleEdit}
-						>
-							<div className="flex w-full flex-col gap-1 text-left">
-								<span className="text-surface-600-400 text-xs">Organization name</span>
-								<span className="text-surface-800-200 font-medium">{orgData.name}</span>
-							</div>
-							<div className="btn preset-filled-surface-200-800 p-2">
-								<Pencil size={16} color="currentColor" />
-							</div>
-						</DialogTrigger>
+				{/* Desktop Dialog - hidden on mobile, shown on desktop */}
+				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+					<DialogTrigger
+						className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+						onClick={toggleEdit}
+					>
+						<div className="flex w-full flex-col gap-1 text-left">
+							<span className="text-surface-600-400 text-xs">Organization name</span>
+							<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+						</div>
+						<div className="btn preset-filled-surface-200-800 p-2">
+							<Pencil size={16} color="currentColor" />
+						</div>
+					</DialogTrigger>
 
-						<DialogContent className="md:max-w-108">
-							<DialogHeader>
-								<DialogTitle>Edit Organization</DialogTitle>
-							</DialogHeader>
-							{form}
-							<DialogClose />
-						</DialogContent>
-					</Dialog>
-				) : (
-					<Drawer open={isEditing} onOpenChange={setIsEditing}>
-						<DrawerTrigger
-							onClick={toggleEdit}
-							className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
-						>
-							<div className="flex w-full flex-col gap-1 text-left">
-								<span className="text-surface-600-400 text-xs">Organization name</span>
-								<span className="text-surface-800-200 font-medium">{orgData.name}</span>
-							</div>
-							<div className="btn-icon preset-filled-surface-200-800">
-								<Pencil size={16} color="currentColor" />
-							</div>
-						</DrawerTrigger>
+					<DialogContent className="md:max-w-108">
+						<DialogHeader>
+							<DialogTitle>Edit Organization</DialogTitle>
+						</DialogHeader>
+						{form}
+						<DialogClose />
+					</DialogContent>
+				</Dialog>
 
-						<DrawerContent>
-							<DrawerHeader>
-								<DrawerTitle>Edit Organization</DrawerTitle>
-							</DrawerHeader>
-							{form}
-							<DrawerClose />
-						</DrawerContent>
-					</Drawer>
-				)}
+				{/* Mobile Drawer - shown on mobile, hidden on desktop */}
+				<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+					<DrawerTrigger
+						onClick={toggleEdit}
+						className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+					>
+						<div className="flex w-full flex-col gap-1 text-left">
+							<span className="text-surface-600-400 text-xs">Organization name</span>
+							<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+						</div>
+						<div className="btn-icon preset-filled-surface-200-800">
+							<Pencil size={16} color="currentColor" />
+						</div>
+					</DrawerTrigger>
+
+					<DrawerContent>
+						<DrawerHeader>
+							<DrawerTitle>Edit Organization</DrawerTitle>
+						</DrawerHeader>
+						{form}
+						<DrawerClose />
+					</DrawerContent>
+				</Drawer>
 			</div>
 
 			{success && <p className="text-error-600-400 mt-2">{success}</p>}
