@@ -12,7 +12,6 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogClose,
 	DialogFooter
 } from '@/components/primitives/ui/dialog';
 import { Shield, ShieldCheck, Search } from 'lucide-react';
