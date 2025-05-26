@@ -137,9 +137,10 @@ export default function InviteMembers() {
 			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 				<DialogTrigger
 					onClick={() => setIsDialogOpen(true)}
-					className="btn preset-filled-primary-500 hidden h-10 text-sm md:block"
+					className="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
 				>
-					<Plus size={20} /> Invite members
+					<Plus size={20} />
+					<span>Invite members</span>
 				</DialogTrigger>
 				<DialogContent className="max-w-108">
 					<DialogHeader>
