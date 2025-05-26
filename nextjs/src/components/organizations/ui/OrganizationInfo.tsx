@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Pencil } from 'lucide-react';
@@ -67,38 +67,44 @@ export default function OrganizationInfo() {
 	/** Single source of truth for what the UI shows; never undefined */
 	const [logoSrc, setLogoSrc] = useState<string>(activeOrganization?.logo ?? '');
 
-	/* ───────────────────────────────────────────── sync with server ── */
+	/* stable ref with whatever is currently shown */
+	const shownLogoRef = useRef(logoSrc);
+	useEffect(() => {
+		shownLogoRef.current = logoSrc;
+	}, [logoSrc]);
+
+	/* handle new logo from Convex only after it is pre-loaded */
 	useEffect(() => {
 		if (!activeOrganization) return;
-
-		setOrgData({
-			organizationId: activeOrganization._id,
-			name: activeOrganization.name,
-			slug: activeOrganization.slug || '',
-			logo: activeOrganization.logo || '',
-			logoId: activeOrganization.logoId
-		});
-		setFormState({
-			name: activeOrganization.name,
-			slug: activeOrganization.slug || ''
-		});
-
-		// swap to fresh logo only after it's fully loaded
-		if (activeOrganization.logo && activeOrganization.logo !== logoSrc) {
-			let revoked: string | undefined;
-
-			preloadImage(activeOrganization.logo)
-				.then(() => {
-					if (logoSrc.startsWith('blob:')) revoked = logoSrc;
-					setLogoSrc(activeOrganization!.logo!);
-				})
-				.catch(() => void 0);
-
-			return () => {
-				if (revoked) URL.revokeObjectURL(revoked);
-			};
+		if (!activeOrganization.logo || activeOrganization.logo === shownLogoRef.current) {
+			// just keep org data in sync
+			setOrgData({
+				organizationId: activeOrganization._id,
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || '',
+				logo: activeOrganization.logo || '',
+				logoId: activeOrganization.logoId
+			});
+			setFormState({
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || ''
+			});
+			return;
 		}
-	}, [activeOrganization?.logo]);
+
+		let revoked: string | undefined;
+
+		preloadImage(activeOrganization.logo)
+			.then(() => {
+				if (shownLogoRef.current.startsWith('blob:')) revoked = shownLogoRef.current;
+				setLogoSrc(activeOrganization.logo!);
+			})
+			.catch(() => void 0);
+
+		return () => {
+			if (revoked) URL.revokeObjectURL(revoked);
+		};
+	}, [activeOrganization]);
 
 	// tidy up any leftover blob on unmount
 	useEffect(() => {

@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+'use client';
 
-// API
+import { useEffect, useRef, useState } from 'react';
+
+// Convex
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+
+// UI / icons
 import { Pencil } from 'lucide-react';
 import { toast } from 'sonner';
-
-// Utils
-import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 import {
 	Drawer,
 	DrawerContent,
@@ -26,63 +27,93 @@ import {
 } from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 
-// Types
+// utils
+import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
+import { preloadImage } from '@/components/primitives/utils/preloadImage';
+
+// types
 import type { Id } from '@/convex/_generated/dataModel';
-import { type FileChangeDetails } from '@zag-js/file-upload';
+import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
-	const [isDesktop, setIsDesktop] = useState<boolean>(
+	/* ─────────────────────────────────────────────  layout breakpoint */
+	const [isDesktop, setIsDesktop] = useState(
 		typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)').matches : false
 	);
-
 	useEffect(() => {
-		const mediaQuery = window.matchMedia('(min-width: 768px)');
-		const handleChange = () => setIsDesktop(mediaQuery.matches);
-
-		mediaQuery.addEventListener('change', handleChange);
-		return () => mediaQuery.removeEventListener('change', handleChange);
+		const mq = window.matchMedia('(min-width: 768px)');
+		const onChange = () => setIsDesktop(mq.matches);
+		mq.addEventListener('change', onChange);
+		return () => mq.removeEventListener('change', onChange);
 	}, []);
 
+	/* ─────────────────────────────────────────────  Convex queries    */
 	const user = useQuery(api.users.getUser);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 	const updateUserName = useMutation(api.users.updateUserName);
 	const updateAvatar = useMutation(api.users.updateAvatar);
 
-	const [isEditing, setIsEditing] = useState<boolean>(false);
-	const [successMessage, setSuccessMessage] = useState<string>('');
-	const [errorMessage, setErrorMessage] = useState<string>('');
-	const [name, setName] = useState<string>('');
+	/* ─────────────────────────────────────────────  local state       */
+	const [isEditing, setIsEditing] = useState(false);
+	const [successMessage, setSuccessMessage] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
+	const [name, setName] = useState('');
 
-	if (user && name === '') {
-		setName(user.name);
-	}
+	/** single source of truth for avatar shown in the UI */
+	const [avatarSrc, setAvatarSrc] = useState<string>(user?.image ?? '');
 
-	const cancelEdit = (): void => {
+	/* keep a stable ref so another effect can read it without being a dependency */
+	const shownAvatarRef = useRef(avatarSrc);
+	useEffect(() => {
+		shownAvatarRef.current = avatarSrc;
+	}, [avatarSrc]);
+
+	/* preload the NEW server image, but only when it changes */
+	useEffect(() => {
+		if (!user?.image || user.image === shownAvatarRef.current) return;
+
+		let revoked: string | undefined;
+
+		preloadImage(user.image)
+			.then(() => {
+				if (shownAvatarRef.current.startsWith('blob:')) revoked = shownAvatarRef.current;
+				setAvatarSrc(user.image!);
+			})
+			.catch(() => void 0);
+
+		return () => {
+			if (revoked) URL.revokeObjectURL(revoked);
+		};
+	}, [user?.image]);
+
+	/* ─────────────────────────────────────────────  handlers          */
+	const cancelEdit = () => {
 		setIsEditing(false);
 		setSuccessMessage('');
 		setErrorMessage('');
 	};
 
-	const handleSubmit = async (event: React.FormEvent): Promise<void> => {
-		event.preventDefault();
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
 		try {
 			await updateUserName({ name });
 			setIsEditing(false);
 			toast.success('Profile name updated successfully');
-		} catch (err: unknown) {
-			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to update profile: ${errorMessage}`);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			setErrorMessage(`Failed to update profile: ${message}`);
 		}
 	};
 
-	const handleFileChange = async (details: FileChangeDetails): Promise<void> => {
+	const handleFileChange = async (details: FileChangeDetails) => {
 		const file = details.acceptedFiles.at(0);
 		if (!file) return;
+
 		try {
 			setErrorMessage('');
 			setSuccessMessage('');
 
-			const optimizedFile = await optimizeImage(file, {
+			const optimised = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -91,29 +122,42 @@ export default function ProfileInfo() {
 				forceConvert: true
 			});
 
+			const blobUrl = URL.createObjectURL(optimised);
+
+			// cleanup previous blob
+			if (avatarSrc.startsWith('blob:')) URL.revokeObjectURL(avatarSrc);
+
+			/* optimistic UI */
+			setAvatarSrc(blobUrl);
+
+			/* upload to storage */
 			const uploadUrl = await generateUploadUrl();
-			const response = await fetch(uploadUrl, {
+			const res = await fetch(uploadUrl, {
 				method: 'POST',
-				headers: {
-					'Content-Type': optimizedFile.type
-				},
-				body: optimizedFile
+				headers: { 'Content-Type': optimised.type },
+				body: optimised
 			});
+			if (!res.ok) throw new Error('Failed to upload file');
 
-			if (!response.ok) throw new Error('Failed to upload file');
-			const result = await response.json();
-			const storageId = result.storageId as Id<'_storage'>;
+			const { storageId } = await res.json();
+			await updateAvatar({ storageId: storageId as Id<'_storage'> });
 
-			await updateAvatar({ storageId });
 			toast.success('Avatar updated successfully');
-		} catch (err: unknown) {
-			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			setErrorMessage(`Failed to upload avatar: ${errorMessage}`);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			setErrorMessage(`Failed to upload avatar: ${message}`);
+
+			// revert to server image
+			setAvatarSrc(user?.image || '');
 		}
 	};
 
-	if (!user) return <div className="bg-success-200-800 h-16 w-full animate-pulse rounded-md"></div>;
+	/* ─────────────────────────────────────────────  skeleton while loading */
+	if (!user) {
+		return <div className="bg-success-200-800 h-16 w-full animate-pulse rounded-md" />;
+	}
 
+	/* ─────────────────────────────────────────────  edit form */
 	const form = (
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="flex flex-col">
@@ -138,12 +182,18 @@ export default function ProfileInfo() {
 		</form>
 	);
 
+	/* ─────────────────────────────────────────────  component UI */
 	return (
 		<div className="flex flex-col gap-6">
+			{/* avatar + upload */}
 			<div className="flex items-center justify-start rounded-lg pt-6 pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
-						<Avatar src={user.image || ''} name={user.name} size="size-20" />
+						{/* key swap + fade for cross-fade */}
+						<div key={avatarSrc} className="fade-img">
+							<Avatar src={avatarSrc} name={user.name} size="size-20" />
+						</div>
+
 						<div className="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
@@ -151,6 +201,7 @@ export default function ProfileInfo() {
 				</FileUpload>
 			</div>
 
+			{/* name edit trigger (Dialog on desktop, Drawer on mobile) */}
 			{isDesktop ? (
 				<Dialog open={isEditing} onOpenChange={setIsEditing}>
 					<DialogTrigger
@@ -184,7 +235,6 @@ export default function ProfileInfo() {
 							<span className="text-surface-800-200 font-medium">{user.name}</span>
 						</div>
 						<div className="btn-icon preset-faded-surface-50-950">
-							{' '}
 							<Pencil size={16} color="currentColor" />
 						</div>
 					</DrawerTrigger>
@@ -198,6 +248,7 @@ export default function ProfileInfo() {
 				</Drawer>
 			)}
 
+			{/* messages */}
 			{successMessage && <p className="text-success-600-400 mt-2">{successMessage}</p>}
 			{errorMessage && <p className="text-error-600-400 mt-2">{errorMessage}</p>}
 		</div>
