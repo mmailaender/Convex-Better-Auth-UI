@@ -48,10 +48,7 @@ export default function OrganizationInfo() {
 	const [success, setSuccess] = useState('');
 	const [error, setError] = useState('');
 	const [isUploading, setIsUploading] = useState(false);
-	const [logoFile, setLogoFile] = useState<File | null>(null);
-	const [logoPreview, setLogoPreview] = useState('');
 	const [manualSlugEdit, setManualSlugEdit] = useState(false);
-	const [newLogoUploaded, setNewLogoUploaded] = useState(false);
 
 	const [formState, setFormState] = useState({
 		name: '',
@@ -79,7 +76,6 @@ export default function OrganizationInfo() {
 				name: activeOrganization.name,
 				slug: activeOrganization.slug || ''
 			});
-			setLogoPreview(activeOrganization.logo || '');
 		}
 	}, [activeOrganization]);
 
@@ -108,11 +104,8 @@ export default function OrganizationInfo() {
 		setIsEditing(false);
 		setSuccess('');
 		setError('');
-		setLogoFile(null);
-		setLogoPreview(orgData.logo || '');
 		setFormState({ name: orgData.name, slug: orgData.slug });
 		setManualSlugEdit(false);
-		setNewLogoUploaded(false);
 	};
 
 	const handleFileChange = async (details: FileChangeDetails) => {
@@ -120,8 +113,8 @@ export default function OrganizationInfo() {
 		if (!file) return;
 
 		try {
-			setIsUploading(true);
 			setError('');
+			setSuccess('');
 
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
@@ -132,6 +125,11 @@ export default function OrganizationInfo() {
 				forceConvert: true
 			});
 
+			const newLogoUrl = URL.createObjectURL(optimizedFile);
+			setOrgData((prev) => ({
+				...prev,
+				logo: newLogoUrl
+			}));
 			const uploadUrl = await generateUploadUrl();
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
@@ -149,13 +147,6 @@ export default function OrganizationInfo() {
 				slug: orgData.slug,
 				logoId: logoStorageId
 			});
-
-			const newLogoUrl = URL.createObjectURL(optimizedFile);
-			setOrgData((prev) => ({
-				...prev,
-				logoId: logoStorageId,
-				logo: newLogoUrl
-			}));
 
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
@@ -252,8 +243,8 @@ export default function OrganizationInfo() {
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
 						<Avatar
-							src={logoPreview || orgData.logo}
-							name={orgData.logo || newLogoUploaded ? orgData.name : orgData.name || 'Organization'}
+							src={orgData.logo}
+							name={orgData.name || 'Organization'}
 							size="size-20 rounded-xl"
 						/>
 						<div className="btn-icon preset-filled-surface-300-700 border-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">

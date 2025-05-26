@@ -87,7 +87,7 @@ export default function DeleteOrganization({
 
 	return (
 		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
-			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 rounded-lg text-sm">
+			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm">
 				Delete organization
 			</DialogTrigger>
 

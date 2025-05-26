@@ -100,7 +100,7 @@ export default function LeaveOrganization(): React.ReactNode {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger className="btn text-error-500 hover:bg-error-100 hover:text-error-600">
+			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm">
 				Leave organization
 			</DialogTrigger>
 
