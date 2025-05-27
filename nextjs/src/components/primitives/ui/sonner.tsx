@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { toast as sonnerToast, Toaster as SonnerToaster } from 'sonner';
-import { Check, X, AlertTriangle, Info, Loader2 } from 'lucide-react';
+import { CircleCheck, CircleX, X, AlertTriangle, Info, Loader2 } from 'lucide-react';
 
 // Toast variant types
 type ToastVariant = 'default' | 'success' | 'error' | 'warning' | 'info' | 'loading';
@@ -48,13 +48,13 @@ interface PromiseToastOptions<T> {
 // Get variant styles based on your existing classes
 function getVariantStyles(variant: ToastVariant) {
 	const baseClasses =
-		'flex rounded-container shadow-lg ring-1 w-full md:max-w-[364px] items-center p-4 transition-all';
+		'flex flex-row rounded-container shadow-lg w-full md:w-96 items-center p-3 transition-all font-medium z-50 gap-2 bg-surface-950 dark:bg-surface-800 text-surface-50';
 
 	switch (variant) {
 		case 'success':
-			return `${baseClasses} bg-success-50-950 text-success-950-50 border-success-200-800`;
+			return `${baseClasses}  `;
 		case 'error':
-			return `${baseClasses} bg-error-50-950 text-error-950-50 border-error-200-800`;
+			return `${baseClasses} `;
 		case 'warning':
 			return `${baseClasses} bg-warning-50-950 text-warning-950-50 border-warning-200-800`;
 		case 'info':
@@ -68,13 +68,13 @@ function getVariantStyles(variant: ToastVariant) {
 
 // Get icon for each variant using Lucide React icons
 function getVariantIcon(variant: ToastVariant) {
-	const iconProps = { size: 16, className: 'flex-shrink-0' };
+	const iconProps = { size: 20, className: 'flex-shrink-0' };
 
 	switch (variant) {
 		case 'success':
-			return <Check {...iconProps} />;
+			return <CircleCheck {...iconProps} style={{ color: 'var(--color-success-500)' }} />;
 		case 'error':
-			return <X {...iconProps} />;
+			return <CircleX {...iconProps} style={{ color: 'var(--color-error-500)' }} />;
 		case 'warning':
 			return <AlertTriangle {...iconProps} />;
 		case 'info':
@@ -98,7 +98,7 @@ function Toast(props: BaseToastProps) {
 
 	return (
 		<div className={getVariantStyles(variant)}>
-			<div className="flex flex-1 items-center gap-3">
+			<div className="flex flex-1 items-center gap-2">
 				{icon && <div className="flex-shrink-0">{icon}</div>}
 				<div className="min-w-0 flex-1">
 					{title && <p className="truncate text-sm font-medium">{title}</p>}
