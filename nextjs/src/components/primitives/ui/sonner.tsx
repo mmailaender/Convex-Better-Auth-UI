@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { toast as sonnerToast, Toaster as SonnerToaster } from 'sonner';
+import { Check, X, AlertTriangle, Info, Loader2 } from 'lucide-react';
 
 // Toast variant types
 type ToastVariant = 'default' | 'success' | 'error' | 'warning' | 'info' | 'loading';
@@ -65,19 +66,21 @@ function getVariantStyles(variant: ToastVariant) {
 	}
 }
 
-// Get icon for each variant (you can replace with your preferred icons)
+// Get icon for each variant using Lucide React icons
 function getVariantIcon(variant: ToastVariant) {
+	const iconProps = { size: 16, className: 'flex-shrink-0' };
+
 	switch (variant) {
 		case 'success':
-			return '✓';
+			return <Check {...iconProps} />;
 		case 'error':
-			return '✕';
+			return <X {...iconProps} />;
 		case 'warning':
-			return '⚠';
+			return <AlertTriangle {...iconProps} />;
 		case 'info':
-			return 'ℹ';
+			return <Info {...iconProps} />;
 		case 'loading':
-			return '⟳';
+			return <Loader2 {...iconProps} className="flex-shrink-0 animate-spin" />;
 		default:
 			return null;
 	}
@@ -96,11 +99,7 @@ function Toast(props: BaseToastProps) {
 	return (
 		<div className={getVariantStyles(variant)}>
 			<div className="flex flex-1 items-center gap-3">
-				{icon && (
-					<div className="flex-shrink-0 text-lg">
-						{variant === 'loading' ? <div className="animate-spin">{icon}</div> : icon}
-					</div>
-				)}
+				{icon && <div className="flex-shrink-0">{icon}</div>}
 				<div className="min-w-0 flex-1">
 					{title && <p className="truncate text-sm font-medium">{title}</p>}
 					{description && (
@@ -133,7 +132,7 @@ function Toast(props: BaseToastProps) {
 					</button>
 				)}
 				<button className="btn hover:preset-tonal ml-1 p-1 text-xs" onClick={handleDismiss}>
-					✕
+					<X size={12} />
 				</button>
 			</div>
 		</div>
