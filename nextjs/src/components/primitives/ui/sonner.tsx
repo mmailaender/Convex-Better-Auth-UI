@@ -12,7 +12,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
 				className: '!rounded-container',
 				// Style variants for different toast types
 				classNames: {
-					description: '!text-slate-500 !text-xs !mt-1',
+					description: '!text-surface-600-400 !text-xs !mt-1',
 					actionButton: '!btn !preset-filled-primary-500',
 					cancelButton: '!btn !hover:preset-tonal',
 					closeButton: '!btn !hover:preset-tonal',
