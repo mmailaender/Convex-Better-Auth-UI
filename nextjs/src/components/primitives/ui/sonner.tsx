@@ -9,32 +9,23 @@ const Toaster = ({ ...props }: ToasterProps) => {
 			className="z-50"
 			toastOptions={{
 				// Base toast styles
-				className: 'rounded-xl border shadow-lg font-medium text-sm p-4',
+				className: '!rounded-container',
 				// Style variants for different toast types
 				classNames: {
-					toast:
-						'group toast group-[.toaster]:bg-white group-[.toaster]:text-slate-950 group-[.toaster]:border-slate-200 group-[.toaster]:shadow-lg',
-					description: 'group-[.toast]:text-slate-500 text-xs mt-1',
-					actionButton:
-						'group-[.toast]:bg-slate-900 group-[.toast]:text-slate-50 rounded-lg px-3 py-1.5 text-xs font-medium hover:bg-slate-800 transition-colors',
-					cancelButton:
-						'group-[.toast]:bg-slate-100 group-[.toast]:text-slate-500 rounded-lg px-3 py-1.5 text-xs font-medium hover:bg-slate-200 transition-colors',
-					closeButton:
-						'group-[.toast]:bg-slate-200 group-[.toast]:text-slate-500 hover:bg-slate-300 border-0',
+					description: '!text-slate-500 !text-xs !mt-1',
+					actionButton: '!btn !preset-filled-primary-500',
+					cancelButton: '!btn !hover:preset-tonal',
+					closeButton: '!btn !hover:preset-tonal',
 					// Success toast styles
-					success:
-						'group toast group-[.toaster]:bg-emerald-50 group-[.toaster]:text-emerald-900 group-[.toaster]:border-emerald-200',
+					success: '!bg-success-50-950 !text-success-950-50 !border-success-200-800',
 					// Error toast styles
-					error:
-						'group toast group-[.toaster]:bg-red-50 group-[.toaster]:text-red-900 group-[.toaster]:border-red-200',
+					error: '!bg-error-50-950 !text-error-950-50 !border-error-200-800',
 					// Warning toast styles
-					warning:
-						'group toast group-[.toaster]:bg-amber-50 group-[.toaster]:text-amber-900 group-[.toaster]:border-amber-200',
+					warning: '!bg-warning-50-950 !text-warning-950-50 !border-warning-200-800',
 					// Info toast styles
-					info: 'group toast group-[.toaster]:bg-blue-50 group-[.toaster]:text-blue-900 group-[.toaster]:border-blue-200',
+					info: '',
 					// Loading toast styles
-					loading:
-						'group toast group-[.toaster]:bg-slate-50 group-[.toaster]:text-slate-900 group-[.toaster]:border-slate-200'
+					loading: '!bg-surface-50-950 !text-surface-900-100 !border-surface-200-800'
 				}
 			}}
 			{...props}
