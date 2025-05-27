@@ -117,9 +117,13 @@ export default function OrganizationInfo() {
 	if (!user || !activeOrganization) return null;
 
 	/* ───────────────────────────────────────────── handlers ────────── */
-	const toggleEdit = () => {
+	const toggleDialogEdit = () => {
 		if (!isOwnerOrAdmin) return;
 		setIsDialogOpen(true);
+		setManualSlugEdit(false);
+	};
+	const toggleDrawerEdit = () => {
+		if (!isOwnerOrAdmin) return;
 		setIsDrawerOpen(true);
 		setManualSlugEdit(false);
 	};
@@ -285,7 +289,7 @@ export default function OrganizationInfo() {
 				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 					<DialogTrigger
 						className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-						onClick={toggleEdit}
+						onClick={toggleDialogEdit}
 					>
 						<div className="flex w-full flex-col gap-1 text-left">
 							<span className="text-surface-600-400 text-xs">Organization name</span>
@@ -308,7 +312,7 @@ export default function OrganizationInfo() {
 				{/* Mobile Drawer - shown on mobile, hidden on desktop */}
 				<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 					<DrawerTrigger
-						onClick={toggleEdit}
+						onClick={toggleDrawerEdit}
 						className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
 					>
 						<div className="flex w-full flex-col gap-1 text-left">
