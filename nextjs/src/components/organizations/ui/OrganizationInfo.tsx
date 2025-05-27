@@ -26,7 +26,7 @@ import {
 	DrawerTitle,
 	DrawerClose
 } from '@/components/primitives/ui/drawer';
-import { toast } from 'sonner';
+import { toast } from '@/components/primitives/ui/sonner';
 import { preloadImage } from '@/components/primitives/utils/preloadImage';
 
 export default function OrganizationInfo() {

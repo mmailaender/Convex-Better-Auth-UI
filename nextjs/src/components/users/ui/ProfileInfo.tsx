@@ -8,7 +8,7 @@ import { api } from '@/convex/_generated/api';
 
 // UI / icons
 import { Pencil } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/primitives/ui/sonner';
 import {
 	Drawer,
 	DrawerContent,

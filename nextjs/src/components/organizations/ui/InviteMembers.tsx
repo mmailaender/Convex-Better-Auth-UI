@@ -22,7 +22,7 @@ import {
 	DrawerTitle,
 	DrawerClose
 } from '@/components/primitives/ui/drawer';
-import { toast } from 'sonner';
+import { toast } from '@/components/primitives/ui/sonner';
 
 type Role = Doc<'organizationMembers'>['role'];
 

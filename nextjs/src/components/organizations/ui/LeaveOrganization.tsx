@@ -20,7 +20,7 @@ import { Id } from '@/convex/_generated/dataModel';
 
 // Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
-import { toast } from 'sonner';
+import { toast } from '@/components/primitives/ui/sonner';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization

@@ -22,7 +22,7 @@ type Role = Doc<'organizationMembers'>['role'];
 
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import { toast } from 'sonner';
+import { toast } from '@/components/primitives/ui/sonner';
 
 /**
  * Component that displays a list of organization members with role management functionality
