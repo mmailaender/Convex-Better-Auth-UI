@@ -45,7 +45,7 @@ export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  local state       */
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [name, setName] = useState('');
+	const [name, setName] = useState(user?.name ?? '');
 
 	/** single source of truth for avatar shown in the UI */
 	const [avatarSrc, setAvatarSrc] = useState<string>(user?.image ?? '');
@@ -78,6 +78,7 @@ export default function ProfileInfo() {
 	const cancelEdit = () => {
 		setIsDialogOpen(false);
 		setIsDrawerOpen(false);
+		setTimeout(() => setName(user?.name ?? ''), 125);
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
