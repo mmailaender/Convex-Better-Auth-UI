@@ -30,7 +30,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 				<TabsTrigger
 					value="general"
 					onClick={() => handleTabChange('general')}
-					className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
+					className="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
 				>
 					<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent">
 						<Bolt />
@@ -48,7 +48,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 						<TabsTrigger
 							value="members"
 							onClick={() => handleTabChange('members')}
-							className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
+							className="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
 						>
 							<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent">
 								<UserIcon />
@@ -64,7 +64,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 						<TabsTrigger
 							value="billing"
 							onClick={() => handleTabChange('billing')}
-							className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
+							className="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
 						>
 							<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent">
 								<Wallet />
