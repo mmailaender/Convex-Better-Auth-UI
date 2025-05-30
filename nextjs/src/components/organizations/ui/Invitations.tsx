@@ -133,7 +133,9 @@ export function Invitations(): React.ReactNode {
 										<th className="text-surface-700-300 !w-64 p-2 !pl-0 text-left text-xs">
 											Email
 										</th>
-										<th className="text-surface-700-300 !w-32 p-2 text-left text-xs">Role</th>
+										<th className="text-surface-700-300 hidden !w-32 p-2 text-left text-xs sm:table-cell">
+											Role
+										</th>
 										<th className="text-surface-700-300 hidden !w-24 p-2 text-left text-xs sm:table-cell">
 											Invited By
 										</th>
@@ -148,20 +150,24 @@ export function Invitations(): React.ReactNode {
 												<span className="truncate font-medium">{invitation.email}</span>
 											</td>
 											{/* Role */}
-											<td className="!text-surface-700-300 !w-32">
+											<td className="!text-surface-700-300 hidden !w-32 sm:table-cell">
 												<div className="flex items-center">
 													{invitation.role === 'role_organization_owner' ? (
 														<>
-															<ShieldCheck className="text-primary-500 mr-1 size-4" />
-															<span className="text-primary-900-100 font-medium">Owner</span>
+															<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
+																Owner
+															</span>
 														</>
 													) : invitation.role === 'role_organization_admin' ? (
 														<>
-															<Shield className="text-primary-400 mr-1 size-4" />
-															<span className="font-medium">Admin</span>
+															<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
+																Admin
+															</span>
 														</>
 													) : (
-														<span>Member</span>
+														<span className="badge preset-filled-surface-300-700 border-surface-400-600 h-6 border px-2">
+															Member
+														</span>
 													)}
 												</div>
 											</td>
@@ -180,7 +186,7 @@ export function Invitations(): React.ReactNode {
 															>
 																Revoke
 															</DialogTrigger>
-															<DialogContent className="flex max-h-[90vh] w-full max-w-md flex-col sm:max-h-[80vh] md:max-h-[70vh]">
+															<DialogContent className="md:max-w-108">
 																<DialogHeader className="flex-shrink-0">
 																	<DialogTitle>Revoke invitation</DialogTitle>
 																</DialogHeader>

@@ -11,10 +11,29 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogFooter
+	DialogFooter,
+	DialogDescription
 } from '@/components/primitives/ui/dialog';
+import {
+	Drawer,
+	DrawerTrigger,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerFooter
+} from '@/components/primitives/ui/drawer';
 import { Avatar } from '@skeletonlabs/skeleton-react';
-import { Shield, ShieldCheck, Search, Trash } from 'lucide-react';
+import {
+	Shield,
+	ShieldCheck,
+	Search,
+	Trash,
+	Edit,
+	Pencil,
+	Crown,
+	ShieldUser,
+	Settings
+} from 'lucide-react';
 
 // Types
 import { Doc, Id } from '@/convex/_generated/dataModel';
@@ -32,6 +51,8 @@ export function Members(): React.ReactNode {
 	const [selectedUserId, setSelectedUserId] = useState<Id<'users'> | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+	const [selectedMember, setSelectedMember] = useState<any>(null);
 
 	// Get current organization data
 	const currentUser = useQuery(api.users.getUser);
@@ -86,6 +107,7 @@ export function Members(): React.ReactNode {
 			});
 
 			toast.success('Role updated successfully!');
+			setIsDrawerOpen(false);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : 'Failed to update role');
 			console.error(err);
@@ -104,12 +126,46 @@ export function Members(): React.ReactNode {
 			});
 
 			toast.success('Member removed successfully!');
+			setIsDialogOpen(false);
+			setIsDrawerOpen(false);
 		} catch (err) {
 			toast.error(
 				err instanceof Error
 					? err.message
 					: 'Unknown error. Please try again. If it persists, contact support.'
 			);
+		}
+	};
+
+	/**
+	 * Check if current user can edit a member
+	 */
+	const canEditMember = (member: any): boolean => {
+		if (!isOwnerOrAdmin) return false;
+		if (member.user._id === currentUser?._id) return false;
+		if (member.role === 'role_organization_owner') return false;
+
+		// If current user is admin, they can't edit other admins
+		if (currentUser && members) {
+			const currentUserMember = members.find((m) => m.user._id === currentUser._id);
+			if (
+				currentUserMember?.role === 'role_organization_admin' &&
+				member.role === 'role_organization_admin'
+			) {
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	/**
+	 * Handle member card click
+	 */
+	const handleMemberCardClick = (member: any): void => {
+		if (canEditMember(member)) {
+			setSelectedMember(member);
+			setIsDrawerOpen(true);
 		}
 	};
 
@@ -139,8 +195,53 @@ export function Members(): React.ReactNode {
 				</div>
 			</div>
 
-			{/* Table Section - Scrollable area */}
-			<div className="min-h-0 flex-1">
+			{/* Mobile Layout */}
+			<div className="block min-h-0 flex-1 sm:hidden">
+				<div className="flex max-h-[calc(100vh-12rem)] flex-col gap-2 overflow-y-auto pb-24">
+					{filteredMembers.map((member) => (
+						<div
+							key={member._id}
+							className={`bg-surface-50-950 rounded-container flex items-center justify-between p-4 pr-6 ${
+								canEditMember(member) ? 'hover:bg-surface-100-900 cursor-pointer' : ''
+							}`}
+							onClick={() => handleMemberCardClick(member)}
+						>
+							<div className="flex items-center space-x-3">
+								<div className="avatar">
+									<div className="size-10">
+										{member.user.image ? (
+											<Avatar src={member.user.image} name={member.user.name} size="size-10" />
+										) : (
+											<div className="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full">
+												{member.user.name?.charAt(0) || 'U'}
+											</div>
+										)}
+									</div>
+								</div>
+								<div className="flex flex-col">
+									<div className="flex items-center space-x-2">
+										<span className="font-medium">{member.user.name}</span>
+										{member.role === 'role_organization_owner' && (
+											<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
+												Owner
+											</span>
+										)}
+										{member.role === 'role_organization_admin' && (
+											<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
+												Admin
+											</span>
+										)}
+									</div>
+									<span className="text-surface-700-300 text-sm">{member.user.email}</span>
+								</div>
+							</div>
+							{canEditMember(member) && <Pencil size={16} opacity={0.6} />}
+						</div>
+					))}
+				</div>
+			</div>
+			{/* Desktop Table Layout */}
+			<div className="hidden min-h-0 flex-1 sm:block">
 				<div>
 					{/* Table container with controlled height and scroll */}
 					<div className="max-h-[calc(90vh-12rem)] overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]">
@@ -201,23 +302,27 @@ export function Members(): React.ReactNode {
 														onChange={(e) =>
 															handleUpdateRole(member.user._id, e.target.value as Role)
 														}
-														className="select pl-1 text-sm"
+														className="select text-sm"
 													>
 														<option value="role_organization_admin">Admin</option>
 														<option value="role_organization_member">Member</option>
 													</select>
 												) : member.role === 'role_organization_owner' ? (
 													<>
-														<ShieldCheck className="text-primary-500 mr-1 size-4" />
-														<span className="text-primary-900-100 font-medium">Owner</span>
+														<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
+															Owner
+														</span>
 													</>
 												) : member.role === 'role_organization_admin' ? (
 													<>
-														<Shield className="text-primary-400 mr-1 size-4" />
-														<span className="font-medium">Admin</span>
+														<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
+															Admin
+														</span>
 													</>
 												) : (
-													<span>Member</span>
+													<span className="badge preset-filled-surface-300-700 border-surface-400-600 h-6 border px-2">
+														Member
+													</span>
 												)}
 											</div>
 										</td>
@@ -234,7 +339,7 @@ export function Members(): React.ReactNode {
 															>
 																<Trash size={16} opacity={0.7} />
 															</DialogTrigger>
-															<DialogContent className="flex max-h-[90vh] w-full max-w-md flex-col sm:max-h-[80vh] md:max-h-[70vh]">
+															<DialogContent className="md:max-w-108">
 																<DialogHeader className="flex-shrink-0">
 																	<DialogTitle>Remove member</DialogTitle>
 																</DialogHeader>
@@ -271,6 +376,98 @@ export function Members(): React.ReactNode {
 					</div>
 				</div>
 			</div>
+
+			{/* Mobile Drawer */}
+			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<DrawerContent>
+					{selectedMember && (
+						<>
+							<DrawerHeader>
+								<DrawerTitle>Edit Member</DrawerTitle>
+							</DrawerHeader>
+							<div className="">
+								{/* Member Info */}
+								<div className="flex items-center gap-3 pt-1 pb-8">
+									<div className="avatar">
+										<div className="size-12">
+											{selectedMember.user.image ? (
+												<Avatar
+													src={selectedMember.user.image}
+													name={selectedMember.user.name}
+													size="size-12"
+												/>
+											) : (
+												<div className="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full">
+													{selectedMember.user.name?.charAt(0) || 'U'}
+												</div>
+											)}
+										</div>
+									</div>
+									<div className="flex flex-col">
+										<span>{selectedMember.user.name}</span>
+										<p className="text-surface-700-300 text-sm">{selectedMember.user.email}</p>
+									</div>
+								</div>
+
+								{/* Actions */}
+								<div className="flex flex-col gap-3">
+									{/* Role Select */}
+									<div className="flex-1">
+										<label className="label">Role</label>
+										<select
+											value={selectedMember.role}
+											onChange={(e) =>
+												handleUpdateRole(selectedMember.user._id, e.target.value as Role)
+											}
+											className="select w-full"
+										>
+											<option value="role_organization_admin">Admin</option>
+											<option value="role_organization_member">Member</option>
+										</select>
+									</div>
+
+									{/* Remove Button */}
+									<div className="flex flex-col justify-end">
+										<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+											<DialogTrigger
+												className="btn preset-filled-surface-300-700"
+												onClick={() => setSelectedUserId(selectedMember.user._id)}
+											>
+												<Trash size={16} /> Remove
+											</DialogTrigger>
+											<DialogContent className="md:max-w-108">
+												<DialogHeader className="flex-shrink-0">
+													<DialogTitle>Remove member</DialogTitle>
+												</DialogHeader>
+												<DialogDescription>
+													Are you sure you want to remove the member {selectedMember.user.name}?
+												</DialogDescription>
+
+												<DialogFooter className="flex-shrink-0">
+													<button
+														type="button"
+														className="btn preset-tonal"
+														onClick={() => setIsDialogOpen(false)}
+													>
+														Cancel
+													</button>
+													<button
+														type="button"
+														className="btn preset-filled-error-500"
+														onClick={handleRemoveMember}
+													>
+														Confirm
+													</button>
+												</DialogFooter>
+											</DialogContent>
+										</Dialog>
+									</div>
+								</div>
+							</div>
+						</>
+					)}
+				</DrawerContent>
+			</Drawer>
 		</div>
 	);
 }

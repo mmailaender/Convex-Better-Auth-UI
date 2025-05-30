@@ -1,4 +1,3 @@
-// Components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/ui/tabs';
 import { Members } from '@/components/organizations/ui/Members';
 import { Invitations } from '@/components/organizations/ui/Invitations';
@@ -16,20 +15,29 @@ export default function MembersAndInvitations() {
 
 	return (
 		<Tabs defaultValue="members">
-			<h6 className='text-sm font-medium pb-6 border-b border-surface-300-700 text-surface-700-300 text-center sm:text-left'>Members</h6>
-			<div className='flex flex-row justify-between align-middle w-full  py-4 border-b border-surface-300-700 '>
-					<TabsList>
-						<TabsTrigger value="members" className='gap-2'>Members <span className='badge preset-filled-surface-300-700 size-6 rounded-full'>{members && `${members.length}`} </span></TabsTrigger>
-						{isOwnerOrAdmin && (
-						<TabsTrigger value="invitations" className='gap-2'>
-						Invitations <span className='badge preset-filled-surface-300-700 size-6 rounded-full'>{invitations && `${invitations.length}`}</span>
+			<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left">
+				Members
+			</h6>
+			<div className="border-surface-300-700 flex w-full flex-row justify-between border-b py-4 align-middle">
+				<TabsList>
+					<TabsTrigger value="members" className="gap-2">
+						Members{' '}
+						<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
+							{members && `${members.length}`}{' '}
+						</span>
 					</TabsTrigger>
-				)}
-					</TabsList>
+					{isOwnerOrAdmin && (
+						<TabsTrigger value="invitations" className="gap-2">
+							Invitations{' '}
+							<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
+								{invitations && `${invitations.length}`}
+							</span>
+						</TabsTrigger>
+					)}
+				</TabsList>
 				<InviteMembers />
 			</div>
-			<TabsContent value="members">
-				
+			<TabsContent value="members" className="">
 				<Members />
 			</TabsContent>
 			{isOwnerOrAdmin && (

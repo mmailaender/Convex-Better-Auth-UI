@@ -21,6 +21,7 @@ import { Id } from '@/convex/_generated/dataModel';
 // Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
 import { toast } from '@/components/primitives/ui/sonner';
+import { DialogDescription } from '@radix-ui/react-dialog';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -104,28 +105,20 @@ export default function LeaveOrganization(): React.ReactNode {
 				Leave organization
 			</DialogTrigger>
 
-			<DialogContent>
+			<DialogContent className="md:max-w-108">
 				<DialogHeader>
 					<DialogTitle>Leave organization</DialogTitle>
 				</DialogHeader>
-
-				<div className="space-y-4">
-					<p>
-						Are you sure you want to leave your organization? You will lose access to all projects
-						and resources.
-					</p>
-
+				<DialogDescription>
+					If you leave organization you’ll lose access to all projects and resources. <br /> <br />{' '}
+					As the owner, you must assign a new owner before leaving.
+				</DialogDescription>
+				<div className="mt-8">
 					{isOrgOwner && (
 						<>
-							<div className="bg-warning-100 border-warning-300 rounded-md border p-3">
-								<p className="text-warning-800 text-sm font-medium">
-									As the organization owner, you must designate a successor before leaving.
-								</p>
-							</div>
-
 							<div className="space-y-2">
-								<label htmlFor="successor" className="text-surface-800-200 font-medium">
-									Select a successor:
+								<label htmlFor="successor" className="label">
+									New owner:
 								</label>
 								<select
 									id="successor"

@@ -137,7 +137,7 @@ export default function InviteMembers() {
 			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 				<DrawerTrigger
 					onClick={() => setIsDrawerOpen(true)}
-					className="btn preset-filled-primary-500 absolute right-4 bottom-4 h-10 text-sm md:hidden"
+					className="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden"
 				>
 					<Plus size={20} /> Invite members
 				</DrawerTrigger>
