@@ -1,58 +1,67 @@
 'use client';
 
-import { useState } from 'react';
+import { ComponentProps, useState } from 'react';
 
 // API
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useQuery, Authenticated, Unauthenticated } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
-// Components
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/popover';
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogHeader,
-	DialogTitle
-} from '@/components/primitives/ui/dialog';
-import UserProfile from '@/components/users/ui/UserProfile';
+// Primitive
+import * as Popover from '@/components/primitives/ui/popover';
+import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar } from '@skeletonlabs/skeleton-react';
+// Icons
 import { ChevronRight } from 'lucide-react';
+
+// Components
+import UserProfile from '@/components/users/ui/UserProfile';
+
+// Types
+type PopoverProps = ComponentProps<typeof Popover.Content>;
 
 export default function UserButton({
 	popoverSide = 'bottom',
 	popoverAlign = 'end'
 }: {
-	popoverSide?: 'top' | 'right' | 'bottom' | 'left';
-	popoverAlign?: 'start' | 'end' | 'center';
+	popoverSide?: PopoverProps['side'];
+	popoverAlign?: PopoverProps['align'];
 }) {
+	// Auth
 	const { signOut } = useAuthActions();
+	// Queries
 	const user = useQuery(api.users.getUser);
-	const [open, setOpen] = useState(false);
-	const [profileOpen, setProfileOpen] = useState(false);
+
+	// State
+	const [userPopoverOpen, setUserPopoverOpen] = useState(false);
+	const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+
+	/**
+	 * Open profile modal and close popover
+	 */
+	function openProfileModal(): void {
+		setUserPopoverOpen(false);
+		setProfileDialogOpen(true);
+	}
 
 	return (
 		<>
 			<Authenticated>
 				{user ? (
 					<>
-						<Popover open={open} onOpenChange={setOpen}>
-							<PopoverTrigger>
+						<Popover.Root open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
+							<Popover.Trigger>
 								<Avatar
 									src={user.image}
 									name={user.name}
 									size="size-10 ring-0 hover:ring-4 ring-surface-100-900 ease-out duration-200"
 								/>
-							</PopoverTrigger>
-							<PopoverContent side={popoverSide} align={popoverAlign}>
+							</Popover.Trigger>
+							<Popover.Content side={popoverSide} align={popoverAlign}>
 								<div className="flex flex-col gap-1 p-0">
 									<button
 										className="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
-										onClick={() => {
-											setOpen(false);
-											setProfileOpen(true);
-										}}
+										onClick={openProfileModal}
 									>
 										<Avatar src={user.image} name={user.name} size="size-12" />
 										<div className="flex flex-1 flex-col gap-0 overflow-hidden">
@@ -70,19 +79,19 @@ export default function UserButton({
 										Sign out
 									</button>
 								</div>
-							</PopoverContent>
-						</Popover>
+							</Popover.Content>
+						</Popover.Root>
 
 						{/* ProfileInfo Popup */}
-						<Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-							<DialogContent className="max-w-xl">
-								<DialogHeader>
-									<DialogTitle>Profile</DialogTitle>
-								</DialogHeader>
+						<Dialog.Root open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
+							<Dialog.Content className="max-w-xl">
+								<Dialog.Header>
+									<Dialog.Title>Profile</Dialog.Title>
+								</Dialog.Header>
 								<UserProfile />
-								<DialogClose />
-							</DialogContent>
-						</Dialog>
+								<Dialog.Close />
+							</Dialog.Content>
+						</Dialog.Root>
 					</>
 				) : (
 					<div className="placeholder-circle size-10 animate-pulse" />
