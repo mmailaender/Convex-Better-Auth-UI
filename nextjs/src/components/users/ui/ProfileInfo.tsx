@@ -11,14 +11,7 @@ import { Pencil } from 'lucide-react';
 
 // Primitives
 import { toast } from '@/components/primitives/ui/sonner';
-import {
-	Drawer,
-	DrawerContent,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerTrigger,
-	DrawerClose
-} from '@/components/primitives/ui/drawer';
+import * as Drawer from '@/components/primitives/ui/drawer';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 
@@ -206,8 +199,8 @@ export default function ProfileInfo() {
 			</Dialog.Root>
 
 			{/* Mobile Drawer - shown on mobile, hidden on desktop */}
-			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-				<DrawerTrigger
+			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<Drawer.Trigger
 					onClick={() => setIsDrawerOpen(true)}
 					className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
 				>
@@ -218,15 +211,15 @@ export default function ProfileInfo() {
 					<div className="btn-icon preset-faded-surface-50-950">
 						<Pencil size={16} color="currentColor" />
 					</div>
-				</DrawerTrigger>
-				<DrawerContent>
-					<DrawerHeader>
-						<DrawerTitle>Edit name</DrawerTitle>
-					</DrawerHeader>
+				</Drawer.Trigger>
+				<Drawer.Content>
+					<Drawer.Header>
+						<Drawer.Title>Edit name</Drawer.Title>
+					</Drawer.Header>
 					{form}
-					<DrawerClose />
-				</DrawerContent>
-			</Drawer>
+					<Drawer.Close />
+				</Drawer.Content>
+			</Drawer.Root>
 		</div>
 	);
 }
