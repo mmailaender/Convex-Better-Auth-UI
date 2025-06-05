@@ -191,10 +191,10 @@
 				</Dialog.Header>
 				<form onsubmit={handleSubmit} class="w-full">
 					<div class="flex flex-col">
-						<div class="flex flex-col">
-							<label class="label" for="name-input">Name</label>
-							<input id="name-input" type="text" class="input w-full" bind:value={name} />
-						</div>
+						<label class="flex flex-col">
+							<span class="label">Name</span>
+							<input type="text" class="input w-full" bind:value={name} />
+						</label>
 						<Dialog.Footer>
 							<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
 							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
