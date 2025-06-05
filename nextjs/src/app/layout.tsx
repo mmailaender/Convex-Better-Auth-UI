@@ -30,7 +30,9 @@ export default function RootLayout({
 	return (
 		<ConvexAuthNextjsServerProvider>
 			<html lang="en" data-theme="authapp">
-				<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+				<body
+					className={`${geistSans.variable} ${geistMono.variable} grid h-screen grid-rows-[auto_1fr] antialiased`}
+				>
 					<ConvexClientProvider>
 						<div>
 							<OrganizationSwitcher />

@@ -19,7 +19,7 @@ export default function SignIn() {
 	};
 
 	return (
-		<div className="bg-surface-100-900 flex h-[100vh] w-full flex-col items-center justify-center">
+		<div className="bg-surface-100-900 flex h-full w-full flex-col items-center justify-center">
 			<div className="mt-40 flex h-full w-full max-w-md flex-col items-start justify-center p-8">
 				<h5 className="h4 text-surface-950-50 max-w-96 text-left leading-9 tracking-tighter">
 					Build your app 10x faster <br /> with Skeleton Plus
@@ -78,8 +78,14 @@ export default function SignIn() {
 				</div>
 				<div>
 					<p className="text-surface-600-400 mt-10 text-xs">
-						By contining, you agree to our <a className="anchor text-surface-950-50">Terms </a>and{' '}
-						<a className="anchor text-surface-950-50">Privacy Polices </a>
+						By contining, you agree to our{' '}
+						<a href="#" className="anchor text-surface-950-50">
+							Terms
+						</a>{' '}
+						and{' '}
+						<a href="#" className="anchor text-surface-950-50">
+							Privacy Polices
+						</a>
 					</p>
 				</div>
 			</div>

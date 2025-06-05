@@ -8,5 +8,9 @@
 	setupConvexAuth({ getServerState: () => data.authState });
 </script>
 
-<Navbar />
-{@render children()}
+<div class="grid h-screen grid-rows-[auto_1fr]">
+	<header><Navbar /></header>
+	<main>
+		{@render children()}
+	</main>
+</div>
