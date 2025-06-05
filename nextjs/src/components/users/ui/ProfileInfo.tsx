@@ -128,15 +128,15 @@ export default function ProfileInfo() {
 	const form = (
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="flex flex-col">
-				<div className="flex flex-col">
-					<label className="label">Name</label>
+				<label className="flex flex-col">
+					<span className="label">Name</span>
 					<input
 						type="text"
 						className="input w-full"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 					/>
-				</div>
+				</label>
 				<Dialog.Footer>
 					<Dialog.Close className="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
 					<button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit">
