@@ -91,11 +91,12 @@
 
 		<!-- Profile Dialog -->
 		<Dialog.Root bind:open={profileDialogOpen}>
-			<Dialog.Content>
+			<Dialog.Content class="max-w-xl">
 				<Dialog.Header>
 					<Dialog.Title>Profile</Dialog.Title>
 				</Dialog.Header>
 				<UserProfile />
+				<Dialog.CloseX />
 			</Dialog.Content>
 		</Dialog.Root>
 	{:else}

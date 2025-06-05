@@ -22,3 +22,22 @@
 		}
 	}
 }
+
+@utility input {
+	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border duration-300 ease-in-out;
+}
+@utility textarea {
+	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border duration-300 ease-in-out;
+}
+
+@utility select {
+	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border px-2 duration-300 ease-in-out;
+}
+
+@utility label {
+	@apply mb-1 text-xs font-medium;
+}
+
+[data-sonner-toast] {
+	z-index: 9999 !important;
+}

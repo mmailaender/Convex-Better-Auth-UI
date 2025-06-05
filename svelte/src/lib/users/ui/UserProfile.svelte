@@ -3,7 +3,7 @@
 	import DeleteUser from '$lib/users/ui/DeleteUser.svelte';
 </script>
 
-<div class="w-full md:w-120">
+<div class="w-full">
 	<ProfileInfo />
 	<div class="flex pt-10">
 		<DeleteUser />

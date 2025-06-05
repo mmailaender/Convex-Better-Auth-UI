@@ -25,13 +25,6 @@
 			console.error('Error deleting user:', error);
 		}
 	}
-
-	/**
-	 * Handle cancellation of delete confirmation
-	 */
-	function handleCancel(): void {
-		deleteDialogOpen = false;
-	}
 </script>
 
 <Dialog.Root bind:open={deleteDialogOpen}>
@@ -39,7 +32,7 @@
 		class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm"
 		>Delete account</Dialog.Trigger
 	>
-	<Dialog.Content>
+	<Dialog.Content class="md:max-w-108">
 		<Dialog.Header>
 			<Dialog.Title>Delete your account</Dialog.Title>
 			<Dialog.Description class="text-surface-700-300">
@@ -47,7 +40,7 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<button type="button" class="btn preset-tonal" onclick={handleCancel}> Cancel </button>
+			<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
 			<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
 				Confirm
 			</button>

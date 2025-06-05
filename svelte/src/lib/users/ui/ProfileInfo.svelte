@@ -196,9 +196,7 @@
 							<input id="name-input" type="text" class="input w-full" bind:value={name} />
 						</div>
 						<Dialog.Footer>
-							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
-								Cancel
-							</button>
+							<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
 							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
 								Save
 							</button>
@@ -233,9 +231,7 @@
 							<input id="name-input-mobile" type="text" class="input w-full" bind:value={name} />
 						</div>
 						<Dialog.Footer>
-							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
-								Cancel
-							</button>
+							<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
 							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
 								Save
 							</button>
