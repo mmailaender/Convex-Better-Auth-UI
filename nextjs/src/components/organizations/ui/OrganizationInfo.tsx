@@ -1,32 +1,26 @@
 'use client';
 
+// React
 import { useEffect, useRef, useState } from 'react';
+
+// API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Pencil } from 'lucide-react';
-import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
-import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
-import type { Id } from '@/convex/_generated/dataModel';
-import type { FileChangeDetails } from '@zag-js/file-upload';
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-	DialogClose
-} from '@/components/primitives/ui/dialog';
-import {
-	Drawer,
-	DrawerTrigger,
-	DrawerContent,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerClose
-} from '@/components/primitives/ui/drawer';
+import type { Id } from '@/convex/_generated/dataModel';
+
+// Icons
+import { Pencil } from 'lucide-react';
+
+// Primitives
 import { toast } from '@/components/primitives/ui/sonner';
+import * as Drawer from '@/components/primitives/ui/drawer';
+import * as Dialog from '@/components/primitives/ui/dialog';
+import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+
+// utils
+import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
+import type { FileChangeDetails } from '@zag-js/file-upload';
 import { preloadImage } from '@/components/primitives/utils/preloadImage';
 
 export default function OrganizationInfo() {
@@ -246,7 +240,7 @@ export default function OrganizationInfo() {
 					/>
 				</div>
 
-				<DialogFooter>
+				<div className="flex justify-end gap-2 pt-6 md:flex-row">
 					<button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
 						Cancel
 					</button>
@@ -257,7 +251,7 @@ export default function OrganizationInfo() {
 					>
 						Save
 					</button>
-				</DialogFooter>
+				</div>
 			</div>
 		</form>
 	);
@@ -286,8 +280,8 @@ export default function OrganizationInfo() {
 				</FileUpload>
 
 				{/* Desktop Dialog - hidden on mobile, shown on desktop */}
-				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-					<DialogTrigger
+				<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+					<Dialog.Trigger
 						className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 						onClick={toggleDialogEdit}
 					>
@@ -298,20 +292,19 @@ export default function OrganizationInfo() {
 						<div className="btn preset-filled-surface-200-800 p-2">
 							<Pencil size={16} color="currentColor" />
 						</div>
-					</DialogTrigger>
+					</Dialog.Trigger>
 
-					<DialogContent className="md:max-w-108">
-						<DialogHeader>
-							<DialogTitle>Edit Organization</DialogTitle>
-						</DialogHeader>
+					<Dialog.Content className="md:max-w-108">
+						<Dialog.Header>
+							<Dialog.Title>Edit Organization</Dialog.Title>
+						</Dialog.Header>
 						{form}
-						<DialogClose />
-					</DialogContent>
-				</Dialog>
+					</Dialog.Content>
+				</Dialog.Root>
 
 				{/* Mobile Drawer - shown on mobile, hidden on desktop */}
-				<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-					<DrawerTrigger
+				<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+					<Drawer.Trigger
 						onClick={toggleDrawerEdit}
 						className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
 					>
@@ -322,16 +315,15 @@ export default function OrganizationInfo() {
 						<div className="btn-icon preset-filled-surface-200-800">
 							<Pencil size={16} color="currentColor" />
 						</div>
-					</DrawerTrigger>
+					</Drawer.Trigger>
 
-					<DrawerContent>
-						<DrawerHeader>
-							<DrawerTitle>Edit Organization</DrawerTitle>
-						</DrawerHeader>
+					<Drawer.Content>
+						<Drawer.Header>
+							<Drawer.Title>Edit Organization</Drawer.Title>
+						</Drawer.Header>
 						{form}
-						<DrawerClose />
-					</DrawerContent>
-				</Drawer>
+					</Drawer.Content>
+				</Drawer.Root>
 			</div>
 		</div>
 	);

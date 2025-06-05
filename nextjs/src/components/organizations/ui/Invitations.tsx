@@ -6,15 +6,9 @@ import { api } from '@/convex/_generated/api';
 import { toast } from '@/components/primitives/ui/sonner';
 
 // Components
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter
-} from '@/components/primitives/ui/dialog';
-import { Shield, ShieldCheck, Search } from 'lucide-react';
+import * as Dialog from '@/components/primitives/ui/dialog';
+// Icons
+import { Search } from 'lucide-react';
 
 // Types
 import { Doc, Id } from '@/convex/_generated/dataModel';
@@ -26,7 +20,7 @@ import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 /**
  * Component that displays a list of organization invitations with revoke functionality
  */
-export function Invitations(): React.ReactNode {
+export default function Invitations(): React.ReactNode {
 	// State hooks
 	const [selectedInvitationId, setSelectedInvitationId] = useState<Id<'invitations'> | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
@@ -179,24 +173,24 @@ export function Invitations(): React.ReactNode {
 											<td className="!w-20">
 												<div className="flex justify-end">
 													{isOwnerOrAdmin && (
-														<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-															<DialogTrigger
+														<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+															<Dialog.Trigger
 																className="btn btn-sm preset-filled-surface-300-700"
 																onClick={() => setSelectedInvitationId(invitation._id)}
 															>
 																Revoke
-															</DialogTrigger>
-															<DialogContent className="md:max-w-108">
-																<DialogHeader className="flex-shrink-0">
-																	<DialogTitle>Revoke invitation</DialogTitle>
-																</DialogHeader>
+															</Dialog.Trigger>
+															<Dialog.Content className="md:max-w-108">
+																<Dialog.Header className="flex-shrink-0">
+																	<Dialog.Title>Revoke invitation</Dialog.Title>
+																</Dialog.Header>
 																<article className="flex-shrink-0">
 																	<p className="opacity-60">
 																		Are you sure you want to revoke the invitation sent to{' '}
 																		{invitation.email}?
 																	</p>
 																</article>
-																<DialogFooter className="flex-shrink-0">
+																<Dialog.Footer className="flex-shrink-0">
 																	<button
 																		type="button"
 																		className="btn preset-tonal"
@@ -211,9 +205,9 @@ export function Invitations(): React.ReactNode {
 																	>
 																		Confirm
 																	</button>
-																</DialogFooter>
-															</DialogContent>
-														</Dialog>
+																</Dialog.Footer>
+															</Dialog.Content>
+														</Dialog.Root>
 													)}
 												</div>
 											</td>

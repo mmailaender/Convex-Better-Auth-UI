@@ -4,15 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Components
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/primitives/ui/popover';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogClose,
-	DialogTrigger
-} from '@/components/primitives/ui/dialog';
+import * as Popover from '@/components/primitives/ui/popover';
+import * as Dialog from '@/components/primitives/ui/dialog';
 import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
 import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
@@ -78,27 +71,27 @@ export default function OrganizationSwitcher({
 	// No organizations - just show the create button
 	if (organizations.length === 0) {
 		return (
-			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<DialogTrigger className="btn preset-tonal flex items-center gap-2">
+			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
+				<Dialog.Trigger className="btn preset-tonal flex items-center gap-2">
 					<Plus size={16} />
 					<span>Create Organization</span>
-				</DialogTrigger>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Create Organization</DialogTitle>
-					</DialogHeader>
+				</Dialog.Trigger>
+				<Dialog.Content>
+					<Dialog.Header>
+						<Dialog.Title>Create Organization</Dialog.Title>
+					</Dialog.Header>
 					<CreateOrganization onSuccessfulCreate={() => setOpenCreateOrganization(false)} />
-					<DialogClose />
-				</DialogContent>
-			</Dialog>
+					<Dialog.CloseX />
+				</Dialog.Content>
+			</Dialog.Root>
 		);
 	}
 
 	// Has organizations - show the switcher
 	return (
 		<>
-			<Popover open={openSwitcher} onOpenChange={setOpenSwitcher}>
-				<PopoverTrigger
+			<Popover.Root open={openSwitcher} onOpenChange={setOpenSwitcher}>
+				<Popover.Trigger
 					onClick={() => setOpenSwitcher(!openSwitcher)}
 					className="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-lg border p-1 pr-2 duration-200 ease-in-out"
 				>
@@ -113,9 +106,9 @@ export default function OrganizationSwitcher({
 						</span>
 					</div>
 					<ChevronsUpDown className="size-4 opacity-40" color="currentColor" />
-				</PopoverTrigger>
+				</Popover.Trigger>
 
-				<PopoverContent side={popoverSide} align={popoverAlign}>
+				<Popover.Content side={popoverSide} align={popoverAlign}>
 					<div className="flex flex-col gap-1">
 						<div role="list" className="bg-surface-50-950 rounded-base flex flex-col">
 							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
@@ -179,28 +172,28 @@ export default function OrganizationSwitcher({
 							<span className="text-surface-700-300 text-sm">Create Organization</span>
 						</button>
 					</div>
-				</PopoverContent>
-			</Popover>
+				</Popover.Content>
+			</Popover.Root>
 
-			<Dialog open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<DialogContent className="max-w-xl">
-					<DialogHeader>
-						<DialogTitle>Create Organization</DialogTitle>
-					</DialogHeader>
+			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
+				<Dialog.Content className="max-w-xl">
+					<Dialog.Header>
+						<Dialog.Title>Create Organization</Dialog.Title>
+					</Dialog.Header>
 					<CreateOrganization onSuccessfulCreate={() => setOpenCreateOrganization(false)} />
-					<DialogClose />
-				</DialogContent>
-			</Dialog>
+					<Dialog.CloseX />
+				</Dialog.Content>
+			</Dialog.Root>
 
-			<Dialog open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
-				<DialogContent className="max-h-[100dvh md:rounded-container h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl">
-					<DialogHeader className="hidden">
-						<DialogTitle></DialogTitle>
-					</DialogHeader>
+			<Dialog.Root open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
+				<Dialog.Content className="md:rounded-container h-[100dvh] max-h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl">
+					<Dialog.Header className="hidden">
+						<Dialog.Title></Dialog.Title>
+					</Dialog.Header>
 					<OrganizationProfile onSuccessfulDelete={() => setOpenOrganizationProfile(false)} />
-					<DialogClose />
-				</DialogContent>
-			</Dialog>
+					<Dialog.CloseX />
+				</Dialog.Content>
+			</Dialog.Root>
 		</>
 	);
 }

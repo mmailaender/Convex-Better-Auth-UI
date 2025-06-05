@@ -19,6 +19,10 @@ function Portal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal
 }
 
 function Close({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
+	return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
+}
+
+function CloseX({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
 	return (
 		<DialogPrimitive.Close
 			data-slot="dialog-close"
@@ -120,6 +124,7 @@ export {
 	Content,
 	Description,
 	Close,
+	CloseX,
 	//
 	Root as Dialog,
 	Title as DialogTitle,
@@ -130,5 +135,6 @@ export {
 	Overlay as DialogOverlay,
 	Content as DialogContent,
 	Description as DialogDescription,
-	Close as DialogClose
+	Close as DialogClose,
+	CloseX as DialogCloseX
 };

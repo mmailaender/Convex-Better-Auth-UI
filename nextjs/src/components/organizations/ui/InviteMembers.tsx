@@ -3,26 +3,14 @@
 import { useState, FormEvent } from 'react';
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Plus } from 'lucide-react';
 import { Doc } from '@/convex/_generated/dataModel';
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogClose,
-	DialogFooter
-} from '@/components/primitives/ui/dialog';
-import {
-	Drawer,
-	DrawerTrigger,
-	DrawerContent,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerClose
-} from '@/components/primitives/ui/drawer';
+
+// Primitives
+import * as Dialog from '@/components/primitives/ui/dialog';
+import * as Drawer from '@/components/primitives/ui/drawer';
 import { toast } from '@/components/primitives/ui/sonner';
+// Icons
+import { Plus } from 'lucide-react';
 
 type Role = Doc<'organizationMembers'>['role'];
 
@@ -107,48 +95,48 @@ export default function InviteMembers() {
 					</p>
 				</div>
 
-				<DialogFooter>
+				<div className="flex justify-end gap-2 pt-6 md:flex-row">
 					<button type="submit" className="btn preset-filled-primary-500" disabled={isProcessing}>
 						{isProcessing ? 'Sending...' : 'Send Invitations'}
 					</button>
-				</DialogFooter>
+				</div>
 			</div>
 		</form>
 	);
 
 	return (
 		<>
-			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<DialogTrigger
+			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<Dialog.Trigger
 					onClick={() => setIsDialogOpen(true)}
 					className="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
 				>
 					<Plus size={20} />
 					<span>Invite members</span>
-				</DialogTrigger>
-				<DialogContent className="max-w-108">
-					<DialogHeader>
-						<DialogTitle>Invite new members</DialogTitle>
-					</DialogHeader>
+				</Dialog.Trigger>
+				<Dialog.Content className="max-w-108">
+					<Dialog.Header>
+						<Dialog.Title>Invite new members</Dialog.Title>
+					</Dialog.Header>
 					{form}
-					<DialogClose />
-				</DialogContent>
-			</Dialog>
-			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-				<DrawerTrigger
+					<Dialog.CloseX />
+				</Dialog.Content>
+			</Dialog.Root>
+			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<Drawer.Trigger
 					onClick={() => setIsDrawerOpen(true)}
 					className="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden"
 				>
 					<Plus size={20} /> Invite members
-				</DrawerTrigger>
-				<DrawerContent>
-					<DrawerHeader>
-						<DrawerTitle>Invite new members</DrawerTitle>
-					</DrawerHeader>
+				</Drawer.Trigger>
+				<Drawer.Content>
+					<Drawer.Header>
+						<Drawer.Title>Invite new members</Drawer.Title>
+					</Drawer.Header>
 					{form}
-					<DrawerClose />
-				</DrawerContent>
-			</Drawer>
+					<Drawer.Close />
+				</Drawer.Content>
+			</Drawer.Root>
 		</>
 	);
 }

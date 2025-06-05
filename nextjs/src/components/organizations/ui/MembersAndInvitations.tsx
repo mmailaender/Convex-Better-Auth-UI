@@ -1,7 +1,10 @@
+// Primitives
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/ui/tabs';
-import { Members } from '@/components/organizations/ui/Members';
-import { Invitations } from '@/components/organizations/ui/Invitations';
-import InviteMembers from './InviteMembers';
+
+// Components
+import Members from '@/components/organizations/ui/Members';
+import Invitations from '@/components/organizations/ui/Invitations';
+import InviteMembers from '@/components/organizations/ui/InviteMembers';
 
 // API
 import { useQuery } from 'convex/react';

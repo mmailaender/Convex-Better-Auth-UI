@@ -9,15 +9,7 @@ import { api } from '@/convex/_generated/api';
 import { toast } from '@/components/primitives/ui/sonner';
 
 // Components
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-	DialogClose
-} from '@/components/primitives/ui/dialog';
+import * as Dialog from '@/components/primitives/ui/dialog';
 
 // Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
@@ -75,25 +67,21 @@ export default function DeleteOrganization({
 		}
 	};
 
-	const handleCancel = (): void => {
-		setOpen(false);
-	};
-
 	// If user is not an owner, don't render anything
 	if (!isOwner) {
 		return null;
 	}
 
 	return (
-		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
-			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm">
+		<Dialog.Root open={open} onOpenChange={(open) => setOpen(open)}>
+			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm">
 				Delete organization
-			</DialogTrigger>
+			</Dialog.Trigger>
 
-			<DialogContent className="w-[90%] max-w-md">
-				<DialogHeader>
-					<DialogTitle>Delete organization</DialogTitle>
-				</DialogHeader>
+			<Dialog.Content className="w-[90%] max-w-md">
+				<Dialog.Header>
+					<Dialog.Title>Delete organization</Dialog.Title>
+				</Dialog.Header>
 
 				<article>
 					<p className="text-surface-700-300 text-sm">
@@ -102,16 +90,13 @@ export default function DeleteOrganization({
 					</p>
 				</article>
 
-				<DialogFooter>
-					<button type="button" className="btn preset-tonal" onClick={handleCancel}>
-						Cancel
-					</button>
+				<Dialog.Footer>
+					<Dialog.Close className="btn preset-tonal">Cancel</Dialog.Close>
 					<button type="button" className="btn preset-filled-error-500" onClick={handleConfirm}>
 						Confirm
 					</button>
-				</DialogFooter>
-				<DialogClose />
-			</DialogContent>
-		</Dialog>
+				</Dialog.Footer>
+			</Dialog.Content>
+		</Dialog.Root>
 	);
 }

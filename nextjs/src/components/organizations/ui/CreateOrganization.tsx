@@ -16,7 +16,6 @@ import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
-import { DialogFooter } from '@/components/primitives/ui/dialog';
 
 export default function CreateOrganization({
 	onSuccessfulCreate,
@@ -192,11 +191,11 @@ export default function CreateOrganization({
 				</div>
 			</div>
 
-			<DialogFooter>
+			<div className="flex justify-end gap-2 pt-6 md:flex-row">
 				<button type="submit" className="btn preset-filled-primary-500">
 					Create Organization
 				</button>
-			</DialogFooter>
+			</div>
 		</form>
 	);
 }

@@ -1,43 +1,25 @@
+// React
 import { useState, useMemo } from 'react';
 
-// API
+// API Convex
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { FunctionReturnType } from 'convex/server';
 
 // Components
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-	DialogDescription
-} from '@/components/primitives/ui/dialog';
-import {
-	Drawer,
-	DrawerTrigger,
-	DrawerContent,
-	DrawerHeader,
-	DrawerTitle,
-	DrawerFooter
-} from '@/components/primitives/ui/drawer';
+import * as Dialog from '@/components/primitives/ui/dialog';
+import * as Drawer from '@/components/primitives/ui/drawer';
 import { Avatar } from '@skeletonlabs/skeleton-react';
-import {
-	Shield,
-	ShieldCheck,
-	Search,
-	Trash,
-	Edit,
-	Pencil,
-	Crown,
-	ShieldUser,
-	Settings
-} from 'lucide-react';
+import { Search, Trash, Pencil } from 'lucide-react';
 
 // Types
 import { Doc, Id } from '@/convex/_generated/dataModel';
 type Role = Doc<'organizationMembers'>['role'];
+type GetOrganizationMembersReturnType = FunctionReturnType<
+	typeof api.organizations.members.getOrganizationMembers
+>;
+type GetOrganizationMemberReturnType =
+	GetOrganizationMembersReturnType extends Array<infer T> ? T : never;
 
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
@@ -46,13 +28,15 @@ import { toast } from '@/components/primitives/ui/sonner';
 /**
  * Component that displays a list of organization members with role management functionality
  */
-export function Members(): React.ReactNode {
+export default function Members(): React.ReactNode {
 	// State hooks
 	const [selectedUserId, setSelectedUserId] = useState<Id<'users'> | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [selectedMember, setSelectedMember] = useState<any>(null);
+	const [selectedMember, setSelectedMember] = useState<GetOrganizationMemberReturnType | null>(
+		null
+	);
 
 	// Get current organization data
 	const currentUser = useQuery(api.users.getUser);
@@ -140,7 +124,7 @@ export function Members(): React.ReactNode {
 	/**
 	 * Check if current user can edit a member
 	 */
-	const canEditMember = (member: any): boolean => {
+	const canEditMember = (member: GetOrganizationMemberReturnType): boolean => {
 		if (!isOwnerOrAdmin) return false;
 		if (member.user._id === currentUser?._id) return false;
 		if (member.role === 'role_organization_owner') return false;
@@ -162,7 +146,7 @@ export function Members(): React.ReactNode {
 	/**
 	 * Handle member card click
 	 */
-	const handleMemberCardClick = (member: any): void => {
+	const handleMemberCardClick = (member: GetOrganizationMemberReturnType): void => {
 		if (canEditMember(member)) {
 			setSelectedMember(member);
 			setIsDrawerOpen(true);
@@ -332,23 +316,23 @@ export function Members(): React.ReactNode {
 												{isOwnerOrAdmin &&
 													member.user._id !== currentUser._id &&
 													member.role !== 'role_organization_owner' && (
-														<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-															<DialogTrigger
+														<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+															<Dialog.Trigger
 																className="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
 																onClick={() => setSelectedUserId(member.user._id)}
 															>
 																<Trash size={16} opacity={0.7} />
-															</DialogTrigger>
-															<DialogContent className="md:max-w-108">
-																<DialogHeader className="flex-shrink-0">
-																	<DialogTitle>Remove member</DialogTitle>
-																</DialogHeader>
+															</Dialog.Trigger>
+															<Dialog.Content className="md:max-w-108">
+																<Dialog.Header className="flex-shrink-0">
+																	<Dialog.Title>Remove member</Dialog.Title>
+																</Dialog.Header>
 																<article className="flex-shrink-0">
 																	<p className="opacity-60">
 																		Are you sure you want to remove the member {member.user.name}?
 																	</p>
 																</article>
-																<DialogFooter className="flex-shrink-0">
+																<Dialog.Footer className="flex-shrink-0">
 																	<button
 																		type="button"
 																		className="btn preset-tonal"
@@ -363,9 +347,9 @@ export function Members(): React.ReactNode {
 																	>
 																		Confirm
 																	</button>
-																</DialogFooter>
-															</DialogContent>
-														</Dialog>
+																</Dialog.Footer>
+															</Dialog.Content>
+														</Dialog.Root>
 													)}
 											</div>
 										</td>
@@ -378,13 +362,13 @@ export function Members(): React.ReactNode {
 			</div>
 
 			{/* Mobile Drawer */}
-			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-				<DrawerContent>
+			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<Drawer.Content>
 					{selectedMember && (
 						<>
-							<DrawerHeader>
-								<DrawerTitle>Edit Member</DrawerTitle>
-							</DrawerHeader>
+							<Drawer.Header>
+								<Drawer.Title>Edit Member</Drawer.Title>
+							</Drawer.Header>
 							<div className="">
 								{/* Member Info */}
 								<div className="flex items-center gap-3 pt-1 pb-8">
@@ -428,22 +412,22 @@ export function Members(): React.ReactNode {
 
 									{/* Remove Button */}
 									<div className="flex flex-col justify-end">
-										<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-											<DialogTrigger
+										<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+											<Dialog.Trigger
 												className="btn preset-filled-surface-300-700"
 												onClick={() => setSelectedUserId(selectedMember.user._id)}
 											>
 												<Trash size={16} /> Remove
-											</DialogTrigger>
-											<DialogContent className="md:max-w-108">
-												<DialogHeader className="flex-shrink-0">
-													<DialogTitle>Remove member</DialogTitle>
-												</DialogHeader>
-												<DialogDescription>
+											</Dialog.Trigger>
+											<Dialog.Content className="md:max-w-108">
+												<Dialog.Header className="flex-shrink-0">
+													<Dialog.Title>Remove member</Dialog.Title>
+												</Dialog.Header>
+												<Dialog.Description>
 													Are you sure you want to remove the member {selectedMember.user.name}?
-												</DialogDescription>
+												</Dialog.Description>
 
-												<DialogFooter className="flex-shrink-0">
+												<Dialog.Footer className="flex-shrink-0">
 													<button
 														type="button"
 														className="btn preset-tonal"
@@ -458,16 +442,16 @@ export function Members(): React.ReactNode {
 													>
 														Confirm
 													</button>
-												</DialogFooter>
-											</DialogContent>
-										</Dialog>
+												</Dialog.Footer>
+											</Dialog.Content>
+										</Dialog.Root>
 									</div>
 								</div>
 							</div>
 						</>
 					)}
-				</DrawerContent>
-			</Drawer>
+				</Drawer.Content>
+			</Drawer.Root>
 		</div>
 	);
 }

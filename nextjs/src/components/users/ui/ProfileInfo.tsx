@@ -62,13 +62,6 @@ export default function ProfileInfo() {
 		};
 	}, [user?.image]);
 
-	/* ─────────────────────────────────────────────  handlers          */
-	const cancelEdit = () => {
-		setIsDialogOpen(false);
-		setIsDrawerOpen(false);
-		setTimeout(() => setName(user?.name ?? ''), 125);
-	};
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
@@ -145,9 +138,7 @@ export default function ProfileInfo() {
 					/>
 				</div>
 				<Dialog.Footer>
-					<button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
-						Cancel
-					</button>
+					<Dialog.Close className="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
 					<button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit">
 						Save
 					</button>

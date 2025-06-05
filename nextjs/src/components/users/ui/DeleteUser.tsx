@@ -26,13 +26,6 @@ export default function DeleteUser() {
 		}
 	}
 
-	/**
-	 * Handle cancellation of delete confirmation
-	 */
-	function handleCancel() {
-		setDeleteDialogOpen(false);
-	}
-
 	return (
 		<Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
 			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm">
@@ -48,9 +41,7 @@ export default function DeleteUser() {
 				</Dialog.Header>
 
 				<Dialog.Footer>
-					<button type="button" className="btn preset-tonal" onClick={handleCancel}>
-						Cancel
-					</button>
+					<Dialog.Close className="btn preset-tonal">Cancel</Dialog.Close>
 					<button type="button" className="btn preset-filled-error-500" onClick={handleConfirm}>
 						Confirm
 					</button>

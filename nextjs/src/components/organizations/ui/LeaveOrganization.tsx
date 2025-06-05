@@ -5,23 +5,15 @@ import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/convex/_generated/api';
 
-// Components
-import {
-	Dialog,
-	DialogTrigger,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter
-} from '@/components/primitives/ui/dialog';
+// Primitives
+import * as Dialog from '@/components/primitives/ui/dialog';
+import { toast } from '@/components/primitives/ui/sonner';
 
 // Types
 import { Id } from '@/convex/_generated/dataModel';
 
 // Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
-import { toast } from '@/components/primitives/ui/sonner';
-import { DialogDescription } from '@radix-ui/react-dialog';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -100,19 +92,19 @@ export default function LeaveOrganization(): React.ReactNode {
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
-			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm">
+		<Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm">
 				Leave organization
-			</DialogTrigger>
+			</Dialog.Trigger>
 
-			<DialogContent className="md:max-w-108">
-				<DialogHeader>
-					<DialogTitle>Leave organization</DialogTitle>
-				</DialogHeader>
-				<DialogDescription>
+			<Dialog.Content className="md:max-w-108">
+				<Dialog.Header>
+					<Dialog.Title>Leave organization</Dialog.Title>
+				</Dialog.Header>
+				<Dialog.Description>
 					If you leave organization you’ll lose access to all projects and resources. <br /> <br />{' '}
 					As the owner, you must assign a new owner before leaving.
-				</DialogDescription>
+				</Dialog.Description>
 				<div className="mt-8">
 					{isOrgOwner && (
 						<>
@@ -142,7 +134,7 @@ export default function LeaveOrganization(): React.ReactNode {
 						</>
 					)}
 
-					<DialogFooter>
+					<Dialog.Footer>
 						<button className="btn preset-tonal" onClick={() => setIsOpen(false)}>
 							Cancel
 						</button>
@@ -154,9 +146,9 @@ export default function LeaveOrganization(): React.ReactNode {
 						>
 							Confirm
 						</button>
-					</DialogFooter>
+					</Dialog.Footer>
 				</div>
-			</DialogContent>
-		</Dialog>
+			</Dialog.Content>
+		</Dialog.Root>
 	);
 }

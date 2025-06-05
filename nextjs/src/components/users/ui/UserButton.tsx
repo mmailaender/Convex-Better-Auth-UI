@@ -89,7 +89,7 @@ export default function UserButton({
 									<Dialog.Title>Profile</Dialog.Title>
 								</Dialog.Header>
 								<UserProfile />
-								<Dialog.Close />
+								<Dialog.CloseX />
 							</Dialog.Content>
 						</Dialog.Root>
 					</>
