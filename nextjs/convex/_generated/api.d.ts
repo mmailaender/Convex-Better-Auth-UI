@@ -24,6 +24,7 @@ import type * as organizations_invitations_db from "../organizations/invitations
 import type * as organizations_members from "../organizations/members.js";
 import type * as organizations from "../organizations.js";
 import type * as storage from "../storage.js";
+import type * as tests from "../tests.js";
 import type * as users from "../users.js";
 
 /**
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   "organizations/members": typeof organizations_members;
   organizations: typeof organizations;
   storage: typeof storage;
+  tests: typeof tests;
   users: typeof users;
 }>;
 export declare const api: FilterApi<
