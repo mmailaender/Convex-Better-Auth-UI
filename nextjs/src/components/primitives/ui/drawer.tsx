@@ -22,6 +22,19 @@ function Close({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>)
 	return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
+function CloseX({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
+	return (
+		<DrawerPrimitive.Close
+			data-slot="drawer-close"
+			className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:bg-surface-300-700 absolute top-4 right-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+			{...props}
+		>
+			<XIcon />
+			<span className="sr-only">Close</span>
+		</DrawerPrimitive.Close>
+	);
+}
+
 function Overlay({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
 	return (
 		<DrawerPrimitive.Overlay
@@ -57,10 +70,6 @@ function Content({
 			>
 				<div />
 				{children}
-				<DrawerPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground hover:bg-surface-300-700 absolute top-4 right-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-					<XIcon />
-					<span className="sr-only">Close</span>
-				</DrawerPrimitive.Close>
 			</DrawerPrimitive.Content>
 		</Portal>
 	);
@@ -116,12 +125,14 @@ export {
 	Trigger,
 	Portal,
 	Close,
+	CloseX,
 	//
 	Root as Drawer,
 	Portal as DrawerPortal,
 	Overlay as DrawerOverlay,
 	Trigger as DrawerTrigger,
 	Close as DrawerClose,
+	CloseX as DrawerCloseX,
 	Content as DrawerContent,
 	Header as DrawerHeader,
 	Footer as DrawerFooter,

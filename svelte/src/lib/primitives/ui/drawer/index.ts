@@ -9,6 +9,7 @@ import Header from './drawer-header.svelte';
 import Title from './drawer-title.svelte';
 import NestedRoot from './drawer-nested.svelte';
 import Close from './drawer-close.svelte';
+import CloseX from './drawer-close-x.svelte';
 import Trigger from './drawer-trigger.svelte';
 
 const Portal: typeof DrawerPrimitive.Portal = DrawerPrimitive.Portal;
@@ -25,6 +26,7 @@ export {
 	Trigger,
 	Portal,
 	Close,
+	CloseX,
 
 	//
 	Root as Drawer,
@@ -37,5 +39,6 @@ export {
 	Title as DrawerTitle,
 	Trigger as DrawerTrigger,
 	Portal as DrawerPortal,
-	Close as DrawerClose
+	Close as DrawerClose,
+	CloseX as DrawerCloseX
 };

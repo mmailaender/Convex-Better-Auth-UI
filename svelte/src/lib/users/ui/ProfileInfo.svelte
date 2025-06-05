@@ -238,7 +238,7 @@
 						</Dialog.Footer>
 					</div>
 				</form>
-				<Drawer.Close />
+				<Drawer.CloseX />
 			</Drawer.Content>
 		</Drawer.Root>
 	{/if}

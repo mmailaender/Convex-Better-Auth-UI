@@ -208,7 +208,7 @@ export default function ProfileInfo() {
 						<Drawer.Title>Edit name</Drawer.Title>
 					</Drawer.Header>
 					{form}
-					<Drawer.Close />
+					<Drawer.CloseX />
 				</Drawer.Content>
 			</Drawer.Root>
 		</div>
