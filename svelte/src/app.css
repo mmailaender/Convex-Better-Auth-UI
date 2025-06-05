@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
+@import 'tw-animate-css';
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
