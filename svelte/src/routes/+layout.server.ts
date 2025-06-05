@@ -1,4 +1,4 @@
-import { createConvexAuthHandlers } from '@convex-dev/auth/sveltekit/server';
+import { createConvexAuthHandlers } from '@mmailaender/convex-auth-svelte/sveltekit/server';
 import type { LayoutServerLoad } from './$types';
 
 // Create auth handlers - convexUrl is automatically detected from environment

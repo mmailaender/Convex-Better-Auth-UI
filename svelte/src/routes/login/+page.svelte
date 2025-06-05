@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useAuth } from '@convex-dev/auth/sveltekit';
+	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import { page } from '$app/state';
 	const signIn = $derived(useAuth().signIn);
 

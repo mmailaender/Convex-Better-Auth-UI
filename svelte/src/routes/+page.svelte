@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import UserButton from '$lib/users/ui/UserButton.svelte';
 </script>
 
