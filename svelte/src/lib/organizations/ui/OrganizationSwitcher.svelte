@@ -11,7 +11,7 @@
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
-	import { useAuth } from '@convex-dev/auth/sveltekit';
+	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import { api } from '$convex/_generated/api';
 	const client = useConvexClient();
 

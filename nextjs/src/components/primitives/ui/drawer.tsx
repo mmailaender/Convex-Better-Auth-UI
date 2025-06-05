@@ -6,26 +6,23 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 import { cn } from '@/components/lib/utils';
 import { XIcon } from 'lucide-react';
 
-function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
+function Root({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
 	return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
-function DrawerTrigger({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
+function Trigger({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
 	return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
-function DrawerPortal({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
+function Portal({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
 	return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
-function DrawerClose({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
+function Close({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
 	return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
-function DrawerOverlay({
-	className,
-	...props
-}: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
+function Overlay({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
 	return (
 		<DrawerPrimitive.Overlay
 			data-slot="drawer-overlay"
@@ -38,14 +35,14 @@ function DrawerOverlay({
 	);
 }
 
-function DrawerContent({
+function Content({
 	className,
 	children,
 	...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
 	return (
-		<DrawerPortal data-slot="drawer-portal">
-			<DrawerOverlay />
+		<Portal data-slot="drawer-portal">
+			<Overlay />
 			<DrawerPrimitive.Content
 				data-slot="drawer-content"
 				className={cn(
@@ -65,17 +62,17 @@ function DrawerContent({
 					<span className="sr-only">Close</span>
 				</DrawerPrimitive.Close>
 			</DrawerPrimitive.Content>
-		</DrawerPortal>
+		</Portal>
 	);
 }
 
-function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
+function Header({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
 		<div data-slot="drawer-header" className={cn('flex flex-col gap-4', className)} {...props} />
 	);
 }
 
-function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
+function Footer({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
 		<div
 			data-slot="drawer-footer"
@@ -85,7 +82,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
 	);
 }
 
-function DrawerTitle({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Title>) {
+function Title({ className, ...props }: React.ComponentProps<typeof DrawerPrimitive.Title>) {
 	return (
 		<DrawerPrimitive.Title
 			data-slot="drawer-title"
@@ -95,7 +92,7 @@ function DrawerTitle({ className, ...props }: React.ComponentProps<typeof Drawer
 	);
 }
 
-function DrawerDescription({
+function Description({
 	className,
 	...props
 }: React.ComponentProps<typeof DrawerPrimitive.Description>) {
@@ -109,14 +106,25 @@ function DrawerDescription({
 }
 
 export {
-	Drawer,
-	DrawerPortal,
-	DrawerOverlay,
-	DrawerTrigger,
-	DrawerClose,
-	DrawerContent,
-	DrawerHeader,
-	DrawerFooter,
-	DrawerTitle,
-	DrawerDescription
+	Root,
+	Content,
+	Description,
+	Overlay,
+	Footer,
+	Header,
+	Title,
+	Trigger,
+	Portal,
+	Close,
+	//
+	Root as Drawer,
+	Portal as DrawerPortal,
+	Overlay as DrawerOverlay,
+	Trigger as DrawerTrigger,
+	Close as DrawerClose,
+	Content as DrawerContent,
+	Header as DrawerHeader,
+	Footer as DrawerFooter,
+	Title as DrawerTitle,
+	Description as DrawerDescription
 };

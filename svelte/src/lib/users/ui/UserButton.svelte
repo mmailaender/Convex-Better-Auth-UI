@@ -1,6 +1,6 @@
 <script lang="ts">
 	// API
-	import { useAuth } from '@convex-dev/auth/sveltekit';
+	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 

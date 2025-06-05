@@ -9,7 +9,7 @@
 	// API
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { useAuth } from '@convex-dev/auth/sveltekit';
+	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	const client = useConvexClient();
 
 	// Utils
