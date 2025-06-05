@@ -1,6 +1,9 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import { redirect, type Handle } from '@sveltejs/kit';
-import { createConvexAuthHooks, createRouteMatcher } from '@convex-dev/auth/sveltekit/server';
+import {
+	createConvexAuthHooks,
+	createRouteMatcher
+} from '@mmailaender/convex-auth-svelte/sveltekit/server';
 
 const isLoginPage = createRouteMatcher(['/login']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);

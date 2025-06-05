@@ -41,6 +41,26 @@ export const handleAuthRedirect: Handle = async ({ event, resolve }) => {
 export const handle = sequence(handleAuth, handleAuthRedirect);
 ```
 
+6. Testing (local & preview)
+
+Create a test user
+
+```bash
+npx convex run tests:init
+```
+
+Add a AUTH_E2E_TEST_SECRET to your environment variables
+
+```bash
+AUTH_E2E_TEST_SECRET=secret
+```
+
+and do the same on the convex database
+
+```bash
+npx convex env set AUTH_E2E_TEST_SECRET secret
+```
+
 1. Add Social Provider
 2. Add for every social provider you want to use the environment variables `<socialprovider>_CLIENT_ID` and `<socialprovider>_CLIENT_SECRET`
 3. uncomment the social provider you want in `src/lib/auth/social/oauth.ts`

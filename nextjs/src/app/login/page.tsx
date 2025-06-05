@@ -1,6 +1,5 @@
 'use client';
 
-import GitHub from '@auth/core/providers/github';
 import { useAuthActions } from '@convex-dev/auth/react';
 
 import { useSearchParams } from 'next/navigation';
