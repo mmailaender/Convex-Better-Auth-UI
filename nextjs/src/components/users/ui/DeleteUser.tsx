@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-// API
+// API (Convex)
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useAuthActions } from '@convex-dev/auth/react';
@@ -17,25 +17,32 @@ import {
 } from '@/components/primitives/ui/dialog';
 
 export default function DeleteUser() {
-	const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const deleteMutation = useAction(api.users.invalidateAndDeleteUser);
 	const { signOut } = useAuthActions();
 
+	/**
+	 * Handle the delete confirmation action
+	 */
 	async function handleConfirm() {
 		try {
 			await deleteMutation();
 			await signOut();
+			setDeleteDialogOpen(false);
 		} catch (error) {
 			console.error('Error deleting user:', error);
 		}
 	}
 
+	/**
+	 * Handle cancellation of delete confirmation
+	 */
 	function handleCancel() {
-		setDeleteConfirmationOpen(false);
+		setDeleteDialogOpen(false);
 	}
 
 	return (
-		<Dialog open={deleteConfirmationOpen} onOpenChange={setDeleteConfirmationOpen}>
+		<Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
 			<DialogTrigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm">
 				Delete account
 			</DialogTrigger>

@@ -1,11 +1,22 @@
 <script lang="ts">
+	// API (Convex)
 	import { useConvexClient } from 'convex-svelte';
-	import { useAuth } from '@convex-dev/auth/sveltekit';
+	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import { api } from '$convex/_generated/api';
-	import { Modal } from '@skeletonlabs/skeleton-svelte';
 
-	// State for modal
-	let modalOpen: boolean = $state(false);
+	// Components
+	import {
+		Dialog,
+		DialogTrigger,
+		DialogTitle,
+		DialogHeader,
+		DialogDescription,
+		DialogContent,
+		DialogFooter
+	} from '$lib/primitives/ui/dialog';
+
+	// State
+	let deleteDialogOpen: boolean = $state(false);
 
 	const client = useConvexClient();
 	const { signOut } = useAuth();
@@ -17,7 +28,7 @@
 		try {
 			await client.action(api.users.invalidateAndDeleteUser, {});
 			await signOut();
-			modalOpen = false;
+			deleteDialogOpen = false;
 		} catch (error) {
 			console.error('Error deleting user:', error);
 		}
@@ -27,35 +38,27 @@
 	 * Handle cancellation of delete confirmation
 	 */
 	function handleCancel(): void {
-		modalOpen = false;
+		deleteDialogOpen = false;
 	}
 </script>
 
-<Modal
-	open={modalOpen}
-	onOpenChange={(e) => (modalOpen = e.open)}
-	triggerBase="btn preset-faded-surface-50-950 hover:bg-error-200-800 hover:text-error-950-50 h-10 w-full justify-between gap-1 text-sm"
-	contentBase="card bg-surface-100-900 p-4 space-y-4 shadow-xl max-w-screen-sm"
-	backdropClasses="backdrop-blur-sm"
->
-	{#snippet trigger()}
-		Delete account
-	{/snippet}
-
-	{#snippet content()}
-		<header class="flex justify-between">
-			<h2 class="h2">Delete your account</h2>
-		</header>
-		<article>
-			<p class="opacity-60">
+<Dialog bind:open={deleteDialogOpen}>
+	<DialogTrigger
+		class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm"
+		>Delete account</DialogTrigger
+	>
+	<DialogContent>
+		<DialogHeader>
+			<DialogTitle>Delete your account</DialogTitle>
+			<DialogDescription class="text-surface-700-300">
 				Are you sure you want to delete your account? All of your data will be permanently deleted.
-			</p>
-		</article>
-		<footer class="flex justify-end gap-4">
+			</DialogDescription>
+		</DialogHeader>
+		<DialogFooter>
 			<button type="button" class="btn preset-tonal" onclick={handleCancel}> Cancel </button>
 			<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
 				Confirm
 			</button>
-		</footer>
-	{/snippet}
-</Modal>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>
