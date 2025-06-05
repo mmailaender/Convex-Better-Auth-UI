@@ -5,15 +5,7 @@
 	import { api } from '$convex/_generated/api';
 
 	// Components
-	import {
-		Dialog,
-		DialogTrigger,
-		DialogTitle,
-		DialogHeader,
-		DialogDescription,
-		DialogContent,
-		DialogFooter
-	} from '$lib/primitives/ui/dialog';
+	import * as Dialog from '$lib/primitives/ui/dialog';
 
 	// State
 	let deleteDialogOpen: boolean = $state(false);
@@ -42,23 +34,23 @@
 	}
 </script>
 
-<Dialog bind:open={deleteDialogOpen}>
-	<DialogTrigger
+<Dialog.Root bind:open={deleteDialogOpen}>
+	<Dialog.Trigger
 		class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm"
-		>Delete account</DialogTrigger
+		>Delete account</Dialog.Trigger
 	>
-	<DialogContent>
-		<DialogHeader>
-			<DialogTitle>Delete your account</DialogTitle>
-			<DialogDescription class="text-surface-700-300">
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>Delete your account</Dialog.Title>
+			<Dialog.Description class="text-surface-700-300">
 				Are you sure you want to delete your account? All of your data will be permanently deleted.
-			</DialogDescription>
-		</DialogHeader>
-		<DialogFooter>
+			</Dialog.Description>
+		</Dialog.Header>
+		<Dialog.Footer>
 			<button type="button" class="btn preset-tonal" onclick={handleCancel}> Cancel </button>
 			<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
 				Confirm
 			</button>
-		</DialogFooter>
-	</DialogContent>
-</Dialog>
+		</Dialog.Footer>
+	</Dialog.Content>
+</Dialog.Root>

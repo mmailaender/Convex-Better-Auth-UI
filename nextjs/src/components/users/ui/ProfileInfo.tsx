@@ -6,8 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
-// UI / icons
+// Icons
 import { Pencil } from 'lucide-react';
+
+// Primitives
 import { toast } from '@/components/primitives/ui/sonner';
 import {
 	Drawer,
@@ -17,14 +19,7 @@ import {
 	DrawerTrigger,
 	DrawerClose
 } from '@/components/primitives/ui/drawer';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-	DialogTrigger
-} from '@/components/primitives/ui/dialog';
+import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 
 // utils
@@ -156,14 +151,14 @@ export default function ProfileInfo() {
 						onChange={(e) => setName(e.target.value)}
 					/>
 				</div>
-				<DialogFooter>
+				<Dialog.Footer>
 					<button type="button" className="btn preset-tonal w-full md:w-fit" onClick={cancelEdit}>
 						Cancel
 					</button>
 					<button type="submit" className="btn preset-filled-primary-500 w-full md:w-fit">
 						Save
 					</button>
-				</DialogFooter>
+				</Dialog.Footer>
 			</div>
 		</form>
 	);
@@ -188,8 +183,8 @@ export default function ProfileInfo() {
 			</div>
 
 			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
-			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<DialogTrigger
+			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<Dialog.Trigger
 					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 					onClick={() => setIsDialogOpen(true)}
 				>
@@ -200,15 +195,15 @@ export default function ProfileInfo() {
 					<div className="btn preset-filled-surface-200-800 p-2">
 						<Pencil size={16} color="currentColor" />
 					</div>
-				</DialogTrigger>
+				</Dialog.Trigger>
 
-				<DialogContent className="w-full max-w-md">
-					<DialogHeader>
-						<DialogTitle>Edit name</DialogTitle>
-					</DialogHeader>
+				<Dialog.Content className="w-full max-w-md">
+					<Dialog.Header>
+						<Dialog.Title>Edit name</Dialog.Title>
+					</Dialog.Header>
 					{form}
-				</DialogContent>
-			</Dialog>
+				</Dialog.Content>
+			</Dialog.Root>
 
 			{/* Mobile Drawer - shown on mobile, hidden on desktop */}
 			<Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
