@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Components
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
-	import { X, Shield, ShieldCheck, Search } from 'lucide-svelte';
+	import { X, Shield, ShieldCheck, Search } from '@lucide/svelte';
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';

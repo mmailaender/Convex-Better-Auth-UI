@@ -4,7 +4,7 @@
 
 	// Components
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
-	import { UploadCloud, LogIn } from 'lucide-svelte';
+	import { UploadCloud, LogIn } from '@lucide/svelte';
 
 	// API
 	import { useConvexClient } from 'convex-svelte';

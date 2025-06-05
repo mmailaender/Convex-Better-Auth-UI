@@ -10,7 +10,7 @@
 	// Components
 	import { Modal } from '@skeletonlabs/skeleton-svelte';
 	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	import { X } from 'lucide-svelte';
+	import { X } from '@lucide/svelte';
 
 	const roles = createRoles();
 

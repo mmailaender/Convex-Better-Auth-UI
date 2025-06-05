@@ -52,9 +52,9 @@ function getVariantStyles(variant: ToastVariant) {
 
 	switch (variant) {
 		case 'success':
-			return `${baseClasses}  `;
+			return `${baseClasses}`;
 		case 'error':
-			return `${baseClasses} `;
+			return `${baseClasses}`;
 		case 'warning':
 			return `${baseClasses} bg-warning-50-950 text-warning-950-50 border-warning-200-800`;
 		case 'info':

@@ -2,11 +2,19 @@
 	// API
 	import { api } from '$convex/_generated/api';
 	import { useQuery, useConvexClient } from 'convex-svelte';
-	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 	const client = useConvexClient();
 
-	// Components
+	// Icons
+	import { Pencil } from '@lucide/svelte';
+	// Primitives
+	import { toast } from 'svelte-sonner';
+	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+
+	// Utils
+	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { preloadImage } from '$lib/primitives/utils/preloadImage';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';

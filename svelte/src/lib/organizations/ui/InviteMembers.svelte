@@ -1,6 +1,6 @@
 <script lang="ts">
 	// Components
-	import { UserPlus } from 'lucide-svelte';
+	import { UserPlus } from '@lucide/svelte';
 
 	// API
 	import { useConvexClient } from 'convex-svelte';

@@ -9,13 +9,13 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	// Icons
-	import ChevronRight from 'lucide-svelte/icons/chevron-right';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	// Components
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
 
 	// Types
 	import type { ComponentProps } from 'svelte';
-	import { X } from 'lucide-svelte';
+	import { X } from '@lucide/svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
 	type UserResponse = FunctionReturnType<typeof api.users.getUser>;

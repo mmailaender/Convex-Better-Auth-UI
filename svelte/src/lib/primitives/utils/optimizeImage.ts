@@ -1,4 +1,11 @@
-import type { OptimizeImageOptions } from './types';
+export interface OptimizeImageOptions {
+	maxWidth?: number;
+	maxHeight?: number;
+	quality?: number;
+	maxSizeKB?: number;
+	format?: 'webp' | 'jpeg' | 'jpg' | 'png';
+	forceConvert?: boolean;
+}
 
 export async function optimizeImage(file: File, options: OptimizeImageOptions = {}): Promise<File> {
 	// Check if we're in a browser environment
@@ -151,6 +158,3 @@ async function optimizeImageServer(file: File, options: OptimizeImageOptions = {
 		type: `image/${format}`
 	});
 }
-
-// Export type for usage
-export type { OptimizeImageOptions };

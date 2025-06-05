@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TriangleAlert } from 'lucide-svelte';
+	import { TriangleAlert } from '@lucide/svelte';
 	interface Props {
 		successMessage?: string;
 		errorMessage?: string;

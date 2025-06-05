@@ -10,7 +10,7 @@
 	// Components
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { UploadCloud } from 'lucide-svelte';
+	import { UploadCloud } from '@lucide/svelte';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';

@@ -4,7 +4,7 @@
 
 	// Components
 	import { Avatar, Popover, Modal } from '@skeletonlabs/skeleton-svelte';
-	import { ChevronsUpDown, Plus, Settings, X } from 'lucide-svelte';
+	import { ChevronsUpDown, Plus, Settings, X } from '@lucide/svelte';
 	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
 	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
