@@ -9,6 +9,19 @@
 
 @source '../../node_modules/@skeletonlabs/skeleton-react/dist';
 
+@theme {
+	--animate-fade-in-out: fade-in-out 0.3s ease-in-out;
+
+	@keyframes fade-in-out {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+}
+
 @utility input {
 	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border duration-300 ease-in-out;
 }

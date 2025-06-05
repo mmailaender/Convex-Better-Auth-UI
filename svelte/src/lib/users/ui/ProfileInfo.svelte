@@ -10,7 +10,7 @@
 	import { toast } from 'svelte-sonner';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Dialog from '$lib/primitives/ui/dialog';
-	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
@@ -29,34 +29,54 @@
 	const response = useQuery(api.users.getUser, {}, { initialData });
 
 	// State
-	let isEditing: boolean = $state(false);
-	let successMessage: string = $state('');
-	let errorMessage: string = $state('');
-	let isUploading: boolean = $state(false);
+	let isDialogOpen: boolean = $state(false);
+	let isDrawerOpen: boolean = $state(false);
 	let name: string = $state('');
+	let avatarSrc: string = $state('');
+	let isUploading: boolean = $state(false);
 
 	// Derived state
 	const userData = $derived(response.data);
 
-	// Initialize name when user data is available
+	// Initialize state when user data is available
 	$effect(() => {
-		if (userData && name === '') {
-			name = userData.name;
+		if (userData) {
+			if (name === '') {
+				name = userData.name;
+			}
+			if (avatarSrc === '' && userData.image) {
+				avatarSrc = userData.image;
+			}
 		}
 	});
 
-	// Handle toggling edit mode
-	function toggleEdit(): void {
-		isEditing = true;
-		successMessage = '';
-		errorMessage = '';
-	}
+	// Preload new server image when it changes
+	$effect(() => {
+		if (!userData?.image || userData.image === avatarSrc) return;
+
+		let revoked: string | undefined;
+
+		preloadImage(userData.image)
+			.then(() => {
+				if (avatarSrc.startsWith('blob:')) {
+					revoked = avatarSrc;
+				}
+				avatarSrc = userData.image!;
+			})
+			.catch(() => void 0);
+
+		return () => {
+			if (revoked) URL.revokeObjectURL(revoked);
+		};
+	});
 
 	// Handle canceling edit
 	function cancelEdit(): void {
-		isEditing = false;
-		successMessage = '';
-		errorMessage = '';
+		isDialogOpen = false;
+		isDrawerOpen = false;
+		setTimeout(() => {
+			if (userData) name = userData.name;
+		}, 125);
 	}
 
 	// Handle form submission to update profile
@@ -64,15 +84,13 @@
 		event.preventDefault();
 
 		try {
-			await client.mutation(api.users.updateUserName, {
-				name
-			});
-
-			isEditing = false;
-			successMessage = 'Profile updated successfully!';
+			await client.mutation(api.users.updateUserName, { name });
+			isDialogOpen = false;
+			isDrawerOpen = false;
+			toast.success('Profile name updated successfully');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
-			errorMessage = `Failed to update profile: ${errorMsg}`;
+			toast.error(`Failed to update profile: ${errorMsg}`);
 		}
 	}
 
@@ -83,8 +101,6 @@
 
 		try {
 			isUploading = true;
-			errorMessage = '';
-			successMessage = '';
 
 			// Optimize the image before upload
 			const optimizedFile = await optimizeImage(file, {
@@ -93,8 +109,18 @@
 				maxSizeKB: 500,
 				quality: 0.85,
 				format: 'webp',
-				forceConvert: true // Always convert to WebP
+				forceConvert: true
 			});
+
+			const blobUrl = URL.createObjectURL(optimizedFile);
+
+			// Cleanup previous blob
+			if (avatarSrc.startsWith('blob:')) {
+				URL.revokeObjectURL(avatarSrc);
+			}
+
+			// Optimistic UI update
+			avatarSrc = blobUrl;
 
 			// Get a storage upload URL from Convex
 			const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
@@ -102,9 +128,7 @@
 			// Upload the file to Convex storage
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
-				headers: {
-					'Content-Type': optimizedFile.type
-				},
+				headers: { 'Content-Type': optimizedFile.type },
 				body: optimizedFile
 			});
 
@@ -117,76 +141,117 @@
 			const storageId = result.storageId as Id<'_storage'>;
 
 			// Update the user's avatar with the storage ID
-			await client.mutation(api.users.updateAvatar, {
-				storageId
-			});
+			await client.mutation(api.users.updateAvatar, { storageId });
 
-			successMessage = 'Avatar updated successfully!';
+			toast.success('Avatar updated successfully');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
-			errorMessage = `Failed to upload avatar: ${errorMsg}`;
+			toast.error(`Failed to upload avatar: ${errorMsg}`);
+
+			// Revert to server image
+			avatarSrc = userData?.image || '';
 		} finally {
 			isUploading = false;
 		}
 	}
 </script>
 
-<div>
+<div class="flex flex-col gap-6">
 	{#if !userData}
-		<div class="h-16 w-full animate-pulse rounded-md bg-gray-200"></div>
+		<div class="bg-success-200-800 h-16 w-full animate-pulse rounded-md"></div>
 	{:else}
-		<div class="flex flex-col items-center gap-1">
-			<p class="w-full py-2 pl-4 font-semibold">Profile</p>
-			<div class="bg-surface-50-950 flex w-full items-center justify-center rounded-lg p-0 py-4">
-				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div class="group relative flex cursor-pointer flex-col gap-2">
-						<Avatar src={userData.image || ''} name={userData.name} size="size-20" />
-						<span class="text-surface-950-50 text-center text-sm font-semibold hover:underline">
-							Upload
-						</span>
-
-						{#if isUploading}
-							<ProgressRing
-								value={null}
-								size="size-14"
-								meterStroke="stroke-primary-600-400"
-								trackStroke="stroke-primary-50-950"
-							/>
-						{/if}
+		<!-- Avatar + Upload -->
+		<div class="flex items-center justify-start rounded-lg pt-6 pl-0.5">
+			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
+				<div class="group relative flex cursor-pointer flex-col gap-2">
+					<!-- Key swap + fade for cross-fade effect -->
+					<div class="animate-fade-in-out">
+						<Avatar src={avatarSrc || userData.image || ''} name={userData.name} size="size-20" />
 					</div>
-				</FileUpload>
-			</div>
 
-			{#if !isEditing}
-				<button
-					onclick={toggleEdit}
-					class="bg-surface-50-950 flex w-full flex-col items-start rounded-lg px-4 py-2"
-				>
-					<span class="text-surface-600-400 text-xs">Name</span>
-					<span class="text-surface-800-200 font-medium">
-						{userData.name}
-					</span>
-				</button>
-			{:else}
-				<form onsubmit={handleSubmit} class="w-full">
-					<div class="flex flex-col gap-2">
-						<div class="flex gap-2">
-							<input type="text" class="input" bind:value={name} />
-						</div>
-						<div class="flex gap-2">
-							<button type="submit" class="btn preset-filled-primary-500">Save</button>
-							<button type="button" class="btn preset-tonal" onclick={cancelEdit}>Cancel</button>
-						</div>
+					<div
+						class="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+					>
+						<Pencil size={16} color="currentColor" />
 					</div>
-				</form>
-			{/if}
+				</div>
+			</FileUpload>
 		</div>
 
-		{#if successMessage}
-			<p class="text-success-600-400 mt-2">{successMessage}</p>
-		{/if}
-		{#if errorMessage}
-			<p class="text-error-600-400 mt-2">{errorMessage}</p>
-		{/if}
+		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
+		<Dialog.Root bind:open={isDialogOpen}>
+			<Dialog.Trigger
+				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+				onclick={() => (isDialogOpen = true)}
+			>
+				<div class="flex w-full flex-col gap-1 text-left">
+					<span class="text-surface-600-400 text-xs">Name</span>
+					<span class="text-surface-800-200 font-medium">{userData.name}</span>
+				</div>
+				<div class="btn preset-filled-surface-200-800 p-2">
+					<Pencil size={16} color="currentColor" />
+				</div>
+			</Dialog.Trigger>
+
+			<Dialog.Content class="w-full max-w-md">
+				<Dialog.Header>
+					<Dialog.Title>Edit name</Dialog.Title>
+				</Dialog.Header>
+				<form onsubmit={handleSubmit} class="w-full">
+					<div class="flex flex-col">
+						<div class="flex flex-col">
+							<label class="label" for="name-input">Name</label>
+							<input id="name-input" type="text" class="input w-full" bind:value={name} />
+						</div>
+						<Dialog.Footer>
+							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
+								Cancel
+							</button>
+							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
+								Save
+							</button>
+						</Dialog.Footer>
+					</div>
+				</form>
+			</Dialog.Content>
+		</Dialog.Root>
+
+		<!-- Mobile Drawer - shown on mobile, hidden on desktop -->
+		<Drawer.Root bind:open={isDrawerOpen}>
+			<Drawer.Trigger
+				onclick={() => (isDrawerOpen = true)}
+				class="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+			>
+				<div class="flex w-full flex-col gap-1 text-left">
+					<span class="text-surface-600-400 text-xs">Name</span>
+					<span class="text-surface-800-200 font-medium">{userData.name}</span>
+				</div>
+				<div class="btn-icon preset-faded-surface-50-950">
+					<Pencil size={16} color="currentColor" />
+				</div>
+			</Drawer.Trigger>
+			<Drawer.Content>
+				<Drawer.Header>
+					<Drawer.Title>Edit name</Drawer.Title>
+				</Drawer.Header>
+				<form onsubmit={handleSubmit} class="w-full">
+					<div class="flex flex-col">
+						<div class="flex flex-col">
+							<label class="label" for="name-input-mobile">Name</label>
+							<input id="name-input-mobile" type="text" class="input w-full" bind:value={name} />
+						</div>
+						<Dialog.Footer>
+							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
+								Cancel
+							</button>
+							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
+								Save
+							</button>
+						</Dialog.Footer>
+					</div>
+				</form>
+				<Drawer.Close />
+			</Drawer.Content>
+		</Drawer.Root>
 	{/if}
 </div>

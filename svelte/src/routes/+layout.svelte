@@ -10,7 +10,7 @@
 	setupConvexAuth({ getServerState: () => data.authState });
 </script>
 
-<Toaster />
+<Toaster position="top-center" />
 <div class="grid h-screen grid-rows-[auto_1fr]">
 	<header><Navbar /></header>
 	<main>

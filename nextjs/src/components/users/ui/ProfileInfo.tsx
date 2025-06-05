@@ -164,7 +164,7 @@ export default function ProfileInfo() {
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="group relative flex cursor-pointer flex-col gap-2">
 						{/* key swap + fade for cross-fade */}
-						<div key={avatarSrc} className="fade-img">
+						<div key={avatarSrc} className="animate-fade-in-out">
 							<Avatar src={avatarSrc} name={user.name} size="size-20" />
 						</div>
 

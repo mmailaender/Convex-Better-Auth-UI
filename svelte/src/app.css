@@ -9,3 +9,16 @@
 @import '../../authapptheme.css';
 
 @source '../node_modules/@skeletonlabs/skeleton-svelte';
+
+@theme {
+	--animate-fade-in-out: fade-in-out 0.3s ease-in-out;
+
+	@keyframes fade-in-out {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+}
