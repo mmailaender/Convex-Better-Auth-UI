@@ -7,7 +7,7 @@ import { api } from '@/convex/_generated/api';
 
 // Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 
 // Types
 import { Id } from '@/convex/_generated/dataModel';

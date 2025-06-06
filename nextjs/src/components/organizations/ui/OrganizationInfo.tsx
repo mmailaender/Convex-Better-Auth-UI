@@ -13,7 +13,7 @@ import type { Id } from '@/convex/_generated/dataModel';
 import { Pencil } from 'lucide-react';
 
 // Primitives
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 import * as Drawer from '@/components/primitives/ui/drawer';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';

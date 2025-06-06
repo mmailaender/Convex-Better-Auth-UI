@@ -8,7 +8,7 @@ import { Doc } from '@/convex/_generated/dataModel';
 // Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';
 import * as Drawer from '@/components/primitives/ui/drawer';
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 // Icons
 import { Plus } from 'lucide-react';
 

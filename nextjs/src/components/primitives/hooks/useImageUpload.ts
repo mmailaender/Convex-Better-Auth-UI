@@ -4,7 +4,7 @@ import { api } from '@/convex/_generated/api';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 import type { Id } from '@/convex/_generated/dataModel';
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 
 export interface ImageUploadOptions {
 	maxWidth?: number;

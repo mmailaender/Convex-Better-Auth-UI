@@ -37,7 +37,3 @@
 @utility label {
 	@apply mb-1 text-xs font-medium;
 }
-
-[data-sonner-toast] {
-	z-index: 9999 !important;
-}

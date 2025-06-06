@@ -69,15 +69,6 @@
 		}
 	});
 
-	// Handle canceling edit
-	function cancelEdit(): void {
-		isDialogOpen = false;
-		isDrawerOpen = false;
-		setTimeout(() => {
-			if (user) name = user.name;
-		}, 125);
-	}
-
 	// Handle form submission to update profile
 	async function handleSubmit(event: SubmitEvent): Promise<void> {
 		event.preventDefault();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 
 // Components
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';

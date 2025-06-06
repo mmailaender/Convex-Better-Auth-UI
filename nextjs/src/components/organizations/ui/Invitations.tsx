@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 
 // Components
 import * as Dialog from '@/components/primitives/ui/dialog';

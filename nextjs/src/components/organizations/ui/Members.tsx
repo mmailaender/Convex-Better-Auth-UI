@@ -23,7 +23,7 @@ type GetOrganizationMemberReturnType =
 
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import { toast } from '@/components/primitives/ui/sonner';
+import { toast } from 'sonner';
 
 /**
  * Component that displays a list of organization members with role management functionality
