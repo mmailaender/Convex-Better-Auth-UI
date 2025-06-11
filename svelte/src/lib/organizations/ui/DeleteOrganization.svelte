@@ -5,29 +5,37 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
 
-	// Components
-	import { Modal } from '@skeletonlabs/skeleton-svelte';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	import { X } from '@lucide/svelte';
+	/** UI **/
+	// Primitives
+	import { toast } from 'svelte-sonner';
+	import * as Dialog from '$lib/primitives/ui/dialog';
 
 	const roles = createRoles();
 
+	/**
+	 * Component for deleting an organization
+	 * Only available to organization owners
+	 */
 	const { onSuccessfulDelete, redirectTo } = $props<{
+		/**
+		 * Optional callback that will be called when an organization is successfully deleted
+		 */
 		onSuccessfulDelete?: () => void;
+		/**
+		 * Optional redirect URL after successful deletion
+		 */
 		redirectTo?: string;
 	}>();
 
 	// Queries
-	const organizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const activeOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const activeOrganization = $derived(activeOrganizationResponse.data);
 
 	// State
-	let modalOpen: boolean = $state(false);
-	let error: string = $state('');
-
-	// Derived data
-	const activeOrganization = $derived(organizationResponse.data);
+	let dialogOpen: boolean = $state(false);
 
 	/**
 	 * Handle confirmation of organization deletion
@@ -39,8 +47,9 @@
 			await client.mutation(api.organizations.deleteOrganization, {
 				organizationId: activeOrganization._id
 			});
+			dialogOpen = false;
 
-			modalOpen = false;
+			toast.success('Organization deleted successfully');
 
 			// Call the onSuccessfulDelete callback if provided
 			if (onSuccessfulDelete) {
@@ -55,9 +64,9 @@
 			}
 		} catch (err) {
 			if (err instanceof Error) {
-				error = err.message;
+				toast.error(err.message);
 			} else {
-				error = 'Unknown error. Please try again. If it persists, contact support.';
+				toast.error('Unknown error. Please try again. If it persists, contact support.');
 			}
 		}
 	}
@@ -66,52 +75,35 @@
 	 * Handle cancellation of deletion
 	 */
 	function handleCancel(): void {
-		modalOpen = false;
+		dialogOpen = false;
 	}
 </script>
 
 {#if roles.isOwner && activeOrganization}
-	<Modal
-		open={modalOpen}
-		onOpenChange={(e) => (modalOpen = e.open)}
-		triggerBase="btn text-error-500 hover:preset-tonal-error-500"
-		contentBase="card p-4 space-y-4 shadow-xl max-w-screen-sm"
-	>
-		<!-- Delete organization trigger button -->
-		{#snippet trigger()}
-			Delete organization
-		{/snippet}
+	<Dialog.Root bind:open={dialogOpen}>
+		<Dialog.Trigger
+			class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm"
+			>Delete organization</Dialog.Trigger
+		>
 
-		<!-- Modal content -->
-		{#snippet content()}
-			<header class="flex justify-between">
-				<h2 class="h2">Delete organization</h2>
-				<button
-					class="btn-icon preset-tonal size-8 rounded-full"
-					onclick={() => (modalOpen = false)}
-					aria-label="Close"
-				>
-					<X class="size-4" />
-				</button>
-			</header>
+		<Dialog.Content class="w-[90%] max-w-md">
+			<Dialog.Header>
+				<Dialog.Title>Delete organization</Dialog.Title>
+			</Dialog.Header>
 
 			<article>
-				<p class="opacity-60">
+				<p class="text-surface-700-300 text-sm">
 					Are you sure you want to delete the organization {activeOrganization.name}? All
 					organization data will be permanently deleted.
 				</p>
 			</article>
 
-			<footer class="mt-4 flex justify-end gap-4">
-				<button type="button" class="btn preset-tonal" onclick={handleCancel}> Cancel </button>
+			<Dialog.Footer>
+				<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
 				<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
 					Confirm
 				</button>
-			</footer>
-
-			{#if error}
-				<p class="text-error-600-400 mt-2">{error}</p>
-			{/if}
-		{/snippet}
-	</Modal>
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}

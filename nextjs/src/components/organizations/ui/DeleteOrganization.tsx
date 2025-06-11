@@ -1,17 +1,17 @@
 'use client';
 
+// React
 import { useState } from 'react';
+
+/** UI **/
+// Primitives
+import { toast } from 'sonner';
+import * as Dialog from '@/components/primitives/ui/dialog';
 
 // API
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { toast } from 'sonner';
-
-// Components
-import * as Dialog from '@/components/primitives/ui/dialog';
-
-// Hooks
 import { useIsOwner } from '@/components/organizations/api/hooks';
 
 /**
@@ -49,10 +49,12 @@ export default function DeleteOrganization({
 
 			toast.success('Organization deleted successfully');
 
+			// Call the onSuccessfulDelete callback if provided
 			if (onSuccessfulDelete) {
 				onSuccessfulDelete();
 			}
 
+			// Navigate to the specified URL or home by default
 			if (redirectTo) {
 				router.push(redirectTo);
 			} else {
