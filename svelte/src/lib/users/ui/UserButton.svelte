@@ -15,7 +15,6 @@
 
 	// Types
 	import type { ComponentProps } from 'svelte';
-	import { X } from '@lucide/svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
 	type UserResponse = FunctionReturnType<typeof api.users.getUser>;

@@ -13,7 +13,6 @@ import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar } from '@skeletonlabs/skeleton-react';
 // Icons
 import { ChevronRight } from 'lucide-react';
-
 // Components
 import UserProfile from '@/components/users/ui/UserProfile';
 

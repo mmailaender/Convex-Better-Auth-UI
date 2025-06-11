@@ -30,5 +30,20 @@ export default ts.config(
 				parser: ts.parser
 			}
 		}
+	},
+	{
+		files: ['**/*.{js,ts,svelte}'],
+		rules: {
+			// Allow unused variables if they are prefixed with _
+			'no-unused-vars': 'off', // Turn off the base rule
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_',
+					caughtErrorsIgnorePattern: '^_'
+				}
+			]
+		}
 	}
 );
