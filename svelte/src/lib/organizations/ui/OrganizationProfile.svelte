@@ -25,7 +25,6 @@
 	const { onSuccessfulDelete }: OrganizationProfileProps = $props();
 
 	// State
-	let currentTab: string = $state('general');
 	let mobileTab: string = $state('');
 
 	function handleTabChange(value: string) {
