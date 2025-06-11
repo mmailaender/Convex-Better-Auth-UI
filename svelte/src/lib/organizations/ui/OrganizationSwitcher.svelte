@@ -69,21 +69,18 @@
 	const activeOrganization = $derived(activeOrganizationResponse.data);
 
 	// Component state
-	let openSwitcher: boolean = $state(false);
-	let openCreateOrganization: boolean = $state(false);
-	let openOrganizationProfile: boolean = $state(false);
+	let switcherPopoverOpen: boolean = $state(false);
+	let createOrganizationDialogOpen: boolean = $state(false);
+	let organizationProfileDialogOpen: boolean = $state(false);
 
 	// Handler functions
-	function closeSwitcher(): void {
-		openSwitcher = false;
-	}
 
 	function closeCreateOrganization(): void {
-		openCreateOrganization = false;
+		createOrganizationDialogOpen = false;
 	}
 
 	function closeOrganizationProfile(): void {
-		openOrganizationProfile = false;
+		organizationProfileDialogOpen = false;
 	}
 
 	/**
@@ -94,7 +91,7 @@
 			await client.mutation(api.organizations.setActiveOrganization, { organizationId });
 
 			// Close popover and refresh
-			closeSwitcher();
+			switcherPopoverOpen = false;
 			goto(window.location.href, { replaceState: true }); // refresh page
 		} catch (err) {
 			console.error(err);
@@ -102,13 +99,13 @@
 	}
 
 	function openCreateOrgModal(): void {
-		openCreateOrganization = true;
-		closeSwitcher();
+		createOrganizationDialogOpen = true;
+		switcherPopoverOpen = false;
 	}
 
 	function openProfileModal(): void {
-		openOrganizationProfile = true;
-		closeSwitcher();
+		organizationProfileDialogOpen = true;
+		switcherPopoverOpen = false;
 	}
 </script>
 
@@ -122,7 +119,7 @@
 
 	<!-- No organizations - just show the create button -->
 {:else if organizations.length === 0}
-	<Dialog.Root bind:open={openCreateOrganization}>
+	<Dialog.Root bind:open={createOrganizationDialogOpen}>
 		<Dialog.Trigger class="btn variant-soft flex items-center gap-2">
 			<Plus class="size-4" />
 			<span>Create Organization</span>
@@ -141,99 +138,100 @@
 
 	<!-- Has organizations - show the switcher -->
 {:else}
-	<Popover.Root bind:open={openSwitcher}>
-		<Popover.Trigger class="flex items-center gap-2">
-			<Avatar
-				src={activeOrganization?.logo || ''}
-				name={activeOrganization?.name || ''}
-				size="size-6"
-			/>
-			<span class="text-surface-700-300 text-base font-semibold">
-				{activeOrganization?.name}
-			</span>
-			<ChevronsUpDown class="size-3" />
+	<Popover.Root bind:open={switcherPopoverOpen}>
+		<Popover.Trigger
+			class="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-lg border p-1 pr-2 duration-200 ease-in-out"
+		>
+			<div class="flex w-full max-w-64 items-center gap-3 overflow-hidden">
+				<Avatar
+					src={activeOrganization?.logo || ''}
+					name={activeOrganization?.name || ''}
+					size="size-8 shrink-0 rounded-md"
+				/>
+				<span class="text-surface-700-300 truncate text-sm">
+					{activeOrganization?.name}
+				</span>
+			</div>
+			<ChevronsUpDown class="size-4 opacity-40" />
 		</Popover.Trigger>
 		<Popover.Content side={popoverSide} align={popoverAlign}>
-			<ul role="list" class="space-y-1">
-				<li>
+			<div class="flex flex-col gap-1">
+				<div role="list" class="bg-surface-50-950 rounded-base flex flex-col">
 					<div
-						class="rounded-base text-surface-700-300 flex items-center gap-x-3 p-2 text-sm font-semibold"
+						class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6"
 					>
 						<Avatar
 							src={activeOrganization?.logo || ''}
 							name={activeOrganization?.name || ''}
-							size="size-6"
+							size="size-8 shrink-0 rounded-lg"
 						/>
-						<span class="text-surface-700-300 text-base font-semibold">
+						<span class="text-surface-700-300 text-medium w-full truncate text-base">
 							{activeOrganization?.name}
 						</span>
 						{#if activeOrganization?.role === 'role_organization_owner' || activeOrganization?.role === 'role_organization_admin'}
-							<button onclick={openProfileModal} class="btn variant-outline-surface flex gap-2">
+							<button
+								onclick={openProfileModal}
+								class="btn-icon preset-faded-surface-50-950 hover:preset-filled-surface-300-700 flex gap-2"
+							>
 								<Settings class="size-4" />
-								<span class="text-xs">Manage</span>
 							</button>
 						{:else if activeOrganization}
 							<LeaveOrganization />
 						{/if}
 					</div>
-				</li>
 
-				{#each organizations.filter((org) => org && org._id !== activeOrganization?._id) as org}
-					{#if org}
-						<li>
-							<button
-								onclick={() => updateActiveOrg(org._id)}
-								class="group rounded-base text-surface-700-300 hover:text-primary-600-400 hover:bg-surface-100-900 flex w-full gap-x-3 p-2 text-sm font-semibold"
-							>
-								<Avatar src={org.logo || ''} name={org.name} size="size-6" />
-								<span class="text-surface-700-300 text-base font-semibold">
-									{org.name}
-								</span>
-							</button>
-						</li>
-					{/if}
-				{/each}
-
-				<li>
-					<button
-						onclick={openCreateOrgModal}
-						class="btn variant-soft mt-2 flex w-full items-center gap-2"
+					{#each organizations.filter((org) => org && org._id !== activeOrganization?._id) as org}
+						{#if org}
+							<div>
+								<button
+									onclick={() => updateActiveOrg(org._id)}
+									class="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
+								>
+									<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-lg shrink-0" />
+									<span class="text-surface-700-300 truncate text-base">
+										{org.name}
+									</span>
+								</button>
+							</div>
+						{/if}
+					{/each}
+				</div>
+				<button
+					onclick={openCreateOrgModal}
+					class="btn hover:bg-surface-50-950/50 flex w-full items-center justify-start gap-3 bg-transparent p-3"
+				>
+					<div
+						class="bg-surface-200-800 border-surface-300-700 rounded-base flex size-8 shrink-0 items-center justify-center border border-dashed"
 					>
 						<Plus class="size-4" />
-						<span>Create Organization</span>
-					</button>
-				</li>
-			</ul>
+					</div>
+					<span class="text-surface-700-300 text-sm">Create Organization</span>
+				</button>
+			</div>
 		</Popover.Content>
 	</Popover.Root>
 
 	<!-- Create Organization Modal -->
-	<Dialog.Root bind:open={openCreateOrganization}>
-		<Dialog.Content>
-			<div class="relative">
-				<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
-				<button
-					class="btn-icon variant-ghost absolute top-2 right-2"
-					onclick={closeCreateOrganization}
-				>
-					<X class="size-4" />
-				</button>
-			</div>
+	<Dialog.Root bind:open={createOrganizationDialogOpen}>
+		<Dialog.Content class="max-w-xl">
+			<Dialog.Header>
+				<Dialog.Title>Create Organization</Dialog.Title>
+			</Dialog.Header>
+			<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
+			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
 
 	<!-- Organization Profile Modal -->
-	<Dialog.Root bind:open={openOrganizationProfile}>
-		<Dialog.Content>
-			<div class="relative">
-				<OrganizationProfile onSuccessfulDelete={closeOrganizationProfile} />
-				<button
-					class="btn-icon variant-ghost absolute top-2 right-2"
-					onclick={closeOrganizationProfile}
-				>
-					<X class="size-4" />
-				</button>
-			</div>
+	<Dialog.Root bind:open={organizationProfileDialogOpen}>
+		<Dialog.Content
+			class="md:rounded-container h-[100dvh] max-h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl"
+		>
+			<Dialog.Header class="hidden">
+				<Dialog.Title></Dialog.Title>
+			</Dialog.Header>
+			<OrganizationProfile onSuccessfulDelete={closeOrganizationProfile} />
+			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
 {/if}

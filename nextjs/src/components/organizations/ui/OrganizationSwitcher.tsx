@@ -110,7 +110,7 @@ export default function OrganizationSwitcher({
 							{activeOrganization?.name}
 						</span>
 					</div>
-					<ChevronsUpDown className="size-4 opacity-40" color="currentColor" />
+					<ChevronsUpDown className="size-4 opacity-40" />
 				</Popover.Trigger>
 
 				<Popover.Content side={popoverSide} align={popoverAlign}>
@@ -180,6 +180,7 @@ export default function OrganizationSwitcher({
 				</Popover.Content>
 			</Popover.Root>
 
+			{/* Create Organization Modal */}
 			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
 				<Dialog.Content className="max-w-xl">
 					<Dialog.Header>
@@ -190,6 +191,7 @@ export default function OrganizationSwitcher({
 				</Dialog.Content>
 			</Dialog.Root>
 
+			{/* Organization Profile Modal */}
 			<Dialog.Root open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
 				<Dialog.Content className="md:rounded-container h-[100dvh] max-h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl">
 					<Dialog.Header className="hidden">
