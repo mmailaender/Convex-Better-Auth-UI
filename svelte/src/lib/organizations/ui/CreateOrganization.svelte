@@ -106,10 +106,7 @@
 
 			// Upload the logo if one was selected
 			if (logoFile) {
-				// Get a storage upload URL from Convex
 				const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
-
-				// Upload the file to Convex storage
 				const response = await fetch(uploadUrl, {
 					method: 'POST',
 					headers: {
@@ -117,12 +114,7 @@
 					},
 					body: logoFile
 				});
-
-				if (!response.ok) {
-					throw new Error('Failed to upload file');
-				}
-
-				// Get the storage ID from the response
+				if (!response.ok) throw new Error('Failed to upload file');
 				const result = await response.json();
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
@@ -156,7 +148,9 @@
 
 	<!-- Show message for unauthenticated users -->
 {:else if !isAuthenticated}
-	<div class="border-surface-200-800 mx-auto w-full max-w-md rounded-lg border p-6 text-center">
+	<div
+		class="border-surface-200-800 rounded-container mx-auto w-full max-w-md border p-6 text-center"
+	>
 		<LogIn class="text-surface-400-600 mx-auto mb-4 size-10" />
 		<h2 class="mb-2 text-xl font-semibold">Authentication Required</h2>
 		<p class="text-surface-600-400 mb-4">Please sign in to create an organization</p>

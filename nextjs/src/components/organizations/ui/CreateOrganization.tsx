@@ -120,7 +120,7 @@ export default function CreateOrganization({
 
 	if (!isAuthenticated) {
 		return (
-			<div className="border-surface-200-800 mx-auto w-full max-w-md rounded-lg border p-6 text-center">
+			<div className="border-surface-200-800 rounded-container mx-auto w-full max-w-md border p-6 text-center">
 				<LogIn className="text-surface-400-600 mx-auto mb-4 size-10" />
 				<h2 className="mb-2 text-xl font-semibold">Authentication Required</h2>
 				<p className="text-surface-600-400 mb-4">Please sign in to create an organization</p>
