@@ -97,7 +97,14 @@
 		</div>
 		<div class="flex-1">
 			<Tabs.Content value="general" class="flex h-full flex-col">
-				<OrganizationInfo />
+				<div class="h-full">
+					<h6
+						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left"
+					>
+						General settings
+					</h6>
+					<OrganizationInfo />
+				</div>
 				<div class="pt-16">
 					<LeaveOrganization />
 					<DeleteOrganization {onSuccessfulDelete} />
@@ -105,6 +112,11 @@
 			</Tabs.Content>
 			{#if roles.isOwnerOrAdmin}
 				<Tabs.Content value="members">
+					<h6
+						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left"
+					>
+						Members
+					</h6>
 					<MembersAndInvitations />
 				</Tabs.Content>
 				<Tabs.Content value="billing">
@@ -195,10 +207,22 @@
 				</button>
 
 				{#if mobileTab === 'general'}
-					<OrganizationInfo />
+					<div class="h-full">
+						<h6
+							class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left"
+						>
+							General settings
+						</h6>
+						<OrganizationInfo />
+					</div>
 					<DeleteOrganization {onSuccessfulDelete} />
 					<LeaveOrganization />
 				{:else if mobileTab === 'members'}
+					<h6
+						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left"
+					>
+						Members
+					</h6>
 					<MembersAndInvitations />
 				{:else if mobileTab === 'billing'}
 					<h6

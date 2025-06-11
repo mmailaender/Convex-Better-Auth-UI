@@ -14,8 +14,8 @@
 	data-slot="tabs-content"
 	class={cn(
 		'outline-none',
-		'data-[orientation=horizontal]:flex-1',
-		'w-full data-[orientation=vertical]:p-6',
+		'group-data-[orientation=horizontal]:flex-1',
+		'w-full group-data-[orientation=vertical]:p-6',
 		className
 	)}
 	{...restProps}
