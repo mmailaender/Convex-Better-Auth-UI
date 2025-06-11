@@ -1,10 +1,14 @@
 <script lang="ts">
-	// Navigation
+	// SvelteKit
 	import { goto } from '$app/navigation';
 
-	// Components
-	import { Avatar, Popover, Modal } from '@skeletonlabs/skeleton-svelte';
+	// Primitives
+	import * as Popover from '$lib/primitives/ui/popover';
+	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { Avatar } from '@skeletonlabs/skeleton-svelte';
+	// Icons
 	import { ChevronsUpDown, Plus, Settings, X } from '@lucide/svelte';
+	// Components
 	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
 	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
@@ -18,8 +22,8 @@
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import type { ComponentProps } from 'svelte';
-	type PopoverProps = ComponentProps<typeof Popover>;
-	type PlacementType = NonNullable<PopoverProps['positioning']>['placement'];
+	type PopoverProps = ComponentProps<typeof Popover.Content>;
+
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.getActiveOrganization
@@ -30,10 +34,14 @@
 
 	// Props
 	const {
-		popoverPlacement = 'bottom-end',
+		popoverSide = 'bottom',
+		popoverAlign = 'end',
 		initialData
 	}: {
-		popoverPlacement?: PlacementType;
+		/** Side the popover appears on relative to the trigger */
+		popoverSide?: PopoverProps['side'];
+		/** Alignment of the popover relative to the trigger */
+		popoverAlign?: PopoverProps['align'];
 		initialData?: {
 			userOrganizations: UserOrganizationsResponse;
 			activeOrganization: ActiveOrganizationResponse;
@@ -114,18 +122,13 @@
 
 	<!-- No organizations - just show the create button -->
 {:else if organizations.length === 0}
-	<Modal
-		open={openCreateOrganization}
-		onOpenChange={(e) => (openCreateOrganization = e.open)}
-		triggerBase="btn variant-soft flex items-center gap-2"
-		contentBase="card bg-surface-100-900 relative max-w-screen-sm space-y-4 p-4 shadow-xl"
-	>
-		{#snippet trigger()}
+	<Dialog.Root bind:open={openCreateOrganization}>
+		<Dialog.Trigger class="btn variant-soft flex items-center gap-2">
 			<Plus class="size-4" />
 			<span>Create Organization</span>
-		{/snippet}
+		</Dialog.Trigger>
 
-		{#snippet content()}
+		<Dialog.Content>
 			<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
 			<button
 				class="btn-icon variant-ghost absolute top-2 right-2"
@@ -133,19 +136,13 @@
 			>
 				<X class="size-4" />
 			</button>
-		{/snippet}
-	</Modal>
+		</Dialog.Content>
+	</Dialog.Root>
 
 	<!-- Has organizations - show the switcher -->
 {:else}
-	<Popover
-		open={openSwitcher}
-		onOpenChange={(e) => (openSwitcher = e.open)}
-		positioning={{ placement: popoverPlacement }}
-		triggerBase="flex items-center gap-2"
-		contentBase="floating card bg-surface-200-800 max-w-100 p-4"
-	>
-		{#snippet trigger()}
+	<Popover.Root bind:open={openSwitcher}>
+		<Popover.Trigger class="flex items-center gap-2">
 			<Avatar
 				src={activeOrganization?.logo || ''}
 				name={activeOrganization?.name || ''}
@@ -155,9 +152,8 @@
 				{activeOrganization?.name}
 			</span>
 			<ChevronsUpDown class="size-3" />
-		{/snippet}
-
-		{#snippet content()}
+		</Popover.Trigger>
+		<Popover.Content side={popoverSide} align={popoverAlign}>
 			<ul role="list" class="space-y-1">
 				<li>
 					<div
@@ -208,16 +204,12 @@
 					</button>
 				</li>
 			</ul>
-		{/snippet}
-	</Popover>
+		</Popover.Content>
+	</Popover.Root>
 
 	<!-- Create Organization Modal -->
-	<Modal
-		open={openCreateOrganization}
-		onOpenChange={(e) => (openCreateOrganization = e.open)}
-		contentBase="card p-4 w-full max-w-md shadow-xl"
-	>
-		{#snippet content()}
+	<Dialog.Root bind:open={openCreateOrganization}>
+		<Dialog.Content>
 			<div class="relative">
 				<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
 				<button
@@ -227,17 +219,12 @@
 					<X class="size-4" />
 				</button>
 			</div>
-		{/snippet}
-	</Modal>
+		</Dialog.Content>
+	</Dialog.Root>
 
 	<!-- Organization Profile Modal -->
-	<Modal
-		open={openOrganizationProfile}
-		onOpenChange={(e) => (openOrganizationProfile = e.open)}
-		contentBase="card bg-surface-100-900 relative space-y-4 p-4 shadow-xl"
-		backdropBase="bg-surface-50-950/75 fixed top-0 right-0 bottom-0 left-0 flex items-center justify-center p-4 backdrop-blur-sm"
-	>
-		{#snippet content()}
+	<Dialog.Root bind:open={openOrganizationProfile}>
+		<Dialog.Content>
 			<div class="relative">
 				<OrganizationProfile onSuccessfulDelete={closeOrganizationProfile} />
 				<button
@@ -247,6 +234,6 @@
 					<X class="size-4" />
 				</button>
 			</div>
-		{/snippet}
-	</Modal>
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}

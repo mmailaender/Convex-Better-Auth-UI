@@ -1,21 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { ComponentProps, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Components
+// Primitives
 import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
+import { Avatar } from '@skeletonlabs/skeleton-react';
+// Icons
+import { ChevronsUpDown, Plus, Settings } from 'lucide-react';
+// Components
 import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
 import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
-import { ChevronsUpDown, Plus, Settings } from 'lucide-react';
-import { Avatar } from '@skeletonlabs/skeleton-react';
 
 // API
 import { useQuery, useMutation, useConvexAuth } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
+
+// Types
+type PopoverProps = ComponentProps<typeof Popover.Content>;
 
 /**
  * Organization switcher component that allows switching between organizations,
@@ -26,9 +31,9 @@ export default function OrganizationSwitcher({
 	popoverAlign = 'end'
 }: {
 	/** Side the popover appears on relative to the trigger */
-	popoverSide?: 'top' | 'right' | 'bottom' | 'left';
+	popoverSide?: PopoverProps['side'];
 	/** Alignment of the popover relative to the trigger */
-	popoverAlign?: 'start' | 'end' | 'center';
+	popoverAlign?: PopoverProps['align'];
 }) {
 	const router = useRouter();
 	const { isLoading, isAuthenticated } = useConvexAuth();

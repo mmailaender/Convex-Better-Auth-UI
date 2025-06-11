@@ -1,9 +1,4 @@
 <script lang="ts">
-	// API
-	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
-	import { useQuery } from 'convex-svelte';
-	import { api } from '$convex/_generated/api';
-
 	// Primitives
 	import * as Popover from '$lib/primitives/ui/popover';
 	import * as Dialog from '$lib/primitives/ui/dialog';
@@ -12,6 +7,11 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	// Components
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
+
+	// API
+	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { useQuery } from 'convex-svelte';
+	import { api } from '$convex/_generated/api';
 
 	// Types
 	import type { ComponentProps } from 'svelte';

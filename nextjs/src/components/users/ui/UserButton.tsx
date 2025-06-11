@@ -1,11 +1,7 @@
 'use client';
 
+// React
 import { ComponentProps, useState } from 'react';
-
-// API
-import { useAuthActions } from '@convex-dev/auth/react';
-import { useQuery, Authenticated, Unauthenticated } from 'convex/react';
-import { api } from '@/convex/_generated/api';
 
 // Primitive
 import * as Popover from '@/components/primitives/ui/popover';
@@ -16,6 +12,11 @@ import { ChevronRight } from 'lucide-react';
 // Components
 import UserProfile from '@/components/users/ui/UserProfile';
 
+// API
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useQuery, Authenticated, Unauthenticated } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
 
@@ -23,7 +24,9 @@ export default function UserButton({
 	popoverSide = 'bottom',
 	popoverAlign = 'end'
 }: {
+	/** Side the popover appears on relative to the trigger */
 	popoverSide?: PopoverProps['side'];
+	/** Alignment of the popover relative to the trigger */
 	popoverAlign?: PopoverProps['align'];
 }) {
 	// Auth
