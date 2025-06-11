@@ -150,14 +150,16 @@ export default function CreateOrganization({
 		<form onSubmit={handleSubmit} className="mx-auto w-full">
 			<div className="my-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl transition-colors">
+					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
 						<Avatar
 							src={logo}
 							name={name.length > 0 ? name : 'My Organization'}
-							size="size-20 rounded-xl"
+							background="bg-surface-400-600"
+							size="size-20"
+							rounded="rounded-base"
 						/>
-						<div className="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
-							<Pencil size={16} color="currentColor" />
+						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
+							<Pencil className="size-4" />
 						</div>
 					</div>
 				</FileUpload>

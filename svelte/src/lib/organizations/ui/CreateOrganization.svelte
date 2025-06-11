@@ -4,7 +4,7 @@
 
 	/** UI **/
 	// Icons
-	import { UploadCloud, LogIn } from '@lucide/svelte';
+	import { UploadCloud, LogIn, Pencil } from '@lucide/svelte';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
@@ -163,7 +163,7 @@
 <!-- Show loading state -->
 {#if isLoading}
 	<div class="mx-auto w-full max-w-md animate-pulse">
-		<div class="placeholder mb-4 h-8 w-64"></div>
+		<div class="placeholder mb-4 h-8 w-full"></div>
 		<div class="placeholder mb-4 h-40 w-full"></div>
 		<div class="placeholder mb-2 h-10 w-full"></div>
 		<div class="placeholder h-10 w-full"></div>
@@ -179,60 +179,57 @@
 
 	<!-- Show the form for authenticated users -->
 {:else}
-	<form onsubmit={handleSubmit} class="mx-auto w-full max-w-md">
-		<h2 class="mb-4 text-2xl font-bold">Create Organization</h2>
-
-		<div class="mb-4">
-			<label for="logo" class="mb-1 block font-medium">Logo</label>
+	<form onsubmit={handleSubmit} class="mx-auto w-full">
+		<div class="my-6">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div
-					class="group border-surface-600-400 hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed transition-colors"
+					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 				>
-					{#if isUploading}
-						<ProgressRing
-							value={null}
-							size="size-14"
-							meterStroke="stroke-primary-600-400"
-							trackStroke="stroke-primary-50-950"
-						/>
-					{:else}
-						<Avatar src={logo} name={name.length > 0 ? name : 'My Organization'} size="size-16" />
-						<div
-							class="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
-						>
-							<UploadCloud class="size-6 text-white" />
-						</div>
-					{/if}
+					<Avatar
+						src={logo}
+						name={name.length > 0 ? name : 'My Organization'}
+						background="bg-surface-400-600"
+						size="size-20"
+						rounded="rounded-base"
+					/>
+					<div
+						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+					>
+						<Pencil className="size-4" />
+					</div>
 				</div>
 			</FileUpload>
 		</div>
 
-		<div class="mb-4">
-			<label for="name" class="mb-1 block font-medium">Name</label>
-			<input
-				type="text"
-				id="name"
-				value={name}
-				oninput={handleNameInput}
-				required
-				class="input w-full"
-				placeholder="My Organization"
-			/>
+		<div class="flex flex-col gap-2">
+			<div class="mb-4">
+				<label for="name" class="label">Name</label>
+				<input
+					type="text"
+					id="name"
+					value={name}
+					oninput={handleNameInput}
+					required
+					class="input w-full"
+					placeholder="My Organization..."
+				/>
+			</div>
+			<div class="mb-4">
+				<label for="slug" class="label">Slug URL</label>
+				<input
+					type="text"
+					id="slug"
+					value={slug}
+					oninput={(e) => (slug = (e.target as HTMLInputElement).value)}
+					required
+					class="input w-full"
+					placeholder="my-organization"
+				/>
+			</div>
 		</div>
 
-		<div class="mb-4">
-			<label for="slug" class="mb-1 block font-medium">Slug URL</label>
-			<input
-				type="text"
-				id="slug"
-				value={slug}
-				oninput={(e) => (slug = (e.target as HTMLInputElement).value)}
-				required
-				class="input w-full"
-				placeholder="my-organization"
-			/>
+		<div class="flex justify-end gap-2 pt-6 md:flex-row">
+			<button type="submit" class="btn preset-filled-primary-500">Create Organization</button>
 		</div>
-
-		<button type="submit" class="btn variant-filled-primary w-full"> Create Organization </button>
 	</form>
 {/if}
