@@ -45,7 +45,6 @@
 	let slug: string = $state('');
 	let logo: string = $state('');
 	let logoFile: File | null = $state(null);
-	let isUploading: boolean = $state(false);
 
 	/**
 	 * Generates a URL-friendly slug from the provided input string
@@ -71,8 +70,6 @@
 		if (!file) return;
 
 		try {
-			isUploading = true;
-
 			// Optimize the image but don't upload yet
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
@@ -90,8 +87,6 @@
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to process logo: ${message}`);
-		} finally {
-			isUploading = false;
 		}
 	}
 
@@ -107,7 +102,6 @@
 		}
 
 		try {
-			isUploading = true;
 			let logoStorageId: Id<'_storage'> | undefined = undefined;
 
 			// Upload the logo if one was selected
@@ -133,29 +127,20 @@
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
-			// Create the organization with Convex
+			// Create the organization
 			await client.mutation(api.organizations.createOrganization, {
 				name,
 				slug,
 				logoId: logoStorageId
 			});
-
 			toast.success('Organization created successfully!');
-
 			// Call the onSuccessfulCreate callback if provided
-			if (props.onSuccessfulCreate) {
-				props.onSuccessfulCreate();
-			}
-
+			if (props.onSuccessfulCreate) props.onSuccessfulCreate();
 			// Navigate to the specified URL
-			if (props.redirectTo) {
-				goto(props.redirectTo);
-			}
+			if (props.redirectTo) goto(props.redirectTo);
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${message}`);
-		} finally {
-			isUploading = false;
 		}
 	}
 </script>

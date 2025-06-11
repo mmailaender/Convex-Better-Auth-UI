@@ -63,32 +63,10 @@ export default function CreateOrganization({
 			const previewUrl = URL.createObjectURL(optimizedFile);
 			setLogo(previewUrl);
 			setLogoFile(optimizedFile);
-
-			const uploadUrl = await generateUploadUrl();
-			const response = await fetch(uploadUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': optimizedFile.type
-				},
-				body: optimizedFile
-			});
-
-			if (!response.ok) throw new Error('Failed to upload file');
-			const result = await response.json();
-			const logoStorageId = result.storageId as Id<'_storage'>;
-
-			toast.success('Logo uploaded successfully');
-
-			if (name && slug) {
-				await createOrganization({ name, slug, logoId: logoStorageId });
-				toast.success('Organization created with uploaded logo');
-				if (onSuccessfulCreate) onSuccessfulCreate();
-				if (redirectTo) router.push(redirectTo);
-			} else {
-			}
+			toast.success('Logo ready for upload!');
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			toast.error(`Failed to upload and save logo: ${errorMessage}`);
+			toast.error(`Failed to process logo: ${errorMessage}`);
 		}
 	};
 
@@ -103,6 +81,7 @@ export default function CreateOrganization({
 		try {
 			let logoStorageId: Id<'_storage'> | undefined;
 
+			// Upload the logo if one was selected
 			if (logoFile) {
 				const uploadUrl = await generateUploadUrl();
 				const response = await fetch(uploadUrl, {
@@ -115,9 +94,12 @@ export default function CreateOrganization({
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
+			// Create the organization
 			await createOrganization({ name, slug, logoId: logoStorageId });
 			toast.success('Organization created successfully');
+			// Call the onSuccessfulCreate callback if provided
 			if (onSuccessfulCreate) onSuccessfulCreate();
+			// Navigate to the specified URL
 			if (redirectTo) router.push(redirectTo);
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
