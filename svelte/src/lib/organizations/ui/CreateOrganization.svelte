@@ -1,19 +1,22 @@
 <script lang="ts">
-	// Navigation
+	// SvelteKit
 	import { goto } from '$app/navigation';
 
-	// Components
-	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	/** UI **/
+	// Icons
 	import { UploadCloud, LogIn } from '@lucide/svelte';
+	// Primitives
+	import { toast } from 'svelte-sonner';
+	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+
+	// Utils
+	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 
 	// API
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	const client = useConvexClient();
-
-	// Utils
-	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
@@ -43,8 +46,6 @@
 	let logo: string = $state('');
 	let logoFile: File | null = $state(null);
 	let isUploading: boolean = $state(false);
-	let errorMessage: string = $state('');
-	let successMessage: string = $state('');
 
 	/**
 	 * Generates a URL-friendly slug from the provided input string
@@ -71,8 +72,6 @@
 
 		try {
 			isUploading = true;
-			errorMessage = '';
-			successMessage = '';
 
 			// Optimize the image but don't upload yet
 			const optimizedFile = await optimizeImage(file, {
@@ -87,10 +86,10 @@
 			// Store the optimized file for later upload
 			logoFile = optimizedFile;
 			logo = URL.createObjectURL(optimizedFile); // For preview
-			successMessage = 'Logo ready for upload!';
+			toast.success('Logo ready for upload!');
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
-			errorMessage = `Failed to process logo: ${message}`;
+			toast.error(`Failed to process logo: ${message}`);
 		} finally {
 			isUploading = false;
 		}
@@ -103,7 +102,7 @@
 		event.preventDefault();
 
 		if (!name || !slug) {
-			errorMessage = 'Name and slug are required';
+			toast.error('Name and slug are required');
 			return;
 		}
 
@@ -141,7 +140,7 @@
 				logoId: logoStorageId
 			});
 
-			successMessage = 'Organization created successfully!';
+			toast.success('Organization created successfully!');
 
 			// Call the onSuccessfulCreate callback if provided
 			if (props.onSuccessfulCreate) {
@@ -154,7 +153,7 @@
 			}
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
-			errorMessage = `Failed to create organization: ${message}`;
+			toast.error(`Failed to create organization: ${message}`);
 		} finally {
 			isUploading = false;
 		}
@@ -235,12 +234,5 @@
 		</div>
 
 		<button type="submit" class="btn variant-filled-primary w-full"> Create Organization </button>
-
-		{#if successMessage}
-			<p class="text-success-600-400 mt-2">{successMessage}</p>
-		{/if}
-		{#if errorMessage}
-			<p class="text-error-600-400 mt-2">{errorMessage}</p>
-		{/if}
 	</form>
 {/if}

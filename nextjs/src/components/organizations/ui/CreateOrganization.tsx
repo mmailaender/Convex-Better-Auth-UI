@@ -1,17 +1,20 @@
+// React
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 
-// Components
-import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+/** UI **/
+// Icons
 import { LogIn, Pencil } from 'lucide-react';
+// Primitives
+import { toast } from 'sonner';
+import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+
+// Utils
+import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // API
 import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-
-// Utils
-import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
