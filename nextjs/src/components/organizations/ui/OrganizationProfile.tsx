@@ -100,12 +100,24 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 			</button>
 			{mobileTab === 'general' && (
 				<>
-					<OrganizationInfo />
+					<div className="h-full">
+						<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left">
+							General settings
+						</h6>
+						<OrganizationInfo />
+					</div>
 					<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
 					<LeaveOrganization />
 				</>
 			)}
-			{mobileTab === 'members' && <MembersAndInvitations />}
+			{mobileTab === 'members' && (
+				<>
+					<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left">
+						Members
+					</h6>
+					<MembersAndInvitations />
+				</>
+			)}
 			{mobileTab === 'billing' && (
 				<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left">
 					Billing
@@ -125,7 +137,12 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 				<div className="w-56">{navigation}</div>
 				<div className="flex-1">
 					<Tabs.Content value="general" className="flex h-full flex-col">
-						<OrganizationInfo />
+						<div className="h-full">
+							<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left">
+								General settings
+							</h6>
+							<OrganizationInfo />
+						</div>
 						<div className="pt-16">
 							<LeaveOrganization />
 							<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
@@ -134,6 +151,9 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 					{isOwnerOrAdmin && (
 						<>
 							<Tabs.Content value="members">
+								<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left">
+									Members
+								</h6>
 								<MembersAndInvitations />
 							</Tabs.Content>
 							<Tabs.Content value="billing">

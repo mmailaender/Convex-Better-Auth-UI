@@ -257,74 +257,64 @@ export default function OrganizationInfo() {
 	);
 
 	return (
-		<div className="h-full">
-			<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left">
-				General settings
-			</h6>
-
-			<div className="flex flex-col items-start gap-6 pt-6">
-				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
-						<div key={logoSrc} className="fade-img">
-							<Avatar
-								src={logoSrc}
-								name={orgData.name || 'Organization'}
-								size="size-20 rounded-xl"
-							/>
-						</div>
-
-						<div className="btn-icon preset-filled-surface-300-700 border-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
-							<Pencil size={16} color="currentColor" />
-						</div>
+		<div className="flex flex-col items-start gap-6 pt-6">
+			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
+				<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
+					<div key={logoSrc} className="fade-img">
+						<Avatar src={logoSrc} name={orgData.name || 'Organization'} size="size-20 rounded-xl" />
 					</div>
-				</FileUpload>
 
-				{/* Desktop Dialog - hidden on mobile, shown on desktop */}
-				<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-					<Dialog.Trigger
-						className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-						onClick={toggleDialogEdit}
-					>
-						<div className="flex w-full flex-col gap-1 text-left">
-							<span className="text-surface-600-400 text-xs">Organization name</span>
-							<span className="text-surface-800-200 font-medium">{orgData.name}</span>
-						</div>
-						<div className="btn preset-filled-surface-200-800 p-2">
-							<Pencil size={16} color="currentColor" />
-						</div>
-					</Dialog.Trigger>
+					<div className="btn-icon preset-filled-surface-300-700 border-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
+						<Pencil size={16} color="currentColor" />
+					</div>
+				</div>
+			</FileUpload>
 
-					<Dialog.Content className="md:max-w-108">
-						<Dialog.Header>
-							<Dialog.Title>Edit Organization</Dialog.Title>
-						</Dialog.Header>
-						{form}
-					</Dialog.Content>
-				</Dialog.Root>
+			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
+			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<Dialog.Trigger
+					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+					onClick={toggleDialogEdit}
+				>
+					<div className="flex w-full flex-col gap-1 text-left">
+						<span className="text-surface-600-400 text-xs">Organization name</span>
+						<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+					</div>
+					<div className="btn preset-filled-surface-200-800 p-2">
+						<Pencil size={16} color="currentColor" />
+					</div>
+				</Dialog.Trigger>
 
-				{/* Mobile Drawer - shown on mobile, hidden on desktop */}
-				<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-					<Drawer.Trigger
-						onClick={toggleDrawerEdit}
-						className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
-					>
-						<div className="flex w-full flex-col gap-1 text-left">
-							<span className="text-surface-600-400 text-xs">Organization name</span>
-							<span className="text-surface-800-200 font-medium">{orgData.name}</span>
-						</div>
-						<div className="btn-icon preset-filled-surface-200-800">
-							<Pencil size={16} color="currentColor" />
-						</div>
-					</Drawer.Trigger>
+				<Dialog.Content className="md:max-w-108">
+					<Dialog.Header>
+						<Dialog.Title>Edit Organization</Dialog.Title>
+					</Dialog.Header>
+					{form}
+				</Dialog.Content>
+			</Dialog.Root>
 
-					<Drawer.Content>
-						<Drawer.Header>
-							<Drawer.Title>Edit Organization</Drawer.Title>
-						</Drawer.Header>
-						{form}
-					</Drawer.Content>
-				</Drawer.Root>
-			</div>
+			{/* Mobile Drawer - shown on mobile, hidden on desktop */}
+			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+				<Drawer.Trigger
+					onClick={toggleDrawerEdit}
+					className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+				>
+					<div className="flex w-full flex-col gap-1 text-left">
+						<span className="text-surface-600-400 text-xs">Organization name</span>
+						<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+					</div>
+					<div className="btn-icon preset-filled-surface-200-800">
+						<Pencil size={16} color="currentColor" />
+					</div>
+				</Drawer.Trigger>
+
+				<Drawer.Content>
+					<Drawer.Header>
+						<Drawer.Title>Edit Organization</Drawer.Title>
+					</Drawer.Header>
+					{form}
+				</Drawer.Content>
+			</Drawer.Root>
 		</div>
 	);
 }
