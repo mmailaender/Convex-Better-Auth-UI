@@ -15,9 +15,12 @@ import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 // API
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 
-interface OrganizationProfileProps {
+type OrganizationProfileProps = {
+	/**
+	 * Optional callback that will be called when an organization is successfully deleted
+	 */
 	onSuccessfulDelete?: () => void;
-}
+};
 
 export default function OrganizationProfile({ onSuccessfulDelete }: OrganizationProfileProps) {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
