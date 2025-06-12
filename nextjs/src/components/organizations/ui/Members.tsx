@@ -219,7 +219,7 @@ export default function Members(): React.ReactNode {
 									<span className="text-surface-700-300 text-sm">{member.user.email}</span>
 								</div>
 							</div>
-							{canEditMember(member) && <Pencil size={16} opacity={0.6} />}
+							{canEditMember(member) && <Pencil className="size-4 opacity-60" />}
 						</div>
 					))}
 				</div>
@@ -321,7 +321,7 @@ export default function Members(): React.ReactNode {
 																className="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
 																onClick={() => setSelectedUserId(member.user._id)}
 															>
-																<Trash size={16} opacity={0.7} />
+																<Trash className="size-4 opacity-70" />
 															</Dialog.Trigger>
 															<Dialog.Content className="md:max-w-108">
 																<Dialog.Header className="flex-shrink-0">
@@ -419,7 +419,7 @@ export default function Members(): React.ReactNode {
 												className="btn preset-filled-surface-300-700"
 												onClick={() => setSelectedUserId(selectedMember.user._id)}
 											>
-												<Trash size={16} /> Remove
+												<Trash className="size-4" /> Remove
 											</Dialog.Trigger>
 											<Dialog.Content className="md:max-w-108">
 												<Dialog.Header className="flex-shrink-0">

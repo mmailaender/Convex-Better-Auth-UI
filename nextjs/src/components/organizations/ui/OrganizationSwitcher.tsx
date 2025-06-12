@@ -78,7 +78,7 @@ export default function OrganizationSwitcher({
 		return (
 			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
 				<Dialog.Trigger className="btn preset-tonal flex items-center gap-2">
-					<Plus size={16} />
+					<Plus className="size-4" />
 					<span>Create Organization</span>
 				</Dialog.Trigger>
 				<Dialog.Content>

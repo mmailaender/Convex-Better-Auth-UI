@@ -180,7 +180,7 @@
 					<span class="text-surface-800-200 font-medium">{user.name}</span>
 				</div>
 				<div class="btn preset-filled-surface-200-800 p-2">
-					<Pencil size={16} color="currentColor" />
+					<Pencil class="size-4" />
 				</div>
 			</Dialog.Trigger>
 
@@ -216,7 +216,7 @@
 					<span class="text-surface-800-200 font-medium">{user.name}</span>
 				</div>
 				<div class="btn-icon preset-faded-surface-50-950">
-					<Pencil size={16} color="currentColor" />
+					<Pencil class="size-4" />
 				</div>
 			</Drawer.Trigger>
 			<Drawer.Content>

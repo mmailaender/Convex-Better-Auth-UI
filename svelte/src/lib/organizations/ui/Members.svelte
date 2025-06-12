@@ -256,7 +256,7 @@
 							</div>
 						</div>
 						{#if canEditMember(member)}
-							<Pencil size={16} opacity={0.6} />
+							<Pencil class="size-4 opacity-60" />
 						{/if}
 					</div>
 				{/each}
@@ -362,7 +362,7 @@
 														class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
 														onclick={() => (selectedUserId = member.user._id)}
 													>
-														<Trash size={16} opacity={0.7} />
+														<Trash className="size-4 opacity-70" />
 													</Dialog.Trigger>
 													<Dialog.Content class="md:max-w-108">
 														<Dialog.Header class="flex-shrink-0">
@@ -456,7 +456,7 @@
 									class="btn preset-filled-surface-300-700"
 									onclick={() => (selectedUserId = selectedMember!.user._id)}
 								>
-									<Trash size={16} /> Remove
+									<Trash class="size-4" /> Remove
 								</Dialog.Trigger>
 								<Dialog.Content class="md:max-w-108">
 									<Dialog.Header class="flex-shrink-0">
