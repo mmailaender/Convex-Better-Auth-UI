@@ -17,7 +17,7 @@
 		const redirectUrl =
 			redirectParam ??
 			page.url.searchParams.get('redirectTo') ??
-			(page.url.pathname.includes('/login') ? '/' : page.url.pathname);
+			(page.url.pathname.includes('/signin') ? '/' : page.url.pathname);
 
 		void signIn('github', { redirectTo: redirectUrl });
 	}

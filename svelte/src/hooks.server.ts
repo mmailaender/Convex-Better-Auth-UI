@@ -5,7 +5,7 @@ import {
 	createRouteMatcher
 } from '@mmailaender/convex-auth-svelte/sveltekit/server';
 
-const isLoginPage = createRouteMatcher(['/login']);
+const isLoginPage = createRouteMatcher(['/signin']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
 
 // Create auth hooks
@@ -24,10 +24,10 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 	if (isInvitationAcceptRoute(event.url.pathname)) {
 		const isAuthenticated = await isAuthenticatedPromise(event);
 		if (!isAuthenticated) {
-			// If not authenticated, redirect to login with return URL
+			// If not authenticated, redirect to signin with return URL
 			return redirect(
 				307,
-				`/login?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`
+				`/signin?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`
 			);
 		}
 		return resolve(event);

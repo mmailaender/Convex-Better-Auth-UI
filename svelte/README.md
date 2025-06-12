@@ -13,7 +13,7 @@ const config = {
 };
 ```
 
-4. Create /login page
+4. Create /signin page
 5. Add handleAuthRedirect function to hooks.server.ts
 
 ```ts
@@ -23,7 +23,7 @@ import { createConvexAuthHooks, createRouteMatcher } from '@convex-dev/auth/svel
 
 const { handleAuth, isAuthenticated: isAuthenticatedPromise } = createConvexAuthHooks();
 
-const isSignInRoute = createRouteMatcher('/login');
+const isSignInRoute = createRouteMatcher('/signin');
 
 export const handleAuthRedirect: Handle = async ({ event, resolve }) => {
 	if (isSignInRoute(event.url.pathname)) {

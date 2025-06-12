@@ -7,7 +7,7 @@ import {
 import { fetchMutation } from 'convex/nextjs';
 import { NextResponse } from 'next/server';
 
-const isLoginPage = createRouteMatcher(['/login']);
+const isLoginPage = createRouteMatcher(['/signin']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
@@ -22,10 +22,10 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 		const isAuthenticated = await convexAuth.isAuthenticated();
 
 		if (!isAuthenticated) {
-			// If not authenticated, redirect to login with return URL
+			// If not authenticated, redirect to signin with return URL
 			const url = new URL(request.url);
 			return NextResponse.redirect(
-				new URL(`/login?redirectTo=${encodeURIComponent(url.pathname + url.search)}`, request.url)
+				new URL(`/signin?redirectTo=${encodeURIComponent(url.pathname + url.search)}`, request.url)
 			);
 		}
 

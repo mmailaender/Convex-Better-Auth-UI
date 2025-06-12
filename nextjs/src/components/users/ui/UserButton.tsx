@@ -100,7 +100,7 @@ export default function UserButton({
 				)}
 			</Authenticated>
 			<Unauthenticated>
-				<a href="/login" className="btn preset-filled-primary-500">
+				<a href="/signin" className="btn preset-filled-primary-500">
 					Sign in
 				</a>
 			</Unauthenticated>

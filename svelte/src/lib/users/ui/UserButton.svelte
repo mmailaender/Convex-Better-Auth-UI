@@ -102,5 +102,5 @@
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
 {:else}
-	<a href="/login" class="btn preset-filled-primary-500">Sign in</a>
+	<a href="/signin" class="btn preset-filled-primary-500">Sign in</a>
 {/if}
