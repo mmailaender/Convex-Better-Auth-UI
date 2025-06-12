@@ -7,6 +7,7 @@
 		"dev:backend": "npx convex dev",
 		"dev": "concurrently --kill-others --prefix-colors blue,yellow --names 'svelte,convex' 'pnpm dev:frontend' 'pnpm dev:backend'",
 		"build": "vite build",
+		"build:production": "npx convex deploy --cmd='vite build'",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
