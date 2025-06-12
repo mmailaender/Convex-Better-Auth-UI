@@ -1,0 +1,22 @@
+# Stack
+
+- TypeScript,
+- Svelte 5 (with Runes),
+- SvelteKit 2,
+- Tailwind v4,
+- Skeleton v3 (https://next.skeleton.dev/),
+- Convex
+
+Remember the following:
+Event handlers don't have colons in them anymore. on:click => onclick
+
+# General Code Style & Formatting
+
+- Always declare the type of each variable and function (parameters and return value).
+- Never use the type `any`.
+- Create necessary types.
+- Use JSDoc to document public classes and methods.
+
+# Convex
+
+- Follow the convex rules ai_rules/convex_rules.txt
