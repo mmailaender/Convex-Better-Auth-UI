@@ -12,7 +12,7 @@ import { Doc } from '@/convex/_generated/dataModel';
 // API Types
 type Role = Doc<'organizationMembers'>['role'];
 
-export default function InviteMembers() {
+export default function InviteMembers({ onSuccess }: { onSuccess?: () => void }) {
 	const [emailInput, setEmailInput] = useState('');
 	const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -45,6 +45,9 @@ export default function InviteMembers() {
 				const msg = `Sent ${successful.length} invitation(s) to: ${successful.map((r) => r.email).join(', ')}`;
 				toast.success(msg);
 				setEmailInput('');
+				if (onSuccess) {
+					onSuccess();
+				}
 			}
 
 			if (failed.length > 0) {

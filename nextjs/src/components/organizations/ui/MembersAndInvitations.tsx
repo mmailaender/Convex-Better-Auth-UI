@@ -14,11 +14,19 @@ import InviteMembers from '@/components/organizations/ui/InviteMembers';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { useState } from 'react';
 
 export default function MembersAndInvitations() {
 	const members = useQuery(api.organizations.members.getOrganizationMembers);
 	const invitations = useQuery(api.organizations.invitations.db.getInvitations);
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const [inviteMembersDialogOpen, setInviteMembersDialogOpen] = useState(false);
+	const [inviteMembersDrawerOpen, setInviteMembersDrawerOpen] = useState(false);
+
+	const handleInviteMembersSuccess = () => {
+		setInviteMembersDialogOpen(false);
+		setInviteMembersDrawerOpen(false);
+	};
 
 	return (
 		<Tabs.Root defaultValue="members">
@@ -41,7 +49,7 @@ export default function MembersAndInvitations() {
 				</Tabs.List>
 				{isOwnerOrAdmin && (
 					<>
-						<Dialog.Root>
+						<Dialog.Root open={inviteMembersDialogOpen} onOpenChange={setInviteMembersDialogOpen}>
 							<Dialog.Trigger className="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex">
 								<Plus className="size-5" />
 								<span>Invite members</span>
@@ -50,11 +58,11 @@ export default function MembersAndInvitations() {
 								<Dialog.Header>
 									<Dialog.Title>Invite new members</Dialog.Title>
 								</Dialog.Header>
-								<InviteMembers />
+								<InviteMembers onSuccess={handleInviteMembersSuccess} />
 								<Dialog.CloseX />
 							</Dialog.Content>
 						</Dialog.Root>
-						<Drawer.Root>
+						<Drawer.Root open={inviteMembersDrawerOpen} onOpenChange={setInviteMembersDrawerOpen}>
 							<Drawer.Trigger className="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden">
 								<Plus className="size-5" /> Invite members
 							</Drawer.Trigger>
@@ -62,7 +70,7 @@ export default function MembersAndInvitations() {
 								<Drawer.Header>
 									<Drawer.Title>Invite new members</Drawer.Title>
 								</Drawer.Header>
-								<InviteMembers />
+								<InviteMembers onSuccess={handleInviteMembersSuccess} />
 								<Drawer.CloseX />
 							</Drawer.Content>
 						</Drawer.Root>

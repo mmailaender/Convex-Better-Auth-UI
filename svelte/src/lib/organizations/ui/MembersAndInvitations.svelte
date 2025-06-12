@@ -50,6 +50,16 @@
 	// Derived data
 	const members = $derived(membersResponse.data);
 	const invitations = $derived(invitationsResponse.data);
+
+	// State
+	let inviteMembersDialogOpen = $state(false);
+	let inviteMembersDrawerOpen = $state(false);
+
+	// Handlers
+	function handleInviteMembersSuccess() {
+		inviteMembersDialogOpen = false;
+		inviteMembersDrawerOpen = false;
+	}
 </script>
 
 <Tabs.Root value="members">
@@ -73,7 +83,7 @@
 			{/if}
 		</Tabs.List>
 		{#if roles.isOwnerOrAdmin}
-			<Dialog.Root>
+			<Dialog.Root bind:open={inviteMembersDialogOpen}>
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
 				>
@@ -84,11 +94,11 @@
 					<Dialog.Header>
 						<Dialog.Title>Invite new members</Dialog.Title>
 					</Dialog.Header>
-					<InviteMembers />
+					<InviteMembers onSuccess={handleInviteMembersSuccess} />
 					<Dialog.CloseX />
 				</Dialog.Content>
 			</Dialog.Root>
-			<Drawer.Root>
+			<Drawer.Root bind:open={inviteMembersDrawerOpen}>
 				<Drawer.Trigger
 					class="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden"
 				>
@@ -98,19 +108,20 @@
 					<Drawer.Header>
 						<Drawer.Title>Invite new members</Drawer.Title>
 					</Drawer.Header>
-					<InviteMembers />
+					<InviteMembers onSuccess={handleInviteMembersSuccess} />
 					<Drawer.CloseX />
 				</Drawer.Content>
 			</Drawer.Root>
 		{/if}
 	</div>
 
-	<Tabs.Content value="members">
+	<Tabs.Content value="members" class="!p-0">
 		<Members />
 	</Tabs.Content>
 
 	{#if roles.isOwnerOrAdmin}
-		<Tabs.Content value="invitations">
+		<!-- TODO: Remove the !p-0 once https://github.com/huntabyte/bits-ui/issues/1570 is fixed -->
+		<Tabs.Content value="invitations" class="!p-0">
 			<Invitations />
 		</Tabs.Content>
 	{/if}

@@ -3,19 +3,17 @@ import { useState, useMemo } from 'react';
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { toast } from 'sonner';
+import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 
-// Components
+// Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';
+import { toast } from 'sonner';
 // Icons
 import { Search } from 'lucide-react';
 
 // Types
 import { Doc, Id } from '@/convex/_generated/dataModel';
 type Role = Doc<'organizationMembers'>['role'];
-
-// Hooks
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 
 /**
  * Component that displays a list of organization invitations with revoke functionality
@@ -98,12 +96,12 @@ export default function Invitations(): React.ReactNode {
 			{/* Search Section - Fixed at top */}
 			<div className="flex flex-shrink-0 items-center gap-3 py-4">
 				<div className="relative flex-1">
-					<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center">
+					<div className="pointer-events-none absolute inset-y-0 flex items-center pl-2">
 						<Search className="text-surface-400-600 size-4" />
 					</div>
 					<input
 						type="text"
-						className="input w-hug w-full !border-0 !border-transparent pl-6 text-sm"
+						className="input w-hug w-full !border-0 !border-transparent pl-8 text-sm"
 						placeholder="Search invitations..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}

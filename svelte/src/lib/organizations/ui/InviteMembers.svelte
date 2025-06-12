@@ -26,6 +26,9 @@
 	let selectedRole: Role = $state('role_organization_member');
 	let isProcessing: boolean = $state(false);
 
+	// Props
+	let { onSuccess }: { onSuccess?: () => void } = $props();
+
 	/**
 	 * Handles the submission of the invitation form
 	 */
@@ -65,6 +68,9 @@
 					.join(', ')}`;
 				toast.success(msg);
 				emailInput = '';
+				if (onSuccess) {
+					onSuccess();
+				}
 			}
 
 			if (failed.length > 0) {

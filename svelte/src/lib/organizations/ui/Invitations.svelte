@@ -1,13 +1,16 @@
 <script lang="ts">
-	// Components
-	import { Modal } from '@skeletonlabs/skeleton-svelte';
-	import { X, Shield, ShieldCheck, Search } from '@lucide/svelte';
+	// Primitives
+	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { toast } from 'svelte-sonner';
+	// Icons
+	import { Search } from '@lucide/svelte';
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { createRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
+	const roles = createRoles();
 
 	// Types
 	import type { Doc, Id } from '$convex/_generated/dataModel';
@@ -26,6 +29,7 @@
 		{},
 		{ initialData }
 	);
+	const invitations = $derived(invitationsResponse.data);
 
 	// State
 	let errorMessage: string = $state('');
@@ -33,10 +37,6 @@
 	let selectedInvitationId: Id<'invitations'> | null = $state(null);
 	let searchQuery: string = $state('');
 	let revokeModalOpen: boolean = $state(false);
-
-	// Derived data
-	const invitations = $derived(invitationsResponse.data);
-	const roles = createRoles();
 
 	/**
 	 * Filter invitations based on search query
@@ -81,12 +81,14 @@
 			errorMessage = '';
 			successMessage = 'Invitation revoked successfully!';
 			revokeModalOpen = false;
+			toast.success('Invitation revoked successfully');
 		} catch (err) {
 			successMessage = '';
 			errorMessage =
 				err instanceof Error
 					? err.message
 					: 'Unknown error. Please try again. If it persists, contact support.';
+			toast.error(errorMessage);
 		}
 	}
 
@@ -99,23 +101,19 @@
 	}
 </script>
 
-{#if invitations}
-	<div>
-		{#if errorMessage}
-			<p class="text-error-500">{errorMessage}</p>
-		{/if}
-		{#if successMessage}
-			<p class="text-success-500">{successMessage}</p>
-		{/if}
-
-		<div class="mb-4 flex items-center gap-3">
+{#if !invitations}
+	<div>Loading invitations...</div>
+{:else}
+	<div class="flex h-full flex-col">
+		<!-- Search Section - Fixed at top -->
+		<div class="flex flex-shrink-0 items-center gap-3 py-4">
 			<div class="relative flex-1">
-				<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+				<div class="pointer-events-none absolute inset-y-0 flex items-center pl-2">
 					<Search class="text-surface-400-600 size-4" />
 				</div>
 				<input
 					type="text"
-					class="input w-full pl-10"
+					class="input w-hug w-full !border-0 !border-transparent pl-8 text-sm"
 					placeholder="Search invitations..."
 					value={searchQuery}
 					onchange={handleSearchChange}
@@ -123,110 +121,126 @@
 			</div>
 		</div>
 
-		{#if invitations.length === 0 && !searchQuery}
-			<div class="text-surface-600-400 p-8 text-center">
-				<p>No pending invitations.</p>
-			</div>
-		{:else if filteredInvitations.length === 0 && searchQuery}
-			<div class="text-surface-600-400 p-8 text-center">
-				<p>No invitations match your search.</p>
-			</div>
-		{:else}
-			<table class="table caption-bottom">
-				<thead>
-					<tr class="border-surface-300-700 border-b">
-						<th class="p-2 text-left">Email</th>
-						<th class="p-2 text-left">Role</th>
-						<th class="p-2 text-left">Invited By</th>
-						{#if roles.isOwnerOrAdmin}
-							<th class="p-2 text-right">Actions</th>
-						{/if}
-					</tr>
-				</thead>
-				<tbody>
-					{#each filteredInvitations as invitation (invitation._id)}
-						<tr class="border-surface-300-700 border-b">
-							<td class="p-2">{invitation.email}</td>
-							<td class="p-2">
-								<div class="flex items-center">
-									{#if invitation.role === 'role_organization_owner'}
-										<ShieldCheck class="text-primary-500 mr-1 size-4" />
-										<span class="font-medium">Owner</span>
-									{:else if invitation.role === 'role_organization_admin'}
-										<Shield class="text-primary-400 mr-1 size-4" />
-										<span class="font-medium">Admin</span>
-									{:else}
-										<span>Member</span>
+		<!-- Table Section - Scrollable area -->
+		<div class="min-h-0 flex-1">
+			{#if invitations.length === 0 && !searchQuery}
+				<div class="text-surface-600-400 p-8 text-center">
+					<p>No pending invitations.</p>
+				</div>
+			{:else if filteredInvitations.length === 0 && searchQuery}
+				<div class="text-surface-600-400 p-8 text-center">
+					<p>No invitations match your search.</p>
+				</div>
+			{:else}
+				<div>
+					<!-- Table container with controlled height and scroll -->
+					<div
+						class="max-h-[calc(90vh-12rem)] overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
+					>
+						<table class="table w-full !table-fixed">
+							<thead
+								class="sm:bg-surface-200-800 bg-surface-100-900 border-surface-300-700 sticky top-0 z-20 border-b"
+							>
+								<tr>
+									<th class="text-surface-700-300 !w-64 p-2 !pl-0 text-left text-xs"> Email </th>
+									<th class="text-surface-700-300 hidden !w-32 p-2 text-left text-xs sm:table-cell">
+										Role
+									</th>
+									<th class="text-surface-700-300 hidden !w-24 p-2 text-left text-xs sm:table-cell">
+										Invited By
+									</th>
+									{#if roles.isOwnerOrAdmin}
+										<th class="!w-20 p-2 text-right"></th>
 									{/if}
-								</div>
-							</td>
-							<td class="p-2">{invitation.invitedBy.name}</td>
-							{#if roles.isOwnerOrAdmin}
-								<td class="p-2 text-right">
-									<Modal
-										open={revokeModalOpen}
-										onOpenChange={(e) => (revokeModalOpen = e.open)}
-										triggerBase="btn text-error-500 hover:preset-tonal-error-500"
-										contentBase="card bg-surface-100-900 max-w-(--breakpoint-sm) space-y-4 p-4 shadow-xl"
-									>
-										<!-- Modal Trigger -->
-										{#snippet trigger()}
-											<button
-												onclick={() => {
-													selectedInvitationId = invitation._id;
-													revokeModalOpen = true;
-												}}
-											>
-												Revoke
-											</button>
-										{/snippet}
-
-										<!-- Modal Content -->
-										{#snippet content()}
-											<header class="flex justify-between">
-												<h2 class="h2">Revoke invitation</h2>
-												<button
-													class="btn-icon preset-tonal size-8 rounded-full"
-													onclick={() => (revokeModalOpen = false)}
-													aria-label="Close"
-												>
-													<X class="size-4" />
-												</button>
-											</header>
-											<article>
-												<p class="opacity-60">
-													Are you sure you want to revoke the invitation sent to {invitation.email}?
-												</p>
-											</article>
-											<footer class="flex justify-end gap-4">
-												<button
-													type="button"
-													class="btn preset-tonal"
-													onclick={() => (revokeModalOpen = false)}
-												>
-													Cancel
-												</button>
-												<button
-													type="button"
-													class="btn preset-filled-error-400-600"
-													onclick={handleRevokeInvitation}
-												>
-													Confirm
-												</button>
-											</footer>
-											{#if errorMessage}
-												<p class="text-error-600-400">{errorMessage}</p>
-											{/if}
-										{/snippet}
-									</Modal>
-								</td>
-							{/if}
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{/if}
+								</tr>
+							</thead>
+							<tbody>
+								{#each filteredInvitations as invitation (invitation._id)}
+									<tr class="!border-surface-300-700 !border-t">
+										<!-- Email -->
+										<td class="!w-64 !max-w-64 !truncate !py-3 !pl-0">
+											<span class="truncate font-medium">{invitation.email}</span>
+										</td>
+										<!-- Role -->
+										<td class="!text-surface-700-300 hidden !w-32 sm:table-cell">
+											<div class="flex items-center">
+												{#if invitation.role === 'role_organization_owner'}
+													<span
+														class="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2"
+													>
+														Owner
+													</span>
+												{:else if invitation.role === 'role_organization_admin'}
+													<span
+														class="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2"
+													>
+														Admin
+													</span>
+												{:else}
+													<span
+														class="badge preset-filled-surface-300-700 border-surface-400-600 h-6 border px-2"
+													>
+														Member
+													</span>
+												{/if}
+											</div>
+										</td>
+										<!-- Invited By -->
+										<td class="!text-surface-700-300 hidden !h-fit !w-24 !truncate sm:table-cell">
+											{invitation.invitedBy.name}
+										</td>
+										<!-- Actions -->
+										<td class="!w-20">
+											<div class="flex justify-end">
+												{#if roles.isOwnerOrAdmin}
+													<Dialog.Root bind:open={revokeModalOpen}>
+														<Dialog.Trigger
+															class="btn btn-sm preset-filled-surface-300-700"
+															onclick={() => {
+																selectedInvitationId = invitation._id;
+																revokeModalOpen = true;
+															}}
+														>
+															Revoke
+														</Dialog.Trigger>
+														<Dialog.Content class="md:max-w-108">
+															<Dialog.Header class="flex-shrink-0">
+																<Dialog.Title>Revoke invitation</Dialog.Title>
+															</Dialog.Header>
+															<article class="flex-shrink-0">
+																<p class="opacity-60">
+																	Are you sure you want to revoke the invitation sent to{' '}
+																	{invitation.email}?
+																</p>
+															</article>
+															<Dialog.Footer class="flex-shrink-0">
+																<button
+																	type="button"
+																	class="btn preset-tonal"
+																	onclick={() => (revokeModalOpen = false)}
+																>
+																	Cancel
+																</button>
+																<button
+																	type="button"
+																	class="btn preset-filled-error-500"
+																	onclick={handleRevokeInvitation}
+																>
+																	Confirm
+																</button>
+															</Dialog.Footer>
+														</Dialog.Content>
+													</Dialog.Root>
+												{/if}
+											</div>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
-{:else}
-	<div>Loading invitations...</div>
 {/if}
