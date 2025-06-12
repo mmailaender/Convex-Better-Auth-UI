@@ -3,23 +3,36 @@
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	const client = useConvexClient();
 
-	const roles = createRoles();
-
-	// Components
-	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
-	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { UploadCloud } from '@lucide/svelte';
-
-	// Types
+	// API Types
 	import type { Id } from '$convex/_generated/dataModel';
-	import { type FileChangeDetails } from '@zag-js/file-upload';
 	import type { FunctionReturnType } from 'convex/server';
+
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.getActiveOrganization
 	>;
 	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+
+	const client = useConvexClient();
+	const roles = createRoles();
+
+	// UI Components
+	// Icons
+	import { Pencil } from '@lucide/svelte';
+
+	// Primitives
+	import { toast } from 'svelte-sonner';
+	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
+
+	// Primitive Types
+	import { type FileChangeDetails } from '@zag-js/file-upload';
+
+	// Utils
+	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { preloadImage } from '$lib/primitives/utils/preloadImage';
+	import { onMount } from 'svelte';
 
 	// Props
 	let {
@@ -36,13 +49,13 @@
 	);
 
 	// State
-	let isEditing: boolean = $state(false);
-	let success: string = $state('');
-	let error: string = $state('');
+	let isDialogOpen: boolean = $state(false);
+	let isDrawerOpen: boolean = $state(false);
 	let isUploading: boolean = $state(false);
-	let logoFile: File | null = $state(null);
-	let logoPreview: string = $state('');
-	let profileData = $state({
+
+	let formState = $state({ name: '', slug: '' });
+
+	let orgData = $state({
 		organizationId: '' as Id<'organizations'>,
 		name: '',
 		slug: '',
@@ -50,137 +63,159 @@
 		logoId: undefined as Id<'_storage'> | undefined
 	});
 
+	// Single source of truth for what the UI shows; never undefined
+	let logoSrc: string = $state('');
+
+	// Stable ref with whatever is currently shown
+	let shownLogoRef: string = $state('');
+
 	// Derived data
 	const user = $derived(userResponse.data);
 	const activeOrganization = $derived(organizationResponse.data);
 
-	// Update profile data when activeOrganization changes
+	// Update shownLogoRef when logoSrc changes
 	$effect(() => {
-		if (activeOrganization) {
-			profileData = {
-				organizationId: activeOrganization._id,
-				name: activeOrganization.name,
-				slug: activeOrganization.slug,
-				logo: activeOrganization.logo || '',
-				logoId: activeOrganization.logoId
-			};
-			logoPreview = activeOrganization.logo || '';
+		shownLogoRef = logoSrc;
+	});
+
+	// Initialize logoSrc when activeOrganization first loads
+	$effect(() => {
+		if (activeOrganization && logoSrc === '') {
+			logoSrc = activeOrganization.logo ?? '';
 		}
 	});
 
-	/**
-	 * Toggles edit mode for organization profile
-	 */
-	function toggleEdit(): void {
+	// Handle new logo from Convex only after it is pre-loaded
+	$effect(() => {
+		if (!activeOrganization) return;
+
+		if (!activeOrganization.logo || activeOrganization.logo === shownLogoRef) {
+			// Just keep org data in sync
+			orgData = {
+				organizationId: activeOrganization._id,
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || '',
+				logo: activeOrganization.logo || '',
+				logoId: activeOrganization.logoId
+			};
+			formState = {
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || ''
+			};
+			return;
+		}
+
+		let revoked: string | undefined;
+
+		preloadImage(activeOrganization.logo)
+			.then(() => {
+				if (shownLogoRef.startsWith('blob:')) revoked = shownLogoRef;
+				logoSrc = activeOrganization.logo!;
+			})
+			.catch(() => void 0);
+
+		// Cleanup function equivalent
+		return () => {
+			if (revoked) URL.revokeObjectURL(revoked);
+		};
+	});
+
+	// Cleanup any leftover blob on component destroy
+	onMount(() => {
+		return () => {
+			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
+		};
+	});
+
+	// Handlers
+	function toggleDialogEdit(): void {
 		if (!roles.isOwnerOrAdmin) return;
-		isEditing = true;
-		success = '';
-		error = '';
-		// Reset logo preview to current logo when entering edit mode
-		logoPreview = activeOrganization?.logo || '';
-		logoFile = null;
+		isDialogOpen = true;
 	}
 
-	/**
-	 * Cancels edit mode without saving changes
-	 */
+	function toggleDrawerEdit(): void {
+		if (!roles.isOwnerOrAdmin) return;
+		isDrawerOpen = true;
+	}
+
 	function cancelEdit(): void {
-		isEditing = false;
-		success = '';
-		error = '';
-		logoFile = null;
-		// Reset logo preview when canceling
-		logoPreview = activeOrganization?.logo || '';
+		isDialogOpen = false;
+		isDrawerOpen = false;
+		formState = { name: orgData.name, slug: orgData.slug };
 	}
 
-	/**
-	 * Handles file selection for organization logo but doesn't upload yet
-	 */
 	async function handleFileChange(details: FileChangeDetails): Promise<void> {
 		const file = details.acceptedFiles.at(0);
 		if (!file) return;
 
 		try {
 			isUploading = true;
-			error = '';
-			success = '';
 
-			// Optimize the image but don't upload yet
-			const optimizedFile = await optimizeImage(file, {
+			const optimised = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
 				quality: 0.85,
 				format: 'webp',
-				forceConvert: true // Always convert to WebP
+				forceConvert: true
 			});
 
-			// Store the optimized file for later upload
-			logoFile = optimizedFile;
-			logoPreview = URL.createObjectURL(optimizedFile); // For preview
-			success = 'Logo ready for upload!';
-		} catch (err: unknown) {
-			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			error = `Failed to process logo: ${errorMessage}`;
+			const newLogoUrl = URL.createObjectURL(optimised);
+
+			// Clean up prior blob
+			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
+
+			// Optimistic UI swap
+			logoSrc = newLogoUrl;
+
+			const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
+			const res = await fetch(uploadUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': optimised.type },
+				body: optimised
+			});
+			if (!res.ok) throw new Error('Failed to upload file');
+
+			const { storageId } = await res.json();
+			const logoStorageId = storageId as Id<'_storage'>;
+
+			await client.mutation(api.organizations.updateOrganizationProfile, {
+				organizationId: orgData.organizationId,
+				name: orgData.name,
+				slug: orgData.slug,
+				logoId: logoStorageId
+			});
+
+			toast.success('Organization logo updated successfully');
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			toast.error(`Failed to update logo: ${message}`);
+
+			// Revert to server image
+			logoSrc = activeOrganization?.logo || '';
 		} finally {
 			isUploading = false;
 		}
 	}
 
-	/**
-	 * Handles form submission to update organization profile
-	 */
-	async function handleSubmit(event: SubmitEvent): Promise<void> {
-		event.preventDefault();
-
+	async function handleEditNameSubmit(e: SubmitEvent): Promise<void> {
+		e.preventDefault();
 		try {
 			isUploading = true;
-			success = '';
-			error = '';
 
-			let logoStorageId: Id<'_storage'> | undefined;
-
-			// Upload the new logo if one was selected
-			if (logoFile) {
-				// Get a storage upload URL from Convex
-				const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
-
-				// Upload the file to Convex storage
-				const response = await fetch(uploadUrl, {
-					method: 'POST',
-					headers: {
-						'Content-Type': logoFile.type
-					},
-					body: logoFile
-				});
-
-				if (!response.ok) {
-					throw new Error('Failed to upload file');
-				}
-
-				// Get the storage ID from the response
-				const result = await response.json();
-				logoStorageId = result.storageId as Id<'_storage'>;
-			} else {
-				logoStorageId = profileData.logoId;
-			}
-
-			// Call the Convex mutation to update the organization
 			await client.mutation(api.organizations.updateOrganizationProfile, {
-				organizationId: profileData.organizationId,
-				name: profileData.name,
-				slug: profileData.slug,
-				logoId: logoStorageId
+				organizationId: orgData.organizationId,
+				name: formState.name,
+				slug: formState.slug
 			});
 
-			// Update the local state
-			isEditing = false;
-			success = 'Profile updated successfully!';
-			error = '';
-			logoFile = null;
-		} catch (err: unknown) {
-			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-			error = `Failed to update profile: ${errorMessage}`;
+			orgData = { ...orgData, name: formState.name, slug: formState.slug };
+			isDialogOpen = false;
+			isDrawerOpen = false;
+			toast.success('Organization details updated successfully');
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			toast.error(`Failed to update organization: ${message}`);
 		} finally {
 			isUploading = false;
 		}
@@ -188,85 +223,121 @@
 </script>
 
 {#if user && activeOrganization}
-	<div class="mb-6 flex items-center gap-4">
-		{#if !isEditing}
-			<Avatar src={activeOrganization.logo} name={activeOrganization.name} />
-			<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
-			{#if roles.isOwnerOrAdmin}
-				<button onclick={toggleEdit} class="btn">Edit</button>
-			{/if}
-		{:else}
-			<form onsubmit={handleSubmit} class="w-full">
-				<div class="flex flex-col gap-4">
-					<div class="mb-4">
-						<label for="logo" class="mb-1 block font-medium">Logo</label>
-						<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-							<div
-								class="group border-surface-600-400 hover:bg-surface-50-950 relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-4 transition-colors"
-							>
-								{#if isUploading}
-									<ProgressRing
-										value={null}
-										size="size-14"
-										meterStroke="stroke-primary-600-400"
-										trackStroke="stroke-primary-50-950"
-									/>
-								{:else}
-									<Avatar
-										src={logoPreview}
-										name={profileData.name.length > 0 ? profileData.name : 'Organization'}
-										size="size-16"
-									/>
-									<div
-										class="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
-									>
-										<UploadCloud class="size-6 text-white" />
-									</div>
-								{/if}
-							</div>
-						</FileUpload>
-					</div>
+	<div class="flex flex-col items-start gap-6">
+		<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
+			<div
+				class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
+			>
+				<Avatar
+					src={logoSrc}
+					name={orgData.name || 'Organization'}
+					background="bg-surface-400-600"
+					size="size-20"
+					rounded="rounded-container"
+				/>
 
-					<label for="name">Name</label>
-					<input
-						type="text"
-						name="name"
-						class="input"
-						value={profileData.name}
-						onchange={(e) => (profileData = { ...profileData, name: e.currentTarget.value })}
-					/>
-					<label for="slug">Slug URL</label>
-					<input
-						type="text"
-						name="slug"
-						class="input"
-						value={profileData.slug}
-						onchange={(e) => (profileData = { ...profileData, slug: e.currentTarget.value })}
-					/>
-					<div class="flex gap-2">
-						<button type="submit" class="preset-filled-primary-500 btn" disabled={isUploading}>
-							Save
-						</button>
-						<button
-							type="button"
-							class="btn hover:preset-tonal"
-							onclick={cancelEdit}
-							disabled={isUploading}
-						>
-							Cancel
-						</button>
-					</div>
+				<div
+					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+				>
+					<Pencil class="size-4" />
 				</div>
-			</form>
-		{/if}
+			</div>
+		</FileUpload>
 
-		{#if success}
-			<p class="text-success-600-400">{success}</p>
-		{/if}
-		{#if error}
-			<p class="text-error-600-400">{error}</p>
-		{/if}
+		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
+		<Dialog.Root bind:open={isDialogOpen}>
+			<Dialog.Trigger
+				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+				onclick={toggleDialogEdit}
+			>
+				<div class="flex w-full flex-col gap-1 text-left">
+					<span class="text-surface-600-400 text-xs">Organization name</span>
+					<span class="text-surface-800-200 font-medium">{orgData.name}</span>
+				</div>
+				<div class="btn preset-filled-surface-200-800 p-2">
+					<Pencil class="size-4" />
+				</div>
+			</Dialog.Trigger>
+
+			<Dialog.Content class="md:max-w-108">
+				<Dialog.Header>
+					<Dialog.Title>Edit Organization Name</Dialog.Title>
+				</Dialog.Header>
+				<form onsubmit={handleEditNameSubmit} class="w-full">
+					<div class="flex flex-col gap-4">
+						<div>
+							<label for="name" class="label"> Organization Name </label>
+							<input type="text" name="name" class="input" bind:value={formState.name} required />
+						</div>
+
+						<div>
+							<label for="slug" class="label"> Slug URL </label>
+							<input type="text" name="slug" class="input" bind:value={formState.slug} />
+						</div>
+
+						<div class="flex justify-end gap-2 pt-6 md:flex-row">
+							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
+								Cancel
+							</button>
+							<button
+								type="submit"
+								class="btn preset-filled-primary-500 w-full md:w-fit"
+								disabled={isUploading}
+							>
+								Save
+							</button>
+						</div>
+					</div>
+				</form>
+			</Dialog.Content>
+		</Dialog.Root>
+
+		<!-- Mobile Drawer - shown on mobile, hidden on desktop -->
+		<Drawer.Root bind:open={isDrawerOpen}>
+			<Drawer.Trigger
+				onclick={toggleDrawerEdit}
+				class="border-surface-300-700 rounded-container flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
+			>
+				<div class="flex w-full flex-col gap-1 text-left">
+					<span class="text-surface-600-400 text-xs">Organization name</span>
+					<span class="text-surface-800-200 font-medium">{orgData.name}</span>
+				</div>
+				<div class="btn-icon preset-filled-surface-200-800">
+					<Pencil class="size-4" />
+				</div>
+			</Drawer.Trigger>
+
+			<Drawer.Content>
+				<Drawer.Header>
+					<Drawer.Title>Edit Organization Name</Drawer.Title>
+				</Drawer.Header>
+				<form onsubmit={handleEditNameSubmit} class="w-full">
+					<div class="flex flex-col gap-4">
+						<div>
+							<label for="name" class="label"> Organization Name </label>
+							<input type="text" name="name" class="input" bind:value={formState.name} required />
+						</div>
+
+						<div>
+							<label for="slug" class="label"> Slug URL </label>
+							<input type="text" name="slug" class="input" bind:value={formState.slug} />
+						</div>
+
+						<div class="flex justify-end gap-2 pt-6 md:flex-row">
+							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
+								Cancel
+							</button>
+							<button
+								type="submit"
+								class="btn preset-filled-primary-500 w-full md:w-fit"
+								disabled={isUploading}
+							>
+								Save
+							</button>
+						</div>
+					</div>
+				</form>
+			</Drawer.Content>
+		</Drawer.Root>
 	</div>
-{:else}
-	<div class="h-16 w-full animate-pulse rounded-md bg-gray-200"></div>
 {/if}

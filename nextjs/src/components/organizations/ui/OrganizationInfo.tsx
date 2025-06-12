@@ -20,8 +20,10 @@ import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 
 // utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
-import type { FileChangeDetails } from '@zag-js/file-upload';
 import { preloadImage } from '@/components/primitives/utils/preloadImage';
+
+// Types
+import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── state & queries ── */
