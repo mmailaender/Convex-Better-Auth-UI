@@ -138,7 +138,7 @@ export default function CreateOrganization({
 							name={name.length > 0 ? name : 'My Organization'}
 							background="bg-surface-400-600"
 							size="size-20"
-							rounded="rounded-base"
+							rounded="rounded-container"
 						/>
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />

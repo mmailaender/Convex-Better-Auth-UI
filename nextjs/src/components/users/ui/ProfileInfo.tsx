@@ -34,25 +34,32 @@ export default function ProfileInfo() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [name, setName] = useState(user?.name ?? '');
+	const [shouldAnimate, setShouldAnimate] = useState(false);
 
-	/** single source of truth for avatar shown in the UI */
+	/** Single source of truth for what the UI shows; never undefined */
 	const [avatarSrc, setAvatarSrc] = useState<string>(user?.image ?? '');
 
-	/* keep a stable ref so another effect can read it without being a dependency */
+	/* stable ref with whatever is currently shown */
 	const shownAvatarRef = useRef(avatarSrc);
 	useEffect(() => {
 		shownAvatarRef.current = avatarSrc;
 	}, [avatarSrc]);
 
-	/* preload the NEW server image, but only when it changes */
+	/* handle new avatar from Convex only after it is pre-loaded */
 	useEffect(() => {
-		if (!user?.image || user.image === shownAvatarRef.current) return;
+		if (!user) return;
+		if (!user.image || user.image === shownAvatarRef.current) {
+			// just keep name in sync
+			setName(user.name);
+			return;
+		}
 
 		let revoked: string | undefined;
 
 		preloadImage(user.image)
 			.then(() => {
 				if (shownAvatarRef.current.startsWith('blob:')) revoked = shownAvatarRef.current;
+				setShouldAnimate(false); // No animation for server updates
 				setAvatarSrc(user.image!);
 			})
 			.catch(() => void 0);
@@ -61,6 +68,13 @@ export default function ProfileInfo() {
 			if (revoked) URL.revokeObjectURL(revoked);
 		};
 	}, [user?.image]);
+
+	// tidy up any leftover blob on unmount
+	useEffect(() => {
+		return () => {
+			if (avatarSrc.startsWith('blob:')) URL.revokeObjectURL(avatarSrc);
+		};
+	}, [avatarSrc]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -89,13 +103,14 @@ export default function ProfileInfo() {
 				forceConvert: true
 			});
 
-			const blobUrl = URL.createObjectURL(optimised);
+			const newAvatarUrl = URL.createObjectURL(optimised);
 
-			// cleanup previous blob
+			// clean up prior blob
 			if (avatarSrc.startsWith('blob:')) URL.revokeObjectURL(avatarSrc);
 
-			/* optimistic UI */
-			setAvatarSrc(blobUrl);
+			/* optimistic UI swap */
+			setShouldAnimate(true); // Animate for optimistic updates
+			setAvatarSrc(newAvatarUrl);
 
 			/* upload to storage */
 			const uploadUrl = await generateUploadUrl();
@@ -115,6 +130,7 @@ export default function ProfileInfo() {
 			toast.error(`Failed to upload avatar: ${message}`);
 
 			// revert to server image
+			setShouldAnimate(false); // No animation for error revert
 			setAvatarSrc(user?.image || '');
 		}
 	};
@@ -153,14 +169,20 @@ export default function ProfileInfo() {
 			{/* avatar + upload */}
 			<div className="flex items-center justify-start rounded-lg pt-6 pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-					<div className="group relative flex cursor-pointer flex-col gap-2">
-						{/* key swap + fade for cross-fade */}
-						<div key={avatarSrc} className="animate-fade-in-out">
-							<Avatar src={avatarSrc} name={user.name} size="size-20" />
+					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
+						{/* key swap + conditional fade for cross-fade */}
+						<div key={avatarSrc} className={shouldAnimate ? 'animate-fade-in-out' : ''}>
+							<Avatar
+								src={avatarSrc}
+								name={user.name}
+								background="bg-surface-400-600"
+								size="size-20"
+								rounded="rounded-full"
+							/>
 						</div>
 
-						<div className="btn-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
-							<Pencil size={16} color="currentColor" />
+						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
+							<Pencil className="size-4" />
 						</div>
 					</div>
 				</FileUpload>

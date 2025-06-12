@@ -35,7 +35,6 @@ export default function OrganizationInfo() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
-	const [manualSlugEdit, setManualSlugEdit] = useState(false);
 
 	const [formState, setFormState] = useState({ name: '', slug: '' });
 
@@ -96,37 +95,22 @@ export default function OrganizationInfo() {
 		};
 	}, [logoSrc]);
 
-	/* auto-generate slug unless the user touched it */
-	useEffect(() => {
-		if (!manualSlugEdit) {
-			const formatted = formState.name
-				.toLowerCase()
-				.trim()
-				.replace(/[^a-z0-9]+/g, '-')
-				.replace(/^-+|-+$/g, '');
-			setFormState((p) => ({ ...p, slug: formatted }));
-		}
-	}, [formState.name, manualSlugEdit]);
-
 	if (!user || !activeOrganization) return null;
 
 	/* ───────────────────────────────────────────── handlers ────────── */
 	const toggleDialogEdit = () => {
 		if (!isOwnerOrAdmin) return;
 		setIsDialogOpen(true);
-		setManualSlugEdit(false);
 	};
 	const toggleDrawerEdit = () => {
 		if (!isOwnerOrAdmin) return;
 		setIsDrawerOpen(true);
-		setManualSlugEdit(false);
 	};
 
 	const cancelEdit = () => {
 		setIsDialogOpen(false);
 		setIsDrawerOpen(false);
 		setFormState({ name: orgData.name, slug: orgData.slug });
-		setManualSlugEdit(false);
 	};
 
 	const handleFileChange = async (details: FileChangeDetails) => {
@@ -183,7 +167,7 @@ export default function OrganizationInfo() {
 		}
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleEditNameSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
 			setIsUploading(true);
@@ -208,7 +192,7 @@ export default function OrganizationInfo() {
 
 	/* ───────────────────────────────────────────── view ────────────── */
 	const form = (
-		<form onSubmit={handleSubmit} className="w-full">
+		<form onSubmit={handleEditNameSubmit} className="w-full">
 			<div className="flex flex-col gap-4">
 				<div>
 					<label htmlFor="name" className="label">
@@ -234,7 +218,6 @@ export default function OrganizationInfo() {
 						className="input"
 						value={formState.slug}
 						onChange={(e) => {
-							setManualSlugEdit(true);
 							setFormState({ ...formState, slug: e.target.value });
 						}}
 					/>
@@ -259,13 +242,17 @@ export default function OrganizationInfo() {
 	return (
 		<div className="flex flex-col items-start gap-6">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-				<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
-					<div key={logoSrc} className="fade-img">
-						<Avatar src={logoSrc} name={orgData.name || 'Organization'} size="size-20 rounded-xl" />
-					</div>
+				<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
+					<Avatar
+						src={logoSrc}
+						name={orgData.name || 'Organization'}
+						background="bg-surface-400-600"
+						size="size-20"
+						rounded="rounded-container"
+					/>
 
-					<div className="btn-icon preset-filled-surface-300-700 border-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
-						<Pencil size={16} color="currentColor" />
+					<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
+						<Pencil className="size-4" />
 					</div>
 				</div>
 			</FileUpload>
@@ -273,7 +260,7 @@ export default function OrganizationInfo() {
 			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
 			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 				<Dialog.Trigger
-					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 					onClick={toggleDialogEdit}
 				>
 					<div className="flex w-full flex-col gap-1 text-left">
@@ -281,13 +268,13 @@ export default function OrganizationInfo() {
 						<span className="text-surface-800-200 font-medium">{orgData.name}</span>
 					</div>
 					<div className="btn preset-filled-surface-200-800 p-2">
-						<Pencil size={16} color="currentColor" />
+						<Pencil className="size-4" />
 					</div>
 				</Dialog.Trigger>
 
 				<Dialog.Content className="md:max-w-108">
 					<Dialog.Header>
-						<Dialog.Title>Edit Organization</Dialog.Title>
+						<Dialog.Title>Edit Organization Name</Dialog.Title>
 					</Dialog.Header>
 					{form}
 				</Dialog.Content>
@@ -297,20 +284,20 @@ export default function OrganizationInfo() {
 			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 				<Drawer.Trigger
 					onClick={toggleDrawerEdit}
-					className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+					className="border-surface-300-700 rounded-container flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
 				>
 					<div className="flex w-full flex-col gap-1 text-left">
 						<span className="text-surface-600-400 text-xs">Organization name</span>
 						<span className="text-surface-800-200 font-medium">{orgData.name}</span>
 					</div>
 					<div className="btn-icon preset-filled-surface-200-800">
-						<Pencil size={16} color="currentColor" />
+						<Pencil className="size-4" />
 					</div>
 				</Drawer.Trigger>
 
 				<Drawer.Content>
 					<Drawer.Header>
-						<Drawer.Title>Edit Organization</Drawer.Title>
+						<Drawer.Title>Edit Organization Name</Drawer.Title>
 					</Drawer.Header>
 					{form}
 				</Drawer.Content>
