@@ -1,7 +1,11 @@
+/** UI **/
 // Primitives
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/primitives/ui/tabs';
-
-// Components
+import * as Tabs from '@/components/primitives/ui/tabs';
+import * as Dialog from '@/components/primitives/ui/dialog';
+import * as Drawer from '@/components/primitives/ui/drawer';
+// Icons
+import { Plus } from 'lucide-react';
+// Widgets
 import Members from '@/components/organizations/ui/Members';
 import Invitations from '@/components/organizations/ui/Invitations';
 import InviteMembers from '@/components/organizations/ui/InviteMembers';
@@ -17,34 +21,62 @@ export default function MembersAndInvitations() {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
 	return (
-		<Tabs defaultValue="members">
+		<Tabs.Root defaultValue="members">
 			<div className="border-surface-300-700 flex w-full flex-row justify-between border-b pb-6 align-middle">
-				<TabsList>
-					<TabsTrigger value="members" className="gap-2">
+				<Tabs.List>
+					<Tabs.Trigger value="members" className="gap-2">
 						Members{' '}
 						<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
 							{members && `${members.length}`}{' '}
 						</span>
-					</TabsTrigger>
+					</Tabs.Trigger>
 					{isOwnerOrAdmin && (
-						<TabsTrigger value="invitations" className="gap-2">
+						<Tabs.Trigger value="invitations" className="gap-2">
 							Invitations{' '}
 							<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
 								{invitations && `${invitations.length}`}
 							</span>
-						</TabsTrigger>
+						</Tabs.Trigger>
 					)}
-				</TabsList>
-				<InviteMembers />
+				</Tabs.List>
+				{isOwnerOrAdmin && (
+					<>
+						<Dialog.Root>
+							<Dialog.Trigger className="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex">
+								<Plus className="size-4" />
+								<span>Invite members</span>
+							</Dialog.Trigger>
+							<Dialog.Content className="max-w-108">
+								<Dialog.Header>
+									<Dialog.Title>Invite new members</Dialog.Title>
+								</Dialog.Header>
+								<InviteMembers />
+								<Dialog.CloseX />
+							</Dialog.Content>
+						</Dialog.Root>
+						<Drawer.Root>
+							<Drawer.Trigger className="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden">
+								<Plus className="size-4" /> Invite members
+							</Drawer.Trigger>
+							<Drawer.Content>
+								<Drawer.Header>
+									<Drawer.Title>Invite new members</Drawer.Title>
+								</Drawer.Header>
+								<InviteMembers />
+								<Drawer.Close />
+							</Drawer.Content>
+						</Drawer.Root>
+					</>
+				)}
 			</div>
-			<TabsContent value="members" className="">
+			<Tabs.Content value="members" className="">
 				<Members />
-			</TabsContent>
+			</Tabs.Content>
 			{isOwnerOrAdmin && (
-				<TabsContent value="invitations">
+				<Tabs.Content value="invitations">
 					<Invitations />
-				</TabsContent>
+				</Tabs.Content>
 			)}
-		</Tabs>
+		</Tabs.Root>
 	);
 }

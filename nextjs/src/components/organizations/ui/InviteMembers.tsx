@@ -6,17 +6,11 @@ import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 
 // Primitives
-import * as Dialog from '@/components/primitives/ui/dialog';
-import * as Drawer from '@/components/primitives/ui/drawer';
 import { toast } from 'sonner';
-// Icons
-import { Plus } from 'lucide-react';
 
 type Role = Doc<'organizationMembers'>['role'];
 
 export default function InviteMembers() {
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [emailInput, setEmailInput] = useState('');
 	const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -64,7 +58,7 @@ export default function InviteMembers() {
 		}
 	};
 
-	const form = (
+	return (
 		<form onSubmit={handleInvite} className="flex flex-col gap-4">
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col">
@@ -102,41 +96,5 @@ export default function InviteMembers() {
 				</div>
 			</div>
 		</form>
-	);
-
-	return (
-		<>
-			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<Dialog.Trigger
-					onClick={() => setIsDialogOpen(true)}
-					className="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
-				>
-					<Plus size={20} />
-					<span>Invite members</span>
-				</Dialog.Trigger>
-				<Dialog.Content className="max-w-108">
-					<Dialog.Header>
-						<Dialog.Title>Invite new members</Dialog.Title>
-					</Dialog.Header>
-					{form}
-					<Dialog.CloseX />
-				</Dialog.Content>
-			</Dialog.Root>
-			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-				<Drawer.Trigger
-					onClick={() => setIsDrawerOpen(true)}
-					className="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden"
-				>
-					<Plus size={20} /> Invite members
-				</Drawer.Trigger>
-				<Drawer.Content>
-					<Drawer.Header>
-						<Drawer.Title>Invite new members</Drawer.Title>
-					</Drawer.Header>
-					{form}
-					<Drawer.Close />
-				</Drawer.Content>
-			</Drawer.Root>
-		</>
 	);
 }
