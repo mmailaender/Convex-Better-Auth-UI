@@ -70,13 +70,6 @@
 			}
 		}
 	}
-
-	/**
-	 * Handle cancellation of deletion
-	 */
-	function handleCancel(): void {
-		dialogOpen = false;
-	}
 </script>
 
 {#if roles.isOwner && activeOrganization}

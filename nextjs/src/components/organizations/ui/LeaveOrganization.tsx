@@ -1,19 +1,17 @@
 import { useState } from 'react';
 
-// API
-import { useMutation, useQuery } from 'convex/react';
-import { useRouter } from 'next/navigation';
-import { api } from '@/convex/_generated/api';
-
 // Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { toast } from 'sonner';
 
-// Types
-import { Id } from '@/convex/_generated/dataModel';
-
-// Hooks
+// API
+import { useMutation, useQuery } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/convex/_generated/api';
 import { useIsOwner } from '@/components/organizations/api/hooks';
+
+// API Types
+import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -118,7 +116,7 @@ export default function LeaveOrganization(): React.ReactNode {
 									onChange={(e) =>
 										setSelectedSuccessor(e.target.value ? (e.target.value as Id<'users'>) : null)
 									}
-									className="select w-full"
+									className="select w-full cursor-pointer"
 									required={isOrgOwner}
 								>
 									<option value="" disabled>

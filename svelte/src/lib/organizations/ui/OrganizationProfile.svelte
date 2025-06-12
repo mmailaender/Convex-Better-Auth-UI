@@ -4,7 +4,7 @@
 	import * as Tabs from '$lib/primitives/ui/tabs';
 	// Icons
 	import { Bolt, ChevronLeft, ChevronRight, UserIcon, Wallet } from '@lucide/svelte';
-	// Components
+	// Widgets
 	import OrganizationInfo from '$lib/organizations/ui/OrganizationInfo.svelte';
 	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
 	import MembersAndInvitations from '$lib/organizations/ui/MembersAndInvitations.svelte';

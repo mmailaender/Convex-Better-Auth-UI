@@ -1,7 +1,7 @@
 <script lang="ts">
-	// Components
-	import { Modal } from '@skeletonlabs/skeleton-svelte';
-	import { X } from '@lucide/svelte';
+	// Primitives
+	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { toast } from 'svelte-sonner';
 
 	// API
 	import { useConvexClient, useQuery } from 'convex-svelte';
@@ -48,7 +48,6 @@
 
 	// State
 	let modalOpen: boolean = $state(false);
-	let errorMessage: string = $state('');
 	let selectedSuccessor: Id<'users'> | null = $state(null);
 
 	// Derived data
@@ -70,7 +69,7 @@
 	 */
 	function validateForm(): boolean {
 		if (roles.isOwner && !selectedSuccessor) {
-			errorMessage = 'As the organization owner, you must select a successor before leaving.';
+			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
 		return true;
@@ -83,7 +82,7 @@
 		if (!validateForm()) return;
 
 		if (!activeOrganization?._id) {
-			errorMessage = 'No active organization found.';
+			toast.error('No active organization found.');
 			return;
 		}
 
@@ -99,17 +98,11 @@
 			// Navigate to home page after leaving
 			goto('/');
 		} catch (err) {
-			errorMessage =
-				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.';
+			toast.error(
+				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
+			);
 			console.error(err);
 		}
-	}
-
-	/**
-	 * Handles the cancel action
-	 */
-	function handleCancel(): void {
-		modalOpen = false;
 	}
 
 	/**
@@ -122,55 +115,37 @@
 </script>
 
 {#if activeOrganization && members && members.length > 1}
-	<Modal
-		open={modalOpen}
-		onOpenChange={(e) => (modalOpen = e.open)}
-		triggerBase="btn text-error-500 hover:preset-tonal-error-500"
-		contentBase="card p-4 space-y-4 shadow-xl max-w-screen-sm"
-	>
-		<!-- Leave organization trigger button -->
-		{#snippet trigger()}
+	<Dialog.Root open={modalOpen} onOpenChange={(open) => (modalOpen = open)}>
+		<Dialog.Trigger
+			class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm"
+		>
 			Leave organization
-		{/snippet}
+		</Dialog.Trigger>
 
-		<!-- Modal content -->
-		{#snippet content()}
-			<header class="flex justify-between">
-				<h2 class="h2">Leave organization</h2>
-				<button
-					class="btn-icon preset-tonal size-8 rounded-full"
-					onclick={() => (modalOpen = false)}
-					aria-label="Close"
-				>
-					<X class="size-4" />
-				</button>
-			</header>
+		<Dialog.Content class="md:max-w-108">
+			<Dialog.Header>
+				<Dialog.Title>Leave organization</Dialog.Title>
+			</Dialog.Header>
 
-			<div class="space-y-4">
-				<p class="opacity-60">
-					Are you sure you want to leave your organization? You will lose access to all projects and
-					resources.
-				</p>
-
+			<Dialog.Description>
+				If you leave organization you'll lose access to all projects and resources. <br /> <br />
 				{#if roles.isOwner}
-					<div class="border-warning-300 bg-warning-100 rounded-md border p-3">
-						<p class="text-warning-800 text-sm font-medium">
-							As the organization owner, you must designate a successor before leaving.
-						</p>
-					</div>
+					As the owner, you must assign a new owner before leaving.
+				{/if}
+			</Dialog.Description>
 
+			<div class="mt-8">
+				{#if roles.isOwner}
 					<div class="space-y-2">
-						<label for="successor" class="text-surface-800-200 font-medium">
-							Select a successor:
-						</label>
+						<label for="successor" class="label"> New owner: </label>
 						<select
 							id="successor"
 							value={selectedSuccessor?.toString() || ''}
 							onchange={handleSuccessorChange}
-							class="select w-full"
+							class="select w-full cursor-pointer"
 							required={roles.isOwner}
 						>
-							<option value="" disabled>Choose a successor</option>
+							<option value="" disabled> Choose a successor </option>
 							{#each organizationMembers as member}
 								<option value={member.user._id.toString()}>
 									{member.user.name} ({member.user.email})
@@ -180,12 +155,8 @@
 					</div>
 				{/if}
 
-				{#if errorMessage}
-					<p class="text-error-600-400">{errorMessage}</p>
-				{/if}
-
-				<footer class="mt-6 flex justify-end gap-4">
-					<button type="button" class="btn bg-surface-300" onclick={handleCancel}>Cancel</button>
+				<Dialog.Footer>
+					<button class="btn preset-tonal" onclick={() => (modalOpen = false)}> Cancel </button>
 					<button
 						type="button"
 						class="btn bg-error-500 hover:bg-error-600 text-white"
@@ -194,8 +165,8 @@
 					>
 						Confirm
 					</button>
-				</footer>
+				</Dialog.Footer>
 			</div>
-		{/snippet}
-	</Modal>
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}
