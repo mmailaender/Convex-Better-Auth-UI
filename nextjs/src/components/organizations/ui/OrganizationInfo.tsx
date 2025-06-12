@@ -257,7 +257,7 @@ export default function OrganizationInfo() {
 	);
 
 	return (
-		<div className="flex flex-col items-start gap-6 pt-6">
+		<div className="flex flex-col items-start gap-6">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div className="group relative ml-1 flex cursor-pointer flex-col items-center justify-center gap-2">
 					<div key={logoSrc} className="fade-img">

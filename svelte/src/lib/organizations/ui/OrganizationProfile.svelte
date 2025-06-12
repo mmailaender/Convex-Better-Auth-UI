@@ -25,80 +25,69 @@
 	const { onSuccessfulDelete }: OrganizationProfileProps = $props();
 
 	// State
-	let mobileTab: string = $state('');
+	let activeMobileTab: string = $state('');
 
-	function handleTabChange(value: string) {
-		// slight delay to allow tab state to update before closing
-		setTimeout(() => (mobileTab = value), 10);
+	// Tab configuration
+	const tabs = [
+		{
+			value: 'general',
+			label: 'General',
+			Icon: Bolt,
+			showForAllUsers: true
+		},
+		{
+			value: 'members',
+			label: 'Members',
+			Icon: UserIcon,
+			showForAllUsers: false
+		},
+		{
+			value: 'billing',
+			label: 'Billing',
+			Icon: Wallet,
+			showForAllUsers: false
+		}
+	];
+
+	const visibleTabs = $derived(tabs.filter((tab) => tab.showForAllUsers || roles.isOwnerOrAdmin));
+
+	function handleMobileTabChange(value: string) {
+		// Slight delay to allow tab state to update before showing content
+		setTimeout(() => (activeMobileTab = value), 10);
+	}
+
+	function closeMobileTab() {
+		activeMobileTab = '';
 	}
 </script>
 
 <Tabs.Root value="general" orientation="vertical" class="relative h-full overflow-hidden">
-	<!-- Desktop layout -->
+	<!-- Desktop Layout -->
 	<div class="hidden h-full w-full md:flex">
-		<div class="w-56">
-			<div class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full p-2">
-				<div class="px-3 py-4 text-2xl font-medium md:text-xl">Organization</div>
-				<Tabs.List class="flex flex-col pt-8 md:pt-0">
+		<!-- Desktop Navigation -->
+		<div class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-56 p-2">
+			<div class="px-3 py-4 text-xl font-medium">Organization</div>
+			<Tabs.List class="flex flex-col">
+				{#each visibleTabs as tab (tab.value)}
 					<Tabs.Trigger
-						value="general"
-						onclick={() => handleTabChange('general')}
-						class="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
+						value={tab.value}
+						class="sm:data-[state=active]:bg-surface-400-600/50 gap-2 px-2 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
 					>
-						<div
-							class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent"
-						>
-							<Bolt />
+						<div class="flex h-6 w-6 shrink-0 items-center justify-center">
+							<tab.Icon />
 						</div>
-						<span class="w-full">General</span>
-						<ChevronRight class="flex md:hidden" />
+						<span class="w-full">{tab.label}</span>
 					</Tabs.Trigger>
-
-					<div class="flex h-2 w-full items-center justify-center px-3 md:hidden">
-						<hr class="border-0.5 border-surface-200-800 w-full" />
-					</div>
-
-					{#if roles.isOwnerOrAdmin}
-						<Tabs.Trigger
-							value="members"
-							onclick={() => handleTabChange('members')}
-							class="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
-						>
-							<div
-								class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent"
-							>
-								<UserIcon />
-							</div>
-							<span class="w-full">Members</span>
-							<ChevronRight class="flex md:hidden" />
-						</Tabs.Trigger>
-
-						<div class="flex h-2 w-full items-center justify-center px-3 md:hidden">
-							<hr class="border-0.5 border-surface-200-800 w-full" />
-						</div>
-
-						<Tabs.Trigger
-							value="billing"
-							onclick={() => handleTabChange('billing')}
-							class="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
-						>
-							<div
-								class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent"
-							>
-								<Wallet />
-							</div>
-							<span class="w-full">Billing</span>
-							<ChevronRight class="flex md:hidden" />
-						</Tabs.Trigger>
-					{/if}
-				</Tabs.List>
-			</div>
+				{/each}
+			</Tabs.List>
 		</div>
+
+		<!-- Desktop Content -->
 		<div class="flex-1">
 			<Tabs.Content value="general" class="flex h-full flex-col">
 				<div class="h-full">
 					<h6
-						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left"
+						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
 					>
 						General settings
 					</h6>
@@ -109,10 +98,11 @@
 					<DeleteOrganization {onSuccessfulDelete} />
 				</div>
 			</Tabs.Content>
+
 			{#if roles.isOwnerOrAdmin}
 				<Tabs.Content value="members">
 					<h6
-						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left"
+						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
 					>
 						Members
 					</h6>
@@ -120,7 +110,7 @@
 				</Tabs.Content>
 				<Tabs.Content value="billing">
 					<h6
-						class="border-surface-300-700 text-surface-700-300 w-full border-b pb-6 text-center text-sm font-medium sm:text-left"
+						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
 					>
 						Billing
 					</h6>
@@ -129,86 +119,57 @@
 		</div>
 	</div>
 
-	<!-- Mobile layout -->
+	<!-- Mobile Layout -->
 	<div class="relative h-full w-full md:hidden">
+		<!-- Mobile Navigation -->
 		<div
-			class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full transform p-2 transition-transform duration-300 {mobileTab
+			class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full transform p-2 transition-transform duration-300 {activeMobileTab
 				? '-translate-x-full'
-				: 'translate-x-0'} md:translate-x-0"
+				: 'translate-x-0'}"
 		>
-			<div class="px-3 py-4 text-2xl font-medium md:text-xl">Organization</div>
-			<Tabs.List class="flex flex-col pt-8 md:pt-0">
-				<Tabs.Trigger
-					value="general"
-					onclick={() => handleTabChange('general')}
-					class="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
-				>
-					<div
-						class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent"
-					>
-						<Bolt />
-					</div>
-					<span class="w-full">General</span>
-					<ChevronRight class="flex md:hidden" />
-				</Tabs.Trigger>
-
-				<div class="flex h-2 w-full items-center justify-center px-3 md:hidden">
-					<hr class="border-0.5 border-surface-200-800 w-full" />
-				</div>
-
-				{#if roles.isOwnerOrAdmin}
-					<Tabs.Trigger
-						value="members"
-						onclick={() => handleTabChange('members')}
-						class="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
-					>
-						<div
-							class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent"
+			<div class="px-3 py-4 text-2xl font-medium">Organization</div>
+			<Tabs.List class="flex flex-col pt-8">
+				{#each visibleTabs as tab, index (tab.value)}
+					<div>
+						<Tabs.Trigger
+							value={tab.value}
+							onclick={() => handleMobileTabChange(tab.value)}
+							class="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
 						>
-							<UserIcon />
-						</div>
-						<span class="w-full">Members</span>
-						<ChevronRight class="flex md:hidden" />
-					</Tabs.Trigger>
-
-					<div class="flex h-2 w-full items-center justify-center px-3 md:hidden">
-						<hr class="border-0.5 border-surface-200-800 w-full" />
+							<div
+								class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+							>
+								<tab.Icon />
+							</div>
+							<span class="w-full">{tab.label}</span>
+							<ChevronRight class="flex" />
+						</Tabs.Trigger>
+						{#if index < visibleTabs.length - 1}
+							<div class="flex h-2 w-full items-center justify-center px-3">
+								<hr class="border-0.5 border-surface-200-800 w-full" />
+							</div>
+						{/if}
 					</div>
-
-					<Tabs.Trigger
-						value="billing"
-						onclick={() => handleTabChange('billing')}
-						class="sm:data-[state=active]:bg-surface-400-600/50 gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit md:gap-2 md:px-2"
-					>
-						<div
-							class="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg md:h-6 md:w-6 md:bg-transparent"
-						>
-							<Wallet />
-						</div>
-						<span class="w-full">Billing</span>
-						<ChevronRight class="flex md:hidden" />
-					</Tabs.Trigger>
-				{/if}
+				{/each}
 			</Tabs.List>
 		</div>
 
-		{#if mobileTab}
+		<!-- Mobile Content -->
+		{#if activeMobileTab}
 			<div
-				class="flex transform flex-col gap-4 px-4 py-6 transition-transform duration-300 {mobileTab
-					? 'translate-x-0'
-					: 'translate-x-full'} bg-surface-100-900 absolute inset-0 md:translate-x-full"
+				class="bg-surface-100-900 absolute inset-0 flex translate-x-0 transform flex-col gap-4 px-4 py-6 transition-transform duration-300"
 			>
 				<button
 					class="ring-offset-background focus:ring-ring hover:bg-surface-300-700 absolute top-5 left-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-					onclick={() => (mobileTab = '')}
+					onclick={closeMobileTab}
 				>
 					<ChevronLeft />
 				</button>
 
-				{#if mobileTab === 'general'}
+				{#if activeMobileTab === 'general'}
 					<div class="h-full">
 						<h6
-							class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium md:text-left"
+							class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium"
 						>
 							General settings
 						</h6>
@@ -216,16 +177,16 @@
 					</div>
 					<DeleteOrganization {onSuccessfulDelete} />
 					<LeaveOrganization />
-				{:else if mobileTab === 'members'}
+				{:else if activeMobileTab === 'members'}
 					<h6
-						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left"
+						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium"
 					>
 						Members
 					</h6>
 					<MembersAndInvitations />
-				{:else if mobileTab === 'billing'}
+				{:else if activeMobileTab === 'billing'}
 					<h6
-						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium sm:text-left"
+						class="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium"
 					>
 						Billing
 					</h6>

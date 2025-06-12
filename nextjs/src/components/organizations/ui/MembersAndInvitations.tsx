@@ -18,7 +18,7 @@ export default function MembersAndInvitations() {
 
 	return (
 		<Tabs defaultValue="members">
-			<div className="border-surface-300-700 flex w-full flex-row justify-between border-b py-4 align-middle">
+			<div className="border-surface-300-700 flex w-full flex-row justify-between border-b pb-6 align-middle">
 				<TabsList>
 					<TabsTrigger value="members" className="gap-2">
 						Members{' '}
