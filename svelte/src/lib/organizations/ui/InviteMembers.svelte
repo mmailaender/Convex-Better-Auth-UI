@@ -1,13 +1,16 @@
 <script lang="ts">
-	// Components
+	// Icons
 	import { UserPlus } from '@lucide/svelte';
+
+	// Primitives
+	import { toast } from 'svelte-sonner';
 
 	// API
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	const client = useConvexClient();
 
-	// Types
+	// API Types
 	import type { FunctionReturnType } from 'convex/server';
 	import type { Doc } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
@@ -22,8 +25,6 @@
 	let emailInput: string = $state('');
 	let selectedRole: Role = $state('role_organization_member');
 	let isProcessing: boolean = $state(false);
-	let errorMessage: string = $state('');
-	let successMessage: string = $state('');
 
 	/**
 	 * Handles the submission of the invitation form
@@ -33,8 +34,6 @@
 
 		if (isProcessing) return;
 		isProcessing = true;
-		errorMessage = '';
-		successMessage = '';
 
 		try {
 			// Split and clean email addresses
@@ -45,7 +44,7 @@
 				.filter((email: string) => email.length > 0);
 
 			if (emails.length === 0) {
-				errorMessage = 'Please enter at least one email address';
+				toast.error('Please enter at least one email address');
 				isProcessing = false;
 				return;
 			}
@@ -61,21 +60,24 @@
 			const failed = results.filter((r: InvitationResponse) => !r.success);
 
 			if (successful.length > 0) {
-				successMessage = `Successfully sent ${successful.length} invitation(s) to: ${successful
+				const msg = `Sent ${successful.length} invitation(s) to: ${successful
 					.map((r: InvitationResponse) => r.email)
 					.join(', ')}`;
+				toast.success(msg);
 				emailInput = '';
 			}
 
 			if (failed.length > 0) {
-				errorMessage = `Failed to send invitation(s) to: ${failed
+				const msg = `Failed to send invitation(s) to: ${failed
 					.map((r: InvitationResponse) => r.email)
 					.join(', ')}`;
+				toast.error(msg);
 			}
 		} catch (err) {
 			console.error('An error occurred while processing invitations: ', err);
-			errorMessage =
+			const errorMsg =
 				err instanceof Error ? err.message : 'An error occurred while processing invitations';
+			toast.error(errorMsg);
 		} finally {
 			isProcessing = false;
 		}
@@ -98,55 +100,37 @@
 	}
 </script>
 
-<div class="border-surface-300-700 mb-8 rounded-lg border p-4">
-	<h3 class="mb-4 flex items-center text-xl font-semibold">
-		<UserPlus class="mr-2 size-5" />
-		Invite new members
-	</h3>
-
-	<form onsubmit={handleInvite} class="flex flex-col gap-4">
-		<div class="flex flex-col gap-4 md:flex-row">
-			<textarea
-				value={emailInput}
-				onchange={handleEmailChange}
-				placeholder="example@email.com, example2@email.com"
-				class="textarea min-h-24 grow"
-				required
-			></textarea>
-
-			<div class="flex flex-col gap-3">
-				<select value={selectedRole} onchange={handleRoleChange} class="select w-full md:w-48">
+<form onsubmit={handleInvite} class="flex flex-col gap-4">
+	<div class="flex flex-col gap-4">
+		<div class="flex flex-col">
+			<label>
+				<span class="label">Role</span>
+				<select value={selectedRole} onchange={handleRoleChange} class="select w-full">
 					<option value="role_organization_member">Member</option>
 					<option value="role_organization_admin">Admin</option>
 				</select>
-
-				<button type="submit" class="btn variant-filled-primary w-full" disabled={isProcessing}>
-					{isProcessing ? 'Sending...' : 'Send Invitations'}
-				</button>
-			</div>
+			</label>
 		</div>
-	</form>
-
-	{#if successMessage}
-		<div
-			class="bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 mt-3 rounded-lg p-3"
-		>
-			{successMessage}
+		<div class="flex flex-col gap-2">
+			<label>
+				<span class="label">Email(s)</span>
+				<textarea
+					value={emailInput}
+					onchange={handleEmailChange}
+					placeholder="example@email.com, example2@email.com"
+					class="textarea min-h-24 grow"
+					required
+				></textarea>
+			</label>
+			<p class="text-surface-600-400 px-1 text-xs">
+				You can invite multiple people by separating email addresses with commas, semicolons, or
+				spaces.
+			</p>
 		</div>
-	{/if}
-
-	{#if errorMessage}
-		<div
-			class="bg-error-100 text-error-800 dark:bg-error-900 dark:text-error-200 mt-3 rounded-lg p-3"
-		>
-			{errorMessage}
+		<div class="flex justify-end gap-2 pt-6 md:flex-row">
+			<button type="submit" class="btn preset-filled-primary-500" disabled={isProcessing}>
+				{isProcessing ? 'Sending...' : 'Send Invitations'}
+			</button>
 		</div>
-	{/if}
-
-	<div class="text-surface-500-500 mt-3 text-xs">
-		<p>
-			You can invite multiple people by separating email addresses with commas, semicolons, or
-			spaces.
-		</p>
 	</div>
-</div>
+</form>

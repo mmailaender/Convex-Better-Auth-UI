@@ -1,13 +1,15 @@
 'use client';
-
+// React
 import { useState, FormEvent } from 'react';
-import { useAction } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { Doc } from '@/convex/_generated/dataModel';
 
 // Primitives
 import { toast } from 'sonner';
 
+// API
+import { useAction } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { Doc } from '@/convex/_generated/dataModel';
+// API Types
 type Role = Doc<'organizationMembers'>['role'];
 
 export default function InviteMembers() {
@@ -62,19 +64,21 @@ export default function InviteMembers() {
 		<form onSubmit={handleInvite} className="flex flex-col gap-4">
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col">
-					<label className="label">Role</label>
-					<select
-						value={selectedRole}
-						onChange={(e) => setSelectedRole(e.target.value as Role)}
-						className="select w-full"
-					>
-						<option value="role_organization_member">Member</option>
-						<option value="role_organization_admin">Admin</option>
-					</select>
+					<label>
+						<span className="label">Role</span>
+						<select
+							value={selectedRole}
+							onChange={(e) => setSelectedRole(e.target.value as Role)}
+							className="select w-full"
+						>
+							<option value="role_organization_member">Member</option>
+							<option value="role_organization_admin">Admin</option>
+						</select>
+					</label>
 				</div>
 				<div className="flex flex-col gap-2">
-					<div>
-						<label className="label">Email(s)</label>
+					<label>
+						<span className="label">Email(s)</span>
 						<textarea
 							value={emailInput}
 							onChange={(e) => setEmailInput(e.target.value)}
@@ -82,7 +86,7 @@ export default function InviteMembers() {
 							className="textarea min-h-24 grow"
 							required
 						></textarea>
-					</div>
+					</label>
 					<p className="text-surface-600-400 px-1 text-xs">
 						You can invite multiple people by separating email addresses with commas, semicolons, or
 						spaces.
