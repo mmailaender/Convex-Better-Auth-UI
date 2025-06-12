@@ -141,7 +141,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 										onClick={() => handleMobileTabChange(tab.value)}
 										className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
 									>
-										<div className="bg-surface-300-700 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+										<div className="bg-surface-300-700 rounded-base flex h-7 w-7 shrink-0 items-center justify-center">
 											<IconComponent />
 										</div>
 										<span className="w-full">{tab.label}</span>
@@ -162,7 +162,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 				{activeMobileTab && (
 					<div className="bg-surface-100-900 absolute inset-0 flex translate-x-0 transform flex-col gap-4 px-4 py-6 transition-transform duration-300">
 						<button
-							className="ring-offset-background focus:ring-ring hover:bg-surface-300-700 absolute top-5 left-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+							className="ring-offset-background focus:ring-ring hover:bg-surface-300-700 rounded-base absolute top-5 left-4 p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 							onClick={closeMobileTab}
 						>
 							<ChevronLeft />
@@ -171,7 +171,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 						{activeMobileTab === 'general' && (
 							<>
 								<div className="h-full">
-									<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium">
+									<h6 className="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium">
 										General settings
 									</h6>
 									<OrganizationInfo />
@@ -183,7 +183,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 
 						{activeMobileTab === 'members' && (
 							<>
-								<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium">
+								<h6 className="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium">
 									Members
 								</h6>
 								<MembersAndInvitations />
@@ -191,7 +191,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 						)}
 
 						{activeMobileTab === 'billing' && (
-							<h6 className="border-surface-300-700 text-surface-700-300 border-b pb-6 text-center text-sm font-medium">
+							<h6 className="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium">
 								Billing
 							</h6>
 						)}
