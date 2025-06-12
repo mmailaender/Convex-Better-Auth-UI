@@ -43,7 +43,7 @@ export default function MembersAndInvitations() {
 					<>
 						<Dialog.Root>
 							<Dialog.Trigger className="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex">
-								<Plus className="size-4" />
+								<Plus className="size-5" />
 								<span>Invite members</span>
 							</Dialog.Trigger>
 							<Dialog.Content className="max-w-108">
@@ -56,14 +56,14 @@ export default function MembersAndInvitations() {
 						</Dialog.Root>
 						<Drawer.Root>
 							<Drawer.Trigger className="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden">
-								<Plus className="size-4" /> Invite members
+								<Plus className="size-5" /> Invite members
 							</Drawer.Trigger>
 							<Drawer.Content>
 								<Drawer.Header>
 									<Drawer.Title>Invite new members</Drawer.Title>
 								</Drawer.Header>
 								<InviteMembers />
-								<Drawer.Close />
+								<Drawer.CloseX />
 							</Drawer.Content>
 						</Drawer.Root>
 					</>

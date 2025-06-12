@@ -66,7 +66,7 @@
 			{#if roles.isOwnerOrAdmin}
 				<Tabs.Trigger value="invitations" class="gap-2">
 					Invitations{' '}
-					<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
+					<span class="badge preset-filled-surface-300-700 size-6 rounded-full text-center">
 						{invitations && `${invitations.length}`}
 					</span>
 				</Tabs.Trigger>
@@ -77,7 +77,7 @@
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
 				>
-					<Plus class="size-4" />
+					<Plus class="size-5" />
 					<span>Invite members</span>
 				</Dialog.Trigger>
 				<Dialog.Content class="max-w-108">
@@ -92,14 +92,14 @@
 				<Drawer.Trigger
 					class="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden"
 				>
-					<Plus class="size-4" /> Invite members
+					<Plus class="size-5" /> Invite members
 				</Drawer.Trigger>
 				<Drawer.Content>
 					<Drawer.Header>
 						<Drawer.Title>Invite new members</Drawer.Title>
 					</Drawer.Header>
 					<InviteMembers />
-					<Drawer.Close />
+					<Drawer.CloseX />
 				</Drawer.Content>
 			</Drawer.Root>
 		{/if}
