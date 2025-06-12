@@ -4,16 +4,9 @@ import { useState, useMemo } from 'react';
 // API Convex
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { FunctionReturnType } from 'convex/server';
-
-// Components
-import * as Dialog from '@/components/primitives/ui/dialog';
-import * as Drawer from '@/components/primitives/ui/drawer';
-import { Avatar } from '@skeletonlabs/skeleton-react';
-import { Search, Trash, Pencil } from 'lucide-react';
-
-// Types
-import { Doc, Id } from '@/convex/_generated/dataModel';
+// API Types
+import type { Doc, Id } from '@/convex/_generated/dataModel';
+import type { FunctionReturnType } from 'convex/server';
 type Role = Doc<'organizationMembers'>['role'];
 type GetOrganizationMembersReturnType = FunctionReturnType<
 	typeof api.organizations.members.getOrganizationMembers
@@ -21,9 +14,16 @@ type GetOrganizationMembersReturnType = FunctionReturnType<
 type GetOrganizationMemberReturnType =
 	GetOrganizationMembersReturnType extends Array<infer T> ? T : never;
 
+// Components
+import * as Dialog from '@/components/primitives/ui/dialog';
+import * as Drawer from '@/components/primitives/ui/drawer';
+import { toast } from 'sonner';
+import { Avatar } from '@skeletonlabs/skeleton-react';
+// Icons
+import { Search, Trash, Pencil } from 'lucide-react';
+
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import { toast } from 'sonner';
 
 /**
  * Component that displays a list of organization members with role management functionality
@@ -397,17 +397,19 @@ export default function Members(): React.ReactNode {
 								<div className="flex flex-col gap-3">
 									{/* Role Select */}
 									<div className="flex-1">
-										<label className="label">Role</label>
-										<select
-											value={selectedMember.role}
-											onChange={(e) =>
-												handleUpdateRole(selectedMember.user._id, e.target.value as Role)
-											}
-											className="select w-full"
-										>
-											<option value="role_organization_admin">Admin</option>
-											<option value="role_organization_member">Member</option>
-										</select>
+										<label>
+											<span className="label">Role</span>
+											<select
+												value={selectedMember.role}
+												onChange={(e) =>
+													handleUpdateRole(selectedMember.user._id, e.target.value as Role)
+												}
+												className="select w-full"
+											>
+												<option value="role_organization_admin">Admin</option>
+												<option value="role_organization_member">Member</option>
+											</select>
+										</label>
 									</div>
 
 									{/* Remove Button */}
