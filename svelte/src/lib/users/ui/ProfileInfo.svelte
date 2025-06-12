@@ -172,7 +172,7 @@
 		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
 		<Dialog.Root bind:open={isDialogOpen}>
 			<Dialog.Trigger
-				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-base hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 				onclick={() => (isDialogOpen = true)}
 			>
 				<div class="flex w-full flex-col gap-1 text-left">
@@ -209,7 +209,7 @@
 		<Drawer.Root bind:open={isDrawerOpen}>
 			<Drawer.Trigger
 				onclick={() => (isDrawerOpen = true)}
-				class="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+				class="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
 			>
 				<div class="flex w-full flex-col gap-1 text-left">
 					<span class="text-surface-600-400 text-xs">Name</span>

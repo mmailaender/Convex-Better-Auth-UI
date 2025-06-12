@@ -191,7 +191,7 @@ export default function ProfileInfo() {
 			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
 			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 				<Dialog.Trigger
-					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 hidden w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-base hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 					onClick={() => setIsDialogOpen(true)}
 				>
 					<div className="flex w-full flex-col gap-1 text-left">
@@ -215,7 +215,7 @@ export default function ProfileInfo() {
 			<Drawer.Root open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 				<Drawer.Trigger
 					onClick={() => setIsDrawerOpen(true)}
-					className="border-surface-300-700 flex w-full flex-row content-center items-center rounded-xl border py-2 pr-3 pl-4 md:hidden"
+					className="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
 				>
 					<div className="flex w-full flex-col gap-1 text-left">
 						<span className="text-surface-600-400 text-xs">Name</span>
