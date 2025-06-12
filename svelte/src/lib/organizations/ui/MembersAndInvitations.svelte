@@ -57,12 +57,18 @@
 		class="border-surface-300-700 flex w-full flex-row justify-between border-b pb-6 align-middle"
 	>
 		<Tabs.List>
-			<Tabs.Trigger value="members" class="gap-2"
-				>Members {members && `(${members.length})`}</Tabs.Trigger
-			>
+			<Tabs.Trigger value="members" class="gap-2">
+				Members{' '}
+				<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
+					{members && `${members.length}`}
+				</span>
+			</Tabs.Trigger>
 			{#if roles.isOwnerOrAdmin}
 				<Tabs.Trigger value="invitations" class="gap-2">
-					Invitations {invitations && `(${invitations.length})`}
+					Invitations{' '}
+					<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
+						{invitations && `${invitations.length}`}
+					</span>
 				</Tabs.Trigger>
 			{/if}
 		</Tabs.List>
@@ -71,7 +77,7 @@
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
 				>
-					<Plus size={20} />
+					<Plus class="size-4" />
 					<span>Invite members</span>
 				</Dialog.Trigger>
 				<Dialog.Content class="max-w-108">
