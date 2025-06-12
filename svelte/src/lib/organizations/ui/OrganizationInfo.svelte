@@ -32,7 +32,6 @@
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 	import { preloadImage } from '$lib/primitives/utils/preloadImage';
-	import { onMount } from 'svelte';
 
 	// Props
 	let {
@@ -52,79 +51,48 @@
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
 	let isUploading: boolean = $state(false);
+	let isPreloading: boolean = $state(false);
+	let displayLogoSrc: string = $state('');
 
 	let formState = $state({ name: '', slug: '' });
-
-	let orgData = $state({
-		organizationId: '' as Id<'organizations'>,
-		name: '',
-		slug: '',
-		logo: '',
-		logoId: undefined as Id<'_storage'> | undefined
-	});
-
-	// Single source of truth for what the UI shows; never undefined
-	let logoSrc: string = $state('');
-
-	// Stable ref with whatever is currently shown
-	let shownLogoRef: string = $state('');
 
 	// Derived data
 	const user = $derived(userResponse.data);
 	const activeOrganization = $derived(organizationResponse.data);
 
-	// Update shownLogoRef when logoSrc changes
+	// Initialize state when organization data is available
 	$effect(() => {
-		shownLogoRef = logoSrc;
-	});
-
-	// Initialize logoSrc when activeOrganization first loads
-	$effect(() => {
-		if (activeOrganization && logoSrc === '') {
-			logoSrc = activeOrganization.logo ?? '';
+		if (activeOrganization) {
+			if (formState.name === '') {
+				formState.name = activeOrganization.name;
+			}
+			if (formState.slug === '') {
+				formState.slug = activeOrganization.slug || '';
+			}
+			if (displayLogoSrc === '') {
+				displayLogoSrc = activeOrganization.logo || '';
+			}
 		}
 	});
 
-	// Handle new logo from Convex only after it is pre-loaded
+	// Handle server logo updates - preload before showing
 	$effect(() => {
-		if (!activeOrganization) return;
+		if (!activeOrganization?.logo || isUploading) return;
 
-		if (!activeOrganization.logo || activeOrganization.logo === shownLogoRef) {
-			// Just keep org data in sync
-			orgData = {
-				organizationId: activeOrganization._id,
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || '',
-				logo: activeOrganization.logo || '',
-				logoId: activeOrganization.logoId
-			};
-			formState = {
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || ''
-			};
-			return;
+		// If server has a new logo URL that's different from what we're displaying
+		if (activeOrganization.logo !== displayLogoSrc) {
+			isPreloading = true;
+			preloadImage(activeOrganization.logo)
+				.then(() => {
+					displayLogoSrc = activeOrganization.logo!;
+					isPreloading = false;
+				})
+				.catch(() => {
+					// If preload fails, still update
+					displayLogoSrc = activeOrganization.logo!;
+					isPreloading = false;
+				});
 		}
-
-		let revoked: string | undefined;
-
-		preloadImage(activeOrganization.logo)
-			.then(() => {
-				if (shownLogoRef.startsWith('blob:')) revoked = shownLogoRef;
-				logoSrc = activeOrganization.logo!;
-			})
-			.catch(() => void 0);
-
-		// Cleanup function equivalent
-		return () => {
-			if (revoked) URL.revokeObjectURL(revoked);
-		};
-	});
-
-	// Cleanup any leftover blob on component destroy
-	onMount(() => {
-		return () => {
-			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
-		};
 	});
 
 	// Handlers
@@ -141,12 +109,17 @@
 	function cancelEdit(): void {
 		isDialogOpen = false;
 		isDrawerOpen = false;
-		formState = { name: orgData.name, slug: orgData.slug };
+		if (activeOrganization) {
+			formState = {
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || ''
+			};
+		}
 	}
 
 	async function handleFileChange(details: FileChangeDetails): Promise<void> {
 		const file = details.acceptedFiles.at(0);
-		if (!file) return;
+		if (!file || !activeOrganization) return;
 
 		try {
 			isUploading = true;
@@ -160,14 +133,6 @@
 				forceConvert: true
 			});
 
-			const newLogoUrl = URL.createObjectURL(optimised);
-
-			// Clean up prior blob
-			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
-
-			// Optimistic UI swap
-			logoSrc = newLogoUrl;
-
 			const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
 			const res = await fetch(uploadUrl, {
 				method: 'POST',
@@ -180,9 +145,9 @@
 			const logoStorageId = storageId as Id<'_storage'>;
 
 			await client.mutation(api.organizations.updateOrganizationProfile, {
-				organizationId: orgData.organizationId,
-				name: orgData.name,
-				slug: orgData.slug,
+				organizationId: activeOrganization._id,
+				name: activeOrganization.name,
+				slug: activeOrganization.slug || '',
 				logoId: logoStorageId
 			});
 
@@ -190,9 +155,6 @@
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
-
-			// Revert to server image
-			logoSrc = activeOrganization?.logo || '';
 		} finally {
 			isUploading = false;
 		}
@@ -200,16 +162,17 @@
 
 	async function handleEditNameSubmit(e: SubmitEvent): Promise<void> {
 		e.preventDefault();
+		if (!activeOrganization) return;
+
 		try {
 			isUploading = true;
 
 			await client.mutation(api.organizations.updateOrganizationProfile, {
-				organizationId: orgData.organizationId,
+				organizationId: activeOrganization._id,
 				name: formState.name,
 				slug: formState.slug
 			});
 
-			orgData = { ...orgData, name: formState.name, slug: formState.slug };
 			isDialogOpen = false;
 			isDrawerOpen = false;
 			toast.success('Organization details updated successfully');
@@ -229,8 +192,8 @@
 				class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 			>
 				<Avatar
-					src={logoSrc}
-					name={orgData.name || 'Organization'}
+					src={displayLogoSrc}
+					name={activeOrganization.name || 'Organization'}
 					background="bg-surface-400-600"
 					size="size-20"
 					rounded="rounded-container"
@@ -241,6 +204,15 @@
 				>
 					<Pencil class="size-4" />
 				</div>
+
+				<!-- Loading indicator during upload or preloading -->
+				{#if isUploading || isPreloading}
+					<div
+						class="bg-opacity-50 rounded-container absolute inset-0 flex items-center justify-center bg-black"
+					>
+						<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
+					</div>
+				{/if}
 			</div>
 		</FileUpload>
 
@@ -252,7 +224,7 @@
 			>
 				<div class="flex w-full flex-col gap-1 text-left">
 					<span class="text-surface-600-400 text-xs">Organization name</span>
-					<span class="text-surface-800-200 font-medium">{orgData.name}</span>
+					<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
 				</div>
 				<div class="btn preset-filled-surface-200-800 p-2">
 					<Pencil class="size-4" />
@@ -300,7 +272,7 @@
 			>
 				<div class="flex w-full flex-col gap-1 text-left">
 					<span class="text-surface-600-400 text-xs">Organization name</span>
-					<span class="text-surface-800-200 font-medium">{orgData.name}</span>
+					<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
 				</div>
 				<div class="btn-icon preset-filled-surface-200-800">
 					<Pencil class="size-4" />
