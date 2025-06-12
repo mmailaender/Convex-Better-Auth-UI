@@ -154,7 +154,7 @@
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
 					>
-						<Pencil className="size-4" />
+						<Pencil class="size-4" />
 					</div>
 
 					<!-- Loading indicator during upload or preloading -->

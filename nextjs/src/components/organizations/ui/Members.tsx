@@ -286,7 +286,7 @@ export default function Members(): React.ReactNode {
 														onChange={(e) =>
 															handleUpdateRole(member.user._id, e.target.value as Role)
 														}
-														className="select text-sm"
+														className="select cursor-pointer text-sm"
 													>
 														<option value="role_organization_admin">Admin</option>
 														<option value="role_organization_member">Member</option>

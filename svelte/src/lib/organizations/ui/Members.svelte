@@ -327,7 +327,7 @@
 												<select
 													value={member.role}
 													onchange={(e) => handleRoleChange(e, member.user._id)}
-													class="select text-sm"
+													class="select cursor-pointer text-sm"
 												>
 													<option value="role_organization_admin">Admin</option>
 													<option value="role_organization_member">Member</option>
@@ -362,7 +362,7 @@
 														class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
 														onclick={() => (selectedUserId = member.user._id)}
 													>
-														<Trash className="size-4 opacity-70" />
+														<Trash class="size-4 opacity-70" />
 													</Dialog.Trigger>
 													<Dialog.Content class="md:max-w-108">
 														<Dialog.Header class="flex-shrink-0">
