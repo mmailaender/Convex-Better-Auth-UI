@@ -115,13 +115,12 @@
 		{/if}
 	</div>
 
-	<Tabs.Content value="members" class="!p-0">
+	<Tabs.Content value="members">
 		<Members />
 	</Tabs.Content>
 
 	{#if roles.isOwnerOrAdmin}
-		<!-- TODO: Remove the !p-0 once https://github.com/huntabyte/bits-ui/issues/1570 is fixed -->
-		<Tabs.Content value="invitations" class="!p-0">
+		<Tabs.Content value="invitations">
 			<Invitations />
 		</Tabs.Content>
 	{/if}

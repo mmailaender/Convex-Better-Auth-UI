@@ -15,7 +15,7 @@
 	bind:value
 	data-slot="tabs"
 	class={cn(
-		'group flex',
+		'flex',
 		'data-[orientation=vertical]:w-full data-[orientation=vertical]:shrink-0 data-[orientation=vertical]:flex-row data-[orientation=vertical]:items-start',
 		'data-[orientation=horizontal]:flex-col',
 		className
