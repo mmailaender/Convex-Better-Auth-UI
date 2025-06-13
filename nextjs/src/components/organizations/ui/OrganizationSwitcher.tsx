@@ -98,13 +98,13 @@ export default function OrganizationSwitcher({
 			<Popover.Root open={openSwitcher} onOpenChange={setOpenSwitcher}>
 				<Popover.Trigger
 					onClick={() => setOpenSwitcher(!openSwitcher)}
-					className="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-lg border p-1 pr-2 duration-200 ease-in-out"
+					className="hover:bg-surface-200-800 border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
 				>
 					<div className="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 						<Avatar
 							src={activeOrganization?.logo || ''}
 							name={activeOrganization?.name || ''}
-							size="size-8 shrink-0 rounded-md"
+							size="size-8 shrink-0 rounded-base"
 						/>
 						<span className="text-surface-700-300 truncate text-sm">
 							{activeOrganization?.name}
@@ -120,7 +120,7 @@ export default function OrganizationSwitcher({
 								<Avatar
 									src={activeOrganization?.logo || ''}
 									name={activeOrganization?.name || ''}
-									size="size-8 shrink-0 rounded-lg"
+									size="size-8 shrink-0 rounded-base"
 								/>
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
@@ -154,7 +154,7 @@ export default function OrganizationSwitcher({
 													<Avatar
 														src={org.logo || ''}
 														name={org.name}
-														size="size-8 rounded-lg shrink-0"
+														size="size-8 rounded-base shrink-0"
 													/>
 													<span className="text-surface-700-300 truncate text-base">
 														{org.name}

@@ -62,7 +62,7 @@ export default function UserButton({
 							<Popover.Content side={popoverSide} align={popoverAlign}>
 								<div className="flex flex-col gap-1 p-0">
 									<button
-										className="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
+										className="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 										onClick={openProfileModal}
 									>
 										<Avatar src={user.image} name={user.name} size="size-12" />
