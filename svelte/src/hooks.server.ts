@@ -1,5 +1,7 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import { redirect, type Handle } from '@sveltejs/kit';
+
+import { api } from '$convex/_generated/api';
 import {
 	createConvexAuthHooks,
 	createRouteMatcher
@@ -9,7 +11,11 @@ const isLoginPage = createRouteMatcher(['/signin']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
 
 // Create auth hooks
-const { handleAuth, isAuthenticated: isAuthenticatedPromise } = createConvexAuthHooks();
+const {
+	handleAuth,
+	isAuthenticated: isAuthenticatedPromise,
+	createConvexHttpClient
+} = createConvexAuthHooks();
 
 // Create custom auth handler
 const requireAuth: Handle = async ({ event, resolve }) => {
@@ -30,7 +36,19 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 				`/signin?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`
 			);
 		}
-		return resolve(event);
+		// Get invitation ID from query params
+		const invitationId = event.url.searchParams.get('invitationId');
+		if (invitationId) {
+			const client = await createConvexHttpClient(event);
+			try {
+				// Call the mutation directly with the auth token
+				await client.mutation(api.organizations.invitations.db.acceptInvitation, { invitationId });
+				return redirect(307, '/');
+			} catch (error: unknown) {
+				console.error('Error accepting invitation: ', error);
+				return redirect(307, '/');
+			}
+		}
 	}
 
 	return resolve(event);
