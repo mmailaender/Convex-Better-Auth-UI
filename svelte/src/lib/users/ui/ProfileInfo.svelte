@@ -135,10 +135,10 @@
 
 <div class="flex flex-col gap-6">
 	{#if !user}
-		<div class="bg-success-200-800 h-16 w-full animate-pulse rounded-md"></div>
+		<div class="bg-success-200-800 h-16 w-full animate-pulse rounded-base"></div>
 	{:else}
 		<!-- Avatar + Upload -->
-		<div class="flex items-center justify-start rounded-lg pt-6 pl-0.5">
+		<div class="flex items-center justify-start rounded-base pt-6 pl-0.5">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
@@ -172,7 +172,7 @@
 		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
 		<Dialog.Root bind:open={isDialogOpen}>
 			<Dialog.Trigger
-				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-base hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 				onclick={() => (isDialogOpen = true)}
 			>
 				<div class="flex w-full flex-col gap-1 text-left">

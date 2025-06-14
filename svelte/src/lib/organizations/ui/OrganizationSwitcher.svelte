@@ -140,13 +140,13 @@
 {:else}
 	<Popover.Root bind:open={switcherPopoverOpen}>
 		<Popover.Trigger
-			class="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-lg border p-1 pr-2 duration-200 ease-in-out"
+			class="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-container border p-1 pr-2 duration-200 ease-in-out"
 		>
 			<div class="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 				<Avatar
 					src={activeOrganization?.logo || ''}
 					name={activeOrganization?.name || ''}
-					size="size-8 shrink-0 rounded-md"
+					size="size-8 shrink-0 rounded-base"
 				/>
 				<span class="text-surface-700-300 truncate text-sm">
 					{activeOrganization?.name}
@@ -163,7 +163,7 @@
 						<Avatar
 							src={activeOrganization?.logo || ''}
 							name={activeOrganization?.name || ''}
-							size="size-8 shrink-0 rounded-lg"
+							size="size-8 shrink-0 rounded-base"
 						/>
 						<span class="text-surface-700-300 text-medium w-full truncate text-base">
 							{activeOrganization?.name}
@@ -187,7 +187,7 @@
 									onclick={() => updateActiveOrg(org._id)}
 									class="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 								>
-									<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-lg shrink-0" />
+									<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-base shrink-0" />
 									<span class="text-surface-700-300 truncate text-base">
 										{org.name}
 									</span>

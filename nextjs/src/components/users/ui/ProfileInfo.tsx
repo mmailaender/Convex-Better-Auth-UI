@@ -137,7 +137,7 @@ export default function ProfileInfo() {
 
 	/* ─────────────────────────────────────────────  skeleton while loading */
 	if (!user) {
-		return <div className="bg-success-200-800 h-16 w-full animate-pulse rounded-md" />;
+		return <div className="bg-success-200-800 rounded-base h-16 w-full animate-pulse" />;
 	}
 
 	/* ─────────────────────────────────────────────  edit form */
@@ -167,7 +167,7 @@ export default function ProfileInfo() {
 	return (
 		<div className="flex flex-col gap-6">
 			{/* avatar + upload */}
-			<div className="flex items-center justify-start rounded-lg pt-6 pl-0.5">
+			<div className="rounded-container flex items-center justify-start pt-6 pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
 						{/* key swap + conditional fade for cross-fade */}
@@ -191,7 +191,7 @@ export default function ProfileInfo() {
 			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
 			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 				<Dialog.Trigger
-					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-base hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 					onClick={() => setIsDialogOpen(true)}
 				>
 					<div className="flex w-full flex-col gap-1 text-left">

@@ -28,7 +28,7 @@ export default function DeleteUser() {
 
 	return (
 		<Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm">
+			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 rounded-base justify-between gap-1 text-sm">
 				Delete account
 			</Dialog.Trigger>
 			<Dialog.Content className="md:max-w-108">
