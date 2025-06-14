@@ -1,6 +1,6 @@
 // React
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 /** UI **/
 // Icons
@@ -13,7 +13,7 @@ import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // API
-import { useConvexAuth, useMutation } from 'convex/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
 // Types
@@ -28,10 +28,14 @@ export default function CreateOrganization({
 	redirectTo?: string;
 }) {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	const createOrganization = useMutation(api.organizations.createOrganization);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+
+	// Query for active organization
+	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
 
 	const [name, setName] = useState('');
 	const [slug, setSlug] = useState('');
@@ -94,13 +98,43 @@ export default function CreateOrganization({
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
+			const currentUrl = new URL(window.location.href);
+			const pathSegments = currentUrl.pathname.split('/');
+			const activeOrgId = activeOrganization?._id;
+
 			// Create the organization
 			await createOrganization({ name, slug, logoId: logoStorageId });
-			toast.success('Organization created successfully');
+			toast.success('Organization created successfully!');
+
 			// Call the onSuccessfulCreate callback if provided
 			if (onSuccessfulCreate) onSuccessfulCreate();
+
+			// Redirect
+			const redirectUrl = redirectTo ?? searchParams.get('redirectTo');
+
 			// Navigate to the specified URL
-			if (redirectTo) router.push(redirectTo);
+			if (redirectUrl) {
+				router.push(redirectUrl);
+			} else {
+				let needsRedirect = false;
+				if (activeOrgId) {
+					// Check each path segment for the organization ID
+					for (let i = 0; i < pathSegments.length; i++) {
+						if (pathSegments[i] === activeOrgId) {
+							// Found the organization ID in the URL path
+							pathSegments[i] = activeOrganization?._id;
+							needsRedirect = true;
+							break;
+						}
+					}
+				}
+
+				if (needsRedirect) {
+					// Reconstruct the URL with the new organization ID
+					currentUrl.pathname = pathSegments.join('/');
+					router.push(currentUrl.pathname + currentUrl.search);
+				}
+			}
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${errorMessage}`);

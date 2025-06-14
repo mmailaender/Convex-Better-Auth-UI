@@ -1,6 +1,7 @@
 <script lang="ts">
 	// SvelteKit
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	/** UI **/
 	// Icons
@@ -13,7 +14,7 @@
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 
 	// API
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	const client = useConvexClient();
@@ -21,6 +22,10 @@
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
+
+	// Queries
+	const activeOrgResponse = useQuery(api.organizations.getActiveOrganization);
+	const activeOrganization = $derived(activeOrgResponse.data);
 
 	// Props
 	type CreateOrganizationProps = {
@@ -119,6 +124,10 @@
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
+			const currentUrl = new URL(window.location.href);
+			const pathSegments = currentUrl.pathname.split('/');
+			const activeOrgId = activeOrganization?._id;
+
 			// Create the organization
 			await client.mutation(api.organizations.createOrganization, {
 				name,
@@ -128,8 +137,32 @@
 			toast.success('Organization created successfully!');
 			// Call the onSuccessfulCreate callback if provided
 			if (props.onSuccessfulCreate) props.onSuccessfulCreate();
+
+			// Redirect
+			const redirectUrl = props.redirectTo ?? page.url.searchParams.get('redirectTo');
 			// Navigate to the specified URL
-			if (props.redirectTo) goto(props.redirectTo);
+			if (redirectUrl) {
+				goto(redirectUrl);
+			} else {
+				let needsRedirect = false;
+				if (activeOrgId) {
+					// Check each path segment for the organization ID
+					for (let i = 0; i < pathSegments.length; i++) {
+						if (pathSegments[i] === activeOrgId) {
+							// Found the organization ID in the URL path
+							pathSegments[i] = activeOrganization?._id;
+							needsRedirect = true;
+							break;
+						}
+					}
+				}
+
+				if (needsRedirect) {
+					// Reconstruct the URL with the new organization ID
+					currentUrl.pathname = pathSegments.join('/');
+					goto(currentUrl, { invalidateAll: true });
+				}
+			}
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${message}`);
