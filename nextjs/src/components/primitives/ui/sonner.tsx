@@ -19,8 +19,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
 					unstyled: true,
 					classNames: {
 						toast:
-							'flex flex-row rounded-container shadow-lg w-full md:w-96 items-center p-3 transition-all font-medium gap-2 pointer-events-auto',
-						title: 'truncate text-sm font-medium',
+							'flex flex-row rounded-container shadow-lg w-full md:w-96 items-start p-3 transition-all font-medium gap-2 pointer-events-auto',
+						title: 'break-words text-sm font-medium leading-tight',
 						description: 'text-surface-600-400 mt-1 line-clamp-2 text-xs',
 						actionButton: '',
 						cancelButton: '',
