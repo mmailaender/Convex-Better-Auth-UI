@@ -100,52 +100,52 @@ export default function LeaveOrganization(): React.ReactNode {
 					<Dialog.Title>Leave organization</Dialog.Title>
 				</Dialog.Header>
 				<Dialog.Description>
-					If you leave organization you’ll lose access to all projects and resources. <br /> <br />{' '}
-					As the owner, you must assign a new owner before leaving.
-				</Dialog.Description>
-				<div className="mt-8">
+					<p>If you leave organization you’ll lose access to all projects and resources.</p>
 					{isOrgOwner && (
-						<>
-							<div className="space-y-2">
-								<label htmlFor="successor" className="label">
-									New owner:
-								</label>
-								<select
-									id="successor"
-									value={selectedSuccessor?.toString() || ''}
-									onChange={(e) =>
-										setSelectedSuccessor(e.target.value ? (e.target.value as Id<'users'>) : null)
-									}
-									className="select w-full cursor-pointer"
-									required={isOrgOwner}
-								>
-									<option value="" disabled>
-										Choose a successor
-									</option>
-									{organizationMembers.map((member) => (
-										<option key={member.user._id.toString()} value={member.user._id.toString()}>
-											{member.user.name} ({member.user.email})
-										</option>
-									))}
-								</select>
-							</div>
-						</>
+						<p className="my-6">As the owner, you must assign a new owner before leaving.</p>
 					)}
+				</Dialog.Description>
+				{isOrgOwner && (
+					<>
+						<div className="space-y-2">
+							<label htmlFor="successor" className="label">
+								New owner:
+							</label>
+							<select
+								id="successor"
+								value={selectedSuccessor?.toString() || ''}
+								onChange={(e) =>
+									setSelectedSuccessor(e.target.value ? (e.target.value as Id<'users'>) : null)
+								}
+								className="select w-full cursor-pointer"
+								required={isOrgOwner}
+							>
+								<option value="" disabled>
+									Choose a successor
+								</option>
+								{organizationMembers.map((member) => (
+									<option key={member.user._id.toString()} value={member.user._id.toString()}>
+										{member.user.name} ({member.user.email})
+									</option>
+								))}
+							</select>
+						</div>
+					</>
+				)}
 
-					<Dialog.Footer>
-						<button className="btn preset-tonal" onClick={() => setIsOpen(false)}>
-							Cancel
-						</button>
-						<button
-							type="button"
-							className="btn bg-error-500 hover:bg-error-600 text-white"
-							onClick={handleLeaveOrganization}
-							disabled={isOrgOwner && !selectedSuccessor}
-						>
-							Confirm
-						</button>
-					</Dialog.Footer>
-				</div>
+				<Dialog.Footer>
+					<button className="btn preset-tonal" onClick={() => setIsOpen(false)}>
+						Cancel
+					</button>
+					<button
+						type="button"
+						className="btn bg-error-500 hover:bg-error-600 text-white"
+						onClick={handleLeaveOrganization}
+						disabled={isOrgOwner && !selectedSuccessor}
+					>
+						Confirm
+					</button>
+				</Dialog.Footer>
 			</Dialog.Content>
 		</Dialog.Root>
 	);

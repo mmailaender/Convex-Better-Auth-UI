@@ -128,45 +128,43 @@
 			</Dialog.Header>
 
 			<Dialog.Description>
-				If you leave organization you'll lose access to all projects and resources. <br /> <br />
+				<p>If you leave organization you'll lose access to all projects and resources.</p>
 				{#if roles.isOwner}
-					As the owner, you must assign a new owner before leaving.
+					<p class="my-6">As the owner, you must assign a new owner before leaving.</p>
 				{/if}
 			</Dialog.Description>
 
-			<div class="mt-8">
-				{#if roles.isOwner}
-					<div class="space-y-2">
-						<label for="successor" class="label"> New owner: </label>
-						<select
-							id="successor"
-							value={selectedSuccessor?.toString() || ''}
-							onchange={handleSuccessorChange}
-							class="select w-full cursor-pointer"
-							required={roles.isOwner}
-						>
-							<option value="" disabled> Choose a successor </option>
-							{#each organizationMembers as member}
-								<option value={member.user._id.toString()}>
-									{member.user.name} ({member.user.email})
-								</option>
-							{/each}
-						</select>
-					</div>
-				{/if}
-
-				<Dialog.Footer>
-					<button class="btn preset-tonal" onclick={() => (modalOpen = false)}> Cancel </button>
-					<button
-						type="button"
-						class="btn bg-error-500 hover:bg-error-600 text-white"
-						onclick={handleLeaveOrganization}
-						disabled={roles.isOwner && !selectedSuccessor}
+			{#if roles.isOwner}
+				<div class="space-y-2">
+					<label for="successor" class="label"> New owner: </label>
+					<select
+						id="successor"
+						value={selectedSuccessor?.toString() || ''}
+						onchange={handleSuccessorChange}
+						class="select w-full cursor-pointer"
+						required={roles.isOwner}
 					>
-						Confirm
-					</button>
-				</Dialog.Footer>
-			</div>
+						<option value="" disabled> Choose a successor </option>
+						{#each organizationMembers as member}
+							<option value={member.user._id.toString()}>
+								{member.user.name} ({member.user.email})
+							</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
+
+			<Dialog.Footer>
+				<button class="btn preset-tonal" onclick={() => (modalOpen = false)}> Cancel </button>
+				<button
+					type="button"
+					class="btn bg-error-500 hover:bg-error-600 text-white"
+					onclick={handleLeaveOrganization}
+					disabled={roles.isOwner && !selectedSuccessor}
+				>
+					Confirm
+				</button>
+			</Dialog.Footer>
 		</Dialog.Content>
 	</Dialog.Root>
 {/if}
