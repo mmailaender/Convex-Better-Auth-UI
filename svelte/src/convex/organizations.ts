@@ -1,6 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { v } from 'convex/values';
-import { mutation, query } from './_generated/server';
+import { ConvexError, v } from 'convex/values';
+import { internalMutation, mutation, query } from './_generated/server';
+import { internal } from './_generated/api';
 
 /**
  * Creates a new organization with the given name, slug, and optional logo
@@ -14,9 +15,26 @@ export const createOrganization = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
+		return await ctx.runMutation(internal.organizations._createOrganization, {
+			userId,
+			name: args.name,
+			slug: args.slug,
+			logoId: args.logoId
+		});
+	}
+});
+
+export const _createOrganization = internalMutation({
+	args: {
+		userId: v.id('users'),
+		name: v.string(),
+		slug: v.string(),
+		logoId: v.optional(v.id('_storage'))
+	},
+	handler: async (ctx, args) => {
 		// Create the organization
 		const organizationId = await ctx.db.insert('organizations', {
 			name: args.name,
@@ -28,12 +46,12 @@ export const createOrganization = mutation({
 		// Add the creator as an owner
 		await ctx.db.insert('organizationMembers', {
 			organizationId,
-			userId,
+			userId: args.userId,
 			role: 'role_organization_owner'
 		});
 
 		// Set the new organization as active
-		await ctx.db.patch(userId, {
+		await ctx.db.patch(args.userId, {
 			activeOrganizationId: organizationId
 		});
 
@@ -152,7 +170,7 @@ export const setActiveOrganization = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Verify the user is a member of the organization
@@ -164,7 +182,7 @@ export const setActiveOrganization = mutation({
 			.first();
 
 		if (!membership) {
-			throw new Error('User is not a member of this organization');
+			throw new ConvexError('User is not a member of this organization');
 		}
 
 		// Update the user's active organization
@@ -184,7 +202,7 @@ export const leaveOrganization = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get the membership
@@ -196,7 +214,7 @@ export const leaveOrganization = mutation({
 			.first();
 
 		if (!membership) {
-			throw new Error('Not a member of this organization');
+			throw new ConvexError('Not a member of this organization');
 		}
 
 		// Check if user is the owner and the only owner
@@ -213,7 +231,7 @@ export const leaveOrganization = mutation({
 				.collect();
 
 			if (otherOwners.length === 0) {
-				throw new Error(
+				throw new ConvexError(
 					'Cannot leave organization as the only owner. Transfer ownership first or delete the organization.'
 				);
 			}
@@ -259,7 +277,7 @@ export const updateOrganizationProfile = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Verify the user is a member of the organization with admin/owner role
@@ -271,11 +289,11 @@ export const updateOrganizationProfile = mutation({
 			.first();
 
 		if (!membership) {
-			throw new Error('User is not a member of this organization');
+			throw new ConvexError('User is not a member of this organization');
 		}
 
 		if (!['role_organization_owner', 'role_organization_admin'].includes(membership.role)) {
-			throw new Error('User does not have permission to update this organization');
+			throw new ConvexError('User does not have permission to update this organization');
 		}
 
 		if (args.logoId !== undefined) {
@@ -283,7 +301,7 @@ export const updateOrganizationProfile = mutation({
 			// Get the existing organization to check if we need to delete an old logo
 			const organization = await ctx.db.get(args.organizationId);
 			if (!organization) {
-				throw new Error('Organization not found');
+				throw new ConvexError('Organization not found');
 			}
 
 			// If the logo is being updated and there was an old one, delete it
@@ -315,7 +333,7 @@ export const deleteOrganization = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Verify the user is an owner of the organization
@@ -327,13 +345,13 @@ export const deleteOrganization = mutation({
 			.first();
 
 		if (!membership || membership.role !== 'role_organization_owner') {
-			throw new Error('Only organization owners can delete an organization');
+			throw new ConvexError('Only organization owners can delete an organization');
 		}
 
 		// Get the organization
 		const organization = await ctx.db.get(args.organizationId);
 		if (!organization) {
-			throw new Error('Organization not found');
+			throw new ConvexError('Organization not found');
 		}
 
 		// Delete the organization logo if it exists

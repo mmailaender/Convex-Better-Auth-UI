@@ -1,5 +1,5 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { action } from '../../_generated/server';
 import { Id } from '../../_generated/dataModel';
 import { api, internal } from '../../_generated/api';
@@ -20,12 +20,12 @@ export const inviteMember = action({
 		// Get the authenticated user
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 		// Get the user's active organization
 		const user = await ctx.runQuery(api.users.getUser, {});
 		if (!user || !user.activeOrganizationId) {
-			throw new Error('User has no active organization');
+			throw new ConvexError('User has no active organization');
 		}
 
 		const organizationId = user.activeOrganizationId;
@@ -35,18 +35,18 @@ export const inviteMember = action({
 			organizationId
 		});
 		if (!isAuthorized) {
-			throw new Error('Not authorized to send invitations');
+			throw new ConvexError('Not authorized to send invitations');
 		}
 
 		// Verify the email address
 		const verificationResult = await verifyEmail(ctx, email);
 
 		if (!verificationResult.valid) {
-			throw new Error(`Email ${email} is not valid: ${verificationResult.reason}`);
+			throw new ConvexError(`Email ${email} is not valid: ${verificationResult.reason}`);
 		}
 
 		const invitation = await ctx.runMutation(
-			internal.organizations.invitations.db.createInvitation,
+			internal.organizations.invitations.db._createInvitation,
 			{
 				email,
 				role
@@ -54,14 +54,14 @@ export const inviteMember = action({
 		);
 
 		if (!invitation) {
-			throw new Error('Failed to create invitation');
+			throw new ConvexError('Failed to create invitation');
 		}
 
 		const baseUrl = process.env.SITE_URL;
 		const fromEmail = process.env.EMAIL_SEND_FROM;
 
 		if (!baseUrl || !fromEmail) {
-			throw new Error('Missing environment variables');
+			throw new ConvexError('Missing environment variables');
 		}
 
 		// Generate the acceptance URL
@@ -114,13 +114,13 @@ export const inviteMembers = action({
 		// Get the authenticated user
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get the user's active organization
 		const user = await ctx.runQuery(api.users.getUser, {});
 		if (!user || !user.activeOrganizationId) {
-			throw new Error('User has no active organization');
+			throw new ConvexError('User has no active organization');
 		}
 
 		const organizationId = user.activeOrganizationId;
@@ -130,14 +130,14 @@ export const inviteMembers = action({
 			organizationId
 		});
 		if (!isAuthorized) {
-			throw new Error('Not authorized to send invitations');
+			throw new ConvexError('Not authorized to send invitations');
 		}
 
 		const baseUrl = process.env.SITE_URL;
 		const fromEmail = process.env.EMAIL_SEND_FROM;
 
 		if (!baseUrl || !fromEmail) {
-			throw new Error('Missing environment variables');
+			throw new ConvexError('Missing environment variables');
 		}
 
 		// Process each email and create invitations
@@ -159,7 +159,7 @@ export const inviteMembers = action({
 
 					// Create invitation in database
 					const invitation = await ctx.runMutation(
-						internal.organizations.invitations.db.createInvitation,
+						internal.organizations.invitations.db._createInvitation,
 						{
 							email,
 							role

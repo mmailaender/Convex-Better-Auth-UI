@@ -1,5 +1,5 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { mutation, query } from '../_generated/server';
 import { Id } from '../_generated/dataModel';
 
@@ -97,18 +97,18 @@ export const updateMemberRole = mutation({
 	handler: async (ctx, args) => {
 		const actorId = await getAuthUserId(ctx);
 		if (!actorId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Prevent users from changing their own role
 		if (actorId.toString() === args.userId.toString()) {
-			throw new Error('Cannot change your own role');
+			throw new ConvexError('Cannot change your own role');
 		}
 
 		// Get user to find active organization
 		const actor = await ctx.db.get(actorId);
 		if (!actor || !actor.activeOrganizationId) {
-			throw new Error('No active organization');
+			throw new ConvexError('No active organization');
 		}
 
 		const organizationId = actor.activeOrganizationId;
@@ -122,11 +122,11 @@ export const updateMemberRole = mutation({
 			.first();
 
 		if (!actorMembership) {
-			throw new Error('Not a member of this organization');
+			throw new ConvexError('Not a member of this organization');
 		}
 
 		if (!['role_organization_owner', 'role_organization_admin'].includes(actorMembership.role)) {
-			throw new Error('Insufficient permissions to update member roles');
+			throw new ConvexError('Insufficient permissions to update member roles');
 		}
 
 		// Find the target user's membership
@@ -138,11 +138,11 @@ export const updateMemberRole = mutation({
 			.first();
 
 		if (!targetMembership) {
-			throw new Error('Target user is not a member of this organization');
+			throw new ConvexError('Target user is not a member of this organization');
 		}
 
 		if (targetMembership.role === 'role_organization_owner') {
-			throw new Error('Cannot change the role of an organization owner');
+			throw new ConvexError('Cannot change the role of an organization owner');
 		}
 
 		// Update the membership
@@ -164,13 +164,13 @@ export const removeMember = mutation({
 	handler: async (ctx, args) => {
 		const actorId = await getAuthUserId(ctx);
 		if (!actorId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get user to find active organization
 		const actor = await ctx.db.get(actorId);
 		if (!actor || !actor.activeOrganizationId) {
-			throw new Error('No active organization');
+			throw new ConvexError('No active organization');
 		}
 
 		const organizationId = actor.activeOrganizationId;
@@ -184,11 +184,11 @@ export const removeMember = mutation({
 			.first();
 
 		if (!actorMembership) {
-			throw new Error('Not a member of this organization');
+			throw new ConvexError('Not a member of this organization');
 		}
 
 		if (!['role_organization_owner', 'role_organization_admin'].includes(actorMembership.role)) {
-			throw new Error('Insufficient permissions to remove members');
+			throw new ConvexError('Insufficient permissions to remove members');
 		}
 
 		// Find the target user's membership
@@ -200,12 +200,12 @@ export const removeMember = mutation({
 			.first();
 
 		if (!targetMembership) {
-			throw new Error('Target user is not a member of this organization');
+			throw new ConvexError('Target user is not a member of this organization');
 		}
 
 		// Cannot remove the organization owner
 		if (targetMembership.role === 'role_organization_owner') {
-			throw new Error('Cannot remove an organization owner');
+			throw new ConvexError('Cannot remove an organization owner');
 		}
 
 		// Remove the membership
@@ -227,7 +227,7 @@ export const leaveOrganization = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get the membership
@@ -239,14 +239,16 @@ export const leaveOrganization = mutation({
 			.first();
 
 		if (!membership) {
-			throw new Error('Not a member of this organization');
+			throw new ConvexError('Not a member of this organization');
 		}
 
 		// Check if user is the owner
 		if (membership.role === 'role_organization_owner') {
 			// Owner must provide a successor
 			if (!args.successorId) {
-				throw new Error('As the organization owner, you must select a successor before leaving');
+				throw new ConvexError(
+					'As the organization owner, you must select a successor before leaving'
+				);
 			}
 
 			// Get the successor's membership
@@ -258,7 +260,7 @@ export const leaveOrganization = mutation({
 				.first();
 
 			if (!successorMembership) {
-				throw new Error('Selected successor is not a member of this organization');
+				throw new ConvexError('Selected successor is not a member of this organization');
 			}
 
 			// Update successor's role to owner
