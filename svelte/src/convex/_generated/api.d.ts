@@ -19,6 +19,7 @@ import type * as http from "../http.js";
 import type * as model_emails_send from "../model/emails/send.js";
 import type * as model_emails_templates_organizationInvitation from "../model/emails/templates/organizationInvitation.js";
 import type * as model_emails_templates_verification from "../model/emails/templates/verification.js";
+import type * as model_organizations_index from "../model/organizations/index.js";
 import type * as organizations_invitations_actions from "../organizations/invitations/actions.js";
 import type * as organizations_invitations_mutations from "../organizations/invitations/mutations.js";
 import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   "model/emails/send": typeof model_emails_send;
   "model/emails/templates/organizationInvitation": typeof model_emails_templates_organizationInvitation;
   "model/emails/templates/verification": typeof model_emails_templates_verification;
+  "model/organizations/index": typeof model_organizations_index;
   "organizations/invitations/actions": typeof organizations_invitations_actions;
   "organizations/invitations/mutations": typeof organizations_invitations_mutations;
   "organizations/invitations/queries": typeof organizations_invitations_queries;

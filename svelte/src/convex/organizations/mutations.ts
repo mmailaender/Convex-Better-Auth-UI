@@ -1,11 +1,14 @@
-// Convex mutations for organizations domain.
-// TODO: Migrate mutation functions from ../organizations.ts into this file.
-
 import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../_generated/server';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
+import {
+	createOrganizationModel,
+	setActiveOrganizationModel,
+	leaveOrganizationModel,
+	updateOrganizationProfileModel,
+	deleteOrganizationModel
+} from '../model/organizations';
 
 /**
  * Creates a new organization with the given name, slug, and optional logo
@@ -22,7 +25,7 @@ export const createOrganization = mutation({
 			throw new ConvexError('Not authenticated');
 		}
 
-		return await ctx.runMutation(internal.organizations.mutations._createOrganization, {
+		return await createOrganizationModel(ctx, {
 			userId,
 			name: args.name,
 			slug: args.slug,
@@ -39,27 +42,7 @@ export const _createOrganization = internalMutation({
 		logoId: v.optional(v.id('_storage'))
 	},
 	handler: async (ctx, args) => {
-		// Create the organization
-		const organizationId = await ctx.db.insert('organizations', {
-			name: args.name,
-			slug: args.slug,
-			logoId: args.logoId,
-			plan: 'Free' // Default plan
-		});
-
-		// Add the creator as an owner
-		await ctx.db.insert('organizationMembers', {
-			organizationId,
-			userId: args.userId,
-			role: 'role_organization_owner'
-		});
-
-		// Set the new organization as active
-		await ctx.db.patch(args.userId, {
-			activeOrganizationId: organizationId
-		});
-
-		return organizationId;
+		return await createOrganizationModel(ctx, args);
 	}
 });
 
@@ -72,10 +55,7 @@ export const setActiveOrganization = mutation({
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			throw new ConvexError('Not authenticated');
-		}
-
+		if (!userId) throw new ConvexError('Not authenticated');
 		// Verify the user is a member of the organization
 		const membership = await ctx.db
 			.query('organizationMembers')
@@ -88,10 +68,7 @@ export const setActiveOrganization = mutation({
 			throw new ConvexError('User is not a member of this organization');
 		}
 
-		// Update the user's active organization
-		return await ctx.db.patch(userId, {
-			activeOrganizationId: args.organizationId
-		});
+		await setActiveOrganizationModel(ctx, { userId, organizationId: args.organizationId });
 	}
 });
 
@@ -104,66 +81,24 @@ export const leaveOrganization = mutation({
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			throw new ConvexError('Not authenticated');
-		}
-
-		// Get the membership
+		if (!userId) throw new ConvexError('Not authenticated');
+		// Validate membership exists
 		const membership = await ctx.db
 			.query('organizationMembers')
 			.withIndex('orgId_and_userId', (q) =>
 				q.eq('organizationId', args.organizationId).eq('userId', userId)
 			)
 			.first();
-
 		if (!membership) {
 			throw new ConvexError('Not a member of this organization');
 		}
 
-		// Check if user is the owner and the only owner
-		if (membership.role === 'role_organization_owner') {
-			const otherOwners = await ctx.db
-				.query('organizationMembers')
-				.filter((q) =>
-					q.and(
-						q.eq(q.field('organizationId'), args.organizationId),
-						q.eq(q.field('role'), 'role_organization_owner'),
-						q.neq(q.field('userId'), userId)
-					)
-				)
-				.collect();
-
-			if (otherOwners.length === 0) {
-				throw new ConvexError(
-					'Cannot leave organization as the only owner. Transfer ownership first or delete the organization.'
-				);
-			}
-		}
-
-		// Remove the membership
-		await ctx.db.delete(membership._id);
-
-		// If this was the user's active organization, unset it
-		const user = await ctx.db.get(userId);
-		if (user && user.activeOrganizationId === args.organizationId) {
-			// Find another organization to set as active
-			const otherMemberships = await ctx.db
-				.query('organizationMembers')
-				.withIndex('userId', (q) => q.eq('userId', userId))
-				.collect();
-
-			if (otherMemberships.length > 0) {
-				await ctx.db.patch(userId, {
-					activeOrganizationId: otherMemberships[0].organizationId
-				});
-			} else {
-				await ctx.db.patch(userId, {
-					activeOrganizationId: undefined
-				});
-			}
-		}
-
-		return true;
+		return await leaveOrganizationModel(ctx, {
+			userId,
+			organizationId: args.organizationId,
+			membershipId: membership._id,
+			role: membership.role
+		});
 	}
 });
 
@@ -179,50 +114,42 @@ export const updateOrganizationProfile = mutation({
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			throw new ConvexError('Not authenticated');
-		}
-
-		// Verify the user is a member of the organization with admin/owner role
+		if (!userId) throw new ConvexError('Not authenticated');
+		// Validate membership and role
 		const membership = await ctx.db
 			.query('organizationMembers')
 			.withIndex('orgId_and_userId', (q) =>
 				q.eq('organizationId', args.organizationId).eq('userId', userId)
 			)
 			.first();
-
 		if (!membership) {
 			throw new ConvexError('User is not a member of this organization');
 		}
-
 		if (!['role_organization_owner', 'role_organization_admin'].includes(membership.role)) {
 			throw new ConvexError('User does not have permission to update this organization');
 		}
 
-		if (args.logoId !== undefined) {
-			// Logo is being updated
-			// Get the existing organization to check if we need to delete an old logo
-			const organization = await ctx.db.get(args.organizationId);
-			if (!organization) {
-				throw new ConvexError('Organization not found');
-			}
-
-			// If the logo is being updated and there was an old one, delete it
-			if (
-				organization.logoId && // There's an existing logo
-				args.logoId !== organization.logoId // The logo is actually changing
-			) {
-				// Delete the old logo file
-				await ctx.storage.delete(organization.logoId);
-			}
-		}
-
-		// Update the organization
-		return await ctx.db.patch(args.organizationId, {
+		await updateOrganizationProfileModel(ctx, {
+			organizationId: args.organizationId,
 			name: args.name,
 			slug: args.slug,
-			...(args.logoId && { logoId: args.logoId })
+			logoId: args.logoId
 		});
+	}
+});
+
+/**
+ * Updates an organization's profile information
+ */
+export const _updateOrganizationProfile = internalMutation({
+	args: {
+		organizationId: v.id('organizations'),
+		name: v.optional(v.string()),
+		slug: v.optional(v.string()),
+		logoId: v.optional(v.id('_storage'))
+	},
+	handler: async (ctx, args) => {
+		await updateOrganizationProfileModel(ctx, args);
 	}
 });
 
@@ -235,80 +162,18 @@ export const deleteOrganization = mutation({
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			throw new ConvexError('Not authenticated');
-		}
-
-		// Verify the user is an owner of the organization
+		if (!userId) throw new ConvexError('Not authenticated');
+		// Validate that the caller is an organization owner
 		const membership = await ctx.db
 			.query('organizationMembers')
 			.withIndex('orgId_and_userId', (q) =>
 				q.eq('organizationId', args.organizationId).eq('userId', userId)
 			)
 			.first();
-
 		if (!membership || membership.role !== 'role_organization_owner') {
 			throw new ConvexError('Only organization owners can delete an organization');
 		}
 
-		// Get the organization
-		const organization = await ctx.db.get(args.organizationId);
-		if (!organization) {
-			throw new ConvexError('Organization not found');
-		}
-
-		// Delete the organization logo if it exists
-		if (organization.logoId) {
-			await ctx.storage.delete(organization.logoId);
-		}
-
-		// Get all members of the organization
-		const members = await ctx.db
-			.query('organizationMembers')
-			.withIndex('orgId', (q) => q.eq('organizationId', args.organizationId))
-			.collect();
-
-		// For each member, update their active organization if needed
-		for (const member of members) {
-			const user = await ctx.db.get(member.userId);
-			if (!user) continue;
-
-			if (user.activeOrganizationId === args.organizationId) {
-				// Find another organization to set as active
-				const otherMemberships = await ctx.db
-					.query('organizationMembers')
-					.withIndex('userId', (q) => q.eq('userId', member.userId))
-					.filter((q) => q.neq(q.field('organizationId'), args.organizationId))
-					.collect();
-
-				if (otherMemberships.length > 0) {
-					await ctx.db.patch(member.userId, {
-						activeOrganizationId: otherMemberships[0].organizationId
-					});
-				} else {
-					await ctx.db.patch(member.userId, {
-						activeOrganizationId: undefined
-					});
-				}
-			}
-
-			// Delete the member record
-			await ctx.db.delete(member._id);
-		}
-
-		// Delete any pending invitations for this organization
-		const invitations = await ctx.db
-			.query('invitations')
-			.withIndex('by_org_and_email', (q) => q.eq('organizationId', args.organizationId))
-			.collect();
-
-		for (const invitation of invitations) {
-			await ctx.db.delete(invitation._id);
-		}
-
-		// Finally, delete the organization
-		await ctx.db.delete(args.organizationId);
-
-		return true;
+		return await deleteOrganizationModel(ctx, { organizationId: args.organizationId });
 	}
 });

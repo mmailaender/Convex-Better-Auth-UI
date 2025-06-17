@@ -3,6 +3,7 @@ import { ConvexCredentials } from '@convex-dev/auth/providers/ConvexCredentials'
 import { convexAuth } from '@convex-dev/auth/server';
 import { api, internal } from './_generated/api.js';
 import { MutationCtx } from './_generated/server.js';
+import { Id } from './_generated/dataModel.js';
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 	providers: [
@@ -27,25 +28,26 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 
 			const user = await ctx.db.get(userId);
 
-			if (imageUrl && !user?.imageId) {
-				await ctx.scheduler.runAfter(0, internal.users.actions._downloadAndStoreProfileImage, {
-					userId,
-					imageUrl
-				});
-			}
-
 			// Get the user's organizations. If there is no organization create one with the users name
 			const organizations = await ctx.db
 				.query('organizationMembers')
 				.withIndex('userId', (q) => q.eq('userId', userId))
 				.collect();
 
+			let orgId: Id<'organizations'> | undefined;
 			if (organizations.length === 0) {
-				await ctx.runMutation(internal.organizations.mutations._createOrganization, {
+				orgId = await ctx.runMutation(internal.organizations.mutations._createOrganization, {
 					userId,
 					name: user?.name + "'s projects",
-					slug: user?.name + '-projects',
-					logoId: user?.imageId
+					slug: user?.name + '-projects'
+				});
+			}
+
+			if (imageUrl && !user?.imageId) {
+				await ctx.scheduler.runAfter(0, internal.users.actions._downloadAndStoreProfileImage, {
+					userId,
+					orgId,
+					imageUrl
 				});
 			}
 		}
