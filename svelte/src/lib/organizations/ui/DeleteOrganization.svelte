@@ -31,7 +31,7 @@
 	}>();
 
 	// Queries
-	const activeOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const activeOrganizationResponse = useQuery(api.organizations.queries.getActiveOrganization, {});
 	const activeOrganization = $derived(activeOrganizationResponse.data);
 
 	// State
@@ -44,7 +44,7 @@
 		try {
 			if (!activeOrganization) return;
 
-			await client.mutation(api.organizations.deleteOrganization, {
+			await client.mutation(api.organizations.mutations.deleteOrganization, {
 				organizationId: activeOrganization._id
 			});
 			dialogOpen = false;

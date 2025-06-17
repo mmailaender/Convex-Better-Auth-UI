@@ -20,13 +20,13 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 	import type { FunctionReturnType } from 'convex/server';
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
 	let { initialData }: { initialData?: UserResponse } = $props();
 
 	// Query
-	const response = useQuery(api.users.getUser, {}, { initialData });
+	const response = useQuery(api.users.queries.getUser, {}, { initialData });
 
 	// State
 	let isDialogOpen: boolean = $state(false);
@@ -74,7 +74,7 @@
 		event.preventDefault();
 
 		try {
-			await client.mutation(api.users.updateUserName, { name });
+			await client.mutation(api.users.mutations.updateUserName, { name });
 			isDialogOpen = false;
 			isDrawerOpen = false;
 			toast.success('Profile name updated successfully');
@@ -121,7 +121,7 @@
 			const storageId = result.storageId as Id<'_storage'>;
 
 			// Update the user's avatar with the storage ID
-			await client.mutation(api.users.updateAvatar, { storageId });
+			await client.mutation(api.users.mutations.updateAvatar, { storageId });
 
 			toast.success('Avatar updated successfully');
 		} catch (err: unknown) {
@@ -135,10 +135,10 @@
 
 <div class="flex flex-col gap-6">
 	{#if !user}
-		<div class="bg-success-200-800 h-16 w-full animate-pulse rounded-base"></div>
+		<div class="bg-success-200-800 rounded-base h-16 w-full animate-pulse"></div>
 	{:else}
 		<!-- Avatar + Upload -->
-		<div class="flex items-center justify-start rounded-base pt-6 pl-0.5">
+		<div class="rounded-base flex items-center justify-start pt-6 pl-0.5">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"

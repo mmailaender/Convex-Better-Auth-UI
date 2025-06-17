@@ -1,12 +1,13 @@
 import { v } from 'convex/values';
 import { action, ActionCtx } from '../_generated/server';
-import { generateVerificationEmail } from './templates/verification';
+import { api } from '../_generated/api';
+
+import { generateVerificationEmail } from '../model/emails/templates/verification';
 import {
 	generateOrganizationInvitationEmail,
 	type OrganizationInvitationParams
-} from './templates/organizationInvitation';
-import { sendEmail, type SendEmailResponse } from './send';
-import { api } from '../_generated/api';
+} from '../model/emails/templates/organizationInvitation';
+import { sendEmail, type SendEmailResponse } from '../model/emails/send';
 
 /**
  * Interface for email verification result
@@ -37,7 +38,7 @@ export async function verifyEmail(ctx: ActionCtx, email: string): Promise<Verify
 		}
 
 		// Check if user already exists in database
-		const exists = await ctx.runQuery(api.users.isUserExisting, { email });
+		const exists = await ctx.runQuery(api.users.queries.isUserExisting, { email });
 
 		// If user doesn't exist, verify email validity with external service
 		if (!exists) {

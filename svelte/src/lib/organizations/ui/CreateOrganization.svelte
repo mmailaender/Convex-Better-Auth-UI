@@ -24,7 +24,7 @@
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 
 	// Queries
-	const activeOrgResponse = useQuery(api.organizations.getActiveOrganization);
+	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization);
 	const activeOrganization = $derived(activeOrgResponse.data);
 
 	// Props
@@ -129,7 +129,7 @@
 			const activeOrgId = activeOrganization?._id;
 
 			// Create the organization
-			await client.mutation(api.organizations.createOrganization, {
+			await client.mutation(api.organizations.mutations.createOrganization, {
 				name,
 				slug,
 				logoId: logoStorageId

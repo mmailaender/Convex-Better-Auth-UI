@@ -1,38 +1,11 @@
-import { getAuthUserId, invalidateSessions } from '@convex-dev/auth/server';
+import { getAuthUserId } from '@convex-dev/auth/server';
 import { ConvexError, v } from 'convex/values';
-import { action, internalAction, internalMutation, mutation, query } from './_generated/server';
-import { api, internal } from './_generated/api.js';
+import { internalMutation, mutation } from '../_generated/server';
+import { api } from '../_generated/api.js';
 
-export const isUserExisting = query({
-	args: {
-		email: v.string()
-	},
-	handler: async (ctx, args) => {
-		const { email } = args;
-		const user = await ctx.db
-			.query('users')
-			.filter((q) => q.eq(q.field('email'), email))
-			.first();
-		return user !== null;
-	}
-});
-
-export const getUser = query({
-	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			return null;
-		}
-		const user = await ctx.db.get(userId);
-		if (!user) {
-			return null;
-		}
-
-		user.image = user.imageId ? ((await ctx.storage.getUrl(user.imageId)) ?? undefined) : undefined;
-		return user;
-	}
-});
-
+/**
+ * Update the authenticated user's display name.
+ */
 export const updateUserName = mutation({
 	args: {
 		name: v.string()
@@ -49,6 +22,9 @@ export const updateUserName = mutation({
 	}
 });
 
+/**
+ * Update the authenticated user's avatar storage reference.
+ */
 export const updateAvatar = mutation({
 	args: {
 		storageId: v.id('_storage')
@@ -66,36 +42,9 @@ export const updateAvatar = mutation({
 	}
 });
 
-export const _downloadAndStoreProfileImage = internalAction({
-	args: {
-		userId: v.id('users'),
-		imageUrl: v.string()
-	},
-	handler: async (ctx, args) => {
-		const { userId, imageUrl } = args;
-
-		// Download the image
-		const response = await fetch(imageUrl);
-		const image = await response.blob();
-
-		// Store the image in Convex
-		const postUrl = await ctx.storage.generateUploadUrl();
-
-		const { storageId } = await fetch(postUrl, {
-			method: 'POST',
-			headers: { 'Content-Type': image.type },
-			body: image
-		}).then((res) => res.json());
-		await ctx.runMutation(internal.users._updateUser, {
-			userId,
-			data: {
-				imageId: storageId,
-				image: null
-			}
-		});
-	}
-});
-
+/**
+ * Internal mutation to patch arbitrary user fields.
+ */
 export const _updateUser = internalMutation({
 	args: {
 		userId: v.id('users'),
@@ -112,6 +61,9 @@ export const _updateUser = internalMutation({
 	}
 });
 
+/**
+ * Internal mutation that deletes a user and associated data.
+ */
 export const _deleteUser = internalMutation({
 	args: {
 		userId: v.id('users')
@@ -138,20 +90,18 @@ export const _deleteUser = internalMutation({
 			if (isOwner) {
 				if (isOnlyMember) {
 					// Sole owner and sole member -> delete organization entirely
-					await ctx.runMutation(api.organizations.deleteOrganization, {
+					await ctx.runMutation(api.organizations.mutations.deleteOrganization, {
 						organizationId: membership.organizationId
 					});
-					// deleteOrganization removes membership records, so nothing more to do here
 					continue;
 				} else {
-					// The organization has other members – abort deletion
 					throw new ConvexError(
 						'Cannot delete user: you are the owner of an organization that still has other members. Transfer ownership or delete the organization first.'
 					);
 				}
 			}
 
-			// Non-owner or non-sole-owner membership – just remove membership
+			// Non-owner membership – just remove membership
 			await ctx.db.delete(membership._id);
 		}
 
@@ -171,25 +121,7 @@ export const _deleteUser = internalMutation({
 			await ctx.storage.delete(user.imageId);
 		}
 
-		// 4. Finally delete the user document itself
+		// 4. Delete user document
 		return await ctx.db.delete(userId);
-	}
-});
-
-export const invalidateAndDeleteUser = action({
-	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			throw new ConvexError('Not authenticated');
-		}
-		try {
-			await ctx.runMutation(internal.users._deleteUser, { userId });
-			await invalidateSessions(ctx, { userId });
-		} catch (error) {
-			console.error('Error deleting user:', error);
-			// Propagate the error to the client so it can be handled (e.g. show toast)
-			throw error;
-			// (logging moved above for consistency)
-		}
 	}
 });

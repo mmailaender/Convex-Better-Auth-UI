@@ -1,7 +1,4 @@
 <script lang="ts">
-	// Icons
-	import { UserPlus } from '@lucide/svelte';
-
 	// Primitives
 	import { toast } from 'svelte-sonner';
 

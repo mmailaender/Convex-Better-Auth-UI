@@ -20,7 +20,7 @@
 	 */
 	async function handleConfirm(): Promise<void> {
 		try {
-			await client.action(api.users.invalidateAndDeleteUser, {});
+			await client.action(api.users.actions.invalidateAndDeleteUser, {});
 			await signOut();
 			deleteDialogOpen = false;
 		} catch (error) {

@@ -19,10 +19,10 @@
 	// API Types
 	import type { FunctionReturnType } from 'convex/server';
 	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.getOrganizationMembers
+		typeof api.organizations.members.queries.getOrganizationMembers
 	>;
 	type InvitationsResponse = FunctionReturnType<
-		typeof api.organizations.invitations.db.getInvitations
+		typeof api.organizations.invitations.queries.getInvitations
 	>;
 
 	// Props
@@ -37,12 +37,12 @@
 
 	// Queries
 	const membersResponse = useQuery(
-		api.organizations.members.getOrganizationMembers,
+		api.organizations.members.queries.getOrganizationMembers,
 		{},
 		{ initialData: initialData?.members }
 	);
 	const invitationsResponse = useQuery(
-		api.organizations.invitations.db.getInvitations,
+		api.organizations.invitations.queries.getInvitations,
 		{},
 		{ initialData: initialData?.invitations }
 	);

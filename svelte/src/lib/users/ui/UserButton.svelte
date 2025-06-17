@@ -17,7 +17,7 @@
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
 	const {
@@ -39,7 +39,7 @@
 	const isAuthenticated = $derived(useAuth().isAuthenticated);
 
 	// Queries
-	const userResponse = useQuery(api.users.getUser, {}, { initialData });
+	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData });
 	const user = $derived(userResponse.data);
 
 	/**
@@ -66,7 +66,7 @@
 			<Popover.Content side={popoverSide} align={popoverAlign}>
 				<div class="flex flex-col gap-1 p-0">
 					<button
-						class="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-base p-3 pr-6 duration-200 ease-in-out"
+						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-base flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 						onclick={openProfileModal}
 					>
 						<Avatar src={user.image} name={user.name} size="size-12" />

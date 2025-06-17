@@ -28,7 +28,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 			const user = await ctx.db.get(userId);
 
 			if (imageUrl && !user?.imageId) {
-				await ctx.scheduler.runAfter(0, internal.users._downloadAndStoreProfileImage, {
+				await ctx.scheduler.runAfter(0, internal.users.actions._downloadAndStoreProfileImage, {
 					userId,
 					imageUrl
 				});
@@ -41,7 +41,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 				.collect();
 
 			if (organizations.length === 0) {
-				await ctx.runMutation(internal.organizations._createOrganization, {
+				await ctx.runMutation(internal.organizations.mutations._createOrganization, {
 					userId,
 					name: user?.name + "'s projects",
 					slug: user?.name + '-projects',

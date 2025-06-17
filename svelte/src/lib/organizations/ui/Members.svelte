@@ -18,12 +18,12 @@
 	type Role = Doc<'organizationMembers'>['role'];
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.getActiveOrganization
+		typeof api.organizations.queries.getActiveOrganization
 	>;
 	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.getOrganizationMembers
+		typeof api.organizations.members.queries.getOrganizationMembers
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 	type GetOrganizationMemberReturnType = MembersResponse extends Array<infer T> ? T : never;
 
 	// Props
@@ -38,14 +38,18 @@
 	} = $props();
 
 	// Queries
-	const currentUserResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const currentUserResponse = useQuery(
+		api.users.queries.getUser,
+		{},
+		{ initialData: initialData?.user }
+	);
 	const currentOrganizationResponse = useQuery(
-		api.organizations.getActiveOrganization,
+		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
 	const membersResponse = useQuery(
-		api.organizations.members.getOrganizationMembers,
+		api.organizations.members.queries.getOrganizationMembers,
 		{},
 		{ initialData: initialData?.members }
 	);
@@ -100,7 +104,7 @@
 		if (newRole === 'role_organization_owner') return; // Cannot set someone as owner this way
 
 		try {
-			await client.mutation(api.organizations.members.updateMemberRole, {
+			await client.mutation(api.organizations.members.mutations.updateMemberRole, {
 				userId,
 				newRole
 			});
@@ -120,7 +124,7 @@
 		if (!selectedUserId) return;
 
 		try {
-			await client.mutation(api.organizations.members.removeMember, {
+			await client.mutation(api.organizations.members.mutations.removeMember, {
 				userId: selectedUserId
 			});
 

@@ -17,7 +17,7 @@
 	type Role = Doc<'organizationMembers'>['role'];
 	import type { FunctionReturnType } from 'convex/server';
 	type InvitationResponse = FunctionReturnType<
-		typeof api.organizations.invitations.db.getInvitations
+		typeof api.organizations.invitations.queries.getInvitations
 	>;
 
 	// Props
@@ -25,7 +25,7 @@
 
 	// Queries
 	const invitationsResponse = useQuery(
-		api.organizations.invitations.db.getInvitations,
+		api.organizations.invitations.queries.getInvitations,
 		{},
 		{ initialData }
 	);
@@ -74,7 +74,7 @@
 		if (!selectedInvitationId) return;
 
 		try {
-			await client.mutation(api.organizations.invitations.db.revokeInvitation, {
+			await client.mutation(api.organizations.invitations.mutations.revokeInvitation, {
 				invitationId: selectedInvitationId
 			});
 

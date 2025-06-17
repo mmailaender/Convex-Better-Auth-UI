@@ -23,7 +23,7 @@ export const inviteMember = action({
 			throw new ConvexError('Not authenticated');
 		}
 		// Get the user's active organization
-		const user = await ctx.runQuery(api.users.getUser, {});
+		const user = await ctx.runQuery(api.users.queries.getUser, {});
 		if (!user || !user.activeOrganizationId) {
 			throw new ConvexError('User has no active organization');
 		}
@@ -31,7 +31,7 @@ export const inviteMember = action({
 		const organizationId = user.activeOrganizationId;
 
 		// Check if the user is authorized to send invitations
-		const isAuthorized = await ctx.runQuery(api.organizations.members.isOwnerOrAdmin, {
+		const isAuthorized = await ctx.runQuery(api.organizations.members.queries.isOwnerOrAdmin, {
 			organizationId
 		});
 		if (!isAuthorized) {
@@ -46,7 +46,7 @@ export const inviteMember = action({
 		}
 
 		const invitation = await ctx.runMutation(
-			internal.organizations.invitations.db._createInvitation,
+			internal.organizations.invitations.mutations._createInvitation,
 			{
 				email,
 				role
@@ -118,7 +118,7 @@ export const inviteMembers = action({
 		}
 
 		// Get the user's active organization
-		const user = await ctx.runQuery(api.users.getUser, {});
+		const user = await ctx.runQuery(api.users.queries.getUser, {});
 		if (!user || !user.activeOrganizationId) {
 			throw new ConvexError('User has no active organization');
 		}
@@ -126,7 +126,7 @@ export const inviteMembers = action({
 		const organizationId = user.activeOrganizationId;
 
 		// Check if the user is authorized to send invitations
-		const isAuthorized = await ctx.runQuery(api.organizations.members.isOwnerOrAdmin, {
+		const isAuthorized = await ctx.runQuery(api.organizations.members.queries.isOwnerOrAdmin, {
 			organizationId
 		});
 		if (!isAuthorized) {
@@ -159,7 +159,7 @@ export const inviteMembers = action({
 
 					// Create invitation in database
 					const invitation = await ctx.runMutation(
-						internal.organizations.invitations.db._createInvitation,
+						internal.organizations.invitations.mutations._createInvitation,
 						{
 							email,
 							role

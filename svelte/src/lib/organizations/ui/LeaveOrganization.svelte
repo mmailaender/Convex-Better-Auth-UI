@@ -15,12 +15,12 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.getActiveOrganization
+		typeof api.organizations.queries.getActiveOrganization
 	>;
 	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.getOrganizationMembers
+		typeof api.organizations.members.queries.getOrganizationMembers
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
 	let {
@@ -34,14 +34,14 @@
 	} = $props();
 
 	// Queries
-	const userResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData: initialData?.user });
 	const organizationResponse = useQuery(
-		api.organizations.getActiveOrganization,
+		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
 	const membersResponse = useQuery(
-		api.organizations.members.getOrganizationMembers,
+		api.organizations.members.queries.getOrganizationMembers,
 		{},
 		{ initialData: initialData?.members }
 	);
@@ -87,7 +87,7 @@
 		}
 
 		try {
-			await client.mutation(api.organizations.members.leaveOrganization, {
+			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				organizationId: activeOrganization._id,
 				// Only send successorId if the user is an owner and a successor is selected
 				...(roles.isOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})

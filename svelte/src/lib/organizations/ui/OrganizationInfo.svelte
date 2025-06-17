@@ -9,9 +9,9 @@
 	import type { FunctionReturnType } from 'convex/server';
 
 	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.getActiveOrganization
+		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	const client = useConvexClient();
 	const roles = createRoles();
@@ -40,9 +40,9 @@
 		$props();
 
 	// Queries
-	const userResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData: initialData?.user });
 	const organizationResponse = useQuery(
-		api.organizations.getActiveOrganization,
+		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
@@ -144,7 +144,7 @@
 			const { storageId } = await res.json();
 			const logoStorageId = storageId as Id<'_storage'>;
 
-			await client.mutation(api.organizations.updateOrganizationProfile, {
+			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
 				organizationId: activeOrganization._id,
 				name: activeOrganization.name,
 				slug: activeOrganization.slug || '',
@@ -167,7 +167,7 @@
 		try {
 			isUploading = true;
 
-			await client.mutation(api.organizations.updateOrganizationProfile, {
+			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
 				organizationId: activeOrganization._id,
 				name: formState.name,
 				slug: formState.slug

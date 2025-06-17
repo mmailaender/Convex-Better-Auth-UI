@@ -9,6 +9,7 @@ import {
 
 const isLoginPage = createRouteMatcher(['/signin']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
+const isCreateOrganizationRoute = createRouteMatcher(['/org/create']);
 
 // Create auth hooks
 const {
@@ -27,8 +28,9 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
+	const isAuthenticated = await isAuthenticatedPromise(event);
+
 	if (isInvitationAcceptRoute(event.url.pathname)) {
-		const isAuthenticated = await isAuthenticatedPromise(event);
 		if (!isAuthenticated) {
 			// If not authenticated, redirect to signin with return URL
 			return redirect(
@@ -42,12 +44,28 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 			const client = await createConvexHttpClient(event);
 			try {
 				// Call the mutation directly with the auth token
-				await client.mutation(api.organizations.invitations.db.acceptInvitation, { invitationId });
+				await client.mutation(api.organizations.invitations.mutations.acceptInvitation, {
+					invitationId
+				});
 				return redirect(307, '/');
 			} catch (error: unknown) {
 				console.error('Error accepting invitation: ', error);
 				return redirect(307, '/');
 			}
+		}
+	}
+
+	if (isAuthenticated) {
+		const client = await createConvexHttpClient(event);
+		const activeOrganization = await client.query(
+			api.organizations.queries.getActiveOrganization,
+			{}
+		);
+		if (!activeOrganization && !isCreateOrganizationRoute(event.url.pathname)) {
+			return redirect(
+				307,
+				`/org/create?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`
+			);
 		}
 	}
 

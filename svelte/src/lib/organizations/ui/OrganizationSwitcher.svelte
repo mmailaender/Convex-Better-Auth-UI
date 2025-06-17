@@ -26,10 +26,10 @@
 
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.getActiveOrganization
+		typeof api.organizations.queries.getActiveOrganization
 	>;
 	type UserOrganizationsResponse = FunctionReturnType<
-		typeof api.organizations.getUserOrganizations
+		typeof api.organizations.queries.getUserOrganizations
 	>;
 
 	// Props
@@ -54,12 +54,12 @@
 
 	// Queries
 	const organizationsResponse = useQuery(
-		api.organizations.getUserOrganizations,
+		api.organizations.queries.getUserOrganizations,
 		{},
 		{ initialData: initialData?.userOrganizations }
 	);
 	const activeOrganizationResponse = useQuery(
-		api.organizations.getActiveOrganization,
+		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
@@ -88,7 +88,7 @@
 	 */
 	async function updateActiveOrg(organizationId: Id<'organizations'>): Promise<void> {
 		try {
-			await client.mutation(api.organizations.setActiveOrganization, { organizationId });
+			await client.mutation(api.organizations.mutations.setActiveOrganization, { organizationId });
 
 			// Close popover and refresh
 			switcherPopoverOpen = false;
@@ -140,7 +140,7 @@
 {:else}
 	<Popover.Root bind:open={switcherPopoverOpen}>
 		<Popover.Trigger
-			class="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-container border p-1 pr-2 duration-200 ease-in-out"
+			class="hover:bg-surface-200-800 border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
 		>
 			<div class="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 				<Avatar
@@ -187,7 +187,11 @@
 									onclick={() => updateActiveOrg(org._id)}
 									class="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 								>
-									<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-base shrink-0" />
+									<Avatar
+										src={org.logo || ''}
+										name={org.name}
+										size="size-8 rounded-base shrink-0"
+									/>
 									<span class="text-surface-700-300 truncate text-base">
 										{org.name}
 									</span>
