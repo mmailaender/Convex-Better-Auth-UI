@@ -1,6 +1,3 @@
-// Convex queries for organizations domain.
-// TODO: Migrate query functions from ../organizations.ts into this file.
-
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from '../_generated/server';
 import { getUserOrganizationsModel, getActiveOrganizationModel } from '../model/organizations';

@@ -57,7 +57,8 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 	if (isAuthenticated) {
 		const activeOrganization = await fetchQuery(
 			api.organizations.queries.getActiveOrganization,
-			{}
+			{},
+			{ token: await convexAuthNextjsToken() }
 		);
 		if (!activeOrganization && !isCreateOrganizationRoute(request)) {
 			const url = new URL(request.url);
