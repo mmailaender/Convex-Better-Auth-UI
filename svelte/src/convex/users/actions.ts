@@ -1,7 +1,7 @@
 import { getAuthUserId, invalidateSessions } from '@convex-dev/auth/server';
 import type { Id } from '../_generated/dataModel';
 import { ConvexError, v } from 'convex/values';
-import { action, ActionCtx, internalAction } from '../_generated/server';
+import { action, internalAction } from '../_generated/server';
 import { internal } from '../_generated/api.js';
 
 /**

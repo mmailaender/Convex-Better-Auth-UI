@@ -1,4 +1,5 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
+import { isUserExistingModel, getUserModel } from '../model/users';
 import { query } from '../_generated/server';
 import { v } from 'convex/values';
 
@@ -10,12 +11,7 @@ export const isUserExisting = query({
 		email: v.string()
 	},
 	handler: async (ctx, args) => {
-		const { email } = args;
-		const user = await ctx.db
-			.query('users')
-			.filter((q) => q.eq(q.field('email'), email))
-			.first();
-		return user !== null;
+		return await isUserExistingModel(ctx, args);
 	}
 });
 
@@ -28,12 +24,6 @@ export const getUser = query({
 		if (!userId) {
 			return null;
 		}
-		const user = await ctx.db.get(userId);
-		if (!user) {
-			return null;
-		}
-
-		user.image = user.imageId ? ((await ctx.storage.getUrl(user.imageId)) ?? undefined) : undefined;
-		return user;
+		return await getUserModel(ctx, { userId });
 	}
 });
