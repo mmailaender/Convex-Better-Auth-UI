@@ -5,6 +5,20 @@ import { deleteOrganizationModel } from '../organizations';
 import { WithoutSystemFields } from 'convex/server';
 
 /**
+ * Extract the first name from a user's full name.
+ * Falls back to "Unknown" when the name is not provided.
+ *
+ * @param user - A user document or null/undefined.
+ * @returns The first name string.
+ */
+export const getUserFirstName = (name: string | null | undefined): string => {
+	const fullName: string | undefined = name ?? undefined;
+	if (!fullName) {
+		return 'Unknown';
+	}
+	return fullName.trim().split(/\s+/)[0] ?? 'Unknown';
+};
+
 /**
  * Patch (update) arbitrary fields on a user document. All validation and auth
  * checks must be performed by the caller (i.e. the mutation handler).

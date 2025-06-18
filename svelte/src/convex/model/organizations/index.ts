@@ -3,6 +3,34 @@ import { MutationCtx, QueryCtx } from '../../_generated/server';
 import { ConvexError } from 'convex/values';
 
 /**
+ * Ensure the organization slug is unique by appending an incrementing postfix
+ * ("-2", "-3", ...). If the base slug does not exist, it is returned
+ * unchanged.
+ *
+ * @param ctx - Convex context with database access.
+ * @param baseSlug - Desired slug (e.g. "john-projects").
+ * @returns A unique slug guaranteed not to collide with existing organizations.
+ */
+export const getUniqueOrganizationSlug = async (
+	ctx: QueryCtx | MutationCtx,
+	baseSlug: string
+): Promise<string> => {
+	// Check if the base slug already exists.
+	let candidate: string = baseSlug;
+	let counter = 2;
+	while (
+		(await ctx.db
+			.query('organizations')
+			.filter((q) => q.eq(q.field('slug'), candidate))
+			.first()) !== null
+	) {
+		candidate = `${baseSlug}-${counter}`;
+		counter++;
+	}
+	return candidate;
+};
+
+/**
  * Get all organizations for the current user
  */
 export const getUserOrganizationsModel = async (ctx: QueryCtx, args: { userId: Id<'users'> }) => {
@@ -100,10 +128,14 @@ export const createOrganizationModel = async (
 	args: { userId: Id<'users'>; name: string; slug: string; logoId?: Id<'_storage'> }
 ) => {
 	const { userId, name, slug, logoId } = args;
+
+	// Ensure slug is unique across organizations
+	const uniqueSlug: string = await getUniqueOrganizationSlug(ctx, slug);
+
 	// Create the organization
 	const organizationId = await ctx.db.insert('organizations', {
 		name,
-		slug,
+		slug: uniqueSlug,
 		logoId,
 		plan: 'Free' // Default plan
 	});
