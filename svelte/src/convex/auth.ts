@@ -41,7 +41,17 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 				orgId = await ctx.runMutation(internal.organizations.mutations._createOrganization, {
 					userId,
 					name: `Personal Organization`,
-					slug: `personal-organization`
+					slug: (() => {
+						const userName: string = (user as { name?: string })?.name ?? '';
+						const sanitizedName: string = userName
+							.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
+							.trim()
+							.replace(/\s+/g, '-')
+							.toLowerCase();
+						return sanitizedName
+							? `personal-organization-${sanitizedName}`
+							: 'personal-organization';
+					})()
 				});
 			}
 
