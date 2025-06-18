@@ -1,7 +1,7 @@
 'use client';
 
 // React
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // API
 import { useMutation, useQuery } from 'convex/react';
@@ -37,65 +37,51 @@ export default function OrganizationInfo() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
+	const [isPreloading, setIsPreloading] = useState(false);
 
 	const [formState, setFormState] = useState({ name: '', slug: '' });
+	const [displayLogoSrc, setDisplayLogoSrc] = useState('');
 
-	const [orgData, setOrgData] = useState({
-		organizationId: '' as Id<'organizations'>,
-		name: '',
-		slug: '',
-		logo: '',
-		logoId: '' as Id<'_storage'> | undefined
-	});
-
-	/** Single source of truth for what the UI shows; never undefined */
-	const [logoSrc, setLogoSrc] = useState<string>(activeOrganization?.logo ?? '');
-
-	/* stable ref with whatever is currently shown */
-	const shownLogoRef = useRef(logoSrc);
+	// Initialize state when organization data is available
 	useEffect(() => {
-		shownLogoRef.current = logoSrc;
-	}, [logoSrc]);
-
-	/* handle new logo from Convex only after it is pre-loaded */
-	useEffect(() => {
-		if (!activeOrganization) return;
-		if (!activeOrganization.logo || activeOrganization.logo === shownLogoRef.current) {
-			// just keep org data in sync
-			setOrgData({
-				organizationId: activeOrganization._id,
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || '',
-				logo: activeOrganization.logo || '',
-				logoId: activeOrganization.logoId
-			});
-			setFormState({
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || ''
-			});
-			return;
+		if (activeOrganization) {
+			if (formState.name === '') {
+				setFormState((prev) => ({
+					...prev,
+					name: activeOrganization.name
+				}));
+			}
+			if (formState.slug === '') {
+				setFormState((prev) => ({
+					...prev,
+					slug: activeOrganization.slug || ''
+				}));
+			}
+			if (displayLogoSrc === '') {
+				setDisplayLogoSrc(activeOrganization.logo || '');
+			}
 		}
+	}, [activeOrganization, formState.name, formState.slug, displayLogoSrc]);
 
-		let revoked: string | undefined;
-
-		preloadImage(activeOrganization.logo)
-			.then(() => {
-				if (shownLogoRef.current.startsWith('blob:')) revoked = shownLogoRef.current;
-				setLogoSrc(activeOrganization.logo!);
-			})
-			.catch(() => void 0);
-
-		return () => {
-			if (revoked) URL.revokeObjectURL(revoked);
-		};
-	}, [activeOrganization]);
-
-	// tidy up any leftover blob on unmount
+	// Handle server logo updates - preload before showing
 	useEffect(() => {
-		return () => {
-			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
-		};
-	}, [logoSrc]);
+		if (!activeOrganization?.logo || isUploading) return;
+
+		// If server has a new logo URL that's different from what we're displaying
+		if (activeOrganization.logo !== displayLogoSrc) {
+			setIsPreloading(true);
+			preloadImage(activeOrganization.logo)
+				.then(() => {
+					setDisplayLogoSrc(activeOrganization.logo!);
+					setIsPreloading(false);
+				})
+				.catch(() => {
+					// If preload fails, still update
+					setDisplayLogoSrc(activeOrganization.logo!);
+					setIsPreloading(false);
+				});
+		}
+	}, [activeOrganization?.logo, displayLogoSrc, isUploading]);
 
 	if (!user || !activeOrganization) return null;
 
@@ -112,12 +98,17 @@ export default function OrganizationInfo() {
 	const cancelEdit = () => {
 		setIsDialogOpen(false);
 		setIsDrawerOpen(false);
-		setFormState({ name: orgData.name, slug: orgData.slug });
+		if (activeOrganization) {
+			setFormState({
+				name: activeOrganization.name,
+				slug: activeOrganization.slug
+			});
+		}
 	};
 
 	const handleFileChange = async (details: FileChangeDetails) => {
 		const file = details.acceptedFiles.at(0);
-		if (!file) return;
+		if (!file || !activeOrganization) return;
 
 		try {
 			setIsUploading(true);
@@ -131,14 +122,6 @@ export default function OrganizationInfo() {
 				forceConvert: true
 			});
 
-			const newLogoUrl = URL.createObjectURL(optimised);
-
-			// clean up prior blob
-			if (logoSrc.startsWith('blob:')) URL.revokeObjectURL(logoSrc);
-
-			/* optimistic UI swap */
-			setLogoSrc(newLogoUrl);
-
 			const uploadUrl = await generateUploadUrl();
 			const res = await fetch(uploadUrl, {
 				method: 'POST',
@@ -151,9 +134,9 @@ export default function OrganizationInfo() {
 			const logoStorageId = storageId as Id<'_storage'>;
 
 			await updateOrganization({
-				organizationId: orgData.organizationId,
-				name: orgData.name,
-				slug: orgData.slug,
+				organizationId: activeOrganization._id,
+				name: activeOrganization.name,
+				slug: activeOrganization.slug,
 				logoId: logoStorageId
 			});
 
@@ -161,9 +144,6 @@ export default function OrganizationInfo() {
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
-
-			// revert to server image
-			setLogoSrc(activeOrganization.logo || '');
 		} finally {
 			setIsUploading(false);
 		}
@@ -171,16 +151,17 @@ export default function OrganizationInfo() {
 
 	const handleEditNameSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!activeOrganization) return;
+
 		try {
 			setIsUploading(true);
 
 			await updateOrganization({
-				organizationId: orgData.organizationId,
+				organizationId: activeOrganization._id,
 				name: formState.name,
 				slug: formState.slug
 			});
 
-			setOrgData((p) => ({ ...p, name: formState.name, slug: formState.slug }));
 			setIsDialogOpen(false);
 			setIsDrawerOpen(false);
 			toast.success('Organization details updated successfully');
@@ -246,8 +227,8 @@ export default function OrganizationInfo() {
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
 					<Avatar
-						src={logoSrc}
-						name={orgData.name || 'Organization'}
+						src={displayLogoSrc}
+						name={activeOrganization.name || 'Organization'}
 						background="bg-surface-400-600"
 						size="size-20"
 						rounded="rounded-container"
@@ -256,6 +237,13 @@ export default function OrganizationInfo() {
 					<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 						<Pencil className="size-4" />
 					</div>
+
+					{/* Loading indicator during upload or preloading */}
+					{(isUploading || isPreloading) && (
+						<div className="bg-opacity-50 rounded-container absolute inset-0 flex items-center justify-center bg-black">
+							<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
+						</div>
+					)}
 				</div>
 			</FileUpload>
 
@@ -267,7 +255,7 @@ export default function OrganizationInfo() {
 				>
 					<div className="flex w-full flex-col gap-1 text-left">
 						<span className="text-surface-600-400 text-xs">Organization name</span>
-						<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+						<span className="text-surface-800-200 font-medium">{activeOrganization.name}</span>
 					</div>
 					<div className="btn preset-filled-surface-200-800 p-2">
 						<Pencil className="size-4" />
@@ -290,7 +278,7 @@ export default function OrganizationInfo() {
 				>
 					<div className="flex w-full flex-col gap-1 text-left">
 						<span className="text-surface-600-400 text-xs">Organization name</span>
-						<span className="text-surface-800-200 font-medium">{orgData.name}</span>
+						<span className="text-surface-800-200 font-medium">{activeOrganization.name}</span>
 					</div>
 					<div className="btn-icon preset-filled-surface-200-800">
 						<Pencil className="size-4" />
