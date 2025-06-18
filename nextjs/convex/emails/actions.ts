@@ -87,7 +87,6 @@ export async function verifyEmail(ctx: ActionCtx, email: string): Promise<Verify
 
 /**
  * Action to send a verification email with OTP
- * TODO: Check if we can migrate this to a normal function
  */
 export const sendVerificationEmail = action({
 	args: {

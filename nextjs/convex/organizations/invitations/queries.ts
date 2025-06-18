@@ -1,5 +1,6 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from '../../_generated/server';
+import { getInvitationsModel } from '../../model/organizations/invitations';
 
 /**
  * Get pending invitations for the current active organization
@@ -35,28 +36,7 @@ export const getInvitations = query({
 			return [];
 		}
 
-		// Get all invitations for this organization
-		const invitations = await ctx.db
-			.query('invitations')
-			.withIndex('by_org_and_email', (q) => q.eq('organizationId', organizationId))
-			.collect();
-
-		// Get the invited by user info for each invitation
-		return await Promise.all(
-			invitations.map(async (invitation) => {
-				const invitedByUser = await ctx.db.get(invitation.invitedByUserId);
-
-				return {
-					_id: invitation._id,
-					email: invitation.email,
-					role: invitation.role,
-					invitedBy: {
-						_id: invitedByUser?._id,
-						name: invitedByUser?.name || 'Unknown'
-					},
-					expiresAt: invitation.expiresAt
-				};
-			})
-		);
+		// Fetch invitations via model
+		return await getInvitationsModel(ctx, { organizationId });
 	}
 });
