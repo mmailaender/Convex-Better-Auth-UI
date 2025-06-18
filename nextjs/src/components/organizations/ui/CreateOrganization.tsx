@@ -31,11 +31,11 @@ export default function CreateOrganization({
 	const searchParams = useSearchParams();
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
-	const createOrganization = useMutation(api.organizations.createOrganization);
+	const createOrganization = useMutation(api.organizations.mutations.createOrganization);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
 	// Query for active organization
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 
 	const [name, setName] = useState('');
 	const [slug, setSlug] = useState('');

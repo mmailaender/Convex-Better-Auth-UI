@@ -1,16 +1,18 @@
 import { useState } from 'react';
 
+// Primitives
+import * as Dialog from '@/components/primitives/ui/dialog';
+import { toast } from 'sonner';
+
 // API (Convex)
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useAuthActions } from '@convex-dev/auth/react';
-
-// Components
-import * as Dialog from '@/components/primitives/ui/dialog';
+import { ConvexError } from 'convex/values';
 
 export default function DeleteUser() {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	const deleteMutation = useAction(api.users.invalidateAndDeleteUser);
+	const deleteMutation = useAction(api.users.actions.invalidateAndDeleteUser);
 	const { signOut } = useAuthActions();
 
 	/**
@@ -23,6 +25,13 @@ export default function DeleteUser() {
 			setDeleteDialogOpen(false);
 		} catch (error) {
 			console.error('Error deleting user:', error);
+			if (error instanceof ConvexError) {
+				toast.error(error.data);
+			} else if (error instanceof Error) {
+				toast.error(error.message);
+			} else {
+				toast.error('Error deleting user');
+			}
 		}
 	}
 

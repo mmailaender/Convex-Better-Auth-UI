@@ -33,10 +33,10 @@ export default function DeleteOrganization({
 }) {
 	const [open, setOpen] = useState<boolean>(false);
 	const router = useRouter();
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwner = useIsOwner();
 
-	const deleteOrganization = useMutation(api.organizations.deleteOrganization);
+	const deleteOrganization = useMutation(api.organizations.mutations.deleteOrganization);
 
 	if (!activeOrganization) {
 		return null;

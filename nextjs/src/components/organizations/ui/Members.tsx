@@ -9,7 +9,7 @@ import type { Doc, Id } from '@/convex/_generated/dataModel';
 import type { FunctionReturnType } from 'convex/server';
 type Role = Doc<'organizationMembers'>['role'];
 type GetOrganizationMembersReturnType = FunctionReturnType<
-	typeof api.organizations.members.getOrganizationMembers
+	typeof api.organizations.members.queries.getOrganizationMembers
 >;
 type GetOrganizationMemberReturnType =
 	GetOrganizationMembersReturnType extends Array<infer T> ? T : never;
@@ -39,14 +39,14 @@ export default function Members(): React.ReactNode {
 	);
 
 	// Get current organization data
-	const currentUser = useQuery(api.users.getUser);
-	const currentOrganization = useQuery(api.organizations.getActiveOrganization);
+	const currentUser = useQuery(api.users.queries.getUser);
+	const currentOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
 	// Get members data and mutations
-	const members = useQuery(api.organizations.members.getOrganizationMembers);
-	const updateMemberRole = useMutation(api.organizations.members.updateMemberRole);
-	const removeMember = useMutation(api.organizations.members.removeMember);
+	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
+	const updateMemberRole = useMutation(api.organizations.members.mutations.updateMemberRole);
+	const removeMember = useMutation(api.organizations.members.mutations.removeMember);
 
 	/**
 	 * Filter and sort members based on search query and role

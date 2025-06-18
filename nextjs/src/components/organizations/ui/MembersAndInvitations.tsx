@@ -17,8 +17,8 @@ import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
 import { useState } from 'react';
 
 export default function MembersAndInvitations() {
-	const members = useQuery(api.organizations.members.getOrganizationMembers);
-	const invitations = useQuery(api.organizations.invitations.db.getInvitations);
+	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
+	const invitations = useQuery(api.organizations.invitations.queries.getInvitations);
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 	const [inviteMembersDialogOpen, setInviteMembersDialogOpen] = useState(false);
 	const [inviteMembersDrawerOpen, setInviteMembersDrawerOpen] = useState(false);

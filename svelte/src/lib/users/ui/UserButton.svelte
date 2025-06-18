@@ -17,6 +17,7 @@
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
+	import SignIn from '$lib/auth/ui/SignIn.svelte';
 	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
@@ -31,8 +32,8 @@
 	} = $props();
 
 	// State
-	let userPopoverOpen: boolean = $state(false);
-	let profileDialogOpen: boolean = $state(false);
+	let userPopoverOpen = $state(false);
+	let profileDialogOpen = $state(false);
 
 	// Auth
 	const { signOut } = useAuth();
@@ -102,5 +103,16 @@
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
 {:else}
-	<a href="/signin" class="btn preset-filled-primary-500">Sign in</a>
+	<Dialog.Root>
+		<Dialog.Trigger class="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
+		<Dialog.Content
+			class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
+		>
+			<Dialog.Header>
+				<Dialog.Title>Sign in</Dialog.Title>
+			</Dialog.Header>
+			<SignIn />
+			<Dialog.CloseX />
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}

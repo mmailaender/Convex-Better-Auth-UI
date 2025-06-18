@@ -27,11 +27,11 @@ import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── state & queries ── */
-	const user = useQuery(api.users.getUser);
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
+	const user = useQuery(api.users.queries.getUser);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
-	const updateOrganization = useMutation(api.organizations.updateOrganizationProfile);
+	const updateOrganization = useMutation(api.organizations.mutations.updateOrganizationProfile);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
 	const [isDialogOpen, setIsDialogOpen] = useState(false);

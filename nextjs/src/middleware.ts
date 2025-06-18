@@ -4,11 +4,12 @@ import {
 	convexAuthNextjsToken,
 	createRouteMatcher
 } from '@convex-dev/auth/nextjs/server';
-import { fetchMutation } from 'convex/nextjs';
+import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import { NextResponse } from 'next/server';
 
 const isLoginPage = createRouteMatcher(['/signin']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
+const isCreateOrganizationRoute = createRouteMatcher(['/org/create']);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 	if (isLoginPage(request)) {
@@ -18,9 +19,9 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 		}
 	}
 
-	if (isInvitationAcceptRoute(request)) {
-		const isAuthenticated = await convexAuth.isAuthenticated();
+	const isAuthenticated = await convexAuth.isAuthenticated();
 
+	if (isInvitationAcceptRoute(request)) {
 		if (!isAuthenticated) {
 			// If not authenticated, redirect to signin with return URL
 			const url = new URL(request.url);
@@ -37,7 +38,7 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 			try {
 				// Call the mutation directly with the auth token
 				await fetchMutation(
-					api.organizations.invitations.db.acceptInvitation,
+					api.organizations.invitations.mutations.acceptInvitation,
 					{ invitationId },
 					{ token: await convexAuthNextjsToken() }
 				);
@@ -50,6 +51,22 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
 				console.error('Error accepting invitation: ', error);
 				return NextResponse.error();
 			}
+		}
+	}
+
+	if (isAuthenticated) {
+		const activeOrganization = await fetchQuery(
+			api.organizations.queries.getActiveOrganization,
+			{}
+		);
+		if (!activeOrganization && !isCreateOrganizationRoute(request)) {
+			const url = new URL(request.url);
+			return NextResponse.redirect(
+				new URL(
+					`/org/create?redirectTo=${encodeURIComponent(url.pathname + url.search)}`,
+					request.url
+				)
+			);
 		}
 	}
 

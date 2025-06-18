@@ -28,8 +28,8 @@ export default function Invitations(): React.ReactNode {
 	const isOwnerOrAdmin = useIsOwnerOrAdmin();
 
 	// Get invitations data and mutations
-	const invitations = useQuery(api.organizations.invitations.db.getInvitations);
-	const revokeInvitation = useMutation(api.organizations.invitations.db.revokeInvitation);
+	const invitations = useQuery(api.organizations.invitations.queries.getInvitations);
+	const revokeInvitation = useMutation(api.organizations.invitations.mutations.revokeInvitation);
 
 	/**
 	 * Filter invitations based on search query

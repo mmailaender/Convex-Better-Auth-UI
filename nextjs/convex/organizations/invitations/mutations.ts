@@ -1,67 +1,6 @@
+import { ConvexError, v } from 'convex/values';
+import { internalMutation, mutation } from '../../_generated/server';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { v } from 'convex/values';
-import { mutation, query, internalMutation } from '../../_generated/server';
-import { Id } from '../../_generated/dataModel';
-
-/**
- * Get pending invitations for the current active organization
- */
-export const getInvitations = query({
-	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			return [];
-		}
-
-		// Get the user's active organization
-		const user = await ctx.db.get(userId);
-		if (!user || !user.activeOrganizationId) {
-			return [];
-		}
-
-		const organizationId: Id<'organizations'> = user.activeOrganizationId;
-
-		// Check if the user is an admin or owner
-		const membership = await ctx.db
-			.query('organizationMembers')
-			.withIndex('orgId_and_userId', (q) =>
-				q.eq('organizationId', organizationId).eq('userId', userId)
-			)
-			.first();
-
-		if (
-			!membership ||
-			!['role_organization_owner', 'role_organization_admin'].includes(membership.role)
-		) {
-			// Not authorized to view invitations
-			return [];
-		}
-
-		// Get all invitations for this organization
-		const invitations = await ctx.db
-			.query('invitations')
-			.withIndex('by_org_and_email', (q) => q.eq('organizationId', organizationId))
-			.collect();
-
-		// Get the invited by user info for each invitation
-		return await Promise.all(
-			invitations.map(async (invitation) => {
-				const invitedByUser = await ctx.db.get(invitation.invitedByUserId);
-
-				return {
-					_id: invitation._id,
-					email: invitation.email,
-					role: invitation.role,
-					invitedBy: {
-						_id: invitedByUser?._id,
-						name: invitedByUser?.name || 'Unknown'
-					},
-					expiresAt: invitation.expiresAt
-				};
-			})
-		);
-	}
-});
 
 /**
  * Revokes an invitation
@@ -73,13 +12,13 @@ export const revokeInvitation = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get the invitation
 		const invitation = await ctx.db.get(args.invitationId);
 		if (!invitation) {
-			throw new Error('Invitation not found');
+			throw new ConvexError('Invitation not found');
 		}
 
 		// Check if the user is an admin or owner of this organization
@@ -94,7 +33,7 @@ export const revokeInvitation = mutation({
 			!membership ||
 			!['role_organization_owner', 'role_organization_admin'].includes(membership.role)
 		) {
-			throw new Error('Not authorized to revoke invitations');
+			throw new ConvexError('Not authorized to revoke invitations');
 		}
 
 		// Delete the invitation
@@ -106,7 +45,7 @@ export const revokeInvitation = mutation({
 /**
  * Creates a new organization invitation
  */
-export const createInvitation = internalMutation({
+export const _createInvitation = internalMutation({
 	args: {
 		email: v.string(),
 		role: v.union(
@@ -123,17 +62,17 @@ export const createInvitation = internalMutation({
 
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 		// Get the user's active organization
 		const user = await ctx.db.get(userId);
 		if (!user || !user.activeOrganizationId) {
-			throw new Error('User has no active organization');
+			throw new ConvexError('User has no active organization');
 		}
 
 		const organization = await ctx.db.get(user.activeOrganizationId);
 		if (!organization) {
-			throw new Error('Organization not found');
+			throw new ConvexError('Organization not found');
 		}
 
 		// Check if an invitation is already existing and if yes return the invitation id
@@ -188,13 +127,13 @@ export const acceptInvitation = mutation({
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get the user
 		const user = await ctx.db.get(userId);
 		if (!user) {
-			throw new Error('User not found');
+			throw new ConvexError('User not found');
 		}
 
 		// Get the invitation
@@ -204,17 +143,17 @@ export const acceptInvitation = mutation({
 			.first();
 
 		if (!invitation) {
-			throw new Error('Invitation not found');
+			throw new ConvexError('Invitation not found');
 		}
 
 		// Check if invitation has expired
 		if (invitation.expiresAt < Date.now()) {
-			throw new Error('Invitation has expired');
+			throw new ConvexError('Invitation has expired');
 		}
 
 		// Check if user's email matches the invitation email
 		if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
-			throw new Error('This invitation was not sent to your email address');
+			throw new ConvexError('This invitation was not sent to your email address');
 		}
 
 		// Check if the user is already a member of the organization

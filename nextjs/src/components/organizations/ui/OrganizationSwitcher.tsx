@@ -39,9 +39,9 @@ export default function OrganizationSwitcher({
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	// Queries and mutations
-	const organizations = useQuery(api.organizations.getUserOrganizations);
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-	const setActiveOrg = useMutation(api.organizations.setActiveOrganization);
+	const organizations = useQuery(api.organizations.queries.getUserOrganizations);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const setActiveOrg = useMutation(api.organizations.mutations.setActiveOrganization);
 
 	// State
 	const [openSwitcher, setOpenSwitcher] = useState<boolean>(false);

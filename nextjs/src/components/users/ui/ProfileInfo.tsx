@@ -25,10 +25,10 @@ import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  Convex queries    */
-	const user = useQuery(api.users.getUser);
+	const user = useQuery(api.users.queries.getUser);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-	const updateUserName = useMutation(api.users.updateUserName);
-	const updateAvatar = useMutation(api.users.updateAvatar);
+	const updateUserName = useMutation(api.users.mutations.updateUserName);
+	const updateAvatar = useMutation(api.users.mutations.updateAvatar);
 
 	/* ─────────────────────────────────────────────  local state       */
 	const [isDialogOpen, setIsDialogOpen] = useState(false);

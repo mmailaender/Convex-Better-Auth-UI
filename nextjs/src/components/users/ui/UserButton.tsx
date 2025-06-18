@@ -16,6 +16,7 @@ import UserProfile from '@/components/users/ui/UserProfile';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useQuery, Authenticated, Unauthenticated } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import SignIn from '@/components/auth/ui/SignIn';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -32,7 +33,7 @@ export default function UserButton({
 	// Auth
 	const { signOut } = useAuthActions();
 	// Queries
-	const user = useQuery(api.users.getUser);
+	const user = useQuery(api.users.queries.getUser);
 
 	// State
 	const [userPopoverOpen, setUserPopoverOpen] = useState(false);
@@ -100,9 +101,16 @@ export default function UserButton({
 				)}
 			</Authenticated>
 			<Unauthenticated>
-				<a href="/signin" className="btn preset-filled-primary-500">
-					Sign in
-				</a>
+				<Dialog.Root>
+					<Dialog.Trigger className="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
+					<Dialog.Content className="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md">
+						<Dialog.Header>
+							<Dialog.Title>Sign in</Dialog.Title>
+						</Dialog.Header>
+						<SignIn />
+						<Dialog.CloseX />
+					</Dialog.Content>
+				</Dialog.Root>
 			</Unauthenticated>
 		</>
 	);

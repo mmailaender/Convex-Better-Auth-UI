@@ -23,9 +23,9 @@
 	}
 </script>
 
-<div class="bg-surface-100-900 flex h-full w-full flex-col items-center justify-center">
-	<div class="mt-40 flex h-full w-full max-w-md flex-col items-start justify-center p-8">
-		<h5 class="h4 text-surface-950-50 max-w-96 text-left leading-9 tracking-tighter">
+<div class="flex h-full w-full flex-col items-center justify-center">
+	<div class="flex h-full w-full max-w-md flex-col p-8">
+		<h5 class="h4 max-w-96 text-left leading-9 tracking-tighter">
 			Build your app 10x faster <br /> with Skeleton Plus
 		</h5>
 		<p class="text-surface-600-400 mt-3 mb-10 max-w-96 text-left text-sm">

@@ -23,10 +23,10 @@ export default function LeaveOrganization(): React.ReactNode {
 	const [selectedSuccessor, setSelectedSuccessor] = useState<Id<'users'> | null>(null);
 
 	// Convex queries and mutations
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-	const members = useQuery(api.organizations.members.getOrganizationMembers);
-	const user = useQuery(api.users.getUser);
-	const leaveOrganization = useMutation(api.organizations.members.leaveOrganization);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
+	const user = useQuery(api.users.queries.getUser);
+	const leaveOrganization = useMutation(api.organizations.members.mutations.leaveOrganization);
 
 	// Navigation
 	const router = useRouter();
