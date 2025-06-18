@@ -1,6 +1,11 @@
 import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../../_generated/server';
 import { getAuthUserId } from '@convex-dev/auth/server';
+import {
+	createInvitationModel,
+	revokeInvitationModel,
+	acceptInvitationModel
+} from '../../model/organizations/invitations';
 
 /**
  * Revokes an invitation
@@ -36,8 +41,8 @@ export const revokeInvitation = mutation({
 			throw new ConvexError('Not authorized to revoke invitations');
 		}
 
-		// Delete the invitation
-		await ctx.db.delete(args.invitationId);
+		// Business logic in model
+		await revokeInvitationModel(ctx, { invitationId: args.invitationId });
 		return { success: true };
 	}
 });
@@ -55,60 +60,9 @@ export const _createInvitation = internalMutation({
 		)
 	},
 	handler: async (ctx, args) => {
-		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + 7);
-
-		const { email, role } = args;
-
 		const userId = await getAuthUserId(ctx);
-		if (!userId) {
-			throw new ConvexError('Not authenticated');
-		}
-		// Get the user's active organization
-		const user = await ctx.db.get(userId);
-		if (!user || !user.activeOrganizationId) {
-			throw new ConvexError('User has no active organization');
-		}
-
-		const organization = await ctx.db.get(user.activeOrganizationId);
-		if (!organization) {
-			throw new ConvexError('Organization not found');
-		}
-
-		// Check if an invitation is already existing and if yes return the invitation id
-		const existingInvitation = await ctx.db
-			.query('invitations')
-			.withIndex('by_org_and_email', (q) =>
-				q.eq('organizationId', organization._id).eq('email', email)
-			)
-			.first();
-
-		if (existingInvitation) {
-			return {
-				_id: existingInvitation._id,
-				invitedByUserId: userId,
-				invitedByName: user.name,
-				organizationId: organization._id,
-				organizationName: organization.name
-			};
-		} else {
-			// Create the invitation
-			const invitationId = await ctx.db.insert('invitations', {
-				email,
-				role,
-				invitedByUserId: userId,
-				organizationId: organization._id,
-				expiresAt: expiresAt.getTime()
-			});
-
-			return {
-				_id: invitationId,
-				invitedByUserId: userId,
-				invitedByName: user.name,
-				organizationId: organization._id,
-				organizationName: organization.name
-			};
-		}
+		if (!userId) throw new ConvexError('Not authenticated');
+		return await createInvitationModel(ctx, { userId, email: args.email, role: args.role });
 	}
 });
 
@@ -130,67 +84,7 @@ export const acceptInvitation = mutation({
 			throw new ConvexError('Not authenticated');
 		}
 
-		// Get the user
-		const user = await ctx.db.get(userId);
-		if (!user) {
-			throw new ConvexError('User not found');
-		}
-
-		// Get the invitation
-		const invitation = await ctx.db
-			.query('invitations')
-			.filter((q) => q.eq(q.field('_id'), args.invitationId))
-			.first();
-
-		if (!invitation) {
-			throw new ConvexError('Invitation not found');
-		}
-
-		// Check if invitation has expired
-		if (invitation.expiresAt < Date.now()) {
-			throw new ConvexError('Invitation has expired');
-		}
-
-		// Check if user's email matches the invitation email
-		if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
-			throw new ConvexError('This invitation was not sent to your email address');
-		}
-
-		// Check if the user is already a member of the organization
-		const existingMembership = await ctx.db
-			.query('organizationMembers')
-			.withIndex('orgId_and_userId', (q) =>
-				q.eq('organizationId', invitation.organizationId).eq('userId', userId)
-			)
-			.first();
-
-		if (existingMembership) {
-			// User is already a member, so delete the invitation
-			await ctx.db.delete(invitation._id);
-
-			// Set this organization as the user's active organization
-			await ctx.db.patch(userId, {
-				activeOrganizationId: invitation.organizationId
-			});
-
-			return { success: true };
-		}
-
-		// Add the user to the organization with the role from the invitation
-		await ctx.db.insert('organizationMembers', {
-			organizationId: invitation.organizationId,
-			userId: userId,
-			role: invitation.role
-		});
-
-		// Set this organization as the user's active organization
-		await ctx.db.patch(userId, {
-			activeOrganizationId: invitation.organizationId
-		});
-
-		// Delete the invitation
-		await ctx.db.delete(invitation._id);
-
+		await acceptInvitationModel(ctx, { userId, invitationId: args.invitationId });
 		return { success: true };
 	}
 });
