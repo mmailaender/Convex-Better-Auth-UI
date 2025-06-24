@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@auth/core": "0.39.1",
 		"@convex-dev/auth": "^0.0.87",
+		"@convex-dev/resend": "0.1.2-beta.2",
 		"@floating-ui/react": "^0.27.12",
 		"@radix-ui/react-dialog": "^1.1.14",
 		"@radix-ui/react-popover": "^1.1.14",
@@ -30,7 +31,6 @@
 		"next": "15.3.3",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
-		"resend": "^4.5.2",
 		"sharp": "^0.34.2",
 		"sonner": "^2.0.5",
 		"tailwind-merge": "^3.3.1",

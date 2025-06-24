@@ -8,15 +8,10 @@
  * @module
  */
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
 import type * as auth from "../auth.js";
 import type * as emails_actions from "../emails/actions.js";
 import type * as http from "../http.js";
-import type * as model_emails_send from "../model/emails/send.js";
+import type * as model_emails_index from "../model/emails/index.js";
 import type * as model_emails_templates_organizationInvitation from "../model/emails/templates/organizationInvitation.js";
 import type * as model_emails_templates_verification from "../model/emails/templates/verification.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
@@ -36,6 +31,12 @@ import type * as users_actions from "../users/actions.js";
 import type * as users_mutations from "../users/mutations.js";
 import type * as users_queries from "../users/queries.js";
 
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
+
 /**
  * A utility for referencing Convex functions in your app's API.
  *
@@ -48,7 +49,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "emails/actions": typeof emails_actions;
   http: typeof http;
-  "model/emails/send": typeof model_emails_send;
+  "model/emails/index": typeof model_emails_index;
   "model/emails/templates/organizationInvitation": typeof model_emails_templates_organizationInvitation;
   "model/emails/templates/verification": typeof model_emails_templates_verification;
   "model/organizations/index": typeof model_organizations_index;
@@ -68,11 +69,72 @@ declare const fullApi: ApiFromModules<{
   "users/mutations": typeof users_mutations;
   "users/queries": typeof users_queries;
 }>;
+declare const fullApiWithMounts: typeof fullApi;
+
 export declare const api: FilterApi<
-  typeof fullApi,
+  typeof fullApiWithMounts,
   FunctionReference<any, "public">
 >;
 export declare const internal: FilterApi<
-  typeof fullApi,
+  typeof fullApiWithMounts,
   FunctionReference<any, "internal">
 >;
+
+export declare const components: {
+  resend: {
+    lib: {
+      cancelEmail: FunctionReference<
+        "mutation",
+        "internal",
+        { emailId: string },
+        null
+      >;
+      get: FunctionReference<"query", "internal", { emailId: string }, any>;
+      getStatus: FunctionReference<
+        "query",
+        "internal",
+        { emailId: string },
+        {
+          complained: boolean;
+          errorMessage: string | null;
+          opened: boolean;
+          status:
+            | "waiting"
+            | "queued"
+            | "cancelled"
+            | "sent"
+            | "delivered"
+            | "delivery_delayed"
+            | "bounced";
+        }
+      >;
+      handleEmailEvent: FunctionReference<
+        "mutation",
+        "internal",
+        { event: any },
+        null
+      >;
+      sendEmail: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          from: string;
+          headers?: Array<{ name: string; value: string }>;
+          html?: string;
+          options: {
+            apiKey: string;
+            initialBackoffMs: number;
+            onEmailEvent?: { fnHandle: string };
+            retryAttempts: number;
+            testMode: boolean;
+          };
+          replyTo?: Array<string>;
+          subject: string;
+          text?: string;
+          to: string;
+        },
+        string
+      >;
+    };
+  };
+};

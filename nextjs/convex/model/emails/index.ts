@@ -1,12 +1,13 @@
-import { v } from 'convex/values';
-import { action, ActionCtx } from '../_generated/server';
-import { generateVerificationEmail } from './templates/verification';
+import { EmailId } from '@convex-dev/resend';
+import { api } from '../../_generated/api';
+import { ActionCtx } from '../../_generated/server';
+import { Resend } from '@convex-dev/resend';
+import { components } from '../../_generated/api';
 import {
 	generateOrganizationInvitationEmail,
-	type OrganizationInvitationParams
+	OrganizationInvitationParams
 } from './templates/organizationInvitation';
-import { sendEmail, type SendEmailResponse } from './send';
-import { api } from '../_generated/api';
+import { generateVerificationEmail } from './templates/verification';
 
 /**
  * Interface for email verification result
@@ -17,6 +18,10 @@ export interface VerifyEmailReturnData {
 	email: string;
 	reason?: string;
 }
+
+export const resend: Resend = new Resend(components.resend, {
+	testMode: false
+});
 
 /**
  * Function to verify an email address
@@ -37,7 +42,7 @@ export async function verifyEmail(ctx: ActionCtx, email: string): Promise<Verify
 		}
 
 		// Check if user already exists in database
-		const exists = await ctx.runQuery(api.users.isUserExisting, { email });
+		const exists = await ctx.runQuery(api.users.queries.isUserExisting, { email });
 
 		// If user doesn't exist, verify email validity with external service
 		if (!exists) {
@@ -84,85 +89,23 @@ export async function verifyEmail(ctx: ActionCtx, email: string): Promise<Verify
 	}
 }
 
-/**
- * Action to send a verification email with OTP
- * TODO: Check if we can migrate this to a normal function
- */
-export const sendVerificationEmail = action({
+export async function sendVerificationEmailModel(
+	ctx: ActionCtx,
 	args: {
-		email: v.string(),
-		otp: v.string(),
-		fromEmail: v.string()
-	},
-	handler: async (ctx, args): Promise<SendEmailResponse> => {
-		const { email, otp, fromEmail } = args;
-
-		try {
-			// Generate the email content
-			const html = generateVerificationEmail(otp);
-
-			// Send the email
-			return await sendEmail({
-				from: fromEmail,
-				to: email,
-				subject: `${otp} is your verification code`,
-				html
-			});
-		} catch (error) {
-			console.error(`Error sending verification email to ${email}:`, error);
-
-			if (error instanceof Error) {
-				return {
-					error: {
-						message: error.message,
-						statusCode: 500
-					}
-				};
-			}
-
-			return {
-				error: {
-					message: 'Unknown error sending verification email',
-					statusCode: 500
-				}
-			};
-		}
+		from: string;
+		to: string;
+		otp: string;
 	}
-});
-
-/**
- * Sends an organization invitation email
- * @param params Email parameters including recipient, organization, inviter and accept URL
- * @returns Email sending response
- */
-export async function sendOrganizationInvitationEmail(params: {
-	email: string;
-	organizationName: string;
-	inviterName: string;
-	acceptUrl: string;
-	fromEmail: string;
-}): Promise<SendEmailResponse> {
-	const { email, organizationName, inviterName, acceptUrl, fromEmail } = params;
+) {
+	const { from, to, otp } = args;
 
 	try {
-		// Generate the invitation email content
-		const invitationParams: OrganizationInvitationParams = {
-			organizationName,
-			inviterName,
-			acceptUrl
-		};
+		// Generate the email content
+		const html = generateVerificationEmail(otp);
 
-		const html = generateOrganizationInvitationEmail(invitationParams);
-
-		// Send the email
-		return await sendEmail({
-			from: fromEmail,
-			to: email,
-			subject: `Invitation to join ${organizationName}`,
-			html
-		});
+		return resend.sendEmail(ctx, from, to, `${otp} is your verification code`, html);
 	} catch (error) {
-		console.error(`Error sending invitation email to ${email}:`, error);
+		console.error(`Error sending verification email to ${to}:`, error);
 
 		if (error instanceof Error) {
 			return {
@@ -174,6 +117,67 @@ export async function sendOrganizationInvitationEmail(params: {
 		}
 
 		return {
+			error: {
+				message: 'Unknown error sending verification email',
+				statusCode: 500
+			}
+		};
+	}
+}
+
+/**
+ * Sends an organization invitation email
+ * @param args Email parameters including recipient, organization, inviter and accept URL
+ * @returns Email sending response
+ */
+export async function sendOrganizationInvitationEmailModel(
+	ctx: ActionCtx,
+	args: {
+		from: string;
+		to: string;
+		organizationName: string;
+		inviterName: string;
+		acceptUrl: string;
+	}
+): Promise<
+	| { success: true; emailId: EmailId }
+	| { success: false; error: { message: string; statusCode: number } }
+> {
+	const { from, to, organizationName, inviterName, acceptUrl } = args;
+
+	try {
+		// Generate the invitation email content
+		const invitationParams: OrganizationInvitationParams = {
+			organizationName,
+			inviterName,
+			acceptUrl
+		};
+
+		const html = generateOrganizationInvitationEmail(invitationParams);
+
+		const emailId = await resend.sendEmail(
+			ctx,
+			from,
+			to,
+			`Invitation to join ${organizationName}`,
+			html
+		);
+		return { success: true, emailId };
+	} catch (error) {
+		console.error(`Error sending invitation email to ${to}:`, error);
+
+		if (error instanceof Error) {
+			return {
+				success: false,
+				error: {
+					message: error.message,
+					statusCode: 500
+				}
+			};
+		}
+
+		return {
+			success: false,
 			error: {
 				message: 'Unknown error sending invitation email',
 				statusCode: 500
