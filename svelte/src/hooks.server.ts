@@ -10,6 +10,7 @@ import {
 const isLoginPage = createRouteMatcher(['/signin']);
 const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
 const isCreateOrganizationRoute = createRouteMatcher(['/org/create']);
+const isProtectedRoute = createRouteMatcher('/org{/*rest}');
 
 // Create auth hooks
 const {
@@ -65,6 +66,16 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 			return redirect(
 				307,
 				`/org/create?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`
+			);
+		}
+	}
+
+	if (isProtectedRoute(event.url.pathname)) {
+		if (!isAuthenticated) {
+			console.log('redirecting to login');
+			return redirect(
+				307,
+				`/login?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`
 			);
 		}
 	}
