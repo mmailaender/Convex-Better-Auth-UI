@@ -5,11 +5,15 @@ import { api } from '$convex/_generated/api';
 // Types
 import type { FunctionReturnType } from 'convex/server';
 type ActiveOrganizationResponse = FunctionReturnType<
-	typeof api.organizations.getActiveOrganization
+	typeof api.organizations.queries.getActiveOrganization
 >;
 
 export function createRoles(initialData?: ActiveOrganizationResponse) {
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization, {}, { initialData });
+	const activeOrganization = useQuery(
+		api.organizations.queries.getActiveOrganization,
+		{},
+		{ initialData }
+	);
 
 	const _isOwner = $derived(activeOrganization?.data?.role === 'role_organization_owner');
 	const _isAdmin = $derived(activeOrganization?.data?.role === 'role_organization_admin');
