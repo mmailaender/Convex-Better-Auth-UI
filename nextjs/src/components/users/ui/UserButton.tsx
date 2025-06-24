@@ -7,6 +7,7 @@ import { ComponentProps, useState } from 'react';
 import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar } from '@skeletonlabs/skeleton-react';
+import AvatarMarble from '@/components/primitives/ui/avatarMarble';
 // Icons
 import { ChevronRight } from 'lucide-react';
 // Components
@@ -58,7 +59,9 @@ export default function UserButton({
 									src={user.image}
 									name={user.name}
 									size="size-10 ring-0 hover:ring-4 ring-surface-100-900 ease-out duration-200"
-								/>
+								>
+									<AvatarMarble name={user.name} />
+								</Avatar>
 							</Popover.Trigger>
 							<Popover.Content side={popoverSide} align={popoverAlign}>
 								<div className="flex flex-col gap-1 p-0">
@@ -66,7 +69,9 @@ export default function UserButton({
 										className="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 										onClick={openProfileModal}
 									>
-										<Avatar src={user.image} name={user.name} size="size-12" />
+										<Avatar src={user.image} name={user.name} size="size-12">
+											<AvatarMarble name={user.name} />
+										</Avatar>
 										<div className="flex flex-1 flex-col gap-0 overflow-hidden">
 											<p className="truncate text-left text-base font-medium">{user.name}</p>
 											<p className="text-surface-700-300 truncate text-left text-xs">

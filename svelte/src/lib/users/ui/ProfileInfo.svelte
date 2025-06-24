@@ -11,6 +11,7 @@
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import AvatarMarble from '$lib/primitives/ui/avatar-fallback';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
@@ -149,7 +150,9 @@
 						background="bg-surface-400-600"
 						size="size-20"
 						rounded="rounded-full"
-					/>
+					>
+						<AvatarMarble name={user.name} />
+					</Avatar>
 
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"

@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import * as Drawer from '@/components/primitives/ui/drawer';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+import AvatarMarble from '@/components/primitives/ui/avatarMarble';
 
 // utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
@@ -169,7 +170,9 @@ export default function ProfileInfo() {
 							background="bg-surface-400-600"
 							size="size-20"
 							rounded="rounded-full"
-						/>
+						>
+							<AvatarMarble name={user.name} />
+						</Avatar>
 
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />
