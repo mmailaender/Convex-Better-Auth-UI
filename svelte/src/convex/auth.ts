@@ -5,8 +5,6 @@ import { internal } from './_generated/api.js';
 import { MutationCtx } from './_generated/server.js';
 import { Id } from './_generated/dataModel.js';
 
-import { getUserFirstName } from './model/users/index.js';
-
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 	providers: [
 		GitHub,
