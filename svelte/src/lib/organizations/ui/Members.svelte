@@ -17,6 +17,7 @@
 	import type { Doc, Id } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
 	import type { FunctionReturnType } from 'convex/server';
+	import AvatarMarble from '$lib/primitives/ui/avatar-fallback';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
@@ -227,15 +228,9 @@
 						<div class="flex items-center space-x-3">
 							<div class="avatar">
 								<div class="size-10">
-									{#if member.user.image}
-										<Avatar src={member.user.image} name={member.user.name} size="size-10" />
-									{:else}
-										<div
-											class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
-										>
-											{member.user.name?.charAt(0) || 'U'}
-										</div>
-									{/if}
+									<Avatar src={member.user.image} name={member.user.name} size="size-10">
+										<AvatarMarble name={member.user.name} />
+									</Avatar>
 								</div>
 							</div>
 							<div class="flex flex-col">
@@ -295,19 +290,13 @@
 										<div class="flex items-center space-x-2">
 											<div class="avatar">
 												<div class="size-8 sm:size-5">
-													{#if member.user.image}
-														<Avatar
-															src={member.user.image}
-															name={member.user.name}
-															size="size-8 sm:size-5"
-														/>
-													{:else}
-														<div
-															class="text-primary-700 flex h-full w-full items-center justify-center rounded-full"
-														>
-															{member.user.name?.charAt(0) || 'U'}
-														</div>
-													{/if}
+													<Avatar
+														src={member.user.image}
+														name={member.user.name}
+														size="size-8 sm:size-5"
+													>
+														<AvatarMarble name={member.user.name} />
+													</Avatar>
 												</div>
 											</div>
 

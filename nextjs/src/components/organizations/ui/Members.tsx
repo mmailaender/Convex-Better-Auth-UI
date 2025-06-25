@@ -24,6 +24,7 @@ import { Search, Trash, Pencil } from 'lucide-react';
 
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import AvatarMarble from '@/components/primitives/ui/avatarMarble';
 
 /**
  * Component that displays a list of organization members with role management functionality
@@ -193,13 +194,9 @@ export default function Members(): React.ReactNode {
 							<div className="flex items-center space-x-3">
 								<div className="avatar">
 									<div className="size-10">
-										{member.user.image ? (
-											<Avatar src={member.user.image} name={member.user.name} size="size-10" />
-										) : (
-											<div className="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full">
-												{member.user.name?.charAt(0) || 'U'}
-											</div>
-										)}
+										<Avatar src={member.user.image} name={member.user.name} size="size-10">
+											<AvatarMarble name={member.user.name} />
+										</Avatar>
 									</div>
 								</div>
 								<div className="flex flex-col">
@@ -248,17 +245,13 @@ export default function Members(): React.ReactNode {
 											<div className="flex items-center space-x-2">
 												<div className="avatar">
 													<div className="size-8 sm:size-5">
-														{member.user.image ? (
-															<Avatar
-																src={member.user.image}
-																name={member.user.name}
-																size="size-8 sm:size-5"
-															/>
-														) : (
-															<div className="text-primary-700 flex h-full w-full items-center justify-center rounded-full">
-																{member.user.name?.charAt(0) || 'U'}
-															</div>
-														)}
+														<Avatar
+															src={member.user.image}
+															name={member.user.name}
+															size="size-8 sm:size-5"
+														>
+															<AvatarMarble name={member.user.name} />
+														</Avatar>
 													</div>
 												</div>
 
