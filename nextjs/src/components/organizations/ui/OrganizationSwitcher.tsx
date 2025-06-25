@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 // Primitives
 import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
-import { Avatar } from '@skeletonlabs/skeleton-react';
+import * as Avatar from '@/components/primitives/ui/avatar';
 // Icons
 import { Building2, ChevronsUpDown, Plus, Settings } from 'lucide-react';
 // Components
@@ -101,14 +101,15 @@ export default function OrganizationSwitcher({
 					className="hover:bg-surface-200-800 border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
 				>
 					<div className="flex w-full max-w-64 items-center gap-3 overflow-hidden">
-						<Avatar
-							src={activeOrganization?.logo || ''}
-							name={activeOrganization?.name || ''}
-							size="size-8 shrink-0"
-							rounded="rounded-container"
-						>
-							<Building2 className="size-5" />
-						</Avatar>
+						<Avatar.Root className="rounded-container size-8 shrink-0">
+							<Avatar.Image
+								src={activeOrganization?.logo || ''}
+								alt={activeOrganization?.name || ''}
+							/>
+							<Avatar.Fallback>
+								<Building2 className="size-5" />
+							</Avatar.Fallback>
+						</Avatar.Root>
 						<span className="text-surface-700-300 truncate text-sm">
 							{activeOrganization?.name}
 						</span>
@@ -120,14 +121,15 @@ export default function OrganizationSwitcher({
 					<div className="flex flex-col gap-1">
 						<div role="list" className="bg-surface-50-950 rounded-base flex flex-col">
 							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
-								<Avatar
-									src={activeOrganization?.logo || ''}
-									name={activeOrganization?.name || ''}
-									size="size-8 shrink-0"
-									rounded="rounded-container"
-								>
-									<Building2 className="size-5" />
-								</Avatar>
+								<Avatar.Root className="rounded-container size-8 shrink-0">
+									<Avatar.Image
+										src={activeOrganization?.logo || ''}
+										alt={activeOrganization?.name || ''}
+									/>
+									<Avatar.Fallback>
+										<Building2 className="size-5" />
+									</Avatar.Fallback>
+								</Avatar.Root>
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
@@ -157,13 +159,12 @@ export default function OrganizationSwitcher({
 													onClick={() => updateActiveOrg(org._id)}
 													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 												>
-													<Avatar
-														src={org.logo || ''}
-														name={org.name}
-														size="size-8 rounded-base shrink-0"
-													>
-														<Building2 className="size-5" />
-													</Avatar>
+													<Avatar.Root className="rounded-container size-8 shrink-0">
+														<Avatar.Image src={org.logo || ''} alt={org.name || ''} />
+														<Avatar.Fallback>
+															<Building2 className="size-5" />
+														</Avatar.Fallback>
+													</Avatar.Root>
 													<span className="text-surface-700-300 truncate text-base">
 														{org.name}
 													</span>

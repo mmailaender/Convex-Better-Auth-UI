@@ -20,6 +20,27 @@ export const getUserFirstName = (name: string | null | undefined): string => {
 };
 
 /**
+ * Update the user's avatar storage reference.
+ */
+export const updateAvatarModel = async (
+	ctx: MutationCtx,
+	args: { userId: Id<'users'>; storageId: Id<'_storage'> }
+) => {
+	const { userId, storageId } = args;
+
+	const user = await ctx.db.get(userId);
+	if (!user) {
+		throw new ConvexError('User not found');
+	}
+
+	if (user.imageId && user.imageId !== storageId) {
+		await ctx.storage.delete(user.imageId);
+	}
+
+	return await patchUserModel(ctx, { userId, data: { imageId: storageId } });
+};
+
+/**
  * Patch (update) arbitrary fields on a user document. All validation and auth
  * checks must be performed by the caller (i.e. the mutation handler).
  *

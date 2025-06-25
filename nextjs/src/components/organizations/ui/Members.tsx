@@ -1,6 +1,15 @@
 // React
 import { useState, useMemo } from 'react';
 
+/** UI Components **/
+// Primitives
+import * as Dialog from '@/components/primitives/ui/dialog';
+import * as Drawer from '@/components/primitives/ui/drawer';
+import * as Avatar from '@/components/primitives/ui/avatar';
+import { toast } from 'sonner';
+// Icons
+import { Search, Trash, Pencil } from 'lucide-react';
+
 // API Convex
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -14,17 +23,8 @@ type GetOrganizationMembersReturnType = FunctionReturnType<
 type GetOrganizationMemberReturnType =
 	GetOrganizationMembersReturnType extends Array<infer T> ? T : never;
 
-// Components
-import * as Dialog from '@/components/primitives/ui/dialog';
-import * as Drawer from '@/components/primitives/ui/drawer';
-import { toast } from 'sonner';
-import { Avatar } from '@skeletonlabs/skeleton-react';
-// Icons
-import { Search, Trash, Pencil } from 'lucide-react';
-
 // Hooks
 import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
-import AvatarMarble from '@/components/primitives/ui/avatarMarble';
 
 /**
  * Component that displays a list of organization members with role management functionality
@@ -194,9 +194,12 @@ export default function Members(): React.ReactNode {
 							<div className="flex items-center space-x-3">
 								<div className="avatar">
 									<div className="size-10">
-										<Avatar src={member.user.image} name={member.user.name} size="size-10">
-											<AvatarMarble name={member.user.name} />
-										</Avatar>
+										<Avatar.Root className="size-10">
+											<Avatar.Image src={member.user.image} alt={member.user.name} />
+											<Avatar.Fallback>
+												<Avatar.Marble name={member.user.name} />
+											</Avatar.Fallback>
+										</Avatar.Root>
 									</div>
 								</div>
 								<div className="flex flex-col">
@@ -245,13 +248,12 @@ export default function Members(): React.ReactNode {
 											<div className="flex items-center space-x-2">
 												<div className="avatar">
 													<div className="size-8 sm:size-5">
-														<Avatar
-															src={member.user.image}
-															name={member.user.name}
-															size="size-8 sm:size-5"
-														>
-															<AvatarMarble name={member.user.name} />
-														</Avatar>
+														<Avatar.Root className="size-8 sm:size-5">
+															<Avatar.Image src={member.user.image} alt={member.user.name} />
+															<Avatar.Fallback>
+																<Avatar.Marble name={member.user.name} />
+															</Avatar.Fallback>
+														</Avatar.Root>
 													</div>
 												</div>
 
@@ -368,11 +370,15 @@ export default function Members(): React.ReactNode {
 									<div className="avatar">
 										<div className="size-12">
 											{selectedMember.user.image ? (
-												<Avatar
-													src={selectedMember.user.image}
-													name={selectedMember.user.name}
-													size="size-12"
-												/>
+												<Avatar.Root className="size-12">
+													<Avatar.Image
+														src={selectedMember.user.image}
+														alt={selectedMember.user.name}
+													/>
+													<Avatar.Fallback>
+														<Avatar.Marble name={selectedMember.user.name} />
+													</Avatar.Fallback>
+												</Avatar.Root>
 											) : (
 												<div className="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full">
 													{selectedMember.user.name?.charAt(0) || 'U'}

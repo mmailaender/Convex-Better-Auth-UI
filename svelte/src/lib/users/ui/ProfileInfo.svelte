@@ -10,12 +10,11 @@
 	import { toast } from 'svelte-sonner';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Dialog from '$lib/primitives/ui/dialog';
-	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
-	import AvatarMarble from '$lib/primitives/ui/avatar-fallback';
+	import * as Avatar from '$lib/primitives/ui/avatar';
+	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { preloadImage } from '$lib/primitives/utils/preloadImage';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
@@ -33,9 +32,9 @@
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
 	let name: string = $state('');
-	let isUploading: boolean = $state(false);
-	let isPreloading: boolean = $state(false);
-	let displayImageSrc: string = $state('');
+	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+
+	let avatarKey: number = $state(0); // Force re-render when image changes
 
 	// Derived state
 	const user = $derived(response.data);
@@ -44,29 +43,6 @@
 	$effect(() => {
 		if (user && name === '') {
 			name = user.name;
-		}
-		if (user?.image && displayImageSrc === '') {
-			displayImageSrc = user.image;
-		}
-	});
-
-	// Handle server image updates - preload before showing
-	$effect(() => {
-		if (!user?.image || isUploading) return;
-
-		// If server has a new image URL that's different from what we're displaying
-		if (user.image !== displayImageSrc) {
-			isPreloading = true;
-			preloadImage(user.image)
-				.then(() => {
-					displayImageSrc = user.image!;
-					isPreloading = false;
-				})
-				.catch(() => {
-					// If preload fails, still update
-					displayImageSrc = user.image!;
-					isPreloading = false;
-				});
 		}
 	});
 
@@ -91,7 +67,8 @@
 		if (!file) return;
 
 		try {
-			isUploading = true;
+			// Set loading status to show spinner immediately
+			loadingStatus = 'loading';
 
 			// Optimize the image before upload
 			const optimizedFile = await optimizeImage(file, {
@@ -124,12 +101,15 @@
 			// Update the user's avatar with the storage ID
 			await client.mutation(api.users.mutations.updateAvatar, { storageId });
 
+			// Force avatar to re-render with new image - this will trigger new loading
+			avatarKey += 1;
+
 			toast.success('Avatar updated successfully');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to upload avatar: ${errorMsg}`);
-		} finally {
-			isUploading = false;
+			// Reset loading status on error
+			loadingStatus = 'error';
 		}
 	}
 </script>
@@ -144,30 +124,30 @@
 				<div
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 				>
-					<Avatar
-						src={displayImageSrc}
-						name={user.name}
-						background="bg-surface-400-600"
-						size="size-20"
-						rounded="rounded-full"
-					>
-						<AvatarMarble name={user.name} />
-					</Avatar>
+					{#key avatarKey}
+						<Avatar.Root class="size-20" bind:loadingStatus>
+							<Avatar.Image src={user.image} alt={user.name} />
+							<Avatar.Fallback>
+								{#if loadingStatus === 'loading'}
+									<div
+										class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50"
+									>
+										<div
+											class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+										></div>
+									</div>
+								{:else}
+									<Avatar.Marble name={user.name} />
+								{/if}
+							</Avatar.Fallback>
+						</Avatar.Root>
+					{/key}
 
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
 					>
 						<Pencil class="size-4" />
 					</div>
-
-					<!-- Loading indicator during upload or preloading -->
-					{#if isUploading || isPreloading}
-						<div
-							class="bg-opacity-50 absolute inset-0 flex items-center justify-center rounded-full bg-black"
-						>
-							<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-						</div>
-					{/if}
 				</div>
 			</FileUpload>
 		</div>

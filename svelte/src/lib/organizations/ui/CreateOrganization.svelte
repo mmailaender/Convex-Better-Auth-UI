@@ -8,7 +8,8 @@
 	import { LogIn, Pencil, Building2 } from '@lucide/svelte';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import * as Avatar from '$lib/primitives/ui/avatar';
+	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
@@ -197,15 +198,12 @@
 				<div
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 				>
-					<Avatar
-						src={logo}
-						name={name.length > 0 ? name : 'My Organization'}
-						background="bg-surface-400-600"
-						size="size-20"
-						rounded="rounded-container"
-					>
-						<Building2 class="size-10" />
-					</Avatar>
+					<Avatar.Root class="rounded-container size-20">
+						<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
+						<Avatar.Fallback class="bg-surface-400-600 rounded-container">
+							<Building2 class="size-10" />
+						</Avatar.Fallback>
+					</Avatar.Root>
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
 					>

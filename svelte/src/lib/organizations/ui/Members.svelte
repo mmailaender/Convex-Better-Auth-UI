@@ -1,8 +1,8 @@
 <script lang="ts">
 	// Primitives
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Avatar from '$lib/primitives/ui/avatar';
 	import { toast } from 'svelte-sonner';
 	// Icons
 	import { Search, Trash, Pencil } from '@lucide/svelte';
@@ -17,7 +17,6 @@
 	import type { Doc, Id } from '$convex/_generated/dataModel';
 	type Role = Doc<'organizationMembers'>['role'];
 	import type { FunctionReturnType } from 'convex/server';
-	import AvatarMarble from '$lib/primitives/ui/avatar-fallback';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
@@ -228,9 +227,12 @@
 						<div class="flex items-center space-x-3">
 							<div class="avatar">
 								<div class="size-10">
-									<Avatar src={member.user.image} name={member.user.name} size="size-10">
-										<AvatarMarble name={member.user.name} />
-									</Avatar>
+									<Avatar.Root class="size-10">
+										<Avatar.Image src={member.user.image} alt={member.user.name} />
+										<Avatar.Fallback>
+											<Avatar.Marble name={member.user.name} />
+										</Avatar.Fallback>
+									</Avatar.Root>
 								</div>
 							</div>
 							<div class="flex flex-col">
@@ -290,13 +292,12 @@
 										<div class="flex items-center space-x-2">
 											<div class="avatar">
 												<div class="size-8 sm:size-5">
-													<Avatar
-														src={member.user.image}
-														name={member.user.name}
-														size="size-8 sm:size-5"
-													>
-														<AvatarMarble name={member.user.name} />
-													</Avatar>
+													<Avatar.Root class="size-8 sm:size-5">
+														<Avatar.Image src={member.user.image} alt={member.user.name} />
+														<Avatar.Fallback>
+															<Avatar.Marble name={member.user.name} />
+														</Avatar.Fallback>
+													</Avatar.Root>
 												</div>
 											</div>
 
@@ -407,11 +408,15 @@
 						<div class="avatar">
 							<div class="size-12">
 								{#if selectedMember!.user.image}
-									<Avatar
-										src={selectedMember!.user.image}
-										name={selectedMember!.user.name}
-										size="size-12"
-									/>
+									<Avatar.Root class="size-12">
+										<Avatar.Image
+											src={selectedMember!.user.image}
+											alt={selectedMember!.user.name}
+										/>
+										<Avatar.Fallback>
+											<Avatar.Marble name={selectedMember!.user.name} />
+										</Avatar.Fallback>
+									</Avatar.Root>
 								{:else}
 									<div
 										class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"

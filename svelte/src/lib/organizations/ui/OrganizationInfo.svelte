@@ -24,14 +24,14 @@
 	import { toast } from 'svelte-sonner';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Dialog from '$lib/primitives/ui/dialog';
-	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import * as Avatar from '$lib/primitives/ui/avatar';
+	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Primitive Types
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { preloadImage } from '$lib/primitives/utils/preloadImage';
 
 	// Props
 	let {
@@ -50,9 +50,8 @@
 	// State
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
-	let isUploading: boolean = $state(false);
-	let isPreloading: boolean = $state(false);
-	let displayLogoSrc: string = $state('');
+	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+	let avatarKey: number = $state(0); // Force re-render when image changes
 
 	let formState = $state({ name: '', slug: '' });
 
@@ -69,29 +68,6 @@
 			if (formState.slug === '') {
 				formState.slug = activeOrganization.slug || '';
 			}
-			if (displayLogoSrc === '') {
-				displayLogoSrc = activeOrganization.logo || '';
-			}
-		}
-	});
-
-	// Handle server logo updates - preload before showing
-	$effect(() => {
-		if (!activeOrganization?.logo || isUploading) return;
-
-		// If server has a new logo URL that's different from what we're displaying
-		if (activeOrganization.logo !== displayLogoSrc) {
-			isPreloading = true;
-			preloadImage(activeOrganization.logo)
-				.then(() => {
-					displayLogoSrc = activeOrganization.logo!;
-					isPreloading = false;
-				})
-				.catch(() => {
-					// If preload fails, still update
-					displayLogoSrc = activeOrganization.logo!;
-					isPreloading = false;
-				});
 		}
 	});
 
@@ -122,7 +98,8 @@
 		if (!file || !activeOrganization) return;
 
 		try {
-			isUploading = true;
+			// Set loading status to show spinner immediately
+			loadingStatus = 'loading';
 
 			const optimised = await optimizeImage(file, {
 				maxWidth: 512,
@@ -151,12 +128,15 @@
 				logoId: logoStorageId
 			});
 
+			// Force avatar to re-render with new image - this will trigger new loading
+			avatarKey += 1;
+
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
-		} finally {
-			isUploading = false;
+			// Reset loading status on error
+			loadingStatus = 'error';
 		}
 	}
 
@@ -165,8 +145,6 @@
 		if (!activeOrganization) return;
 
 		try {
-			isUploading = true;
-
 			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
 				organizationId: activeOrganization._id,
 				name: formState.name,
@@ -179,8 +157,6 @@
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update organization: ${message}`);
-		} finally {
-			isUploading = false;
 		}
 	}
 </script>
@@ -191,30 +167,33 @@
 			<div
 				class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 			>
-				<Avatar
-					src={displayLogoSrc}
-					name={activeOrganization.name || 'Organization'}
-					background="bg-surface-400-600"
-					size="size-20"
-					rounded="rounded-container"
-				>
-					<Building2 class="size-10" />
-				</Avatar>
+				{#key avatarKey}
+					<Avatar.Root class="rounded-container size-20" bind:loadingStatus>
+						<Avatar.Image
+							src={activeOrganization.logo}
+							alt={activeOrganization.name || 'Organization'}
+						/>
+						<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
+							{#if loadingStatus === 'loading'}
+								<div
+									class="rounded-container absolute inset-0 flex items-center justify-center bg-black/50"
+								>
+									<div
+										class="rounded-container h-6 w-6 animate-spin border-2 border-white border-b-transparent"
+									></div>
+								</div>
+							{:else}
+								<Building2 class="size-10" />
+							{/if}
+						</Avatar.Fallback>
+					</Avatar.Root>
+				{/key}
 
 				<div
 					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
 				>
 					<Pencil class="size-4" />
 				</div>
-
-				<!-- Loading indicator during upload or preloading -->
-				{#if isUploading || isPreloading}
-					<div
-						class="bg-opacity-50 rounded-container absolute inset-0 flex items-center justify-center bg-black"
-					>
-						<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-					</div>
-				{/if}
 			</div>
 		</FileUpload>
 
@@ -253,11 +232,7 @@
 							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
 								Cancel
 							</button>
-							<button
-								type="submit"
-								class="btn preset-filled-primary-500 w-full md:w-fit"
-								disabled={isUploading}
-							>
+							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
 								Save
 							</button>
 						</div>
@@ -301,11 +276,7 @@
 							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
 								Cancel
 							</button>
-							<button
-								type="submit"
-								class="btn preset-filled-primary-500 w-full md:w-fit"
-								disabled={isUploading}
-							>
+							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
 								Save
 							</button>
 						</div>

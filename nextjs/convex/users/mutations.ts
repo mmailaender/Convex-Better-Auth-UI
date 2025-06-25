@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../_generated/server';
-import { patchUserModel, deleteUserModel } from '../model/users';
+import { patchUserModel, deleteUserModel, updateAvatarModel } from '../model/users';
 
 /**
  * Update the authenticated user's display name.
@@ -33,7 +33,7 @@ export const updateAvatar = mutation({
 			throw new ConvexError('Not authenticated');
 		}
 
-		return await patchUserModel(ctx, { userId, data: { imageId: args.storageId } });
+		return updateAvatarModel(ctx, { userId, storageId: args.storageId });
 	}
 });
 

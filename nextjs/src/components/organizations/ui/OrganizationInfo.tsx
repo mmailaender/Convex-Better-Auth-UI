@@ -16,7 +16,8 @@ import { Building2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import * as Drawer from '@/components/primitives/ui/drawer';
 import * as Dialog from '@/components/primitives/ui/dialog';
-import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+import * as Avatar from '@/components/primitives/ui/avatar';
+import { FileUpload } from '@skeletonlabs/skeleton-react';
 
 // utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
@@ -226,15 +227,12 @@ export default function OrganizationInfo() {
 		<div className="flex flex-col items-start gap-6">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
-					<Avatar
-						src={displayLogoSrc}
-						name={activeOrganization.name || 'Organization'}
-						background="bg-surface-400-600"
-						size="size-20"
-						rounded="rounded-container"
-					>
-						<Building2 className="size-10" />
-					</Avatar>
+					<Avatar.Root className="rounded-container size-20">
+						<Avatar.Image src={displayLogoSrc} alt={activeOrganization.name || 'Organization'} />
+						<Avatar.Fallback className="bg-surface-400-600 rounded-container size-20">
+							<Building2 className="size-10" />
+						</Avatar.Fallback>
+					</Avatar.Root>
 
 					<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 						<Pencil className="size-4" />

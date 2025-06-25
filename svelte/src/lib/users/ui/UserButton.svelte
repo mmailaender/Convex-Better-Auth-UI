@@ -2,8 +2,7 @@
 	// Primitives
 	import * as Popover from '$lib/primitives/ui/popover';
 	import * as Dialog from '$lib/primitives/ui/dialog';
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
-	import AvatarMarble from '$lib/primitives/ui/avatar-fallback';
+	import * as Avatar from '$lib/primitives/ui/avatar';
 	// Icons
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	// Components
@@ -58,13 +57,12 @@
 		<!-- User Popover -->
 		<Popover.Root bind:open={userPopoverOpen}>
 			<Popover.Trigger>
-				<Avatar
-					src={user.image}
-					name={user.name}
-					size="size-10 ring-0 hover:ring-4 ring-surface-100-900 ease-out duration-200"
-				>
-					<AvatarMarble name={user.name} />
-				</Avatar>
+				<Avatar.Root class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
+					<Avatar.Image src={user.image} alt={user.name} />
+					<Avatar.Fallback>
+						<Avatar.Marble name={user.name} />
+					</Avatar.Fallback>
+				</Avatar.Root>
 			</Popover.Trigger>
 
 			<Popover.Content side={popoverSide} align={popoverAlign}>
@@ -73,9 +71,12 @@
 						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-base flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 						onclick={openProfileModal}
 					>
-						<Avatar src={user.image} name={user.name} size="size-12">
-							<AvatarMarble name={user.name} />
-						</Avatar>
+						<Avatar.Root class="size-12">
+							<Avatar.Image src={user.image} alt={user.name} />
+							<Avatar.Fallback>
+								<Avatar.Marble name={user.name} />
+							</Avatar.Fallback>
+						</Avatar.Root>
 						<div class="flex flex-1 flex-col gap-0 overflow-hidden">
 							<p class="truncate text-left text-base font-medium">{user.name}</p>
 							<p class="text-surface-700-300 truncate text-left text-xs">

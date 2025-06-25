@@ -6,8 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 // Icons
 import { LogIn, Pencil, Building2 } from 'lucide-react';
 // Primitives
+import * as Avatar from '@/components/primitives/ui/avatar';
 import { toast } from 'sonner';
-import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+import { FileUpload } from '@skeletonlabs/skeleton-react';
 
 // Utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
@@ -167,15 +168,12 @@ export default function CreateOrganization({
 			<div className="my-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
-						<Avatar
-							src={logo}
-							name={name.length > 0 ? name : 'My Organization'}
-							background="bg-surface-400-600"
-							size="size-20"
-							rounded="rounded-container"
-						>
-							<Building2 className="size-10" />
-						</Avatar>
+						<Avatar.Root className="rounded-container size-20">
+							<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
+							<Avatar.Fallback className="bg-surface-400-600 rounded-container">
+								<Building2 className="size-10" />
+							</Avatar.Fallback>
+						</Avatar.Root>
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />
 						</div>
