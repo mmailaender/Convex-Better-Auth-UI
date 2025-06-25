@@ -18,7 +18,7 @@
 
 	// UI Components
 	// Icons
-	import { Pencil } from '@lucide/svelte';
+	import { Building2, Pencil } from '@lucide/svelte';
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
@@ -197,7 +197,9 @@
 					background="bg-surface-400-600"
 					size="size-20"
 					rounded="rounded-container"
-				/>
+				>
+					<Building2 class="size-10" />
+				</Avatar>
 
 				<div
 					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"

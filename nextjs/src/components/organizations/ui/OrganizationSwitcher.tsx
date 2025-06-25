@@ -8,7 +8,7 @@ import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { Avatar } from '@skeletonlabs/skeleton-react';
 // Icons
-import { ChevronsUpDown, Plus, Settings } from 'lucide-react';
+import { Building2, ChevronsUpDown, Plus, Settings } from 'lucide-react';
 // Components
 import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
 import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
@@ -106,7 +106,9 @@ export default function OrganizationSwitcher({
 							name={activeOrganization?.name || ''}
 							size="size-8 shrink-0"
 							rounded="rounded-container"
-						/>
+						>
+							<Building2 className="size-5" />
+						</Avatar>
 						<span className="text-surface-700-300 truncate text-sm">
 							{activeOrganization?.name}
 						</span>
@@ -123,7 +125,9 @@ export default function OrganizationSwitcher({
 									name={activeOrganization?.name || ''}
 									size="size-8 shrink-0"
 									rounded="rounded-container"
-								/>
+								>
+									<Building2 className="size-5" />
+								</Avatar>
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
@@ -157,7 +161,9 @@ export default function OrganizationSwitcher({
 														src={org.logo || ''}
 														name={org.name}
 														size="size-8 rounded-base shrink-0"
-													/>
+													>
+														<Building2 className="size-5" />
+													</Avatar>
 													<span className="text-surface-700-300 truncate text-base">
 														{org.name}
 													</span>

@@ -7,7 +7,7 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	// Icons
-	import { ChevronsUpDown, Plus, Settings, X } from '@lucide/svelte';
+	import { Building2, ChevronsUpDown, Plus, Settings, X } from '@lucide/svelte';
 	// Components
 	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
 	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
@@ -148,7 +148,9 @@
 					name={activeOrganization?.name || ''}
 					size="size-8 shrink-0"
 					rounded="rounded-container"
-				/>
+				>
+					<Building2 class="size-5" />
+				</Avatar>
 				<span class="text-surface-700-300 truncate text-sm">
 					{activeOrganization?.name}
 				</span>
@@ -166,7 +168,9 @@
 							name={activeOrganization?.name || ''}
 							size="size-8 shrink-0"
 							rounded="rounded-container"
-						/>
+						>
+							<Building2 class="size-5" />
+						</Avatar>
 						<span class="text-surface-700-300 text-medium w-full truncate text-base">
 							{activeOrganization?.name}
 						</span>
@@ -189,11 +193,9 @@
 									onclick={() => updateActiveOrg(org._id)}
 									class="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 								>
-									<Avatar
-										src={org.logo || ''}
-										name={org.name}
-										size="size-8 rounded-base shrink-0"
-									/>
+									<Avatar src={org.logo || ''} name={org.name} size="size-8 rounded-base shrink-0">
+										<Building2 class="size-5" />
+									</Avatar>
 									<span class="text-surface-700-300 truncate text-base">
 										{org.name}
 									</span>

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 /** UI **/
 // Icons
-import { LogIn, Pencil } from 'lucide-react';
+import { LogIn, Pencil, Building2 } from 'lucide-react';
 // Primitives
 import { toast } from 'sonner';
 import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
@@ -173,7 +173,9 @@ export default function CreateOrganization({
 							background="bg-surface-400-600"
 							size="size-20"
 							rounded="rounded-container"
-						/>
+						>
+							<Building2 className="size-10" />
+						</Avatar>
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />
 						</div>
