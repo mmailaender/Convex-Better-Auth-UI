@@ -31,7 +31,7 @@ const authFullTables = {
 		logo: v.optional(v.string()),
 		logoId: v.optional(v.id('_storage')),
 		plan: v.union(v.literal('Free'), v.literal('Pro'), v.literal('Enterprise'))
-	}).index('slug', ['slug']),
+	}).index('by_slug', ['slug']),
 
 	organizationMembers: defineTable({
 		organizationId: v.id('organizations'),
