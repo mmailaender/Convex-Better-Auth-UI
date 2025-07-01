@@ -3,25 +3,162 @@
 	import { page } from '$app/state';
 	import { env } from '$env/dynamic/public';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_CONVEX_URL } from '$env/static/public';
+
+	// Primitives
+	import { toast } from 'svelte-sonner';
 
 	// API Auth
+	import { ConvexHttpClient } from 'convex/browser';
+	const client = new ConvexHttpClient(PUBLIC_CONVEX_URL);
 	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { api } from '$convex/_generated/api';
 	const signIn = $derived(useAuth().signIn);
 
 	let { redirectTo: redirectParam }: { redirectTo?: string } = $props();
 
+	type AuthStep = 'email' | 'login' | 'register';
+
+	let currentStep: AuthStep = $state('email');
+	let email = $state('');
+	let submitting = $state(false);
+	let verifyingEmail = $state(false);
+
 	/**
 	 * Handles sign in with the specified provider
 	 */
-	function handleSignIn(): void {
+	function handleSocialSignIn(provider: string): void {
 		const redirectUrl =
 			redirectParam ??
 			page.url.searchParams.get('redirectTo') ??
 			(page.url.pathname.includes('/signin') ? '/' : page.url.pathname);
 
-		void signIn('github', { redirectTo: redirectUrl });
+		void signIn(provider, { redirectTo: redirectUrl });
+	}
+
+	/**
+	 * Verifies if email exists and determines the appropriate flow
+	 */
+	async function verifyEmail(emailValue: string): Promise<void> {
+		verifyingEmail = true;
+
+		try {
+			const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
+				email: emailValue
+			});
+
+			if (data.exists) {
+				currentStep = 'login';
+			} else if (data.valid) {
+				currentStep = 'register';
+			} else {
+				toast.error('Invalid email. Please try again.');
+			}
+		} catch (error) {
+			toast.error('Failed to verify email. Please try again.');
+			console.error('Email verification error:', error);
+		} finally {
+			verifyingEmail = false;
+		}
+	}
+
+	/**
+	 * Handles email form submission
+	 */
+	function handleEmailSubmit(event: Event): void {
+		event.preventDefault();
+		const formData = new FormData(event.target as HTMLFormElement);
+		const emailValue = formData.get('email') as string;
+
+		if (emailValue) {
+			email = emailValue;
+			void verifyEmail(emailValue);
+		}
+	}
+
+	/**
+	 * Handles authentication form submission (login or register)
+	 */
+	function handleAuthSubmit(event: Event): void {
+		event.preventDefault();
+		submitting = true;
+
+		const formData = new FormData(event.target as HTMLFormElement);
+		formData.set('flow', currentStep === 'login' ? 'signIn' : 'signUp');
+		formData.set('email', email);
+
+		void signIn('password', formData).catch((error) => {
+			let toastTitle = '';
+			if (error.message.includes('Invalid password')) {
+				toastTitle = 'Invalid password. Please try again.';
+			} else {
+				toastTitle =
+					currentStep === 'login'
+						? 'Could not sign in. Please check your credentials.'
+						: 'Could not create account. Please try again.';
+			}
+			toast.error(toastTitle);
+			submitting = false;
+		});
+	}
+
+	/**
+	 * Resets the flow back to email entry
+	 */
+	function resetFlow(): void {
+		currentStep = 'email';
+		email = '';
 	}
 </script>
+
+{#snippet emailStep()}
+	<form class="flex flex-col gap-2" onsubmit={handleEmailSubmit}>
+		<input
+			class="input"
+			type="email"
+			name="email"
+			placeholder="Enter your email"
+			required
+			disabled={verifyingEmail}
+		/>
+		<button class="btn preset-filled" type="submit" disabled={verifyingEmail}>
+			{verifyingEmail ? 'Verifying...' : 'Continue'}
+		</button>
+	</form>
+{/snippet}
+
+{#snippet loginStep()}
+	<form class="flex flex-col gap-2" onsubmit={handleAuthSubmit}>
+		<input class="input" type="email" name="email" value={email} disabled />
+		<input
+			class="input"
+			type="password"
+			name="password"
+			placeholder="Enter your password"
+			required
+		/>
+		<button class="btn preset-filled" type="submit" disabled={submitting}>
+			{submitting ? 'Signing in...' : 'Sign in'}
+		</button>
+		<button type="button" class="anchor text-center text-sm" onclick={resetFlow}>
+			Use a different email
+		</button>
+	</form>
+{/snippet}
+
+{#snippet registerStep()}
+	<form class="flex flex-col gap-2" onsubmit={handleAuthSubmit}>
+		<input class="input" type="email" name="email" value={email} disabled />
+		<input class="input" type="text" name="name" placeholder="Enter your name" required />
+		<input class="input" type="password" name="password" placeholder="Create a password" required />
+		<button class="btn preset-filled" type="submit" disabled={submitting}>
+			{submitting ? 'Creating account...' : 'Create account'}
+		</button>
+		<button type="button" class="anchor text-center text-sm" onclick={resetFlow}>
+			Use a different email
+		</button>
+	</form>
+{/snippet}
 
 <div class="flex h-full w-full flex-col items-center justify-center">
 	<div class="flex h-full w-full max-w-md flex-col p-8">
@@ -31,10 +168,10 @@
 		<p class="text-surface-600-400 mt-3 mb-10 max-w-96 text-left text-sm">
 			Pre-built auth, UI kit, theme generator, and guides — everything you need to start fast.
 		</p>
-		<div class="flex h-full w-full flex-col gap-2">
+		<div class="flex h-full w-full flex-col gap-8">
 			<button
 				class="btn preset-filled hover:border-surface-600-400 w-full shadow-sm"
-				onclick={handleSignIn}
+				onclick={() => handleSocialSignIn('github')}
 			>
 				<svg
 					aria-label="GitHub logo"
@@ -50,9 +187,25 @@
 				</svg>
 				Sign in with GitHub
 			</button>
+
+			<div class="relative flex items-center">
+				<div class="border-surface-600-400 flex-1 border-t"></div>
+				<span class="text-surface-600-400 px-4">OR</span>
+				<div class="border-surface-600-400 flex-1 border-t"></div>
+			</div>
+
+			<!-- Progressive Email Flow -->
+			{#if currentStep === 'email'}
+				{@render emailStep()}
+			{:else if currentStep === 'login'}
+				{@render loginStep()}
+			{:else if currentStep === 'register'}
+				{@render registerStep()}
+			{/if}
+
 			{#if env.PUBLIC_E2E_TEST}
 				<form
-					class="mt-8 flex flex-col gap-2"
+					class="flex flex-col gap-2"
 					onsubmit={(event) => {
 						event.preventDefault();
 						const formData = new FormData(event.currentTarget);
@@ -79,9 +232,9 @@
 		</div>
 		<div>
 			<p class="text-surface-600-400 mt-10 text-xs">
-				By contining, you agree to our{' '}
+				By continuing, you agree to our{' '}
 				<a href="#" class="anchor text-surface-950-50">Terms</a> and{' '}
-				<a href="#" class="anchor text-surface-950-50">Privacy Polices</a>
+				<a href="#" class="anchor text-surface-950-50">Privacy Policies</a>
 			</p>
 		</div>
 	</div>

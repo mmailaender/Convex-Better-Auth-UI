@@ -25,7 +25,11 @@ export const init = internalAction({
 		await createAccount(ctx, {
 			provider: 'secret',
 			account: { id: TEST_USER_EMAIL },
-			profile: { email: TEST_USER_EMAIL, name: 'Test User' }
+			profile: {
+				email: TEST_USER_EMAIL,
+				name: 'Test User',
+				emailVerificationTime: Date.now()
+			}
 		});
 		console.info('Test user created');
 	}

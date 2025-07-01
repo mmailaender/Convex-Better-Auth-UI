@@ -1,13 +1,22 @@
 import GitHub from '@auth/core/providers/github';
 import { ConvexCredentials } from '@convex-dev/auth/providers/ConvexCredentials';
-import { convexAuth } from '@convex-dev/auth/server';
+import { convexAuth, getAuthUserId } from '@convex-dev/auth/server';
 import { internal } from './_generated/api.js';
-import { MutationCtx } from './_generated/server.js';
+import { MutationCtx, query } from './_generated/server.js';
 import { Id } from './_generated/dataModel.js';
+import { Password } from '@convex-dev/auth/providers/Password';
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 	providers: [
 		GitHub,
+		Password({
+			profile(params) {
+				return {
+					email: params.email as string,
+					name: params.name as string
+				};
+			}
+		}),
 		ConvexCredentials({
 			id: 'secret',
 			authorize: async (params, ctx) => {
@@ -61,5 +70,19 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 				});
 			}
 		}
+	}
+});
+
+export const activeUser = query({
+	handler: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) {
+			return null;
+		}
+		const user = await ctx.db.get(userId);
+		if (!user) {
+			return null;
+		}
+		return user;
 	}
 });
