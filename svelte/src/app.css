@@ -21,6 +21,17 @@
 			opacity: 1;
 		}
 	}
+
+	/* Shadcn */
+	--color-popover: var(--color-surface-200-800);
+	--color-popover-foreground: var(--color-surface-950-50);
+
+	--color-muted-foreground: var(--color-surface-700-300);
+
+	--color-border: var(--color-surface-400-600);
+
+	--color-accent: var(--color-primary-600-400);
+	--color-accent-foreground: var(--color-surface-950-50);
 }
 
 @utility input {
