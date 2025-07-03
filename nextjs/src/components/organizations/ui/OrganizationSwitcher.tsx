@@ -49,17 +49,50 @@ export default function OrganizationSwitcher({
 	const [openOrganizationProfile, setOpenOrganizationProfile] = useState<boolean>(false);
 
 	/**
-	 * Updates the active organization
+	 * Updates the active organization and replaces URL slug if needed
 	 */
 	const updateActiveOrg = async (organizationId: Id<'organizations'>) => {
 		try {
+			// Get current active organization slug before mutation
+			const currentActiveOrgSlug = activeOrganization?.slug;
+			const currentPathname = window.location.pathname;
+
+			// Check if current URL contains the active organization slug
+			const urlContainsCurrentSlug =
+				currentActiveOrgSlug &&
+				(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
+					currentPathname.includes(`/${currentActiveOrgSlug}`));
+
+			// Execute the mutation to set new active organization
 			await setActiveOrg({ organizationId });
 
-			// Close popover and refresh
+			// Get the new active organization data
+			const newActiveOrgSlug = activeOrganization?.slug;
+
+			// If URL contained old slug and we have a new slug, replace it
+			if (
+				urlContainsCurrentSlug &&
+				currentActiveOrgSlug &&
+				newActiveOrgSlug &&
+				currentActiveOrgSlug !== newActiveOrgSlug
+			) {
+				// Replace the old slug with the new slug in the URL
+				const newPathname = currentPathname.replace(
+					new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
+					`/${newActiveOrgSlug}`
+				);
+
+				// Navigate to the new URL
+				router.push(newPathname);
+			} else {
+				// No slug replacement needed, just refresh current page
+				router.refresh();
+			}
+
+			// Close popover
 			setOpenSwitcher(false);
-			router.refresh();
 		} catch (err) {
-			console.error(err);
+			console.error('Error updating active organization:', err);
 		}
 	};
 

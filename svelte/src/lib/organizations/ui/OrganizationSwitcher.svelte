@@ -25,6 +25,7 @@
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 
 	import type { FunctionReturnType } from 'convex/server';
+	import { page } from '$app/state';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
@@ -63,7 +64,6 @@
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
-
 	// Derived state
 	const organizations = $derived(organizationsResponse.data);
 	const activeOrganization = $derived(activeOrganizationResponse.data);
@@ -84,17 +84,50 @@
 	}
 
 	/**
-	 * Updates the active organization
+	 * Updates the active organization and replaces URL slug if needed
 	 */
 	async function updateActiveOrg(organizationId: Id<'organizations'>): Promise<void> {
 		try {
+			// Get current active organization slug before mutation
+			const currentActiveOrgSlug = activeOrganization?.slug;
+			const currentPathname = page.url.pathname;
+
+			// Check if current URL contains the active organization slug
+			const urlContainsCurrentSlug =
+				currentActiveOrgSlug &&
+				(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
+					currentPathname.includes(`/${currentActiveOrgSlug}`));
+
+			// Execute the mutation to set new active organization
 			await client.mutation(api.organizations.mutations.setActiveOrganization, { organizationId });
 
-			// Close popover and refresh
+			// Get the new active organization data
+			const newActiveOrgSlug = activeOrganization?.slug;
+
+			// If URL contained old slug and we have a new slug, replace it
+			if (
+				urlContainsCurrentSlug &&
+				currentActiveOrgSlug &&
+				newActiveOrgSlug &&
+				currentActiveOrgSlug !== newActiveOrgSlug
+			) {
+				// Replace the old slug with the new slug in the URL
+				const newPathname = currentPathname.replace(
+					new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
+					`/${newActiveOrgSlug}`
+				);
+
+				// Navigate to the new URL
+				await goto(newPathname, { replaceState: true });
+			} else {
+				// No slug replacement needed, just refresh current page
+				await goto(page.url.pathname + page.url.search, { replaceState: true });
+			}
+
+			// Close popover
 			switcherPopoverOpen = false;
-			goto(window.location.href, { replaceState: true }); // refresh page
 		} catch (err) {
-			console.error(err);
+			console.error('Error updating active organization:', err);
 		}
 	}
 

@@ -1,4 +1,8 @@
 <script lang="ts">
+	// SvelteKit
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
@@ -145,14 +149,44 @@
 		if (!activeOrganization) return;
 
 		try {
+			// Store the current slug before updating
+			const currentSlug = activeOrganization.slug;
+			const currentPathname = page.url.pathname;
+
+			// Check if current URL contains the active organization slug
+			const urlContainsCurrentSlug =
+				currentSlug &&
+				(currentPathname.includes(`/${currentSlug}/`) ||
+					currentPathname.includes(`/${currentSlug}`));
+
+			// Update the organization profile
 			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
 				organizationId: activeOrganization._id,
 				name: formState.name,
 				slug: formState.slug
 			});
 
+			// Close the modals
 			isDialogOpen = false;
 			isDrawerOpen = false;
+
+			// Handle URL redirection if slug was changed
+			if (
+				urlContainsCurrentSlug &&
+				currentSlug &&
+				formState.slug &&
+				currentSlug !== formState.slug
+			) {
+				// Replace the old slug with the new slug in the URL
+				const newPathname = currentPathname.replace(
+					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
+					`/${formState.slug}`
+				);
+
+				// Navigate to the new URL
+				await goto(newPathname, { replaceState: true });
+			}
+
 			toast.success('Organization details updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';

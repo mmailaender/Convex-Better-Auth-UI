@@ -5,75 +5,125 @@ import {
 	createRouteMatcher
 } from '@convex-dev/auth/nextjs/server';
 import { fetchMutation, fetchQuery } from 'convex/nextjs';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-const isLoginPage = createRouteMatcher(['/signin']);
-const isInvitationAcceptRoute = createRouteMatcher(['/api/invitations/accept']);
-const isCreateOrganizationRoute = createRouteMatcher(['/org/create']);
+/* --------------------------------------------------------- */
+/* -------------------- route match helpers ---------------- */
+/* --------------------------------------------------------- */
+
+const isLogin = createRouteMatcher(['/signin']);
+const isInvitationAccept = createRouteMatcher(['/api/invitations/accept']);
+const isCreateOrg = createRouteMatcher(['/org/create']);
+const isPublic = createRouteMatcher([
+	'/',
+	'/signin',
+	'/pricing',
+	'/docs{/*rest}',
+	'/about',
+	'/terms',
+	'/privacy'
+]);
+const isActiveOrganization = createRouteMatcher([
+	'/active-org{/*rest}',
+	'/active-organization{/*rest}'
+]);
+
+/* --------------------------------------------------------- */
+/* ---------------------- auth helpers --------------------- */
+/* --------------------------------------------------------- */
+
+/** Builds `/path?redirectTo=/original/path%3Fquery`  */
+const withRedirect = (to: string, request: NextRequest) => {
+	const url = new URL(request.url);
+	return `${to}?redirectTo=${encodeURIComponent(url.pathname + url.search)}`;
+};
+
+/* --------------------------------------------------------- */
+/* ---------------------- main handler --------------------- */
+/* --------------------------------------------------------- */
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-	if (isLoginPage(request)) {
-		const isAuthenticated = await convexAuth.isAuthenticated();
-		if (isAuthenticated) {
-			return NextResponse.redirect(new URL('/', request.url));
-		}
-	}
-
 	const isAuthenticated = await convexAuth.isAuthenticated();
 
-	if (isInvitationAcceptRoute(request)) {
-		if (!isAuthenticated) {
-			// If not authenticated, redirect to signin with return URL
-			const url = new URL(request.url);
-			return NextResponse.redirect(
-				new URL(`/signin?redirectTo=${encodeURIComponent(url.pathname + url.search)}`, request.url)
-			);
+	/* ---------- 1. Handle public routes first ---------- */
+	if (isPublic(request)) {
+		// Special case: redirect authenticated users away from signin
+		if (isLogin(request) && isAuthenticated) {
+			return NextResponse.redirect(new URL('/', request.url));
 		}
+		return NextResponse.next();
+	}
 
-		// Get invitation ID from query params
+	/* ---------- 2. All other routes require authentication ---------- */
+	if (!isAuthenticated) {
+		return NextResponse.redirect(new URL(withRedirect('/signin', request), request.url));
+	}
+
+	/* ---------- 3. Handle special API routes ---------- */
+	if (isInvitationAccept(request)) {
 		const url = new URL(request.url);
 		const invitationId = url.searchParams.get('invitationId');
-
 		if (invitationId) {
 			try {
-				// Call the mutation directly with the auth token
 				await fetchMutation(
 					api.organizations.invitations.mutations.acceptInvitation,
 					{ invitationId },
 					{ token: await convexAuthNextjsToken() }
 				);
-
-				// Redirect to home page
-				return NextResponse.redirect(new URL('/', request.url));
-			} catch (error: unknown) {
-				// Extract error message and redirect to error page
-
-				console.error('Error accepting invitation: ', error);
-				return NextResponse.error();
+			} catch (err) {
+				console.error('Error accepting invitation', err);
 			}
 		}
+		return NextResponse.redirect(new URL('/', request.url));
 	}
 
-	if (isAuthenticated) {
+	/* ---------- 4. Handle active organization redirects ---------- */
+	if (isActiveOrganization(request)) {
 		const activeOrganization = await fetchQuery(
 			api.organizations.queries.getActiveOrganization,
 			{},
 			{ token: await convexAuthNextjsToken() }
 		);
-		if (!activeOrganization && !isCreateOrganizationRoute(request)) {
+
+		if (activeOrganization) {
+			// Replace /active-org or /active-organization with the organization slug
 			const url = new URL(request.url);
-			return NextResponse.redirect(
-				new URL(
-					`/org/create?redirectTo=${encodeURIComponent(url.pathname + url.search)}`,
-					request.url
-				)
-			);
+			const newPath = url.pathname
+				.replace(/^\/active-org(?=\/|$)/, `/${activeOrganization.slug}`)
+				.replace(/^\/active-organization(?=\/|$)/, `/${activeOrganization.slug}`);
+
+			// Include query parameters if they exist
+			const fullUrl = newPath + url.search;
+			return NextResponse.redirect(new URL(fullUrl, request.url));
 		}
+
+		// If no active organization, redirect to create one
+		return NextResponse.redirect(new URL(withRedirect('/org/create', request), request.url));
 	}
 
-	// For other routes, no special handling
-	return;
+	/* ---------- 5. Authenticated user checks ---------- */
+	const activeOrganization = await fetchQuery(
+		api.organizations.queries.getActiveOrganization,
+		{},
+		{ token: await convexAuthNextjsToken() }
+	);
+
+	// Allow access to org creation page even without active org
+	if (isCreateOrg(request)) {
+		return NextResponse.next();
+	}
+
+	// For all other protected routes, ensure user has an active organization
+	if (!activeOrganization) {
+		return NextResponse.redirect(new URL(withRedirect('/org/create', request), request.url));
+	}
+
+	return NextResponse.next();
 });
+
+/* --------------------------------------------------------- */
+/* ---------------------- exported config ------------------ */
+/* --------------------------------------------------------- */
 
 export const config = {
 	// The following matcher runs middleware on all routes

@@ -101,7 +101,7 @@ export default function CreateOrganization({
 
 			const currentUrl = new URL(window.location.href);
 			const pathSegments = currentUrl.pathname.split('/');
-			const activeOrgId = activeOrganization?._id;
+			const activeOrgSlug = activeOrganization?.slug;
 
 			// Create the organization
 			await createOrganization({ name, slug, logoId: logoStorageId });
@@ -118,12 +118,12 @@ export default function CreateOrganization({
 				router.push(redirectUrl);
 			} else {
 				let needsRedirect = false;
-				if (activeOrgId) {
+				if (activeOrgSlug) {
 					// Check each path segment for the organization ID
 					for (let i = 0; i < pathSegments.length; i++) {
-						if (pathSegments[i] === activeOrgId) {
+						if (pathSegments[i] === activeOrgSlug) {
 							// Found the organization ID in the URL path
-							pathSegments[i] = activeOrganization?._id;
+							pathSegments[i] = activeOrganization?.slug;
 							needsRedirect = true;
 							break;
 						}
