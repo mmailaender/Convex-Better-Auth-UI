@@ -4,37 +4,28 @@ import { api } from '$convex/_generated/api';
 
 // Types
 import type { FunctionReturnType } from 'convex/server';
-type ActiveOrganizationResponse = FunctionReturnType<
-	typeof api.organizations.queries.getActiveOrganization
->;
+import type { Id } from '$convex/_generated/dataModel';
+type Role = FunctionReturnType<typeof api.organizations.queries.getOrganizationRole>;
 
-export function createRoles(initialData?: ActiveOrganizationResponse) {
-	const activeOrganization = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData }
-	);
-
-	const _isOwner = $derived(activeOrganization?.data?.role === 'role_organization_owner');
-	const _isAdmin = $derived(activeOrganization?.data?.role === 'role_organization_admin');
-	const _isOwnerOrAdmin = $derived(
-		['role_organization_owner', 'role_organization_admin'].includes(
-			activeOrganization?.data?.role ?? ''
-		)
+export function createRoles(args: { orgId?: Id<'organizations'>; initialData?: Role } = {}) {
+	const role = useQuery(
+		api.organizations.queries.getOrganizationRole,
+		{ organizationId: args.orgId },
+		{ initialData: args.initialData }
 	);
 
 	return {
-		get isOwner() {
-			return _isOwner;
+		get hasOwnerRole() {
+			return role.data === 'role_organization_owner';
 		},
-		get isAdmin() {
-			return _isAdmin;
+		get hasAdminRole() {
+			return role.data === 'role_organization_admin';
 		},
-		get isOwnerOrAdmin() {
-			return _isOwnerOrAdmin;
+		get hasOwnerOrAdminRole() {
+			return ['role_organization_owner', 'role_organization_admin'].includes(role.data ?? '');
 		},
-		get activeOrganization() {
-			return activeOrganization;
+		get isMember() {
+			return role.data != null;
 		}
 	};
 }

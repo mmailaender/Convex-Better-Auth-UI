@@ -13,7 +13,7 @@ import MembersAndInvitations from '@/components/organizations/ui/MembersAndInvit
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 
 // API
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { useRoles } from '@/components/organizations/api/hooks';
 
 type OrganizationProfileProps = {
 	/**
@@ -23,7 +23,7 @@ type OrganizationProfileProps = {
 };
 
 export default function OrganizationProfile({ onSuccessfulDelete }: OrganizationProfileProps) {
-	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 	const [activeMobileTab, setActiveMobileTab] = useState<string>('');
 
 	// Tab configuration

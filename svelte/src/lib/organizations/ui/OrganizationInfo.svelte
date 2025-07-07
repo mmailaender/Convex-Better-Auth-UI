@@ -77,12 +77,12 @@
 
 	// Handlers
 	function toggleDialogEdit(): void {
-		if (!roles.isOwnerOrAdmin) return;
+		if (!roles.hasOwnerOrAdminRole) return;
 		isDialogOpen = true;
 	}
 
 	function toggleDrawerEdit(): void {
-		if (!roles.isOwnerOrAdmin) return;
+		if (!roles.hasOwnerOrAdminRole) return;
 		isDrawerOpen = true;
 	}
 

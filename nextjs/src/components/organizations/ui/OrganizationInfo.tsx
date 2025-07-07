@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { useRoles } from '@/components/organizations/api/hooks';
 import type { Id } from '@/convex/_generated/dataModel';
 
 // Icons
@@ -30,7 +30,7 @@ export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── state & queries ── */
 	const user = useQuery(api.users.queries.getUser);
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
 	const updateOrganization = useMutation(api.organizations.mutations.updateOrganizationProfile);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);

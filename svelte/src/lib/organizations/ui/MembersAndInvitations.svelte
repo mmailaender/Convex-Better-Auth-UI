@@ -73,7 +73,7 @@
 					{members && `${members.length}`}
 				</span>
 			</Tabs.Trigger>
-			{#if roles.isOwnerOrAdmin}
+			{#if roles.hasOwnerOrAdminRole}
 				<Tabs.Trigger value="invitations" class="gap-2">
 					Invitations{' '}
 					<span class="badge preset-filled-surface-300-700 size-6 rounded-full text-center">
@@ -82,7 +82,7 @@
 				</Tabs.Trigger>
 			{/if}
 		</Tabs.List>
-		{#if roles.isOwnerOrAdmin}
+		{#if roles.hasOwnerOrAdminRole}
 			<Dialog.Root bind:open={inviteMembersDialogOpen}>
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
@@ -119,7 +119,7 @@
 		<Members />
 	</Tabs.Content>
 
-	{#if roles.isOwnerOrAdmin}
+	{#if roles.hasOwnerOrAdminRole}
 		<Tabs.Content value="invitations">
 			<Invitations />
 		</Tabs.Content>

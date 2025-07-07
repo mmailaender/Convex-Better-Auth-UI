@@ -68,7 +68,7 @@
 	 * Validates form input before submission
 	 */
 	function validateForm(): boolean {
-		if (roles.isOwner && !selectedSuccessor) {
+		if (roles.hasOwnerRole && !selectedSuccessor) {
 			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
@@ -90,7 +90,7 @@
 			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				organizationId: activeOrganization._id,
 				// Only send successorId if the user is an owner and a successor is selected
-				...(roles.isOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
+				...(roles.hasOwnerRole && selectedSuccessor ? { successorId: selectedSuccessor } : {})
 			});
 
 			modalOpen = false;
@@ -129,12 +129,12 @@
 
 			<Dialog.Description>
 				<p>If you leave organization you'll lose access to all projects and resources.</p>
-				{#if roles.isOwner}
+				{#if roles.hasOwnerRole}
 					<p class="my-6">As the owner, you must assign a new owner before leaving.</p>
 				{/if}
 			</Dialog.Description>
 
-			{#if roles.isOwner}
+			{#if roles.hasOwnerRole}
 				<div class="space-y-2">
 					<label for="successor" class="label"> New owner: </label>
 					<select
@@ -142,7 +142,7 @@
 						value={selectedSuccessor?.toString() || ''}
 						onchange={handleSuccessorChange}
 						class="select w-full cursor-pointer"
-						required={roles.isOwner}
+						required={roles.hasOwnerRole}
 					>
 						<option value="" disabled> Choose a successor </option>
 						{#each organizationMembers as member}
@@ -160,7 +160,7 @@
 					type="button"
 					class="btn bg-error-500 hover:bg-error-600 text-white"
 					onclick={handleLeaveOrganization}
-					disabled={roles.isOwner && !selectedSuccessor}
+					disabled={roles.hasOwnerRole && !selectedSuccessor}
 				>
 					Confirm
 				</button>

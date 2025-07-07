@@ -144,7 +144,7 @@
 	 * Check if current user can edit a member
 	 */
 	function canEditMember(member: GetOrganizationMemberReturnType): boolean {
-		if (!roles.isOwnerOrAdmin) return false;
+		if (!roles.hasOwnerOrAdminRole) return false;
 		if (member.user._id === currentUser?._id) return false;
 		if (member.role === 'role_organization_owner') return false;
 
@@ -279,7 +279,7 @@
 								<th class="text-surface-700-300 !w-48 p-2 !pl-0 text-left text-xs">Name</th>
 								<th class="text-surface-700-300 hidden p-2 text-left text-xs sm:flex">Email</th>
 								<th class="text-surface-700-300 !w-32 p-2 text-left text-xs">Role</th>
-								{#if roles.isOwnerOrAdmin}
+								{#if roles.hasOwnerOrAdminRole}
 									<th class="!w-16 p-2 text-right"></th>
 								{/if}
 							</tr>
@@ -317,7 +317,7 @@
 									<!-- Member Role -->
 									<td class="!w-32">
 										<div class="flex items-center">
-											{#if roles.isOwnerOrAdmin && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+											{#if roles.hasOwnerOrAdminRole && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
 												<select
 													value={member.role}
 													onchange={(e) => handleRoleChange(e, member.user._id)}
@@ -350,7 +350,7 @@
 									<!-- Member Actions -->
 									<td class="!w-16">
 										<div class="flex justify-end space-x-2">
-											{#if roles.isOwnerOrAdmin && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+											{#if roles.hasOwnerOrAdminRole && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
 												<Dialog.Root bind:open={isDialogOpen}>
 													<Dialog.Trigger
 														class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"

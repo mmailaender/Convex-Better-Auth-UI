@@ -13,13 +13,13 @@ import InviteMembers from '@/components/organizations/ui/InviteMembers';
 // API
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { useRoles } from '@/components/organizations/api/hooks';
 import { useState } from 'react';
 
 export default function MembersAndInvitations() {
 	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
 	const invitations = useQuery(api.organizations.invitations.queries.getInvitations);
-	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 	const [inviteMembersDialogOpen, setInviteMembersDialogOpen] = useState(false);
 	const [inviteMembersDrawerOpen, setInviteMembersDrawerOpen] = useState(false);
 

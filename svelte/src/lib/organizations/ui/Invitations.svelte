@@ -149,7 +149,7 @@
 									<th class="text-surface-700-300 hidden !w-24 p-2 text-left text-xs sm:table-cell">
 										Invited By
 									</th>
-									{#if roles.isOwnerOrAdmin}
+									{#if roles.hasOwnerOrAdminRole}
 										<th class="!w-20 p-2 text-right"></th>
 									{/if}
 								</tr>
@@ -192,7 +192,7 @@
 										<!-- Actions -->
 										<td class="!w-20">
 											<div class="flex justify-end">
-												{#if roles.isOwnerOrAdmin}
+												{#if roles.hasOwnerOrAdminRole}
 													<Dialog.Root bind:open={revokeModalOpen}>
 														<Dialog.Trigger
 															class="btn btn-sm preset-filled-surface-300-700"

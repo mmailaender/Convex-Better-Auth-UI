@@ -24,7 +24,7 @@ type GetOrganizationMemberReturnType =
 	GetOrganizationMembersReturnType extends Array<infer T> ? T : never;
 
 // Hooks
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { useRoles } from '@/components/organizations/api/hooks';
 
 /**
  * Component that displays a list of organization members with role management functionality
@@ -42,7 +42,7 @@ export default function Members(): React.ReactNode {
 	// Get current organization data
 	const currentUser = useQuery(api.users.queries.getUser);
 	const currentOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
 	// Get members data and mutations
 	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);

@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useIsOwnerOrAdmin } from '@/components/organizations/api/hooks';
+import { useRoles } from '@/components/organizations/api/hooks';
 
 // Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';
@@ -25,7 +25,7 @@ export default function Invitations(): React.ReactNode {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	// Check if current user is an owner or admin
-	const isOwnerOrAdmin = useIsOwnerOrAdmin();
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
 	// Get invitations data and mutations
 	const invitations = useQuery(api.organizations.invitations.queries.getInvitations);

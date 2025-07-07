@@ -49,7 +49,9 @@
 		}
 	];
 
-	const visibleTabs = $derived(tabs.filter((tab) => tab.showForAllUsers || roles.isOwnerOrAdmin));
+	const visibleTabs = $derived(
+		tabs.filter((tab) => tab.showForAllUsers || roles.hasOwnerOrAdminRole)
+	);
 
 	function handleMobileTabChange(value: string) {
 		// Slight delay to allow tab state to update before showing content
@@ -99,7 +101,7 @@
 				</div>
 			</Tabs.Content>
 
-			{#if roles.isOwnerOrAdmin}
+			{#if roles.hasOwnerOrAdminRole}
 				<Tabs.Content value="members">
 					<h6
 						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"

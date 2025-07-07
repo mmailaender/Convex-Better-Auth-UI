@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { useMutation, useQuery } from 'convex/react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/convex/_generated/api';
-import { useIsOwner } from '@/components/organizations/api/hooks';
+import { useRoles } from '@/components/organizations/api/hooks';
 
 // API Types
 import { Id } from '@/convex/_generated/dataModel';
@@ -32,7 +32,7 @@ export default function LeaveOrganization(): React.ReactNode {
 	const router = useRouter();
 
 	// Check if user is an organization owner
-	const isOrgOwner = useIsOwner();
+	const isOrgOwner = useRoles().hasOwnerRole;
 
 	// Get organization members excluding current user for successor selection
 	const organizationMembers =

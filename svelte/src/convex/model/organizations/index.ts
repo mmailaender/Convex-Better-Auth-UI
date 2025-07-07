@@ -63,6 +63,38 @@ export const getUserOrganizationsModel = async (ctx: QueryCtx, args: { userId: I
 };
 
 /**
+ * Gets the current user's role in the specified organization
+ * If organizationId is not provided, it will use the user's active organization
+ * @returns The user's role in the organization or null if not a member or if no active organization exists when organizationId is not provided
+ */
+export const getOrganizationRoleModel = async (
+	ctx: QueryCtx,
+	args: { organizationId?: Id<'organizations'>; userId: Id<'users'> }
+) => {
+	let organizationId = args.organizationId;
+	if (!organizationId) {
+		const activeOrganization = await getActiveOrganizationModel(ctx, { userId: args.userId });
+		if (!activeOrganization) {
+			return null;
+		}
+		organizationId = activeOrganization._id;
+	}
+
+	const membership = await ctx.db
+		.query('organizationMembers')
+		.withIndex('orgId_and_userId', (q) =>
+			q.eq('organizationId', organizationId).eq('userId', args.userId)
+		)
+		.first();
+
+	if (!membership) {
+		return null;
+	}
+
+	return membership.role;
+};
+
+/**
  * Gets the active organization for the current user
  */
 export const getActiveOrganizationModel = async (ctx: QueryCtx, args: { userId: Id<'users'> }) => {
