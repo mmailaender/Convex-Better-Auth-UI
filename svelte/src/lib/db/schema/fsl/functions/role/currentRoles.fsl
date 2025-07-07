@@ -1,6 +1,0 @@
-// Defines the `currentRoles()` UDF.
-// Return an Array of user-defined roles.
-// Ex: ["customer", "manager"]
-function currentRoles() {
-  RoleCheck.all().map(.name).toArray()
-}

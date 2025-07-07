@@ -1,7 +1,0 @@
-@role(server)
-function verifySocialAccountExists(providerName: "Github" | "Facebook" | "Google", providerUserId: String): Boolean {
-  Account.firstWhere((account) => {
-    account.socialProvider?.userId == providerUserId
-&& account.socialProvider?.name == providerName
-  }) != null
-};

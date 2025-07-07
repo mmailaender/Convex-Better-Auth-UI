@@ -1,4 +1,0 @@
-@role(server)
-function verifyUserExists(email: String): Boolean {
-  User.firstWhere((user) => user.emails!.includes(email)) != null
-};

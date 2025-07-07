@@ -1,8 +1,0 @@
-/**
- * @returns the active verification for the current user
- */
-@role(server)
-function getVerificationEmail(userId: ID): String | Null {
-    let user = User.byId(userId)
-    Verification.firstWhere(.user == user)?.email
-}
