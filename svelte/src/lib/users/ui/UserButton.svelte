@@ -68,7 +68,7 @@
 			<Popover.Content side={popoverSide} align={popoverAlign}>
 				<div class="flex flex-col gap-1 p-0">
 					<button
-						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-base flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
+						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 						onclick={openProfileModal}
 					>
 						<Avatar.Root class="size-12">
