@@ -190,7 +190,7 @@
 		</Popover.Trigger>
 		<Popover.Content side={popoverSide} align={popoverAlign}>
 			<div class="flex flex-col gap-1">
-				<div role="list" class="bg-surface-50-950 rounded-base flex flex-col">
+				<div role="list" class="bg-surface-50-950 rounded-container flex flex-col">
 					<div
 						class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6"
 					>
@@ -218,7 +218,7 @@
 						{/if}
 					</div>
 
-					{#each organizations.filter((org) => org && org._id !== activeOrganization?._id) as org}
+					{#each organizations.filter((org) => org && org._id !== activeOrganization?._id) as org (org?._id)}
 						{#if org}
 							<div>
 								<button

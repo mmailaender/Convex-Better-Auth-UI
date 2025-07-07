@@ -152,7 +152,7 @@ export default function OrganizationSwitcher({
 
 				<Popover.Content side={popoverSide} align={popoverAlign}>
 					<div className="flex flex-col gap-1">
-						<div role="list" className="bg-surface-50-950 rounded-base flex flex-col">
+						<div role="list" className="bg-surface-50-950 rounded-container flex flex-col">
 							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
 								<Avatar.Root className="rounded-container size-8 shrink-0">
 									<Avatar.Image
