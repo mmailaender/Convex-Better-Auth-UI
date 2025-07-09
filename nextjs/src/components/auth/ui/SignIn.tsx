@@ -1,35 +1,65 @@
 'use client';
 
-import { useAuthActions } from '@convex-dev/auth/react';
-import { useSearchParams, useRouter } from 'next/navigation';
+// React
 import { useState } from 'react';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/convex/_generated/api';
+// Nextjs
+import { useSearchParams } from 'next/navigation';
 
-// You'll need to add your Convex URL here
-const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL || '';
-const client = new ConvexHttpClient(CONVEX_URL);
+// Primitives
+import { toast } from 'sonner';
+
+// API
+import { useAction } from 'convex/react';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { api } from '@/convex/_generated/api';
 
 type AuthStep = 'email' | 'login' | 'register';
 
-export default function SignIn() {
+interface SignInProps {
+	redirectTo?: string;
+	onSignIn?: () => void;
+}
+
+export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInProps = {}) {
+	const checkEmailAvailabilityAndValidity = useAction(
+		api.users.actions.checkEmailAvailabilityAndValidity
+	);
 	const { signIn } = useAuthActions();
 	const searchParams = useSearchParams();
-	const router = useRouter();
 
 	const [currentStep, setCurrentStep] = useState<AuthStep>('email');
 	const [email, setEmail] = useState('');
 	const [submitting, setSubmitting] = useState(false);
 	const [verifyingEmail, setVerifyingEmail] = useState(false);
-	const [error, setError] = useState('');
 
+	/**
+	 * Gets the redirect URL based on parameters and current page
+	 */
+	const getRedirectUrl = (): string => {
+		return (
+			redirectParam ??
+			searchParams.get('redirectTo') ??
+			(window.location.pathname.includes('/signin') ? '/' : window.location.pathname)
+		);
+	};
+
+	/**
+	 * Handles sign in with the specified provider
+	 */
 	const handleSocialSignIn = (): void => {
-		const redirectTo = searchParams.get('redirectTo');
-		if (redirectTo) {
-			void signIn('github', { redirectTo });
-		} else {
-			void signIn('github');
-		}
+		const redirectUrl = getRedirectUrl();
+		console.log('Redirecting to:', redirectUrl);
+
+		signIn('github', { redirectTo: redirectUrl })
+			.then((result) => {
+				if (result.signingIn) {
+					onSignIn?.();
+				}
+			})
+			.catch((error) => {
+				console.error('Social sign in error:', error);
+				toast.error('Failed to sign in with GitHub. Please try again.');
+			});
 	};
 
 	/**
@@ -37,10 +67,9 @@ export default function SignIn() {
 	 */
 	const verifyEmail = async (emailValue: string): Promise<void> => {
 		setVerifyingEmail(true);
-		setError('');
 
 		try {
-			const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
+			const data = await checkEmailAvailabilityAndValidity({
 				email: emailValue
 			});
 
@@ -49,10 +78,11 @@ export default function SignIn() {
 			} else if (data.valid) {
 				setCurrentStep('register');
 			} else {
-				setError('Invalid email. Please try again.');
+				toast.error('Invalid email. Please try again.');
 			}
 		} catch (error) {
-			setError('Failed to verify email. Please try again.');
+			toast.error('Failed to verify email. Please try again.');
+
 			console.error('Email verification error:', error);
 		} finally {
 			setVerifyingEmail(false);
@@ -79,17 +109,17 @@ export default function SignIn() {
 	const handleAuthSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
 		event.preventDefault();
 		setSubmitting(true);
-		setError('');
 
 		const formData = new FormData(event.currentTarget);
 		formData.set('flow', currentStep === 'login' ? 'signIn' : 'signUp');
 		formData.set('email', email);
-
-		const redirectTo = searchParams.get('redirectTo') || '/';
+		formData.set('redirectTo', getRedirectUrl());
 
 		signIn('password', formData)
-			.then(() => {
-				router.push(redirectTo);
+			.then((result) => {
+				if (result.signingIn) {
+					onSignIn?.();
+				}
 			})
 			.catch((error) => {
 				let errorMessage = '';
@@ -101,7 +131,8 @@ export default function SignIn() {
 							? 'Could not sign in. Please check your credentials.'
 							: 'Could not create account. Please try again.';
 				}
-				setError(errorMessage);
+				toast.error(errorMessage);
+
 				setSubmitting(false);
 			});
 	};
@@ -112,7 +143,6 @@ export default function SignIn() {
 	const resetFlow = (): void => {
 		setCurrentStep('email');
 		setEmail('');
-		setError('');
 	};
 
 	const renderEmailStep = () => (
@@ -128,7 +158,6 @@ export default function SignIn() {
 			<button className="btn preset-filled" type="submit" disabled={verifyingEmail}>
 				{verifyingEmail ? 'Verifying...' : 'Continue'}
 			</button>
-			{error && <p className="text-sm text-red-500">{error}</p>}
 		</form>
 	);
 
@@ -148,7 +177,6 @@ export default function SignIn() {
 			<button type="button" className="anchor text-center text-sm" onClick={resetFlow}>
 				Use a different email
 			</button>
-			{error && <p className="text-sm text-red-500">{error}</p>}
 		</form>
 	);
 
@@ -169,7 +197,6 @@ export default function SignIn() {
 			<button type="button" className="anchor text-center text-sm" onClick={resetFlow}>
 				Use a different email
 			</button>
-			{error && <p className="text-sm text-red-500">{error}</p>}
 		</form>
 	);
 
@@ -213,15 +240,21 @@ export default function SignIn() {
 					{currentStep === 'login' && renderLoginStep()}
 					{currentStep === 'register' && renderRegisterStep()}
 
+					{/* Show error message if any */}
+
 					{process.env.NEXT_PUBLIC_E2E_TEST && (
 						<form
 							className="flex flex-col gap-2"
 							onSubmit={(event: React.FormEvent<HTMLFormElement>): void => {
 								event.preventDefault();
 								const formData = new FormData(event.currentTarget);
+								formData.set('redirectTo', getRedirectUrl());
+
 								signIn('secret', formData)
-									.then(() => {
-										router.push('/');
+									.then((result) => {
+										if (result.signingIn) {
+											onSignIn?.();
+										}
 									})
 									.catch(() => {
 										window.alert('Invalid secret');

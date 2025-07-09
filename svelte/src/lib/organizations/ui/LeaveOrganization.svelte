@@ -145,7 +145,7 @@
 						required={roles.hasOwnerRole}
 					>
 						<option value="" disabled> Choose a successor </option>
-						{#each organizationMembers as member}
+						{#each organizationMembers as member (member.user._id)}
 							<option value={member.user._id.toString()}>
 								{member.user.name} ({member.user.email})
 							</option>

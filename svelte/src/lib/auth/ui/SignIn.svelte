@@ -2,20 +2,20 @@
 	// Svelte
 	import { page } from '$app/state';
 	import { env } from '$env/dynamic/public';
-	import { goto } from '$app/navigation';
 	import { PUBLIC_CONVEX_URL } from '$env/static/public';
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
 
-	// API Auth
+	// API
 	import { ConvexHttpClient } from 'convex/browser';
 	const client = new ConvexHttpClient(PUBLIC_CONVEX_URL);
 	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import { api } from '$convex/_generated/api';
 	const signIn = $derived(useAuth().signIn);
 
-	let { redirectTo: redirectParam }: { redirectTo?: string } = $props();
+	let { redirectTo: redirectParam, onSignIn }: { redirectTo?: string; onSignIn?: () => void } =
+		$props();
 
 	type AuthStep = 'email' | 'login' | 'register';
 
@@ -25,15 +25,27 @@
 	let verifyingEmail = $state(false);
 
 	/**
+	 * Gets the redirect URL based on parameters and current page
+	 */
+	function getRedirectUrl(): string {
+		return (
+			redirectParam ??
+			page.url.searchParams.get('redirectTo') ??
+			(page.url.pathname.includes('/signin') ? '/' : page.url.pathname)
+		);
+	}
+
+	/**
 	 * Handles sign in with the specified provider
 	 */
 	function handleSocialSignIn(provider: string): void {
-		const redirectUrl =
-			redirectParam ??
-			page.url.searchParams.get('redirectTo') ??
-			(page.url.pathname.includes('/signin') ? '/' : page.url.pathname);
-
-		void signIn(provider, { redirectTo: redirectUrl });
+		const redirectUrl = getRedirectUrl();
+		console.log('Redirecting to:', redirectUrl);
+		void signIn(provider, { redirectTo: redirectUrl }).then((onFullfilled) => {
+			if (onFullfilled.signingIn) {
+				onSignIn?.();
+			}
+		});
 	}
 
 	/**
@@ -86,20 +98,27 @@
 		const formData = new FormData(event.target as HTMLFormElement);
 		formData.set('flow', currentStep === 'login' ? 'signIn' : 'signUp');
 		formData.set('email', email);
+		formData.set('redirectTo', getRedirectUrl());
 
-		void signIn('password', formData).catch((error) => {
-			let toastTitle = '';
-			if (error.message.includes('Invalid password')) {
-				toastTitle = 'Invalid password. Please try again.';
-			} else {
-				toastTitle =
-					currentStep === 'login'
-						? 'Could not sign in. Please check your credentials.'
-						: 'Could not create account. Please try again.';
-			}
-			toast.error(toastTitle);
-			submitting = false;
-		});
+		void signIn('password', formData)
+			.then((onFullfilled) => {
+				if (onFullfilled.signingIn) {
+					onSignIn?.();
+				}
+			})
+			.catch((error) => {
+				let toastTitle = '';
+				if (error.message.includes('Invalid password')) {
+					toastTitle = 'Invalid password. Please try again.';
+				} else {
+					toastTitle =
+						currentStep === 'login'
+							? 'Could not sign in. Please check your credentials.'
+							: 'Could not create account. Please try again.';
+				}
+				toast.error(toastTitle);
+				submitting = false;
+			});
 	}
 
 	/**
@@ -209,9 +228,12 @@
 					onsubmit={(event) => {
 						event.preventDefault();
 						const formData = new FormData(event.currentTarget);
+						formData.set('redirectTo', getRedirectUrl());
 						signIn('secret', formData)
-							.then(() => {
-								goto('/');
+							.then((onFullfilled) => {
+								if (onFullfilled.signingIn) {
+									onSignIn?.();
+								}
 							})
 							.catch(() => {
 								window.alert('Invalid secret');
@@ -232,8 +254,8 @@
 		</div>
 		<div>
 			<p class="text-surface-600-400 mt-10 text-xs">
-				By continuing, you agree to our{' '}
-				<a href="#" class="anchor text-surface-950-50">Terms</a> and{' '}
+				By continuing, you agree to our
+				<a href="#" class="anchor text-surface-950-50">Terms</a> and
 				<a href="#" class="anchor text-surface-950-50">Privacy Policies</a>
 			</p>
 		</div>
