@@ -1,6 +1,8 @@
-import { Id, Doc } from '../../../_generated/dataModel';
-import { MutationCtx, QueryCtx } from '../../../_generated/server';
 import { ConvexError } from 'convex/values';
+
+// Types
+import type { Id, Doc } from '../../../_generated/dataModel';
+import type { MutationCtx, QueryCtx } from '../../../_generated/server';
 
 /**
  * Business-logic helpers for the Organization → Members sub-domain.

@@ -1,6 +1,8 @@
-import { Id } from '../../_generated/dataModel';
-import { MutationCtx, QueryCtx } from '../../_generated/server';
 import { ConvexError } from 'convex/values';
+
+// Types
+import type { MutationCtx, QueryCtx } from '../../_generated/server';
+import type { Id } from '../../_generated/dataModel';
 
 /**
  * Ensure the organization slug is unique by appending an incrementing postfix

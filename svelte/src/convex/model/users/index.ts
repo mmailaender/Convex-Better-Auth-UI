@@ -1,8 +1,10 @@
-import { Doc, Id } from '../../_generated/dataModel';
-import { MutationCtx, QueryCtx } from '../../_generated/server';
 import { ConvexError } from 'convex/values';
 import { deleteOrganizationModel } from '../organizations';
-import { WithoutSystemFields } from 'convex/server';
+
+// Types
+import type { MutationCtx, QueryCtx } from '../../_generated/server';
+import type { WithoutSystemFields } from 'convex/server';
+import type { Doc, Id } from '../../_generated/dataModel';
 
 /**
  * Extract the first name from a user's full name.

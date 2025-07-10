@@ -1,13 +1,13 @@
-import { EmailId } from '@convex-dev/resend';
 import { api } from '../../_generated/api';
-import { ActionCtx } from '../../_generated/server';
 import { Resend } from '@convex-dev/resend';
 import { components } from '../../_generated/api';
-import {
-	generateOrganizationInvitationEmail,
-	OrganizationInvitationParams
-} from './templates/organizationInvitation';
+import { generateOrganizationInvitationEmail } from './templates/organizationInvitation';
 import { generateVerificationEmail } from './templates/verification';
+
+// Types
+import type { ActionCtx } from '../../_generated/server';
+import type { EmailId } from '@convex-dev/resend';
+import type { OrganizationInvitationParams } from './templates/organizationInvitation';
 
 /**
  * Interface for email verification result

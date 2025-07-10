@@ -1,10 +1,17 @@
+// Provider
 import GitHub from '@auth/core/providers/github';
+import { Password } from '@convex-dev/auth/providers/Password';
 import { ConvexCredentials } from '@convex-dev/auth/providers/ConvexCredentials';
+
 import { convexAuth, getAuthUserId } from '@convex-dev/auth/server';
 import { internal } from './_generated/api.js';
-import { MutationCtx, query } from './_generated/server.js';
-import { Id } from './_generated/dataModel.js';
-import { Password } from '@convex-dev/auth/providers/Password';
+import { query } from './_generated/server.js';
+
+// Types
+import type { MutationCtx } from './_generated/server.js';
+import type { Id } from './_generated/dataModel.js';
+
+//Constants
 import { AUTH_CONSTANTS } from './auth.constants.js';
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({

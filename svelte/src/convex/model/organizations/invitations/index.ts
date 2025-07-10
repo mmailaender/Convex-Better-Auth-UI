@@ -1,6 +1,8 @@
-import { Id } from '../../../_generated/dataModel';
-import { MutationCtx, QueryCtx } from '../../../_generated/server';
+import type { MutationCtx, QueryCtx } from '../../../_generated/server';
 import { ConvexError } from 'convex/values';
+
+// Types
+import type { Id } from '../../../_generated/dataModel';
 
 /**
  * Creates or returns an existing organization invitation.

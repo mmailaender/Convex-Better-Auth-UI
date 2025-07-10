@@ -1,10 +1,12 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { ConvexError, v } from 'convex/values';
 import { action } from '../../_generated/server';
-import { Id } from '../../_generated/dataModel';
 import { api, internal } from '../../_generated/api';
 import { sendOrganizationInvitationEmailModel, verifyEmail } from '../../model/emails';
 import { roleValidator } from '../../schema';
+
+// Types
+import type { Id } from '../../_generated/dataModel';
 
 /**
  * Creates an invitation and sends an invitation email

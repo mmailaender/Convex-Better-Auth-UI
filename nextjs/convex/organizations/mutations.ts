@@ -1,7 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../_generated/server';
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { Id } from '../_generated/dataModel';
 import {
 	createOrganizationModel,
 	setActiveOrganizationModel,
@@ -9,6 +8,9 @@ import {
 	updateOrganizationProfileModel,
 	deleteOrganizationModel
 } from '../model/organizations';
+
+// Types
+import type { Id } from '../_generated/dataModel';
 
 /**
  * Creates a new organization with the given name, slug, and optional logo
