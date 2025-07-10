@@ -18,15 +18,12 @@ const isPublic = createRouteMatcher([
 	'/',
 	'/signin',
 	'/pricing',
-	'/docs{/*rest}',
+	'/docs(.*)',
 	'/about',
 	'/terms',
 	'/privacy'
 ]);
-const isActiveOrganization = createRouteMatcher([
-	'/active-org{/*rest}',
-	'/active-organization{/*rest}'
-]);
+const isActiveOrganization = createRouteMatcher(['/active-org(.*)', '/active-organization(.*)']);
 
 /* --------------------------------------------------------- */
 /* ---------------------- auth helpers --------------------- */

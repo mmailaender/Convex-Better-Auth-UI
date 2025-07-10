@@ -5,18 +5,23 @@ import { internal } from './_generated/api.js';
 import { MutationCtx, query } from './_generated/server.js';
 import { Id } from './_generated/dataModel.js';
 import { Password } from '@convex-dev/auth/providers/Password';
+import { AUTH_CONSTANTS } from './auth.constants.js';
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 	providers: [
-		GitHub,
-		Password({
-			profile(params) {
-				return {
-					email: params.email as string,
-					name: params.name as string
-				};
-			}
-		}),
+		...(AUTH_CONSTANTS.providers.github ? [GitHub] : []),
+		...(AUTH_CONSTANTS.providers.password
+			? [
+					Password({
+						profile(params) {
+							return {
+								email: params.email as string,
+								name: params.name as string
+							};
+						}
+					})
+				]
+			: []),
 		ConvexCredentials({
 			id: 'secret',
 			authorize: async (params, ctx) => {
