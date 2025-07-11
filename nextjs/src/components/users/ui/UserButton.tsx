@@ -83,7 +83,10 @@ export default function UserButton({
 									</button>
 									<button
 										className="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-										onClick={() => void signOut()}
+										onClick={() => {
+											void signOut();
+											setUserPopoverOpen(false);
+										}}
 									>
 										Sign out
 									</button>

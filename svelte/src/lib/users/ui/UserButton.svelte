@@ -87,7 +87,10 @@
 					</button>
 					<button
 						class="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-						onclick={() => signOut()}
+						onclick={() => {
+							signOut();
+							userPopoverOpen = false;
+						}}
 					>
 						Sign out
 					</button>
