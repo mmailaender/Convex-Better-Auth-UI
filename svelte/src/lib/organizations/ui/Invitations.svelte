@@ -33,7 +33,6 @@
 
 	// State
 	let errorMessage: string = $state('');
-	let successMessage: string = $state('');
 	let selectedInvitationId: Id<'invitations'> | null = $state(null);
 	let searchQuery: string = $state('');
 	let revokeModalOpen: boolean = $state(false);
@@ -79,11 +78,9 @@
 			});
 
 			errorMessage = '';
-			successMessage = 'Invitation revoked successfully!';
 			revokeModalOpen = false;
 			toast.success('Invitation revoked successfully');
 		} catch (err) {
-			successMessage = '';
 			errorMessage =
 				err instanceof Error
 					? err.message
@@ -209,7 +206,7 @@
 															</Dialog.Header>
 															<article class="flex-shrink-0">
 																<p class="opacity-60">
-																	Are you sure you want to revoke the invitation sent to{' '}
+																	Are you sure you want to revoke the invitation sent to
 																	{invitation.email}?
 																</p>
 															</article>

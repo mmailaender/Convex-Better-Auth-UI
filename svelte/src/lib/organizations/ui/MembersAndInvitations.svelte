@@ -68,14 +68,14 @@
 	>
 		<Tabs.List>
 			<Tabs.Trigger value="members" class="gap-2">
-				Members{' '}
+				handleInviteMembersSuccess
 				<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
 					{members && `${members.length}`}
 				</span>
 			</Tabs.Trigger>
 			{#if roles.hasOwnerOrAdminRole}
 				<Tabs.Trigger value="invitations" class="gap-2">
-					Invitations{' '}
+					Invitations
 					<span class="badge preset-filled-surface-300-700 size-6 rounded-full text-center">
 						{invitations && `${invitations.length}`}
 					</span>
