@@ -17,27 +17,36 @@
 		return (prefix || '') + Math.random().toString(36).substring(2);
 	};
 
+	import { cn } from '$lib/primitives/utils';
+
 	// Props
 	interface Props {
 		size?: number;
 		name?: string;
-		square?: boolean;
 		colors?: string[];
+		class?: string;
 	}
 
 	let {
 		size = 80,
-		name = 'Anonymous',
-		square = false,
-		colors = ['var(--color-primary-900)', 'var(--color-secondary-200)', 'var(--color-tertiary-200)']
+		name = '',
+		colors = [
+			'var(--color-primary-900)',
+			'var(--color-secondary-200)',
+			'var(--color-tertiary-200)'
+		],
+		class: className = ''
 	}: Props = $props();
 
 	// Constants
 	const ELEMENTS = 3;
 	const SIZE = 80;
 
+	// Use fallback name for pattern generation if no name provided
+	const nameForPattern = name || 'Anonymous';
+
 	// Generate properties based on name
-	const numFromName = getNumber(name);
+	const numFromName = getNumber(nameForPattern);
 
 	const properties = Array.from({ length: ELEMENTS }, (_, i) => ({
 		colorIndex: (numFromName + i) % colors.length,
@@ -47,7 +56,7 @@
 		rotate: getUnit(numFromName * (i + 1), 360, 1)
 	}));
 
-	// Generate initials
+	// Generate initials only if name is provided
 	const getInitials = (name: string) => {
 		return name
 			.split(' ')
@@ -57,7 +66,7 @@
 			.slice(0, 2); // Limit to 2 characters
 	};
 
-	const initials = getInitials(name);
+	const initials = name ? getInitials(name) : '';
 
 	// Generate unique IDs
 	const maskId = getRandId('mask__marble');
@@ -71,13 +80,14 @@
 	width={size}
 	height={size}
 	data-testid="avatar-marble"
+	class={cn('rounded-full', className)}
 	style="--color-0: {colors[properties[0].colorIndex]}; --color-1: {colors[
 		properties[1].colorIndex
 	]}; --color-2: {colors[properties[2].colorIndex]};"
 >
 	<defs>
 		<mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width={SIZE} height={SIZE}>
-			<rect width={SIZE} height={SIZE} rx={square ? 0 : SIZE * 2} fill="white" />
+			<rect width={SIZE} height={SIZE} fill="white" />
 		</mask>
 		<filter id={filterId} filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 			<feFlood flood-opacity="0" result="BackgroundImageFix" />
@@ -88,7 +98,7 @@
 
 	<g mask="url(#{maskId})">
 		<!-- Background -->
-		<rect width={SIZE} height={SIZE} rx="2" fill="var(--color-0)" />
+		<rect width={SIZE} height={SIZE} fill="var(--color-0)" />
 
 		<!-- First overlay path -->
 		<path
@@ -110,25 +120,27 @@
 				.scale})"
 		/>
 
-		<!-- Semi-transparent backdrop for initials -->
-		<rect
-			width={SIZE}
-			height={SIZE}
-			rx={square ? 0 : SIZE * 2}
-			fill="rgba(0, 0, 0, 0.25)"
-			style="backdrop-filter: blur(2px);"
-		/>
+		<!-- Conditionally render semi-transparent backdrop and initials only if name is provided -->
+		{#if name}
+			<!-- Semi-transparent backdrop for initials -->
+			<rect
+				width={SIZE}
+				height={SIZE}
+				fill="rgba(0, 0, 0, 0.25)"
+				style="backdrop-filter: blur(2px);"
+			/>
 
-		<!-- Initials text -->
-		<text
-			x="50%"
-			y="50%"
-			dominant-baseline="central"
-			text-anchor="middle"
-			style="fill: white; font-family: system-ui, -apple-system, sans-serif; font-weight: 600; font-size: {SIZE *
-				0.35}px;"
-		>
-			{initials}
-		</text>
+			<!-- Initials text -->
+			<text
+				x="50%"
+				y="50%"
+				dominant-baseline="central"
+				text-anchor="middle"
+				style="fill: white; font-family: system-ui, -apple-system, sans-serif; font-weight: 600; font-size: {SIZE *
+					0.35}px;"
+			>
+				{initials}
+			</text>
+		{/if}
 	</g>
 </svg>

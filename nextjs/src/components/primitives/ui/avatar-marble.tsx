@@ -17,12 +17,17 @@ const getRandId = (prefix: string = ''): string => {
 	return prefix + Math.random().toString(36).substring(2);
 };
 
-// Interface for component props
+// Utility function for combining class names (simplified cn function)
+const cn = (...classes: (string | undefined)[]): string => {
+	return classes.filter(Boolean).join(' ');
+};
+
+// Interface for component props - matching Svelte exactly
 interface AvatarMarbleProps {
 	size?: number;
 	name?: string;
-	square?: boolean;
 	colors?: string[];
+	className?: string;
 }
 
 // Interface for generated properties
@@ -41,16 +46,19 @@ interface CustomCSSProperties extends React.CSSProperties {
 
 const AvatarMarble: React.FC<AvatarMarbleProps> = ({
 	size = 80,
-	name = 'Anonymous',
-	square = false,
-	colors = ['var(--color-primary-900)', 'var(--color-secondary-200)', 'var(--color-tertiary-200)']
+	name = '',
+	colors = ['var(--color-primary-900)', 'var(--color-secondary-200)', 'var(--color-tertiary-200)'],
+	className = ''
 }) => {
 	// Constants
 	const ELEMENTS = 3;
 	const SIZE = 80;
 
+	// Use fallback name for pattern generation if no name provided
+	const nameForPattern = name || 'Anonymous';
+
 	// Generate properties based on name
-	const numFromName: number = getNumber(name);
+	const numFromName: number = getNumber(nameForPattern);
 
 	const properties: ElementProperty[] = Array.from(
 		{ length: ELEMENTS },
@@ -63,7 +71,7 @@ const AvatarMarble: React.FC<AvatarMarbleProps> = ({
 		})
 	);
 
-	// Generate initials
+	// Generate initials only if name is provided
 	const getInitials = (name: string): string => {
 		return name
 			.split(' ')
@@ -73,7 +81,7 @@ const AvatarMarble: React.FC<AvatarMarbleProps> = ({
 			.slice(0, 2); // Limit to 2 characters
 	};
 
-	const initials: string = getInitials(name);
+	const initials: string = name ? getInitials(name) : '';
 
 	// Generate unique IDs
 	const maskId: string = getRandId('mask__marble');
@@ -94,11 +102,12 @@ const AvatarMarble: React.FC<AvatarMarbleProps> = ({
 			width={size}
 			height={size}
 			data-testid="avatar-marble"
+			className={cn('rounded-full', className)}
 			style={svgStyle}
 		>
 			<defs>
 				<mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width={SIZE} height={SIZE}>
-					<rect width={SIZE} height={SIZE} rx={square ? 0 : SIZE * 2} fill="white" />
+					<rect width={SIZE} height={SIZE} fill="white" />
 				</mask>
 				<filter id={filterId} filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
 					<feFlood floodOpacity="0" result="BackgroundImageFix" />
@@ -109,7 +118,7 @@ const AvatarMarble: React.FC<AvatarMarbleProps> = ({
 
 			<g mask={`url(#${maskId})`}>
 				{/* Background */}
-				<rect width={SIZE} height={SIZE} rx="2" fill="var(--color-0)" />
+				<rect width={SIZE} height={SIZE} fill="var(--color-0)" />
 
 				{/* First overlay path */}
 				<path
@@ -127,30 +136,34 @@ const AvatarMarble: React.FC<AvatarMarbleProps> = ({
 					transform={`translate(${properties[2].translateX} ${properties[2].translateY}) rotate(${properties[2].rotate} ${SIZE / 2} ${SIZE / 2}) scale(${properties[2].scale})`}
 				/>
 
-				{/* Semi-transparent backdrop for initials */}
-				<rect
-					width={SIZE}
-					height={SIZE}
-					rx={square ? 0 : SIZE * 2}
-					fill="rgba(0, 0, 0, 0.25)"
-					style={{ backdropFilter: 'blur(2px)' }}
-				/>
+				{/* Conditionally render semi-transparent backdrop and initials only if name is provided */}
+				{name && (
+					<>
+						{/* Semi-transparent backdrop for initials */}
+						<rect
+							width={SIZE}
+							height={SIZE}
+							fill="rgba(0, 0, 0, 0.25)"
+							style={{ backdropFilter: 'blur(2px)' }}
+						/>
 
-				{/* Initials text */}
-				<text
-					x="50%"
-					y="50%"
-					dominantBaseline="central"
-					textAnchor="middle"
-					style={{
-						fill: 'white',
-						fontFamily: 'system-ui, -apple-system, sans-serif',
-						fontWeight: 600,
-						fontSize: `${SIZE * 0.35}px`
-					}}
-				>
-					{initials}
-				</text>
+						{/* Initials text */}
+						<text
+							x="50%"
+							y="50%"
+							dominantBaseline="central"
+							textAnchor="middle"
+							style={{
+								fill: 'white',
+								fontFamily: 'system-ui, -apple-system, sans-serif',
+								fontWeight: 600,
+								fontSize: `${SIZE * 0.35}px`
+							}}
+						>
+							{initials}
+						</text>
+					</>
+				)}
 			</g>
 		</svg>
 	);
