@@ -19,7 +19,7 @@ importers:
         version: 0.1.2-beta.2(convex-helpers@0.1.94(convex@1.24.8(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(zod@3.24.4))(convex@1.24.8(react@19.1.0))(react@19.1.0)
       '@mmailaender/convex-auth-svelte':
         specifier: 0.0.2
-        version: 0.0.2(@auth/core@0.39.1)(@convex-dev/auth@0.0.87(@auth/core@0.39.1)(convex@1.24.8(react@19.1.0))(react@19.1.0))(@sveltejs/kit@2.21.5(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(convex-svelte@file:node_modules_local/convex-svelte-0.0.11.tgz(convex@1.24.8(react@19.1.0))(svelte@5.34.1))(convex@1.24.8(react@19.1.0))
+        version: 0.0.2(@auth/core@0.39.1)(@convex-dev/auth@0.0.87(@auth/core@0.39.1)(convex@1.24.8(react@19.1.0))(react@19.1.0))(@sveltejs/kit@2.21.5(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(convex-svelte@0.0.11(convex@1.24.8(react@19.1.0))(svelte@5.34.1))(convex@1.24.8(react@19.1.0))
       '@tailwindcss/vite':
         specifier: ^4.1.10
         version: 4.1.10(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1))
@@ -39,8 +39,8 @@ importers:
         specifier: ^0.1.94
         version: 0.1.94(convex@1.24.8(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(zod@3.24.4)
       convex-svelte:
-        specifier: file:node_modules_local/convex-svelte-0.0.11.tgz
-        version: file:node_modules_local/convex-svelte-0.0.11.tgz(convex@1.24.8(react@19.1.0))(svelte@5.34.1)
+        specifier: ^0.0.11
+        version: 0.0.11(convex@1.24.8(react@19.1.0))(svelte@5.34.1)
       sharp:
         specifier: ^0.34.2
         version: 0.34.2
@@ -771,7 +771,6 @@ packages:
 
   '@mmailaender/convex-auth-svelte@0.0.2':
     resolution: {integrity: sha512-CmF1Spw9zuoW9l7pjm96/sXEWluthdREhBcdx2GuTD+HRdZ42ROLahMd+AuAhOC3smCXWwrIsHLWml3GVbn7eg==}
-    version: 0.0.2
     peerDependencies:
       '@auth/core': ^0.39.1
       '@convex-dev/auth': ^0.0.87
@@ -1663,11 +1662,10 @@ packages:
       zod:
         optional: true
 
-  convex-svelte@file:node_modules_local/convex-svelte-0.0.11.tgz:
-    resolution: {integrity: sha512-Id2YDj8sGjYzhVxa5xtU4YclE6CKQP0jHeDWUzTQ/vCR7DB0r6NJU8fLYXAXw4AaxMcxv1TyZxKhR8+OwqMJwg==, tarball: file:node_modules_local/convex-svelte-0.0.11.tgz}
-    version: 0.0.11
+  convex-svelte@0.0.11:
+    resolution: {integrity: sha512-N/29gg5Zqy72vKL4xHSLk3jGwXVKIWXPs6xzq6KxGL84y/D6hG85pG2CPOzn08EzMmByts5FTkJ5p3var6yDng==}
     peerDependencies:
-      convex: '^1.24.8 '
+      convex: ^1.10.0
       svelte: ^5.0.0
 
   convex@1.24.8:
@@ -3310,13 +3308,13 @@ snapshots:
       - encoding
       - supports-color
 
-  '@mmailaender/convex-auth-svelte@0.0.2(@auth/core@0.39.1)(@convex-dev/auth@0.0.87(@auth/core@0.39.1)(convex@1.24.8(react@19.1.0))(react@19.1.0))(@sveltejs/kit@2.21.5(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(convex-svelte@file:node_modules_local/convex-svelte-0.0.11.tgz(convex@1.24.8(react@19.1.0))(svelte@5.34.1))(convex@1.24.8(react@19.1.0))':
+  '@mmailaender/convex-auth-svelte@0.0.2(@auth/core@0.39.1)(@convex-dev/auth@0.0.87(@auth/core@0.39.1)(convex@1.24.8(react@19.1.0))(react@19.1.0))(@sveltejs/kit@2.21.5(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(convex-svelte@0.0.11(convex@1.24.8(react@19.1.0))(svelte@5.34.1))(convex@1.24.8(react@19.1.0))':
     dependencies:
       '@auth/core': 0.39.1
       '@convex-dev/auth': 0.0.87(@auth/core@0.39.1)(convex@1.24.8(react@19.1.0))(react@19.1.0)
       '@sveltejs/kit': 2.21.5(@sveltejs/vite-plugin-svelte@5.1.0(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1)))(svelte@5.34.1)(vite@6.3.5(@types/node@24.0.1)(jiti@2.4.2)(lightningcss@1.30.1))
       convex: 1.24.8(react@19.1.0)
-      convex-svelte: file:node_modules_local/convex-svelte-0.0.11.tgz(convex@1.24.8(react@19.1.0))(svelte@5.34.1)
+      convex-svelte: 0.0.11(convex@1.24.8(react@19.1.0))(svelte@5.34.1)
       cookie: 1.0.2
       is-network-error: 1.1.0
       jwt-decode: 4.0.0
@@ -4304,7 +4302,7 @@ snapshots:
       typescript: 5.8.3
       zod: 3.24.4
 
-  convex-svelte@file:node_modules_local/convex-svelte-0.0.11.tgz(convex@1.24.8(react@19.1.0))(svelte@5.34.1):
+  convex-svelte@0.0.11(convex@1.24.8(react@19.1.0))(svelte@5.34.1):
     dependencies:
       convex: 1.24.8(react@19.1.0)
       svelte: 5.34.1
