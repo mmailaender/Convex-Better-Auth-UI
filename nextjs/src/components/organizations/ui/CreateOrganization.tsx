@@ -1,19 +1,20 @@
 // React
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 /** UI **/
 // Icons
-import { LogIn, Pencil } from 'lucide-react';
+import { LogIn, Pencil, Building2 } from 'lucide-react';
 // Primitives
+import * as Avatar from '@/components/primitives/ui/avatar';
 import { toast } from 'sonner';
-import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+import { FileUpload } from '@skeletonlabs/skeleton-react';
 
 // Utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // API
-import { useConvexAuth, useMutation } from 'convex/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
 // Types
@@ -28,10 +29,14 @@ export default function CreateOrganization({
 	redirectTo?: string;
 }) {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
-	const createOrganization = useMutation(api.organizations.createOrganization);
+	const createOrganization = useMutation(api.organizations.mutations.createOrganization);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+
+	// Query for active organization
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 
 	const [name, setName] = useState('');
 	const [slug, setSlug] = useState('');
@@ -94,13 +99,43 @@ export default function CreateOrganization({
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
+			const currentUrl = new URL(window.location.href);
+			const pathSegments = currentUrl.pathname.split('/');
+			const activeOrgSlug = activeOrganization?.slug;
+
 			// Create the organization
 			await createOrganization({ name, slug, logoId: logoStorageId });
-			toast.success('Organization created successfully');
+			toast.success('Organization created successfully!');
+
 			// Call the onSuccessfulCreate callback if provided
 			if (onSuccessfulCreate) onSuccessfulCreate();
+
+			// Redirect
+			const redirectUrl = redirectTo ?? searchParams.get('redirectTo');
+
 			// Navigate to the specified URL
-			if (redirectTo) router.push(redirectTo);
+			if (redirectUrl) {
+				router.push(redirectUrl);
+			} else {
+				let needsRedirect = false;
+				if (activeOrgSlug) {
+					// Check each path segment for the organization ID
+					for (let i = 0; i < pathSegments.length; i++) {
+						if (pathSegments[i] === activeOrgSlug) {
+							// Found the organization ID in the URL path
+							pathSegments[i] = activeOrganization?.slug;
+							needsRedirect = true;
+							break;
+						}
+					}
+				}
+
+				if (needsRedirect) {
+					// Reconstruct the URL with the new organization ID
+					currentUrl.pathname = pathSegments.join('/');
+					router.push(currentUrl.pathname + currentUrl.search);
+				}
+			}
 		} catch (err: unknown) {
 			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${errorMessage}`);
@@ -133,13 +168,12 @@ export default function CreateOrganization({
 			<div className="my-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
-						<Avatar
-							src={logo}
-							name={name.length > 0 ? name : 'My Organization'}
-							background="bg-surface-400-600"
-							size="size-20"
-							rounded="rounded-container"
-						/>
+						<Avatar.Root className="rounded-container size-20">
+							<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
+							<Avatar.Fallback className="bg-surface-400-600 rounded-container">
+								<Building2 className="size-10" />
+							</Avatar.Fallback>
+						</Avatar.Root>
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />
 						</div>

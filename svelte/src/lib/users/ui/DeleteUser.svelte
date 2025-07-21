@@ -1,11 +1,13 @@
 <script lang="ts">
+	// Primitives
+	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { toast } from 'svelte-sonner';
+
 	// API (Convex)
 	import { useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import { api } from '$convex/_generated/api';
-
-	// Components
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { ConvexError } from 'convex/values';
 
 	// State
 	let deleteDialogOpen: boolean = $state(false);
@@ -18,18 +20,25 @@
 	 */
 	async function handleConfirm(): Promise<void> {
 		try {
-			await client.action(api.users.invalidateAndDeleteUser, {});
+			await client.action(api.users.actions.invalidateAndDeleteUser, {});
 			await signOut();
 			deleteDialogOpen = false;
 		} catch (error) {
 			console.error('Error deleting user:', error);
+			if (error instanceof ConvexError) {
+				toast.error(error.data);
+			} else if (error instanceof Error) {
+				toast.error(error.message);
+			} else {
+				toast.error('Error deleting user');
+			}
 		}
 	}
 </script>
 
 <Dialog.Root bind:open={deleteDialogOpen}>
 	<Dialog.Trigger
-		class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm"
+		class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 rounded-base justify-between gap-1 text-sm"
 		>Delete account</Dialog.Trigger
 	>
 	<Dialog.Content class="md:max-w-108">

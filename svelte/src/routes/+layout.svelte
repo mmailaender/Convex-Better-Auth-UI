@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { setupConvexAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	import '../app.css';
+	import { setupConvexAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 
 	import { Toaster } from '$lib/primitives/ui/sonner';
 	import OrganizationSwitcher from '$lib/organizations/ui/OrganizationSwitcher.svelte';

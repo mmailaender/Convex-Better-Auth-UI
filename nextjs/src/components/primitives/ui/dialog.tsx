@@ -27,7 +27,7 @@ function CloseX({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>
 		<DialogPrimitive.Close
 			data-slot="dialog-close"
 			{...props}
-			className="hover:bg-surface-300-700 absolute top-5 right-4 rounded-lg p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+			className="hover:bg-surface-300-700 rounded-base absolute top-5 right-4 p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 		>
 			<XIcon />
 			<span className="sr-only">Close</span>

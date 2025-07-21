@@ -15,12 +15,12 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.getActiveOrganization
+		typeof api.organizations.queries.getActiveOrganization
 	>;
 	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.getOrganizationMembers
+		typeof api.organizations.members.queries.getOrganizationMembers
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
 	let {
@@ -34,14 +34,14 @@
 	} = $props();
 
 	// Queries
-	const userResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData: initialData?.user });
 	const organizationResponse = useQuery(
-		api.organizations.getActiveOrganization,
+		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
 	const membersResponse = useQuery(
-		api.organizations.members.getOrganizationMembers,
+		api.organizations.members.queries.getOrganizationMembers,
 		{},
 		{ initialData: initialData?.members }
 	);
@@ -68,7 +68,7 @@
 	 * Validates form input before submission
 	 */
 	function validateForm(): boolean {
-		if (roles.isOwner && !selectedSuccessor) {
+		if (roles.hasOwnerRole && !selectedSuccessor) {
 			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
@@ -87,10 +87,10 @@
 		}
 
 		try {
-			await client.mutation(api.organizations.members.leaveOrganization, {
+			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				organizationId: activeOrganization._id,
 				// Only send successorId if the user is an owner and a successor is selected
-				...(roles.isOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
+				...(roles.hasOwnerRole && selectedSuccessor ? { successorId: selectedSuccessor } : {})
 			});
 
 			modalOpen = false;
@@ -128,45 +128,43 @@
 			</Dialog.Header>
 
 			<Dialog.Description>
-				If you leave organization you'll lose access to all projects and resources. <br /> <br />
-				{#if roles.isOwner}
-					As the owner, you must assign a new owner before leaving.
+				<p>If you leave organization you'll lose access to all projects and resources.</p>
+				{#if roles.hasOwnerRole}
+					<p class="my-6">As the owner, you must assign a new owner before leaving.</p>
 				{/if}
 			</Dialog.Description>
 
-			<div class="mt-8">
-				{#if roles.isOwner}
-					<div class="space-y-2">
-						<label for="successor" class="label"> New owner: </label>
-						<select
-							id="successor"
-							value={selectedSuccessor?.toString() || ''}
-							onchange={handleSuccessorChange}
-							class="select w-full cursor-pointer"
-							required={roles.isOwner}
-						>
-							<option value="" disabled> Choose a successor </option>
-							{#each organizationMembers as member}
-								<option value={member.user._id.toString()}>
-									{member.user.name} ({member.user.email})
-								</option>
-							{/each}
-						</select>
-					</div>
-				{/if}
-
-				<Dialog.Footer>
-					<button class="btn preset-tonal" onclick={() => (modalOpen = false)}> Cancel </button>
-					<button
-						type="button"
-						class="btn bg-error-500 hover:bg-error-600 text-white"
-						onclick={handleLeaveOrganization}
-						disabled={roles.isOwner && !selectedSuccessor}
+			{#if roles.hasOwnerRole}
+				<div class="space-y-2">
+					<label for="successor" class="label"> New owner: </label>
+					<select
+						id="successor"
+						value={selectedSuccessor?.toString() || ''}
+						onchange={handleSuccessorChange}
+						class="select w-full cursor-pointer"
+						required={roles.hasOwnerRole}
 					>
-						Confirm
-					</button>
-				</Dialog.Footer>
-			</div>
+						<option value="" disabled> Choose a successor </option>
+						{#each organizationMembers as member (member.user._id)}
+							<option value={member.user._id.toString()}>
+								{member.user.name} ({member.user.email})
+							</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
+
+			<Dialog.Footer>
+				<button class="btn preset-tonal" onclick={() => (modalOpen = false)}> Cancel </button>
+				<button
+					type="button"
+					class="btn bg-error-500 hover:bg-error-600 text-white"
+					onclick={handleLeaveOrganization}
+					disabled={roles.hasOwnerRole && !selectedSuccessor}
+				>
+					Confirm
+				</button>
+			</Dialog.Footer>
 		</Dialog.Content>
 	</Dialog.Root>
 {/if}

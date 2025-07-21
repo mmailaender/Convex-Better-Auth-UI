@@ -21,6 +21,40 @@
 			opacity: 1;
 		}
 	}
+
+	/* Shadcn */
+
+	--color-background: var();
+	--color-foreground: var();
+	--color-card: var();
+	--color-card-foreground: var();
+	--color-popover: var(--color-surface-200-800);
+	--color-popover-foreground: var(--color-surface-950-50);
+	--color-primary: var();
+	--color-primary-foreground: var();
+	--color-secondary: var();
+	--color-secondary-foreground: var();
+	--color-muted: var();
+	--color-muted-foreground: var(--color-surface-700-300);
+	--color-accent: var(--color-primary-600-400);
+	--color-accent-foreground: var(--color-surface-950-50);
+	--color-destructive: var();
+	--color-border: var(--color-surface-400-600);
+	--color-input: var();
+	--color-ring: var();
+	--color-chart-1: var();
+	--color-chart-2: var();
+	--color-chart-3: var();
+	--color-chart-4: var();
+	--color-chart-5: var();
+	--color-sidebar: var();
+	--color-sidebar-foreground: var();
+	--color-sidebar-primary: var();
+	--color-sidebar-primary-foreground: var();
+	--color-sidebar-accent: var();
+	--color-sidebar-accent-foreground: var();
+	--color-sidebar-border: var();
+	--color-sidebar-ring: var();
 }
 
 @utility input {

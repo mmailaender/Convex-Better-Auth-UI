@@ -10,31 +10,31 @@
 	import { toast } from 'svelte-sonner';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Dialog from '$lib/primitives/ui/dialog';
-	import { Avatar, FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import * as Avatar from '$lib/primitives/ui/avatar';
+	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { preloadImage } from '$lib/primitives/utils/preloadImage';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 	import type { FunctionReturnType } from 'convex/server';
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
 	let { initialData }: { initialData?: UserResponse } = $props();
 
 	// Query
-	const response = useQuery(api.users.getUser, {}, { initialData });
+	const response = useQuery(api.users.queries.getUser, {}, { initialData });
 
 	// State
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
 	let name: string = $state('');
-	let isUploading: boolean = $state(false);
-	let isPreloading: boolean = $state(false);
-	let displayImageSrc: string = $state('');
+	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+
+	let avatarKey: number = $state(0); // Force re-render when image changes
 
 	// Derived state
 	const user = $derived(response.data);
@@ -44,29 +44,6 @@
 		if (user && name === '') {
 			name = user.name;
 		}
-		if (user?.image && displayImageSrc === '') {
-			displayImageSrc = user.image;
-		}
-	});
-
-	// Handle server image updates - preload before showing
-	$effect(() => {
-		if (!user?.image || isUploading) return;
-
-		// If server has a new image URL that's different from what we're displaying
-		if (user.image !== displayImageSrc) {
-			isPreloading = true;
-			preloadImage(user.image)
-				.then(() => {
-					displayImageSrc = user.image!;
-					isPreloading = false;
-				})
-				.catch(() => {
-					// If preload fails, still update
-					displayImageSrc = user.image!;
-					isPreloading = false;
-				});
-		}
 	});
 
 	// Handle form submission to update profile
@@ -74,7 +51,7 @@
 		event.preventDefault();
 
 		try {
-			await client.mutation(api.users.updateUserName, { name });
+			await client.mutation(api.users.mutations.updateUserName, { name });
 			isDialogOpen = false;
 			isDrawerOpen = false;
 			toast.success('Profile name updated successfully');
@@ -90,7 +67,8 @@
 		if (!file) return;
 
 		try {
-			isUploading = true;
+			// Set loading status to show spinner immediately
+			loadingStatus = 'loading';
 
 			// Optimize the image before upload
 			const optimizedFile = await optimizeImage(file, {
@@ -121,50 +99,55 @@
 			const storageId = result.storageId as Id<'_storage'>;
 
 			// Update the user's avatar with the storage ID
-			await client.mutation(api.users.updateAvatar, { storageId });
+			await client.mutation(api.users.mutations.updateAvatar, { storageId });
+
+			// Force avatar to re-render with new image - this will trigger new loading
+			avatarKey += 1;
 
 			toast.success('Avatar updated successfully');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to upload avatar: ${errorMsg}`);
-		} finally {
-			isUploading = false;
+			// Reset loading status on error
+			loadingStatus = 'error';
 		}
 	}
 </script>
 
 <div class="flex flex-col gap-6">
 	{#if !user}
-		<div class="bg-success-200-800 h-16 w-full animate-pulse rounded-md"></div>
+		<div class="bg-success-200-800 rounded-base h-16 w-full animate-pulse"></div>
 	{:else}
 		<!-- Avatar + Upload -->
-		<div class="flex items-center justify-start rounded-lg pt-6 pl-0.5">
+		<div class="rounded-base flex items-center justify-start pt-6 pl-0.5">
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 				>
-					<Avatar
-						src={displayImageSrc}
-						name={user.name}
-						background="bg-surface-400-600"
-						size="size-20"
-						rounded="rounded-full"
-					/>
+					{#key avatarKey}
+						<Avatar.Root class="size-20" bind:loadingStatus>
+							<Avatar.Image src={user.image} alt={user.name} />
+							<Avatar.Fallback>
+								{#if loadingStatus === 'loading'}
+									<div
+										class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50"
+									>
+										<div
+											class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+										></div>
+									</div>
+								{:else}
+									<Avatar.Marble name={user.name} />
+								{/if}
+							</Avatar.Fallback>
+						</Avatar.Root>
+					{/key}
 
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
 					>
 						<Pencil class="size-4" />
 					</div>
-
-					<!-- Loading indicator during upload or preloading -->
-					{#if isUploading || isPreloading}
-						<div
-							class="bg-opacity-50 absolute inset-0 flex items-center justify-center rounded-full bg-black"
-						>
-							<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-						</div>
-					{/if}
 				</div>
 			</FileUpload>
 		</div>
@@ -172,7 +155,7 @@
 		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
 		<Dialog.Root bind:open={isDialogOpen}>
 			<Dialog.Trigger
-				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-base hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 				onclick={() => (isDialogOpen = true)}
 			>
 				<div class="flex w-full flex-col gap-1 text-left">

@@ -31,7 +31,7 @@
 	}>();
 
 	// Queries
-	const activeOrganizationResponse = useQuery(api.organizations.getActiveOrganization, {});
+	const activeOrganizationResponse = useQuery(api.organizations.queries.getActiveOrganization, {});
 	const activeOrganization = $derived(activeOrganizationResponse.data);
 
 	// State
@@ -44,7 +44,7 @@
 		try {
 			if (!activeOrganization) return;
 
-			await client.mutation(api.organizations.deleteOrganization, {
+			await client.mutation(api.organizations.mutations.deleteOrganization, {
 				organizationId: activeOrganization._id
 			});
 			dialogOpen = false;
@@ -72,7 +72,7 @@
 	}
 </script>
 
-{#if roles.isOwner && activeOrganization}
+{#if roles.hasOwnerRole && activeOrganization}
 	<Dialog.Root bind:open={dialogOpen}>
 		<Dialog.Trigger
 			class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm"

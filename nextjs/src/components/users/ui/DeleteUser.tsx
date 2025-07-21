@@ -1,16 +1,18 @@
 import { useState } from 'react';
 
+// Primitives
+import * as Dialog from '@/components/primitives/ui/dialog';
+import { toast } from 'sonner';
+
 // API (Convex)
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useAuthActions } from '@convex-dev/auth/react';
-
-// Components
-import * as Dialog from '@/components/primitives/ui/dialog';
+import { ConvexError } from 'convex/values';
 
 export default function DeleteUser() {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	const deleteMutation = useAction(api.users.invalidateAndDeleteUser);
+	const deleteMutation = useAction(api.users.actions.invalidateAndDeleteUser);
 	const { signOut } = useAuthActions();
 
 	/**
@@ -23,12 +25,19 @@ export default function DeleteUser() {
 			setDeleteDialogOpen(false);
 		} catch (error) {
 			console.error('Error deleting user:', error);
+			if (error instanceof ConvexError) {
+				toast.error(error.data);
+			} else if (error instanceof Error) {
+				toast.error(error.message);
+			} else {
+				toast.error('Error deleting user');
+			}
 		}
 	}
 
 	return (
 		<Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 rounded-lg text-sm">
+			<Dialog.Trigger className="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 rounded-base justify-between gap-1 text-sm">
 				Delete account
 			</Dialog.Trigger>
 			<Dialog.Content className="md:max-w-108">

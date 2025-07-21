@@ -11,8 +11,8 @@
 		unstyled: true,
 		classes: {
 			toast:
-				'flex flex-row rounded-container shadow-lg w-full md:w-96 items-center p-3 transition-all font-medium gap-2 pointer-events-auto',
-			title: 'truncate text-sm font-medium',
+				'flex flex-row rounded-container shadow-lg w-full md:w-96 items-start p-3 transition-all font-medium gap-2 pointer-events-auto',
+			title: 'break-words text-sm font-medium leading-tight',
 			description: 'text-surface-600-400 mt-1 line-clamp-2 text-xs',
 			action: '',
 			actionButton: '',
@@ -32,16 +32,16 @@
 		<Loader2 class="flex-shrink-0 animate-spin" />
 	{/snippet}
 	{#snippet successIcon()}
-		<CircleCheck class="text-success-500" />
+		<CircleCheck class="text-success-500 flex-shrink-0" />
 	{/snippet}
 	{#snippet errorIcon()}
-		<CircleX class="text-error-500" />
+		<CircleX class="text-error-500 flex-shrink-0" />
 	{/snippet}
 	{#snippet infoIcon()}
-		<Info />
+		<Info class="flex-shrink-0" />
 	{/snippet}
 	{#snippet warningIcon()}
-		<AlertTriangle />
+		<AlertTriangle class="flex-shrink-0" />
 	{/snippet}
 </Sonner>
 

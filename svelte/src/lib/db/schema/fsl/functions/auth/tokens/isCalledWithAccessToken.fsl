@@ -1,5 +1,0 @@
-@role(server)
-function isCalledWithAccessToken(): Boolean {
-  let token = Query.token()
-  token != null && token?.data != null && token?.data?.type == "access"
-}

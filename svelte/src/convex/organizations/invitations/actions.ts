@@ -1,10 +1,12 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { action } from '../../_generated/server';
-import { Id } from '../../_generated/dataModel';
 import { api, internal } from '../../_generated/api';
-import { sendOrganizationInvitationEmail, verifyEmail } from '../../emails/actions';
+import { sendOrganizationInvitationEmailModel, verifyEmail } from '../../model/emails';
 import { roleValidator } from '../../schema';
+
+// Types
+import type { Id } from '../../_generated/dataModel';
 
 /**
  * Creates an invitation and sends an invitation email
@@ -20,33 +22,33 @@ export const inviteMember = action({
 		// Get the authenticated user
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 		// Get the user's active organization
-		const user = await ctx.runQuery(api.users.getUser, {});
+		const user = await ctx.runQuery(api.users.queries.getUser, {});
 		if (!user || !user.activeOrganizationId) {
-			throw new Error('User has no active organization');
+			throw new ConvexError('User has no active organization');
 		}
 
 		const organizationId = user.activeOrganizationId;
 
 		// Check if the user is authorized to send invitations
-		const isAuthorized = await ctx.runQuery(api.organizations.members.isOwnerOrAdmin, {
+		const isAuthorized = await ctx.runQuery(api.organizations.members.queries.isOwnerOrAdmin, {
 			organizationId
 		});
 		if (!isAuthorized) {
-			throw new Error('Not authorized to send invitations');
+			throw new ConvexError('Not authorized to send invitations');
 		}
 
 		// Verify the email address
 		const verificationResult = await verifyEmail(ctx, email);
 
 		if (!verificationResult.valid) {
-			throw new Error(`Email ${email} is not valid: ${verificationResult.reason}`);
+			throw new ConvexError(`Email ${email} is not valid: ${verificationResult.reason}`);
 		}
 
 		const invitation = await ctx.runMutation(
-			internal.organizations.invitations.db.createInvitation,
+			internal.organizations.invitations.mutations._createInvitation,
 			{
 				email,
 				role
@@ -54,29 +56,29 @@ export const inviteMember = action({
 		);
 
 		if (!invitation) {
-			throw new Error('Failed to create invitation');
+			throw new ConvexError('Failed to create invitation');
 		}
 
 		const baseUrl = process.env.SITE_URL;
 		const fromEmail = process.env.EMAIL_SEND_FROM;
 
 		if (!baseUrl || !fromEmail) {
-			throw new Error('Missing environment variables');
+			throw new ConvexError('Missing environment variables');
 		}
 
 		// Generate the acceptance URL
 		const acceptUrl = `${baseUrl}/api/invitations/accept?invitationId=${invitation._id}`;
 
 		// Send the invitation email
-		const emailResult = await sendOrganizationInvitationEmail({
-			email,
+		const emailResult = await sendOrganizationInvitationEmailModel(ctx, {
+			from: fromEmail,
+			to: email,
 			organizationName: invitation.organizationName,
 			inviterName: invitation.invitedByName,
-			acceptUrl,
-			fromEmail
+			acceptUrl
 		});
 
-		if (emailResult.error) {
+		if (!emailResult.success) {
 			// If email fails, we still return the invitation but log the error
 			console.error(`Error sending invitation email to ${email}:`, emailResult.error);
 		}
@@ -114,30 +116,30 @@ export const inviteMembers = action({
 		// Get the authenticated user
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			throw new Error('Not authenticated');
+			throw new ConvexError('Not authenticated');
 		}
 
 		// Get the user's active organization
-		const user = await ctx.runQuery(api.users.getUser, {});
+		const user = await ctx.runQuery(api.users.queries.getUser, {});
 		if (!user || !user.activeOrganizationId) {
-			throw new Error('User has no active organization');
+			throw new ConvexError('User has no active organization');
 		}
 
 		const organizationId = user.activeOrganizationId;
 
 		// Check if the user is authorized to send invitations
-		const isAuthorized = await ctx.runQuery(api.organizations.members.isOwnerOrAdmin, {
+		const isAuthorized = await ctx.runQuery(api.organizations.members.queries.isOwnerOrAdmin, {
 			organizationId
 		});
 		if (!isAuthorized) {
-			throw new Error('Not authorized to send invitations');
+			throw new ConvexError('Not authorized to send invitations');
 		}
 
 		const baseUrl = process.env.SITE_URL;
 		const fromEmail = process.env.EMAIL_SEND_FROM;
 
 		if (!baseUrl || !fromEmail) {
-			throw new Error('Missing environment variables');
+			throw new ConvexError('Missing environment variables');
 		}
 
 		// Process each email and create invitations
@@ -159,7 +161,7 @@ export const inviteMembers = action({
 
 					// Create invitation in database
 					const invitation = await ctx.runMutation(
-						internal.organizations.invitations.db.createInvitation,
+						internal.organizations.invitations.mutations._createInvitation,
 						{
 							email,
 							role
@@ -180,15 +182,15 @@ export const inviteMembers = action({
 					const acceptUrl = `${baseUrl}/api/invitations/accept?invitationId=${invitation._id}`;
 
 					// Send the invitation email
-					const emailResult = await sendOrganizationInvitationEmail({
-						email,
+					const emailResult = await sendOrganizationInvitationEmailModel(ctx, {
+						from: fromEmail,
+						to: email,
 						organizationName: invitation.organizationName,
 						inviterName: invitation.invitedByName,
-						acceptUrl,
-						fromEmail
+						acceptUrl
 					});
 
-					if (emailResult.error) {
+					if (!emailResult.success) {
 						// If email fails, we still mark the invitation as successful but log the error
 						console.error(`Error sending invitation email to ${email}:`, emailResult.error);
 						return {

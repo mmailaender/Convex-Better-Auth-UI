@@ -9,14 +9,13 @@
 	}: TabsPrimitive.ContentProps = $props();
 </script>
 
-<!-- TODO: Remove the group- prefix once https://github.com/huntabyte/bits-ui/issues/1570 is fixed -->
 <TabsPrimitive.Content
 	bind:ref
 	data-slot="tabs-content"
 	class={cn(
 		'outline-none',
-		'group-data-[orientation=horizontal]:flex-1',
-		'w-full group-data-[orientation=vertical]:p-6',
+		'data-[orientation=horizontal]:flex-1',
+		'w-full data-[orientation=vertical]:p-6',
 		className
 	)}
 	{...restProps}

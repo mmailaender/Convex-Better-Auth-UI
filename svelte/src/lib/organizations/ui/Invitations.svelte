@@ -17,7 +17,7 @@
 	type Role = Doc<'organizationMembers'>['role'];
 	import type { FunctionReturnType } from 'convex/server';
 	type InvitationResponse = FunctionReturnType<
-		typeof api.organizations.invitations.db.getInvitations
+		typeof api.organizations.invitations.queries.getInvitations
 	>;
 
 	// Props
@@ -25,7 +25,7 @@
 
 	// Queries
 	const invitationsResponse = useQuery(
-		api.organizations.invitations.db.getInvitations,
+		api.organizations.invitations.queries.getInvitations,
 		{},
 		{ initialData }
 	);
@@ -33,7 +33,6 @@
 
 	// State
 	let errorMessage: string = $state('');
-	let successMessage: string = $state('');
 	let selectedInvitationId: Id<'invitations'> | null = $state(null);
 	let searchQuery: string = $state('');
 	let revokeModalOpen: boolean = $state(false);
@@ -74,16 +73,14 @@
 		if (!selectedInvitationId) return;
 
 		try {
-			await client.mutation(api.organizations.invitations.db.revokeInvitation, {
+			await client.mutation(api.organizations.invitations.mutations.revokeInvitation, {
 				invitationId: selectedInvitationId
 			});
 
 			errorMessage = '';
-			successMessage = 'Invitation revoked successfully!';
 			revokeModalOpen = false;
 			toast.success('Invitation revoked successfully');
 		} catch (err) {
-			successMessage = '';
 			errorMessage =
 				err instanceof Error
 					? err.message
@@ -149,7 +146,7 @@
 									<th class="text-surface-700-300 hidden !w-24 p-2 text-left text-xs sm:table-cell">
 										Invited By
 									</th>
-									{#if roles.isOwnerOrAdmin}
+									{#if roles.hasOwnerOrAdminRole}
 										<th class="!w-20 p-2 text-right"></th>
 									{/if}
 								</tr>
@@ -192,7 +189,7 @@
 										<!-- Actions -->
 										<td class="!w-20">
 											<div class="flex justify-end">
-												{#if roles.isOwnerOrAdmin}
+												{#if roles.hasOwnerOrAdminRole}
 													<Dialog.Root bind:open={revokeModalOpen}>
 														<Dialog.Trigger
 															class="btn btn-sm preset-filled-surface-300-700"
@@ -209,7 +206,7 @@
 															</Dialog.Header>
 															<article class="flex-shrink-0">
 																<p class="opacity-60">
-																	Are you sure you want to revoke the invitation sent to{' '}
+																	Are you sure you want to revoke the invitation sent to
 																	{invitation.email}?
 																</p>
 															</article>

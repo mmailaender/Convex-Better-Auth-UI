@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 // Primitives
 import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
-import { Avatar } from '@skeletonlabs/skeleton-react';
+import * as Avatar from '@/components/primitives/ui/avatar';
 // Icons
-import { ChevronsUpDown, Plus, Settings } from 'lucide-react';
+import { Building2, ChevronsUpDown, Plus, Settings } from 'lucide-react';
 // Components
 import CreateOrganization from '@/components/organizations/ui/CreateOrganization';
 import OrganizationProfile from '@/components/organizations/ui/OrganizationProfile';
@@ -39,9 +39,9 @@ export default function OrganizationSwitcher({
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	// Queries and mutations
-	const organizations = useQuery(api.organizations.getUserOrganizations);
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-	const setActiveOrg = useMutation(api.organizations.setActiveOrganization);
+	const organizations = useQuery(api.organizations.queries.getUserOrganizations);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const setActiveOrg = useMutation(api.organizations.mutations.setActiveOrganization);
 
 	// State
 	const [openSwitcher, setOpenSwitcher] = useState<boolean>(false);
@@ -49,17 +49,50 @@ export default function OrganizationSwitcher({
 	const [openOrganizationProfile, setOpenOrganizationProfile] = useState<boolean>(false);
 
 	/**
-	 * Updates the active organization
+	 * Updates the active organization and replaces URL slug if needed
 	 */
 	const updateActiveOrg = async (organizationId: Id<'organizations'>) => {
 		try {
+			// Get current active organization slug before mutation
+			const currentActiveOrgSlug = activeOrganization?.slug;
+			const currentPathname = window.location.pathname;
+
+			// Check if current URL contains the active organization slug
+			const urlContainsCurrentSlug =
+				currentActiveOrgSlug &&
+				(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
+					currentPathname.includes(`/${currentActiveOrgSlug}`));
+
+			// Execute the mutation to set new active organization
 			await setActiveOrg({ organizationId });
 
-			// Close popover and refresh
+			// Get the new active organization data
+			const newActiveOrgSlug = activeOrganization?.slug;
+
+			// If URL contained old slug and we have a new slug, replace it
+			if (
+				urlContainsCurrentSlug &&
+				currentActiveOrgSlug &&
+				newActiveOrgSlug &&
+				currentActiveOrgSlug !== newActiveOrgSlug
+			) {
+				// Replace the old slug with the new slug in the URL
+				const newPathname = currentPathname.replace(
+					new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
+					`/${newActiveOrgSlug}`
+				);
+
+				// Navigate to the new URL
+				router.push(newPathname);
+			} else {
+				// No slug replacement needed, just refresh current page
+				router.refresh();
+			}
+
+			// Close popover
 			setOpenSwitcher(false);
-			router.refresh();
 		} catch (err) {
-			console.error(err);
+			console.error('Error updating active organization:', err);
 		}
 	};
 
@@ -98,14 +131,18 @@ export default function OrganizationSwitcher({
 			<Popover.Root open={openSwitcher} onOpenChange={setOpenSwitcher}>
 				<Popover.Trigger
 					onClick={() => setOpenSwitcher(!openSwitcher)}
-					className="hover:bg-surface-200-800 border-surface-200-800 flex w-40 flex-row items-center justify-between rounded-lg border p-1 pr-2 duration-200 ease-in-out"
+					className="hover:bg-surface-200-800 border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
 				>
 					<div className="flex w-full max-w-64 items-center gap-3 overflow-hidden">
-						<Avatar
-							src={activeOrganization?.logo || ''}
-							name={activeOrganization?.name || ''}
-							size="size-8 shrink-0 rounded-md"
-						/>
+						<Avatar.Root className="rounded-container size-8 shrink-0">
+							<Avatar.Image
+								src={activeOrganization?.logo || ''}
+								alt={activeOrganization?.name || ''}
+							/>
+							<Avatar.Fallback>
+								<Building2 className="size-5" />
+							</Avatar.Fallback>
+						</Avatar.Root>
 						<span className="text-surface-700-300 truncate text-sm">
 							{activeOrganization?.name}
 						</span>
@@ -115,13 +152,17 @@ export default function OrganizationSwitcher({
 
 				<Popover.Content side={popoverSide} align={popoverAlign}>
 					<div className="flex flex-col gap-1">
-						<div role="list" className="bg-surface-50-950 rounded-base flex flex-col">
+						<div role="list" className="bg-surface-50-950 rounded-container flex flex-col">
 							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
-								<Avatar
-									src={activeOrganization?.logo || ''}
-									name={activeOrganization?.name || ''}
-									size="size-8 shrink-0 rounded-lg"
-								/>
+								<Avatar.Root className="rounded-container size-8 shrink-0">
+									<Avatar.Image
+										src={activeOrganization?.logo || ''}
+										alt={activeOrganization?.name || ''}
+									/>
+									<Avatar.Fallback>
+										<Building2 className="size-5" />
+									</Avatar.Fallback>
+								</Avatar.Root>
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
@@ -151,11 +192,12 @@ export default function OrganizationSwitcher({
 													onClick={() => updateActiveOrg(org._id)}
 													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 												>
-													<Avatar
-														src={org.logo || ''}
-														name={org.name}
-														size="size-8 rounded-lg shrink-0"
-													/>
+													<Avatar.Root className="rounded-container size-8 shrink-0">
+														<Avatar.Image src={org.logo || ''} alt={org.name || ''} />
+														<Avatar.Fallback>
+															<Building2 className="size-5" />
+														</Avatar.Fallback>
+													</Avatar.Root>
 													<span className="text-surface-700-300 truncate text-base">
 														{org.name}
 													</span>

@@ -8,7 +8,7 @@ export const roleValidator = v.union(
 	v.literal('role_organization_owner')
 );
 
-const schema = defineSchema({
+const authFullTables = {
 	...authTables,
 
 	users: defineTable({
@@ -31,7 +31,7 @@ const schema = defineSchema({
 		logo: v.optional(v.string()),
 		logoId: v.optional(v.id('_storage')),
 		plan: v.union(v.literal('Free'), v.literal('Pro'), v.literal('Enterprise'))
-	}).index('slug', ['slug']),
+	}).index('by_slug', ['slug']),
 
 	organizationMembers: defineTable({
 		organizationId: v.id('organizations'),
@@ -52,6 +52,8 @@ const schema = defineSchema({
 		.index('by_org_and_email', ['organizationId', 'email'])
 		.index('email', ['email'])
 		.index('expiration', ['expiresAt'])
-});
+};
+
+const schema = defineSchema({ ...authFullTables });
 
 export default schema;

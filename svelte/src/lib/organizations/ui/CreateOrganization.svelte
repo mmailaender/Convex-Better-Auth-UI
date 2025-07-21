@@ -1,19 +1,21 @@
 <script lang="ts">
 	// SvelteKit
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	/** UI **/
 	// Icons
-	import { UploadCloud, LogIn, Pencil } from '@lucide/svelte';
+	import { LogIn, Pencil, Building2 } from '@lucide/svelte';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import { Avatar, FileUpload, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import * as Avatar from '$lib/primitives/ui/avatar';
+	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 
 	// API
-	import { useConvexClient } from 'convex-svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
 	const client = useConvexClient();
@@ -21,6 +23,10 @@
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
+
+	// Queries
+	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization);
+	const activeOrganization = $derived(activeOrgResponse.data);
 
 	// Props
 	type CreateOrganizationProps = {
@@ -119,8 +125,12 @@
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
+			const currentUrl = new URL(window.location.href);
+			const pathSegments = currentUrl.pathname.split('/');
+			const activeOrgSlug = activeOrganization?.slug;
+
 			// Create the organization
-			await client.mutation(api.organizations.createOrganization, {
+			await client.mutation(api.organizations.mutations.createOrganization, {
 				name,
 				slug,
 				logoId: logoStorageId
@@ -128,8 +138,32 @@
 			toast.success('Organization created successfully!');
 			// Call the onSuccessfulCreate callback if provided
 			if (props.onSuccessfulCreate) props.onSuccessfulCreate();
+
+			// Redirect
+			const redirectUrl = props.redirectTo ?? page.url.searchParams.get('redirectTo');
 			// Navigate to the specified URL
-			if (props.redirectTo) goto(props.redirectTo);
+			if (redirectUrl) {
+				goto(redirectUrl);
+			} else {
+				let needsRedirect = false;
+				if (activeOrgSlug) {
+					// Check each path segment for the organization ID
+					for (let i = 0; i < pathSegments.length; i++) {
+						if (pathSegments[i] === activeOrgSlug) {
+							// Found the organization ID in the URL path
+							pathSegments[i] = activeOrganization?.slug;
+							needsRedirect = true;
+							break;
+						}
+					}
+				}
+
+				if (needsRedirect) {
+					// Reconstruct the URL with the new organization ID
+					currentUrl.pathname = pathSegments.join('/');
+					goto(currentUrl, { invalidateAll: true });
+				}
+			}
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${message}`);
@@ -164,13 +198,12 @@
 				<div
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 				>
-					<Avatar
-						src={logo}
-						name={name.length > 0 ? name : 'My Organization'}
-						background="bg-surface-400-600"
-						size="size-20"
-						rounded="rounded-base"
-					/>
+					<Avatar.Root class="rounded-container size-20">
+						<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
+						<Avatar.Fallback class="bg-surface-400-600 rounded-container">
+							<Building2 class="size-10" />
+						</Avatar.Fallback>
+					</Avatar.Root>
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
 					>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Convex
 import { useQuery, useMutation } from 'convex/react';
@@ -13,7 +13,8 @@ import { Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import * as Drawer from '@/components/primitives/ui/drawer';
 import * as Dialog from '@/components/primitives/ui/dialog';
-import { Avatar, FileUpload } from '@skeletonlabs/skeleton-react';
+import * as Avatar from '@/components/primitives/ui/avatar';
+import { FileUpload } from '@skeletonlabs/skeleton-react';
 
 // utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
@@ -25,56 +26,48 @@ import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  Convex queries    */
-	const user = useQuery(api.users.getUser);
+	const user = useQuery(api.users.queries.getUser);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-	const updateUserName = useMutation(api.users.updateUserName);
-	const updateAvatar = useMutation(api.users.updateAvatar);
+	const updateUserName = useMutation(api.users.mutations.updateUserName);
+	const updateAvatar = useMutation(api.users.mutations.updateAvatar);
 
 	/* ─────────────────────────────────────────────  local state       */
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [name, setName] = useState(user?.name ?? '');
-	const [shouldAnimate, setShouldAnimate] = useState(false);
+	const [name, setName] = useState('');
+	const [isUploading, setIsUploading] = useState(false);
+	const [isPreloading, setIsPreloading] = useState(false);
+	const [displayImageSrc, setDisplayImageSrc] = useState('');
 
-	/** Single source of truth for what the UI shows; never undefined */
-	const [avatarSrc, setAvatarSrc] = useState<string>(user?.image ?? '');
-
-	/* stable ref with whatever is currently shown */
-	const shownAvatarRef = useRef(avatarSrc);
+	// Initialize state when user data is available
 	useEffect(() => {
-		shownAvatarRef.current = avatarSrc;
-	}, [avatarSrc]);
-
-	/* handle new avatar from Convex only after it is pre-loaded */
-	useEffect(() => {
-		if (!user) return;
-		if (!user.image || user.image === shownAvatarRef.current) {
-			// just keep name in sync
+		if (user && name === '') {
 			setName(user.name);
-			return;
 		}
+		if (user?.image && displayImageSrc === '') {
+			setDisplayImageSrc(user.image);
+		}
+	}, [user, name, displayImageSrc]);
 
-		let revoked: string | undefined;
-
-		preloadImage(user.image)
-			.then(() => {
-				if (shownAvatarRef.current.startsWith('blob:')) revoked = shownAvatarRef.current;
-				setShouldAnimate(false); // No animation for server updates
-				setAvatarSrc(user.image!);
-			})
-			.catch(() => void 0);
-
-		return () => {
-			if (revoked) URL.revokeObjectURL(revoked);
-		};
-	}, [user?.image]);
-
-	// tidy up any leftover blob on unmount
+	// Handle server image updates - preload before showing
 	useEffect(() => {
-		return () => {
-			if (avatarSrc.startsWith('blob:')) URL.revokeObjectURL(avatarSrc);
-		};
-	}, [avatarSrc]);
+		if (!user?.image || isUploading) return;
+
+		// If server has a new image URL that's different from what we're displaying
+		if (user.image !== displayImageSrc) {
+			setIsPreloading(true);
+			preloadImage(user.image)
+				.then(() => {
+					setDisplayImageSrc(user.image!);
+					setIsPreloading(false);
+				})
+				.catch(() => {
+					// If preload fails, still update
+					setDisplayImageSrc(user.image!);
+					setIsPreloading(false);
+				});
+		}
+	}, [user?.image, displayImageSrc, isUploading]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -94,7 +87,10 @@ export default function ProfileInfo() {
 		if (!file) return;
 
 		try {
-			const optimised = await optimizeImage(file, {
+			setIsUploading(true);
+
+			// Optimize the image before upload
+			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -103,41 +99,39 @@ export default function ProfileInfo() {
 				forceConvert: true
 			});
 
-			const newAvatarUrl = URL.createObjectURL(optimised);
-
-			// clean up prior blob
-			if (avatarSrc.startsWith('blob:')) URL.revokeObjectURL(avatarSrc);
-
-			/* optimistic UI swap */
-			setShouldAnimate(true); // Animate for optimistic updates
-			setAvatarSrc(newAvatarUrl);
-
-			/* upload to storage */
+			// Get a storage upload URL from Convex
 			const uploadUrl = await generateUploadUrl();
-			const res = await fetch(uploadUrl, {
-				method: 'POST',
-				headers: { 'Content-Type': optimised.type },
-				body: optimised
-			});
-			if (!res.ok) throw new Error('Failed to upload file');
 
-			const { storageId } = await res.json();
-			await updateAvatar({ storageId: storageId as Id<'_storage'> });
+			// Upload the file to Convex storage
+			const response = await fetch(uploadUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': optimizedFile.type },
+				body: optimizedFile
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to upload file');
+			}
+
+			// Get the storage ID from the response
+			const result = await response.json();
+			const storageId = result.storageId as Id<'_storage'>;
+
+			// Update the user's avatar with the storage ID
+			await updateAvatar({ storageId });
 
 			toast.success('Avatar updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to upload avatar: ${message}`);
-
-			// revert to server image
-			setShouldAnimate(false); // No animation for error revert
-			setAvatarSrc(user?.image || '');
+		} finally {
+			setIsUploading(false);
 		}
 	};
 
 	/* ─────────────────────────────────────────────  skeleton while loading */
 	if (!user) {
-		return <div className="bg-success-200-800 h-16 w-full animate-pulse rounded-md" />;
+		return <div className="bg-success-200-800 rounded-base h-16 w-full animate-pulse" />;
 	}
 
 	/* ─────────────────────────────────────────────  edit form */
@@ -167,23 +161,26 @@ export default function ProfileInfo() {
 	return (
 		<div className="flex flex-col gap-6">
 			{/* avatar + upload */}
-			<div className="flex items-center justify-start rounded-lg pt-6 pl-0.5">
+			<div className="rounded-base flex items-center justify-start pt-6 pl-0.5">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
-						{/* key swap + conditional fade for cross-fade */}
-						<div key={avatarSrc} className={shouldAnimate ? 'animate-fade-in-out' : ''}>
-							<Avatar
-								src={avatarSrc}
-								name={user.name}
-								background="bg-surface-400-600"
-								size="size-20"
-								rounded="rounded-full"
-							/>
-						</div>
+						<Avatar.Root className="bg-surface-400-600 size-20">
+							<Avatar.Image src={displayImageSrc} alt={user.name} />
+							<Avatar.Fallback>
+								<Avatar.Marble name={user.name} />
+							</Avatar.Fallback>
+						</Avatar.Root>
 
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />
 						</div>
+
+						{/* Loading indicator during upload or preloading */}
+						{(isUploading || isPreloading) && (
+							<div className="bg-opacity-50 absolute inset-0 flex items-center justify-center rounded-full bg-black">
+								<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
+							</div>
+						)}
 					</div>
 				</FileUpload>
 			</div>
@@ -191,7 +188,7 @@ export default function ProfileInfo() {
 			{/* Desktop Dialog - hidden on mobile, shown on desktop */}
 			<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 				<Dialog.Trigger
-					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-base hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
+					className="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
 					onClick={() => setIsDialogOpen(true)}
 				>
 					<div className="flex w-full flex-col gap-1 text-left">

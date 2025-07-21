@@ -2,7 +2,7 @@
 	// Primitives
 	import * as Popover from '$lib/primitives/ui/popover';
 	import * as Dialog from '$lib/primitives/ui/dialog';
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
+	import * as Avatar from '$lib/primitives/ui/avatar';
 	// Icons
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	// Components
@@ -17,7 +17,8 @@
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	import SignIn from '$lib/auth/ui/SignIn.svelte';
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 
 	// Props
 	const {
@@ -31,15 +32,15 @@
 	} = $props();
 
 	// State
-	let userPopoverOpen: boolean = $state(false);
-	let profileDialogOpen: boolean = $state(false);
+	let userPopoverOpen = $state(false);
+	let profileDialogOpen = $state(false);
 
 	// Auth
 	const { signOut } = useAuth();
 	const isAuthenticated = $derived(useAuth().isAuthenticated);
 
 	// Queries
-	const userResponse = useQuery(api.users.getUser, {}, { initialData });
+	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData });
 	const user = $derived(userResponse.data);
 
 	/**
@@ -56,20 +57,26 @@
 		<!-- User Popover -->
 		<Popover.Root bind:open={userPopoverOpen}>
 			<Popover.Trigger>
-				<Avatar
-					src={user.image}
-					name={user.name}
-					size="size-10 ring-0 hover:ring-4 ring-surface-100-900 ease-out duration-200"
-				/>
+				<Avatar.Root class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
+					<Avatar.Image src={user.image} alt={user.name} />
+					<Avatar.Fallback>
+						<Avatar.Marble name={user.name} />
+					</Avatar.Fallback>
+				</Avatar.Root>
 			</Popover.Trigger>
 
 			<Popover.Content side={popoverSide} align={popoverAlign}>
 				<div class="flex flex-col gap-1 p-0">
 					<button
-						class="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
+						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 						onclick={openProfileModal}
 					>
-						<Avatar src={user.image} name={user.name} size="size-12" />
+						<Avatar.Root class="size-12">
+							<Avatar.Image src={user.image} alt={user.name} />
+							<Avatar.Fallback>
+								<Avatar.Marble name={user.name} />
+							</Avatar.Fallback>
+						</Avatar.Root>
 						<div class="flex flex-1 flex-col gap-0 overflow-hidden">
 							<p class="truncate text-left text-base font-medium">{user.name}</p>
 							<p class="text-surface-700-300 truncate text-left text-xs">
@@ -80,7 +87,10 @@
 					</button>
 					<button
 						class="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-						onclick={() => signOut()}
+						onclick={() => {
+							signOut();
+							userPopoverOpen = false;
+						}}
 					>
 						Sign out
 					</button>
@@ -102,5 +112,16 @@
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
 {:else}
-	<a href="/signin" class="btn preset-filled-primary-500">Sign in</a>
+	<Dialog.Root>
+		<Dialog.Trigger class="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
+		<Dialog.Content
+			class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
+		>
+			<Dialog.Header>
+				<Dialog.Title>Sign in</Dialog.Title>
+			</Dialog.Header>
+			<SignIn />
+			<Dialog.CloseX />
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}

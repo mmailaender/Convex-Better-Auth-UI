@@ -19,10 +19,10 @@
 	// API Types
 	import type { FunctionReturnType } from 'convex/server';
 	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.getOrganizationMembers
+		typeof api.organizations.members.queries.getOrganizationMembers
 	>;
 	type InvitationsResponse = FunctionReturnType<
-		typeof api.organizations.invitations.db.getInvitations
+		typeof api.organizations.invitations.queries.getInvitations
 	>;
 
 	// Props
@@ -37,12 +37,12 @@
 
 	// Queries
 	const membersResponse = useQuery(
-		api.organizations.members.getOrganizationMembers,
+		api.organizations.members.queries.getOrganizationMembers,
 		{},
 		{ initialData: initialData?.members }
 	);
 	const invitationsResponse = useQuery(
-		api.organizations.invitations.db.getInvitations,
+		api.organizations.invitations.queries.getInvitations,
 		{},
 		{ initialData: initialData?.invitations }
 	);
@@ -68,21 +68,21 @@
 	>
 		<Tabs.List>
 			<Tabs.Trigger value="members" class="gap-2">
-				Members{' '}
+				handleInviteMembersSuccess
 				<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
 					{members && `${members.length}`}
 				</span>
 			</Tabs.Trigger>
-			{#if roles.isOwnerOrAdmin}
+			{#if roles.hasOwnerOrAdminRole}
 				<Tabs.Trigger value="invitations" class="gap-2">
-					Invitations{' '}
+					Invitations
 					<span class="badge preset-filled-surface-300-700 size-6 rounded-full text-center">
 						{invitations && `${invitations.length}`}
 					</span>
 				</Tabs.Trigger>
 			{/if}
 		</Tabs.List>
-		{#if roles.isOwnerOrAdmin}
+		{#if roles.hasOwnerOrAdminRole}
 			<Dialog.Root bind:open={inviteMembersDialogOpen}>
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
@@ -115,13 +115,12 @@
 		{/if}
 	</div>
 
-	<Tabs.Content value="members" class="!p-0">
+	<Tabs.Content value="members">
 		<Members />
 	</Tabs.Content>
 
-	{#if roles.isOwnerOrAdmin}
-		<!-- TODO: Remove the !p-0 once https://github.com/huntabyte/bits-ui/issues/1570 is fixed -->
-		<Tabs.Content value="invitations" class="!p-0">
+	{#if roles.hasOwnerOrAdminRole}
+		<Tabs.Content value="invitations">
 			<Invitations />
 		</Tabs.Content>
 	{/if}

@@ -1,23 +1,26 @@
 import { api } from '@/convex/_generated/api';
 import { useQuery } from 'convex/react';
+import type { Id } from '@/convex/_generated/dataModel';
 
-export const useIsOwnerOrAdmin = () => {
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-	const isOwnerOrAdmin = ['role_organization_owner', 'role_organization_admin'].includes(
-		activeOrganization?.role || ''
-	);
+interface UseRolesArgs {
+	orgId?: Id<'organizations'>;
+}
 
-	return isOwnerOrAdmin;
-};
+export const useRoles = ({ orgId }: UseRolesArgs = {}) => {
+	const role = useQuery(api.organizations.queries.getOrganizationRole, { organizationId: orgId });
 
-export const useIsOwner = () => {
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-	const isOwner = activeOrganization?.role === 'role_organization_owner';
-	return isOwner;
-};
-
-export const useIsAdmin = () => {
-	const activeOrganization = useQuery(api.organizations.getActiveOrganization);
-	const isAdmin = activeOrganization?.role === 'role_organization_admin';
-	return isAdmin;
+	return {
+		get hasOwnerRole() {
+			return role === 'role_organization_owner';
+		},
+		get hasAdminRole() {
+			return role === 'role_organization_admin';
+		},
+		get hasOwnerOrAdminRole() {
+			return ['role_organization_owner', 'role_organization_admin'].includes(role ?? '');
+		},
+		get isMember() {
+			return role != null;
+		}
+	};
 };

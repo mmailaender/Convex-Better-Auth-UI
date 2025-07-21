@@ -6,7 +6,7 @@ import { ComponentProps, useState } from 'react';
 // Primitive
 import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
-import { Avatar } from '@skeletonlabs/skeleton-react';
+import * as Avatar from '@/components/primitives/ui/avatar';
 // Icons
 import { ChevronRight } from 'lucide-react';
 // Components
@@ -16,6 +16,7 @@ import UserProfile from '@/components/users/ui/UserProfile';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useQuery, Authenticated, Unauthenticated } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import SignIn from '@/components/auth/ui/SignIn';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -32,7 +33,7 @@ export default function UserButton({
 	// Auth
 	const { signOut } = useAuthActions();
 	// Queries
-	const user = useQuery(api.users.getUser);
+	const user = useQuery(api.users.queries.getUser);
 
 	// State
 	const [userPopoverOpen, setUserPopoverOpen] = useState(false);
@@ -53,19 +54,25 @@ export default function UserButton({
 					<>
 						<Popover.Root open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
 							<Popover.Trigger>
-								<Avatar
-									src={user.image}
-									name={user.name}
-									size="size-10 ring-0 hover:ring-4 ring-surface-100-900 ease-out duration-200"
-								/>
+								<Avatar.Root className="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
+									<Avatar.Image src={user.image} alt={user.name} />
+									<Avatar.Fallback>
+										<Avatar.Marble name={user.name} />
+									</Avatar.Fallback>
+								</Avatar.Root>
 							</Popover.Trigger>
 							<Popover.Content side={popoverSide} align={popoverAlign}>
 								<div className="flex flex-col gap-1 p-0">
 									<button
-										className="bg-surface-50-950 hover:bg-surface-100-900 flex flex-row items-center gap-3 rounded-lg p-3 pr-6 duration-200 ease-in-out"
+										className="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
 										onClick={openProfileModal}
 									>
-										<Avatar src={user.image} name={user.name} size="size-12" />
+										<Avatar.Root className="size-12">
+											<Avatar.Image src={user.image} alt={user.name} />
+											<Avatar.Fallback>
+												<Avatar.Marble name={user.name} />
+											</Avatar.Fallback>
+										</Avatar.Root>
 										<div className="flex flex-1 flex-col gap-0 overflow-hidden">
 											<p className="truncate text-left text-base font-medium">{user.name}</p>
 											<p className="text-surface-700-300 truncate text-left text-xs">
@@ -76,7 +83,10 @@ export default function UserButton({
 									</button>
 									<button
 										className="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-										onClick={() => void signOut()}
+										onClick={() => {
+											void signOut();
+											setUserPopoverOpen(false);
+										}}
 									>
 										Sign out
 									</button>
@@ -100,9 +110,16 @@ export default function UserButton({
 				)}
 			</Authenticated>
 			<Unauthenticated>
-				<a href="/signin" className="btn preset-filled-primary-500">
-					Sign in
-				</a>
+				<Dialog.Root>
+					<Dialog.Trigger className="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
+					<Dialog.Content className="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md">
+						<Dialog.Header>
+							<Dialog.Title>Sign in</Dialog.Title>
+						</Dialog.Header>
+						<SignIn />
+						<Dialog.CloseX />
+					</Dialog.Content>
+				</Dialog.Root>
 			</Unauthenticated>
 		</>
 	);

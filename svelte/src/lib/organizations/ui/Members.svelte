@@ -1,8 +1,8 @@
 <script lang="ts">
 	// Primitives
-	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Avatar from '$lib/primitives/ui/avatar';
 	import { toast } from 'svelte-sonner';
 	// Icons
 	import { Search, Trash, Pencil } from '@lucide/svelte';
@@ -18,12 +18,12 @@
 	type Role = Doc<'organizationMembers'>['role'];
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.getActiveOrganization
+		typeof api.organizations.queries.getActiveOrganization
 	>;
 	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.getOrganizationMembers
+		typeof api.organizations.members.queries.getOrganizationMembers
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
 	type GetOrganizationMemberReturnType = MembersResponse extends Array<infer T> ? T : never;
 
 	// Props
@@ -38,14 +38,18 @@
 	} = $props();
 
 	// Queries
-	const currentUserResponse = useQuery(api.users.getUser, {}, { initialData: initialData?.user });
+	const currentUserResponse = useQuery(
+		api.users.queries.getUser,
+		{},
+		{ initialData: initialData?.user }
+	);
 	const currentOrganizationResponse = useQuery(
-		api.organizations.getActiveOrganization,
+		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
 	const membersResponse = useQuery(
-		api.organizations.members.getOrganizationMembers,
+		api.organizations.members.queries.getOrganizationMembers,
 		{},
 		{ initialData: initialData?.members }
 	);
@@ -100,7 +104,7 @@
 		if (newRole === 'role_organization_owner') return; // Cannot set someone as owner this way
 
 		try {
-			await client.mutation(api.organizations.members.updateMemberRole, {
+			await client.mutation(api.organizations.members.mutations.updateMemberRole, {
 				userId,
 				newRole
 			});
@@ -120,7 +124,7 @@
 		if (!selectedUserId) return;
 
 		try {
-			await client.mutation(api.organizations.members.removeMember, {
+			await client.mutation(api.organizations.members.mutations.removeMember, {
 				userId: selectedUserId
 			});
 
@@ -140,7 +144,7 @@
 	 * Check if current user can edit a member
 	 */
 	function canEditMember(member: GetOrganizationMemberReturnType): boolean {
-		if (!roles.isOwnerOrAdmin) return false;
+		if (!roles.hasOwnerOrAdminRole) return false;
 		if (member.user._id === currentUser?._id) return false;
 		if (member.role === 'role_organization_owner') return false;
 
@@ -223,15 +227,12 @@
 						<div class="flex items-center space-x-3">
 							<div class="avatar">
 								<div class="size-10">
-									{#if member.user.image}
-										<Avatar src={member.user.image} name={member.user.name} size="size-10" />
-									{:else}
-										<div
-											class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
-										>
-											{member.user.name?.charAt(0) || 'U'}
-										</div>
-									{/if}
+									<Avatar.Root class="size-10">
+										<Avatar.Image src={member.user.image} alt={member.user.name} />
+										<Avatar.Fallback>
+											<Avatar.Marble name={member.user.name} />
+										</Avatar.Fallback>
+									</Avatar.Root>
 								</div>
 							</div>
 							<div class="flex flex-col">
@@ -278,7 +279,7 @@
 								<th class="text-surface-700-300 !w-48 p-2 !pl-0 text-left text-xs">Name</th>
 								<th class="text-surface-700-300 hidden p-2 text-left text-xs sm:flex">Email</th>
 								<th class="text-surface-700-300 !w-32 p-2 text-left text-xs">Role</th>
-								{#if roles.isOwnerOrAdmin}
+								{#if roles.hasOwnerOrAdminRole}
 									<th class="!w-16 p-2 text-right"></th>
 								{/if}
 							</tr>
@@ -291,19 +292,12 @@
 										<div class="flex items-center space-x-2">
 											<div class="avatar">
 												<div class="size-8 sm:size-5">
-													{#if member.user.image}
-														<Avatar
-															src={member.user.image}
-															name={member.user.name}
-															size="size-8 sm:size-5"
-														/>
-													{:else}
-														<div
-															class="text-primary-700 flex h-full w-full items-center justify-center rounded-full"
-														>
-															{member.user.name?.charAt(0) || 'U'}
-														</div>
-													{/if}
+													<Avatar.Root class="size-8 sm:size-5">
+														<Avatar.Image src={member.user.image} alt={member.user.name} />
+														<Avatar.Fallback>
+															<Avatar.Marble name={member.user.name} />
+														</Avatar.Fallback>
+													</Avatar.Root>
 												</div>
 											</div>
 
@@ -323,7 +317,7 @@
 									<!-- Member Role -->
 									<td class="!w-32">
 										<div class="flex items-center">
-											{#if roles.isOwnerOrAdmin && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+											{#if roles.hasOwnerOrAdminRole && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
 												<select
 													value={member.role}
 													onchange={(e) => handleRoleChange(e, member.user._id)}
@@ -356,7 +350,7 @@
 									<!-- Member Actions -->
 									<td class="!w-16">
 										<div class="flex justify-end space-x-2">
-											{#if roles.isOwnerOrAdmin && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+											{#if roles.hasOwnerOrAdminRole && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
 												<Dialog.Root bind:open={isDialogOpen}>
 													<Dialog.Trigger
 														class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
@@ -414,11 +408,15 @@
 						<div class="avatar">
 							<div class="size-12">
 								{#if selectedMember!.user.image}
-									<Avatar
-										src={selectedMember!.user.image}
-										name={selectedMember!.user.name}
-										size="size-12"
-									/>
+									<Avatar.Root class="size-12">
+										<Avatar.Image
+											src={selectedMember!.user.image}
+											alt={selectedMember!.user.name}
+										/>
+										<Avatar.Fallback>
+											<Avatar.Marble name={selectedMember!.user.name} />
+										</Avatar.Fallback>
+									</Avatar.Root>
 								{:else}
 									<div
 										class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
