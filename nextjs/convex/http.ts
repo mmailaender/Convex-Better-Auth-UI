@@ -1,18 +1,19 @@
 import { httpRouter } from 'convex/server';
 import { httpAction } from './_generated/server';
-import { auth } from './auth';
-import { resend } from './model/emails/';
+import { betterAuthComponent } from './auth';
+import { createAuth } from '../src/components/auth/lib/auth';
+// import { resend } from './model/emails/';
 
 const http = httpRouter();
 
-auth.addHttpRoutes(http);
+betterAuthComponent.registerRoutes(http, createAuth);
 
-http.route({
-	path: '/resend-webhook',
-	method: 'POST',
-	handler: httpAction(async (ctx, req) => {
-		return await resend.handleResendEventWebhook(ctx, req);
-	})
-});
+// http.route({
+// 	path: '/resend-webhook',
+// 	method: 'POST',
+// 	handler: httpAction(async (ctx, req) => {
+// 		return await resend.handleResendEventWebhook(ctx, req);
+// 	})
+// });
 
 export default http;

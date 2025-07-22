@@ -3,7 +3,7 @@
 // React
 import { useState } from 'react';
 // Nextjs
-import { useSearchParams } from 'next/navigation';
+import { redirect, useSearchParams } from 'next/navigation';
 
 // Primitives
 import { toast } from 'sonner';
@@ -12,8 +12,8 @@ import { toast } from 'sonner';
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 // API
 import { useAction } from 'convex/react';
-import { useAuthActions } from '@convex-dev/auth/react';
 import { api } from '@/convex/_generated/api';
+import { authClient } from '../lib/auth-client';
 
 type AuthStep = 'email' | 'login' | 'register';
 
@@ -26,7 +26,6 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	const checkEmailAvailabilityAndValidity = useAction(
 		api.users.actions.checkEmailAvailabilityAndValidity
 	);
-	const { signIn } = useAuthActions();
 	const searchParams = useSearchParams();
 
 	const [currentStep, setCurrentStep] = useState<AuthStep>('email');
@@ -52,16 +51,15 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 		const redirectUrl = getRedirectUrl();
 		console.log('Redirecting to:', redirectUrl);
 
-		signIn('github', { redirectTo: redirectUrl })
-			.then((result) => {
-				if (result.signingIn) {
-					onSignIn?.();
-				}
-			})
-			.catch((error) => {
-				console.error('Social sign in error:', error);
+		authClient.signIn.social({ provider: 'github' }).then((result) => {
+			if (result.data) {
+				onSignIn?.();
+				redirect(redirectUrl);
+			} else {
+				console.error('Social sign in error:', result.error);
 				toast.error('Failed to sign in with GitHub. Please try again.');
-			});
+			}
+		});
 	};
 
 	/**
@@ -108,35 +106,87 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	/**
 	 * Handles authentication form submission (login or register)
 	 */
-	const handleAuthSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+	const handleAuthSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
 		event.preventDefault();
 		setSubmitting(true);
 
 		const formData = new FormData(event.currentTarget);
-		formData.set('flow', currentStep === 'login' ? 'signIn' : 'signUp');
-		formData.set('email', email);
-		formData.set('redirectTo', getRedirectUrl());
 
-		signIn('password', formData)
-			.then((result) => {
-				if (result.signingIn) {
-					onSignIn?.();
-				}
-			})
-			.catch((error) => {
-				let errorMessage = '';
-				if (error.message.includes('Invalid password')) {
-					errorMessage = 'Invalid password. Please try again.';
-				} else {
-					errorMessage =
-						currentStep === 'login'
-							? 'Could not sign in. Please check your credentials.'
-							: 'Could not create account. Please try again.';
-				}
-				toast.error(errorMessage);
+		if (currentStep === 'login') {
+			await authClient.signIn.email(
+				{
+					email,
+					password: formData.get('password') as string,
+					callbackURL: getRedirectUrl()
+				},
+				{
+					onSuccess: () => {
+						console.log('Sign in successful');
+						toast.success('Signed in successfully!');
+						onSignIn?.();
+					},
+					onError: (ctx) => {
+						console.error('Sign in error:', ctx.error);
+						let errorMessage = 'Could not sign in. Please check your credentials.';
 
-				setSubmitting(false);
-			});
+						if (ctx.error.message) {
+							if (
+								ctx.error.message.includes('Invalid password') ||
+								ctx.error.message.includes('password')
+							) {
+								errorMessage = 'Invalid password. Please try again.';
+							} else if (
+								ctx.error.message.includes('not found') ||
+								ctx.error.message.includes('email')
+							) {
+								errorMessage = 'No account found with this email.';
+							} else {
+								errorMessage = ctx.error.message;
+							}
+						}
+
+						toast.error(errorMessage);
+						setSubmitting(false);
+					}
+				}
+			);
+		} else if (currentStep === 'register') {
+			await authClient.signUp.email(
+				{
+					email,
+					password: formData.get('password') as string,
+					name: formData.get('name') as string,
+					callbackURL: getRedirectUrl()
+				},
+				{
+					onSuccess: () => {
+						console.log('Sign up successful');
+						toast.success('Account created successfully!');
+						onSignIn?.();
+					},
+					onError: (ctx) => {
+						console.error('Sign up error:', ctx.error);
+						let errorMessage = 'Could not create account. Please try again.';
+
+						if (ctx.error.message) {
+							if (
+								ctx.error.message.includes('already exists') ||
+								ctx.error.message.includes('duplicate')
+							) {
+								errorMessage = 'An account with this email already exists.';
+							} else if (ctx.error.message.includes('password')) {
+								errorMessage = 'Password does not meet requirements.';
+							} else {
+								errorMessage = ctx.error.message;
+							}
+						}
+
+						toast.error(errorMessage);
+						setSubmitting(false);
+					}
+				}
+			);
+		}
 	};
 
 	/**
@@ -248,41 +298,6 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 							{currentStep === 'login' && renderLoginStep()}
 							{currentStep === 'register' && renderRegisterStep()}
 						</>
-					)}
-
-					{/* Show error message if any */}
-
-					{process.env.NEXT_PUBLIC_E2E_TEST && (
-						<form
-							className="flex flex-col gap-2"
-							onSubmit={(event: React.FormEvent<HTMLFormElement>): void => {
-								event.preventDefault();
-								const formData = new FormData(event.currentTarget);
-								formData.set('redirectTo', getRedirectUrl());
-
-								signIn('secret', formData)
-									.then((result) => {
-										if (result.signingIn) {
-											onSignIn?.();
-										}
-									})
-									.catch(() => {
-										window.alert('Invalid secret');
-									});
-							}}
-						>
-							Test only: Sign in with a secret
-							<input
-								aria-label="Secret"
-								type="text"
-								name="secret"
-								placeholder="secret value"
-								className="input"
-							/>
-							<button className="btn preset-filled" type="submit">
-								Sign in with secret
-							</button>
-						</form>
 					)}
 				</div>
 				<div>

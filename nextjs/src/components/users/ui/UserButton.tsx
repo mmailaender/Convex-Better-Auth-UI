@@ -11,12 +11,12 @@ import * as Avatar from '@/components/primitives/ui/avatar';
 import { ChevronRight } from 'lucide-react';
 // Components
 import UserProfile from '@/components/users/ui/UserProfile';
+import SignIn from '@/components/auth/ui/SignIn';
 
 // API
-import { useAuthActions } from '@convex-dev/auth/react';
-import { useQuery, Authenticated, Unauthenticated } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import SignIn from '@/components/auth/ui/SignIn';
+// import { useAuthActions } from '@convex-dev/auth/react';
+import { Authenticated, Unauthenticated } from 'convex/react';
+import { authClient } from '@/components/auth/lib/auth-client';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -31,13 +31,17 @@ export default function UserButton({
 	popoverAlign?: PopoverProps['align'];
 }) {
 	// Auth
-	const { signOut } = useAuthActions();
+	// const { signOut } = useAuthActions();
+
 	// Queries
-	const user = useQuery(api.users.queries.getUser);
+	// const user = useQuery(api.users.queries.getUser);
+	const { data: session } = authClient.useSession();
+	const user = session?.user;
 
 	// State
 	const [userPopoverOpen, setUserPopoverOpen] = useState(false);
 	const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+	const [signInDialogOpen, setSignInDialogOpen] = useState(false);
 
 	/**
 	 * Open profile modal and close popover
@@ -55,7 +59,7 @@ export default function UserButton({
 						<Popover.Root open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
 							<Popover.Trigger>
 								<Avatar.Root className="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
-									<Avatar.Image src={user.image} alt={user.name} />
+									<Avatar.Image src={user.image as string | undefined} alt={user.name} />
 									<Avatar.Fallback>
 										<Avatar.Marble name={user.name} />
 									</Avatar.Fallback>
@@ -68,7 +72,7 @@ export default function UserButton({
 										onClick={openProfileModal}
 									>
 										<Avatar.Root className="size-12">
-											<Avatar.Image src={user.image} alt={user.name} />
+											<Avatar.Image src={user.image as string | undefined} alt={user.name} />
 											<Avatar.Fallback>
 												<Avatar.Marble name={user.name} />
 											</Avatar.Fallback>
@@ -83,8 +87,8 @@ export default function UserButton({
 									</button>
 									<button
 										className="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-										onClick={() => {
-											void signOut();
+										onClick={async () => {
+											await authClient.signOut();
 											setUserPopoverOpen(false);
 										}}
 									>
@@ -110,13 +114,13 @@ export default function UserButton({
 				)}
 			</Authenticated>
 			<Unauthenticated>
-				<Dialog.Root>
+				<Dialog.Root open={signInDialogOpen} onOpenChange={setSignInDialogOpen}>
 					<Dialog.Trigger className="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
 					<Dialog.Content className="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md">
 						<Dialog.Header>
 							<Dialog.Title>Sign in</Dialog.Title>
 						</Dialog.Header>
-						<SignIn />
+						<SignIn onSignIn={() => setSignInDialogOpen(false)} />
 						<Dialog.CloseX />
 					</Dialog.Content>
 				</Dialog.Root>

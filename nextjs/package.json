@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@auth/core": "0.40.0",
 		"@convex-dev/auth": "^0.0.87",
+		"@convex-dev/better-auth": "^0.7.9",
 		"@convex-dev/resend": "0.1.4",
 		"@floating-ui/react": "^0.27.13",
 		"@radix-ui/react-avatar": "^1.1.10",
@@ -25,7 +26,6 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"convex": "^1.25.4",
-		"convex-ents": "^0.15.0",
 		"convex-helpers": "^0.1.99",
 		"install": "^0.13.0",
 		"lucide-react": "^0.525.0",

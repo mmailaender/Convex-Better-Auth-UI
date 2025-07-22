@@ -4,24 +4,27 @@ import { useState } from 'react';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { toast } from 'sonner';
 
-// API (Convex)
-import { useAction } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { useAuthActions } from '@convex-dev/auth/react';
+// API
+// import { useAction } from 'convex/react';
+// import { api } from '@/convex/_generated/api';
+// import { useAuthActions } from '@convex-dev/auth/react';
 import { ConvexError } from 'convex/values';
+import { authClient } from '@/components/auth/lib/auth-client';
 
 export default function DeleteUser() {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	const deleteMutation = useAction(api.users.actions.invalidateAndDeleteUser);
-	const { signOut } = useAuthActions();
+	// const deleteMutation = useAction(api.users.actions.invalidateAndDeleteUser);
+	// const { signOut } = useAuthActions();
 
 	/**
 	 * Handle the delete confirmation action
 	 */
 	async function handleConfirm() {
 		try {
-			await deleteMutation();
-			await signOut();
+			await authClient.deleteUser();
+			await authClient.signOut();
+			// await deleteMutation();
+			// await signOut();
 			setDeleteDialogOpen(false);
 		} catch (error) {
 			console.error('Error deleting user:', error);
