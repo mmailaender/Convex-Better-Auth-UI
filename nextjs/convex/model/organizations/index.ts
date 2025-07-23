@@ -4,7 +4,7 @@ import { createAuth } from '../../../src/components/auth/lib/auth';
 
 // Types
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
-import type { Id } from '../../_generated/dataModel';
+import type { Doc, Id } from '../../_generated/dataModel';
 import { APIError } from 'better-auth/api';
 import { api } from '../../_generated/api';
 
@@ -296,63 +296,102 @@ export const updateOrganizationProfileModel = async (
 		organizationId: string;
 		name?: string;
 		slug?: string;
-		logoId?: Id<'_storage'>;
+		logoId?: Id<'_storage'> | null; // Allow null to remove logo
 	}
 ): Promise<void> => {
 	const { organizationId, name, slug, logoId } = args;
-	let imageUrl: string | undefined;
 	const auth = createAuth(ctx);
 
+	// Input validation
+	if (name !== undefined && (!name || name.trim().length === 0)) {
+		throw new ConvexError('Organization name cannot be empty');
+	}
+	if (slug !== undefined && (!slug || slug.trim().length === 0 || !/^[a-z0-9-]+$/.test(slug))) {
+		throw new ConvexError('Slug must contain only lowercase letters, numbers, and hyphens');
+	}
+
+	// Validate slug uniqueness if it's being changed
 	if (slug) {
-		try {
-			const organization = await auth.api.getFullOrganization({
-				headers: await betterAuthComponent.getHeaders(ctx)
-			});
-			if (organization?.slug !== slug) {
+		// Get current organization data from Better Auth
+		const currentOrganization = await auth.api.getFullOrganization({
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+		if (!currentOrganization) {
+			throw new ConvexError('Organization not found');
+		}
+		if (currentOrganization.slug !== slug) {
+			try {
 				await auth.api.checkOrganizationSlug({
-					body: {
-						slug
-					}
+					body: { slug }
 				});
+			} catch (error) {
+				throw new ConvexError('Slug already taken');
 			}
-		} catch (error) {
-			throw new ConvexError('Slug already taken');
 		}
 	}
 
-	if (logoId) {
-		const organization = await ctx.db
+	// Handle logo updates
+	let imageUrl: string | undefined;
+	let convexOrgToUpdate: Doc<'organizations'> | null = null;
+
+	if (logoId !== undefined) {
+		// Get Convex organization record for logo management
+		convexOrgToUpdate = await ctx.db
 			.query('organizations')
 			.withIndex('betterAuthId', (q) => q.eq('betterAuthId', organizationId))
 			.first();
-		if (!organization) {
-			throw new ConvexError('Organization not found');
+
+		if (!convexOrgToUpdate) {
+			throw new ConvexError('Organization record not found in database');
 		}
 
-		if (organization.logoId && logoId !== organization.logoId) {
-			await ctx.storage.delete(organization.logoId);
-
-			imageUrl = (await ctx.storage.getUrl(logoId)) ?? undefined;
-
+		// Handle logo removal (logoId is null)
+		if (logoId === null) {
+			if (convexOrgToUpdate.logoId) {
+				await ctx.storage.delete(convexOrgToUpdate.logoId);
+				await ctx.db.patch(convexOrgToUpdate._id, { logoId: undefined });
+			}
+			imageUrl = undefined; // This will remove the logo from Better Auth
+		}
+		// Handle logo addition/update
+		else if (logoId !== null && logoId !== convexOrgToUpdate.logoId) {
+			// Validate new logo exists and get URL before making changes
+			// TypeScript assertion: logoId is guaranteed to be Id<'_storage'> here
+			imageUrl = (await ctx.storage.getUrl(logoId as Id<'_storage'>)) ?? undefined;
 			if (!imageUrl) {
-				throw new ConvexError('Failed to get image URL');
+				throw new ConvexError('Invalid logo file or file not found');
 			}
 
-			await ctx.db.patch(organization._id, { logoId });
+			// Delete old logo if it exists
+			if (convexOrgToUpdate.logoId) {
+				await ctx.storage.delete(convexOrgToUpdate.logoId);
+			}
+
+			// Update Convex record with new logo
+			await ctx.db.patch(convexOrgToUpdate._id, { logoId: logoId as Id<'_storage'> });
 		}
 	}
 
+	// Prepare Better Auth update data
 	const betterAuthUpdateData: Parameters<typeof auth.api.updateOrganization>[0]['body']['data'] =
 		{};
-	if (name !== undefined) betterAuthUpdateData.name = name;
-	if (slug !== undefined) betterAuthUpdateData.slug = slug;
-	if (imageUrl !== undefined) betterAuthUpdateData.logo = imageUrl;
+	if (name !== undefined) betterAuthUpdateData.name = name.trim();
+	if (slug !== undefined) betterAuthUpdateData.slug = slug.trim();
+	if (logoId !== undefined) {
+		// Better Auth expects undefined to remove logo
+		betterAuthUpdateData.logo = imageUrl;
+	}
 
+	// Update Better Auth if there are changes
 	if (Object.keys(betterAuthUpdateData).length > 0) {
-		await auth.api.updateOrganization({
-			body: { data: betterAuthUpdateData, organizationId },
-			headers: await betterAuthComponent.getHeaders(ctx)
-		});
+		try {
+			await auth.api.updateOrganization({
+				body: { data: betterAuthUpdateData, organizationId },
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		} catch (error) {
+			throw new ConvexError(`Failed to update organization in Better Auth: ${error}`);
+		}
 	}
 };
 
