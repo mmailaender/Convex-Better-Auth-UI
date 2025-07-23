@@ -14,8 +14,9 @@ import { FileUpload } from '@skeletonlabs/skeleton-react';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // API
-import { useConvexAuth, useMutation, useQuery } from 'convex/react';
+import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { authClient } from '@/components/auth/lib/auth-client';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
@@ -36,7 +37,8 @@ export default function CreateOrganization({
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
 	// Query for active organization
-	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const { data: activeOrganization, refetch: refetchActiveOrganization } =
+		authClient.useActiveOrganization();
 
 	const [name, setName] = useState('');
 	const [slug, setSlug] = useState('');
@@ -105,6 +107,7 @@ export default function CreateOrganization({
 
 			// Create the organization
 			await createOrganization({ name, slug, logoId: logoStorageId });
+			await refetchActiveOrganization();
 			toast.success('Organization created successfully!');
 
 			// Call the onSuccessfulCreate callback if provided

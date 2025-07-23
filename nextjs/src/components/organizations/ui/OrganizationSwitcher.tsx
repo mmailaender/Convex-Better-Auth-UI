@@ -15,9 +15,8 @@ import OrganizationProfile from '@/components/organizations/ui/OrganizationProfi
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 
 // API
-import { useQuery, useMutation, useConvexAuth } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useConvexAuth } from 'convex/react';
+import { authClient } from '@/components/auth/lib/auth-client';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -39,9 +38,9 @@ export default function OrganizationSwitcher({
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	// Queries and mutations
-	const organizations = useQuery(api.organizations.queries.getUserOrganizations);
-	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const setActiveOrg = useMutation(api.organizations.mutations.setActiveOrganization);
+	const { data: organizations } = authClient.useListOrganizations();
+	const { data: activeOrganization } = authClient.useActiveOrganization();
+	const { data: activeMember } = authClient.useActiveMember();
 
 	// State
 	const [openSwitcher, setOpenSwitcher] = useState<boolean>(false);
@@ -51,7 +50,7 @@ export default function OrganizationSwitcher({
 	/**
 	 * Updates the active organization and replaces URL slug if needed
 	 */
-	const updateActiveOrg = async (organizationId: Id<'organizations'>) => {
+	const updateActiveOrg = async (organizationId: string) => {
 		try {
 			// Get current active organization slug before mutation
 			const currentActiveOrgSlug = activeOrganization?.slug;
@@ -64,7 +63,7 @@ export default function OrganizationSwitcher({
 					currentPathname.includes(`/${currentActiveOrgSlug}`));
 
 			// Execute the mutation to set new active organization
-			await setActiveOrg({ organizationId });
+			await authClient.organization.setActive({ organizationId });
 
 			// Get the new active organization data
 			const newActiveOrgSlug = activeOrganization?.slug;
@@ -166,8 +165,7 @@ export default function OrganizationSwitcher({
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
-								{activeOrganization?.role === 'role_organization_owner' ||
-								activeOrganization?.role === 'role_organization_admin' ? (
+								{activeMember?.role === 'owner' || activeMember?.role === 'admin' ? (
 									<button
 										onClick={() => {
 											setOpenOrganizationProfile(true);
@@ -183,13 +181,13 @@ export default function OrganizationSwitcher({
 							</div>
 
 							{organizations
-								.filter((org) => org && org._id !== activeOrganization?._id)
+								.filter((org) => org && org.id !== activeOrganization?.id)
 								.map(
 									(org) =>
 										org && (
-											<div key={org._id}>
+											<div key={org.id}>
 												<button
-													onClick={() => updateActiveOrg(org._id)}
+													onClick={() => updateActiveOrg(org.id)}
 													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 												>
 													<Avatar.Root className="rounded-container size-8 shrink-0">

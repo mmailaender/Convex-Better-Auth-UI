@@ -47,10 +47,14 @@ export const updateAvatarModel = async (
 		throw new ConvexError('Failed to get image URL');
 	}
 
-	await betterAuthComponent.updateUserMetadata(ctx, userId, { image: imageUrl });
+	const auth = createAuth(ctx);
+	await auth.api.updateUser({
+		body: { image: imageUrl },
+		headers: await betterAuthComponent.getHeaders(ctx)
+	});
 
 	await patchUserModel(ctx, { userId, data: { imageId: storageId } });
-	
+
 	return imageUrl;
 };
 

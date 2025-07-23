@@ -1,8 +1,11 @@
 import { convexAdapter } from '@convex-dev/better-auth';
-import { convex } from '@convex-dev/better-auth/plugins';
 import { betterAuth } from 'better-auth';
 import { betterAuthComponent } from '../../../../convex/auth';
 import { type GenericCtx } from '../../../../convex/_generated/server';
+
+// Plugins
+import { convex } from '@convex-dev/better-auth/plugins';
+import { organization } from 'better-auth/plugins';
 
 // You'll want to replace this with an environment variable
 const siteUrl = 'http://localhost:3000';
@@ -34,6 +37,7 @@ export const createAuth = (ctx: GenericCtx) =>
 		},
 		plugins: [
 			// The Convex plugin is required
-			convex()
+			convex(),
+			organization()
 		]
 	});

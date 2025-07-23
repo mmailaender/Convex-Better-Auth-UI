@@ -21,12 +21,10 @@ import { FileUpload } from '@skeletonlabs/skeleton-react';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // types
-import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  Convex queries    */
-	// const user = useQuery(api.users.queries.getUser);
 	const useSession = authClient.useSession();
 	const user = useSession.data?.user;
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
@@ -80,21 +78,15 @@ export default function ProfileInfo() {
 
 			// Get a storage upload URL from Convex
 			const uploadUrl = await generateUploadUrl();
-
 			// Upload the file to Convex storage
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': optimizedFile.type },
 				body: optimizedFile
 			});
+			if (!response.ok) throw new Error('Failed to upload file');
 
-			if (!response.ok) {
-				throw new Error('Failed to upload file');
-			}
-
-			// Get the storage ID from the response
-			const result = await response.json();
-			const storageId = result.storageId as Id<'_storage'>;
+			const { storageId } = await response.json();
 
 			// Update the user's avatar with the storage ID
 			await updateAvatar({ storageId });

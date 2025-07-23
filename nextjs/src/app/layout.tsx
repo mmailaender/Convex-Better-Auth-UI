@@ -27,7 +27,7 @@ export default function RootLayout({
 					<ConvexClientProvider>
 						<div className="flex items-center justify-between gap-5 p-4">
 							<div className="mr-auto text-2xl font-bold text-white">Next.js</div>
-							{/* <OrganizationSwitcher /> */}
+							<OrganizationSwitcher />
 							<UserButton />
 						</div>
 						{children}
