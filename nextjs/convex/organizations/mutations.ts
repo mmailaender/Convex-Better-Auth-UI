@@ -1,10 +1,9 @@
 import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../_generated/server';
-// import { getAuthUserId } from '@convex-dev/auth/server';
 import { betterAuthComponent } from '../auth';
+import { APIError } from 'better-auth/api';
 import {
 	createOrganizationModel,
-	// setActiveOrganizationModel,
 	// leaveOrganizationModel,
 	updateOrganizationProfileModel
 	// deleteOrganizationModel
@@ -49,31 +48,76 @@ export const _createOrganization = internalMutation({
 	}
 });
 
-// /**
-//  * Sets the active organization for the current user
-//  */
-// export const setActiveOrganization = mutation({
-// 	args: {
-// 		organizationId: v.id('organizations')
-// 	},
-// 	handler: async (ctx, args) => {
-// 		const userId = await getAuthUserId(ctx);
-// 		if (!userId) throw new ConvexError('Not authenticated');
-// 		// Verify the user is a member of the organization
-// 		const membership = await ctx.db
-// 			.query('organizationMembers')
-// 			.withIndex('orgId_and_userId', (q) =>
-// 				q.eq('organizationId', args.organizationId).eq('userId', userId)
-// 			)
-// 			.first();
+/**
+ * Sets the active organization for the current user. If no organizationId is provided, the first organization in the list will be set as active.
+ */
+export const setActiveOrganization = mutation({
+	args: {
+		organizationId: v.optional(v.string())
+	},
+	handler: async (ctx, args) => {
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		if (!userId) throw new ConvexError('Not authenticated');
 
-// 		if (!membership) {
-// 			throw new ConvexError('User is not a member of this organization');
-// 		}
+		const auth = createAuth(ctx);
 
-// 		await setActiveOrganizationModel(ctx, { userId, organizationId: args.organizationId });
-// 	}
-// });
+		if (args.organizationId) {
+			try {
+				const organizationId = args.organizationId;
+				await auth.api.setActiveOrganization({
+					body: {
+						organizationId: args.organizationId
+					},
+					headers: await betterAuthComponent.getHeaders(ctx)
+				});
+				const user = await ctx.db.get(userId as Id<'users'>);
+				const org = await ctx.db
+					.query('organizations')
+					.withIndex('betterAuthId', (q) => q.eq('betterAuthId', organizationId))
+					.first();
+				if (user && org) {
+					await ctx.db.patch(user._id, {
+						activeOrganizationId: org._id
+					});
+				}
+			} catch (error) {
+				if (error instanceof APIError) {
+					throw new ConvexError(error.message);
+				}
+			}
+		} else {
+			try {
+				const organizations = await auth.api.listOrganizations({
+					headers: await betterAuthComponent.getHeaders(ctx)
+				});
+				if (organizations.length === 0) {
+					throw new ConvexError('No organizations found');
+				}
+				const betterAuthOrg = organizations[0];
+				await auth.api.setActiveOrganization({
+					body: {
+						organizationId: betterAuthOrg.id
+					},
+					headers: await betterAuthComponent.getHeaders(ctx)
+				});
+				const user = await ctx.db.get(userId as Id<'users'>);
+				const org = await ctx.db
+					.query('organizations')
+					.withIndex('betterAuthId', (q) => q.eq('betterAuthId', betterAuthOrg.id))
+					.first();
+				if (user && org) {
+					await ctx.db.patch(user._id, {
+						activeOrganizationId: org._id
+					});
+				}
+			} catch (error) {
+				if (error instanceof APIError) {
+					throw new ConvexError(error.message);
+				}
+			}
+		}
+	}
+});
 
 // /**
 //  * Leave an organization (remove yourself as a member)

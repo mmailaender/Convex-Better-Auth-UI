@@ -1,6 +1,6 @@
 'use client';
 
-import { ComponentProps, useState } from 'react';
+import { ComponentProps, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Primitives
@@ -15,8 +15,8 @@ import OrganizationProfile from '@/components/organizations/ui/OrganizationProfi
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 
 // API
-import { useConvexAuth } from 'convex/react';
-import { authClient } from '@/components/auth/lib/auth-client';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -38,9 +38,10 @@ export default function OrganizationSwitcher({
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	// Queries and mutations
-	const { data: organizations } = authClient.useListOrganizations();
-	const { data: activeOrganization } = authClient.useActiveOrganization();
-	const { data: activeMember } = authClient.useActiveMember();
+	const organizations = useQuery(api.organizations.queries.listOrganizations);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const role = useQuery(api.organizations.queries.getActiveOrganizationRole);
+	const setActiveOrganization = useMutation(api.organizations.mutations.setActiveOrganization);
 
 	// State
 	const [openSwitcher, setOpenSwitcher] = useState<boolean>(false);
@@ -50,50 +51,60 @@ export default function OrganizationSwitcher({
 	/**
 	 * Updates the active organization and replaces URL slug if needed
 	 */
-	const updateActiveOrg = async (organizationId: string) => {
-		try {
-			// Get current active organization slug before mutation
-			const currentActiveOrgSlug = activeOrganization?.slug;
-			const currentPathname = window.location.pathname;
+	const setActiveOrg = useCallback(
+		async (organizationId: string) => {
+			try {
+				// Get current active organization slug before mutation
+				const currentActiveOrgSlug = activeOrganization?.slug;
+				const currentPathname = window.location.pathname;
 
-			// Check if current URL contains the active organization slug
-			const urlContainsCurrentSlug =
-				currentActiveOrgSlug &&
-				(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
-					currentPathname.includes(`/${currentActiveOrgSlug}`));
+				// Check if current URL contains the active organization slug
+				const urlContainsCurrentSlug =
+					currentActiveOrgSlug &&
+					(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
+						currentPathname.includes(`/${currentActiveOrgSlug}`));
 
-			// Execute the mutation to set new active organization
-			await authClient.organization.setActive({ organizationId });
+				// Execute the mutation to set new active organization
+				await setActiveOrganization({ organizationId });
 
-			// Get the new active organization data
-			const newActiveOrgSlug = activeOrganization?.slug;
+				// Get the new active organization data
+				const newActiveOrgSlug = activeOrganization?.slug;
 
-			// If URL contained old slug and we have a new slug, replace it
-			if (
-				urlContainsCurrentSlug &&
-				currentActiveOrgSlug &&
-				newActiveOrgSlug &&
-				currentActiveOrgSlug !== newActiveOrgSlug
-			) {
-				// Replace the old slug with the new slug in the URL
-				const newPathname = currentPathname.replace(
-					new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
-					`/${newActiveOrgSlug}`
-				);
+				// If URL contained old slug and we have a new slug, replace it
+				if (
+					urlContainsCurrentSlug &&
+					currentActiveOrgSlug &&
+					newActiveOrgSlug &&
+					currentActiveOrgSlug !== newActiveOrgSlug
+				) {
+					// Replace the old slug with the new slug in the URL
+					const newPathname = currentPathname.replace(
+						new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
+						`/${newActiveOrgSlug}`
+					);
 
-				// Navigate to the new URL
-				router.push(newPathname);
-			} else {
-				// No slug replacement needed, just refresh current page
-				router.refresh();
+					// Navigate to the new URL
+					router.push(newPathname);
+				} else {
+					// No slug replacement needed, just refresh current page
+					router.refresh();
+				}
+
+				// Close popover
+				setOpenSwitcher(false);
+			} catch (err) {
+				console.error('Error updating active organization:', err);
 			}
+		},
+		[activeOrganization, setActiveOrganization, router, setOpenSwitcher]
+	);
 
-			// Close popover
-			setOpenSwitcher(false);
-		} catch (err) {
-			console.error('Error updating active organization:', err);
+	// check on mount if there is an active organization and if not, use the first organization from listOrganization and call with that setActiveOrg
+	useEffect(() => {
+		if (organizations && organizations.length > 0 && !activeOrganization) {
+			setActiveOrg(organizations[0].id);
 		}
-	};
+	}, [organizations, activeOrganization, setActiveOrg]);
 
 	// Not authenticated - don't show anything
 	if (!isAuthenticated) {
@@ -165,7 +176,7 @@ export default function OrganizationSwitcher({
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
-								{activeMember?.role === 'owner' || activeMember?.role === 'admin' ? (
+								{role === 'owner' || role === 'admin' ? (
 									<button
 										onClick={() => {
 											setOpenOrganizationProfile(true);
@@ -187,7 +198,7 @@ export default function OrganizationSwitcher({
 										org && (
 											<div key={org.id}>
 												<button
-													onClick={() => updateActiveOrg(org.id)}
+													onClick={() => setActiveOrg(org.id)}
 													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 												>
 													<Avatar.Root className="rounded-container size-8 shrink-0">

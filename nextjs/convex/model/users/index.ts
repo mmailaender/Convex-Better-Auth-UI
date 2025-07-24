@@ -156,16 +156,3 @@ export const isUserExistingModel = async (ctx: QueryCtx, args: { email: string }
 		.first();
 	return user !== null;
 };
-
-// /**
-//  * Fetch a user document by id and populate the image URL (if any).
-//  */
-// export const getUserModel = async (ctx: QueryCtx, args: { userId: Id<'users'> }) => {
-// 	const { userId } = args;
-// 	const user = await ctx.db.get(userId);
-// 	if (!user) {
-// 		return null;
-// 	}
-// 	const imageUrl = user.imageId ? await ctx.storage.getUrl(user.imageId) : undefined;
-// 	return { ...user, image: imageUrl ?? undefined };
-// };

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 // API
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { authClient } from '@/components/auth/lib/auth-client';
 
@@ -25,8 +25,7 @@ import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  Convex queries    */
-	const useSession = authClient.useSession();
-	const user = useSession.data?.user;
+	const user = useQuery(api.users.queries.getActiveUser);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 	const updateAvatar = useMutation(api.users.mutations.updateAvatar);
 
@@ -90,7 +89,6 @@ export default function ProfileInfo() {
 
 			// Update the user's avatar with the storage ID
 			await updateAvatar({ storageId });
-			await useSession.refetch();
 
 			toast.success('Avatar updated successfully');
 		} catch (err) {

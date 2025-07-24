@@ -16,6 +16,7 @@ import type * as model_emails_templates_verification from "../model/emails/templ
 import type * as model_organizations_index from "../model/organizations/index.js";
 import type * as model_users_index from "../model/users/index.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
+import type * as organizations_queries from "../organizations/queries.js";
 import type * as storage from "../storage.js";
 import type * as users_actions from "../users/actions.js";
 import type * as users_mutations from "../users/mutations.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   "model/organizations/index": typeof model_organizations_index;
   "model/users/index": typeof model_users_index;
   "organizations/mutations": typeof organizations_mutations;
+  "organizations/queries": typeof organizations_queries;
   storage: typeof storage;
   "users/actions": typeof users_actions;
   "users/mutations": typeof users_mutations;

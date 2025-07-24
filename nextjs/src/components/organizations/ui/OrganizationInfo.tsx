@@ -4,10 +4,9 @@
 import { useEffect, useState } from 'react';
 
 // API
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
-import { authClient } from '@/components/auth/lib/auth-client';
 import { FunctionArgs } from 'convex/server';
 
 // Icons
@@ -32,10 +31,8 @@ type UpdateOrganizationProfileInput = FunctionArgs<
 
 export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── state & queries ── */
-	const { data } = authClient.useSession();
-	const user = data?.user;
-	const { data: activeOrganization, refetch: refetchActiveOrganization } =
-		authClient.useActiveOrganization();
+	const user = useQuery(api.users.queries.getActiveUser);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
 	const updateOrganization = useMutation(api.organizations.mutations.updateOrganizationProfile);
@@ -126,7 +123,6 @@ export default function OrganizationInfo() {
 			await updateOrganization({
 				logoId: storageId
 			});
-			await refetchActiveOrganization();
 
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
@@ -152,7 +148,6 @@ export default function OrganizationInfo() {
 				updates.slug = formState.slug;
 			}
 			await updateOrganization(updates);
-			refetchActiveOrganization();
 
 			setIsDialogOpen(false);
 			setIsDrawerOpen(false);

@@ -14,8 +14,8 @@ import UserProfile from '@/components/users/ui/UserProfile';
 import SignIn from '@/components/auth/ui/SignIn';
 
 // API
-// import { useAuthActions } from '@convex-dev/auth/react';
-import { Authenticated, Unauthenticated } from 'convex/react';
+import { Authenticated, Unauthenticated, useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 import { authClient } from '@/components/auth/lib/auth-client';
 
 // Types
@@ -30,13 +30,8 @@ export default function UserButton({
 	/** Alignment of the popover relative to the trigger */
 	popoverAlign?: PopoverProps['align'];
 }) {
-	// Auth
-	// const { signOut } = useAuthActions();
-
 	// Queries
-	// const user = useQuery(api.users.queries.getUser);
-	const { data: session } = authClient.useSession();
-	const user = session?.user;
+	const user = useQuery(api.users.queries.getActiveUser);
 
 	// State
 	const [userPopoverOpen, setUserPopoverOpen] = useState(false);

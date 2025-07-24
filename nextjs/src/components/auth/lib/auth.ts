@@ -6,8 +6,10 @@ import { type GenericCtx } from '../../../../convex/_generated/server';
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
 import { organization } from 'better-auth/plugins';
+// import { api, internal } from '../../../../convex/_generated/api';
+// import { Id } from '@/convex/_generated/dataModel';
 
-// You'll want to replace this with an environment variable
+// TODO: You'll want to replace this with an environment variable
 const siteUrl = 'http://localhost:3000';
 
 export const createAuth = (ctx: GenericCtx) =>
@@ -40,4 +42,31 @@ export const createAuth = (ctx: GenericCtx) =>
 			convex(),
 			organization()
 		]
+		// databaseHooks: {
+		// 	session: {
+		// 		create: {
+		// 			before: async (session) => {
+		// 				if ('runQuery' in ctx) {
+		// 					try {
+		// 						const activeOrganizationId = await ctx.runQuery(
+		// 							internal.organizations.queries._getActiveOrganizationFromDb,
+		// 							{ userId: session.userId as Id<'users'> }
+		// 						);
+
+		// 						return {
+		// 							data: {
+		// 								...session,
+		// 								activeOrganizationId: activeOrganizationId || null
+		// 							}
+		// 						};
+		// 					} catch (error) {
+		// 						console.error('Error setting active organization:', error);
+		// 						return { data: session };
+		// 					}
+		// 				}
+		// 				return { data: session };
+		// 			}
+		// 		}
+		// 	}
+		// }
 	});

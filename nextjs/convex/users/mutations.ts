@@ -1,26 +1,8 @@
-import { getAuthUserId } from '@convex-dev/auth/server';
 import { ConvexError, v } from 'convex/values';
-import { internalMutation, mutation } from '../_generated/server';
-// import { patchUserModel, deleteUserModel, updateAvatarModel } from '../model/users';
+import { mutation } from '../_generated/server';
 import { updateAvatarModel } from '../model/users';
 import { betterAuthComponent } from '../auth';
-
-// /**
-//  * Update the authenticated user's display name.
-//  */
-// export const updateUserName = mutation({
-// 	args: {
-// 		name: v.string()
-// 	},
-// 	handler: async (ctx, args) => {
-// 		const userId = await getAuthUserId(ctx);
-// 		if (!userId) {
-// 			throw new ConvexError('Not authenticated');
-// 		}
-
-// 		return await patchUserModel(ctx, { userId, data: { name: args.name } });
-// 	}
-// });
+import { Id } from '../_generated/dataModel';
 
 /**
  * Update the authenticated user's avatar storage reference.
@@ -30,7 +12,7 @@ export const updateAvatar = mutation({
 		storageId: v.id('_storage')
 	},
 	handler: async (ctx, args) => {
-		const userId = await getAuthUserId(ctx);
+		const userId = (await betterAuthComponent.getAuthUserId(ctx)) as Id<'users'>;
 		if (!userId) {
 			throw new ConvexError('Not authenticated');
 		}

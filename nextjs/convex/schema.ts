@@ -5,7 +5,8 @@ import { v } from 'convex/values';
 const schema = defineSchema({
 	users: defineTable({
 		email: v.string(),
-		imageId: v.optional(v.id('_storage'))
+		imageId: v.optional(v.id('_storage')),
+		activeOrganizationId: v.optional(v.id('organizations'))
 	}).index('email', ['email']),
 
 	organizations: defineTable({
