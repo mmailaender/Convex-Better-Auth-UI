@@ -134,19 +134,6 @@ export const createOrganizationModel = async (
 };
 
 // /**
-//  * Sets the active organization for a given user. Performs validation that the
-//  * user is a member of the organization.
-//  */
-// export const setActiveOrganizationModel = async (
-// 	ctx: MutationCtx,
-// 	args: { userId: Id<'users'>; organizationId: Id<'organizations'> }
-// ): Promise<void> => {
-// 	const { userId, organizationId } = args;
-
-// 	await ctx.db.patch(userId, { activeOrganizationId: organizationId });
-// };
-
-// /**
 //  * Removes a user from an organization, taking care of role ownership edge
 //  * cases and updating their active organization selection if necessary.
 //  */

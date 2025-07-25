@@ -48,7 +48,7 @@ export const getActiveOrganizationRole = query({
 			if (!activeMember) {
 				return null;
 			}
-			return activeMember.role;
+			return activeMember.role as typeof auth.$Infer.Member.role;
 		} catch {
 			return null;
 		}

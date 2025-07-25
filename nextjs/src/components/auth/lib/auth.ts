@@ -3,8 +3,11 @@ import { betterAuth } from 'better-auth';
 import { betterAuthComponent } from '../../../../convex/auth';
 import { type GenericCtx } from '../../../../convex/_generated/server';
 
+// Emails
+import { sendEmailVerification, sendInviteMember } from '../../../../convex/email';
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
+import { requireMutationCtx } from '@convex-dev/better-auth/utils';
 import { organization } from 'better-auth/plugins';
 // import { api, internal } from '../../../../convex/_generated/api';
 // import { Id } from '@/convex/_generated/dataModel';
@@ -19,9 +22,12 @@ export const createAuth = (ctx: GenericCtx) =>
 		baseURL: siteUrl,
 		database: convexAdapter(ctx, betterAuthComponent),
 
-		user: {
-			deleteUser: {
-				enabled: true
+		emailVerification: {
+			sendVerificationEmail: async ({ user, url }) => {
+				await sendEmailVerification(requireMutationCtx(ctx), {
+					to: user.email,
+					url
+				});
 			}
 		},
 
@@ -37,10 +43,33 @@ export const createAuth = (ctx: GenericCtx) =>
 				clientSecret: process.env.GITHUB_CLIENT_SECRET as string
 			}
 		},
+
+		user: {
+			deleteUser: {
+				enabled: true
+			}
+		},
+
 		plugins: [
 			// The Convex plugin is required
 			convex(),
-			organization()
+			organization({
+				sendInvitationEmail: async (data) => {
+					await sendInviteMember(requireMutationCtx(ctx), {
+						to: data.email,
+						url: `${siteUrl}/api/organization/accept-invitation/${data.id}`,
+						inviter: {
+							name: data.inviter.user.name,
+							email: data.inviter.user.email,
+							image: data.inviter.user.image ?? undefined
+						},
+						organization: {
+							name: data.organization.name,
+							logo: data.organization.logo ?? undefined
+						}
+					});
+				}
+			})
 		]
 		// databaseHooks: {
 		// 	session: {

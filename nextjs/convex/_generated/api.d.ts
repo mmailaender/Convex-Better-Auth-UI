@@ -9,12 +9,22 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as email from "../email.js";
 import type * as http from "../http.js";
+import type * as model_emails_components_BaseEmail from "../model/emails/components/BaseEmail.js";
 import type * as model_emails_index from "../model/emails/index.js";
+import type * as model_emails_inviteMember from "../model/emails/inviteMember.js";
+import type * as model_emails_magicLink from "../model/emails/magicLink.js";
+import type * as model_emails_resetPassword from "../model/emails/resetPassword.js";
 import type * as model_emails_templates_organizationInvitation from "../model/emails/templates/organizationInvitation.js";
 import type * as model_emails_templates_verification from "../model/emails/templates/verification.js";
+import type * as model_emails_verifyEmail from "../model/emails/verifyEmail.js";
+import type * as model_emails_verifyOTP from "../model/emails/verifyOTP.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
+import type * as model_organizations_invitations_index from "../model/organizations/invitations/index.js";
 import type * as model_users_index from "../model/users/index.js";
+import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
+import type * as organizations_members_mutations from "../organizations/members/mutations.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
 import type * as organizations_queries from "../organizations/queries.js";
 import type * as storage from "../storage.js";
@@ -38,12 +48,22 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  email: typeof email;
   http: typeof http;
+  "model/emails/components/BaseEmail": typeof model_emails_components_BaseEmail;
   "model/emails/index": typeof model_emails_index;
+  "model/emails/inviteMember": typeof model_emails_inviteMember;
+  "model/emails/magicLink": typeof model_emails_magicLink;
+  "model/emails/resetPassword": typeof model_emails_resetPassword;
   "model/emails/templates/organizationInvitation": typeof model_emails_templates_organizationInvitation;
   "model/emails/templates/verification": typeof model_emails_templates_verification;
+  "model/emails/verifyEmail": typeof model_emails_verifyEmail;
+  "model/emails/verifyOTP": typeof model_emails_verifyOTP;
   "model/organizations/index": typeof model_organizations_index;
+  "model/organizations/invitations/index": typeof model_organizations_invitations_index;
   "model/users/index": typeof model_users_index;
+  "organizations/invitations/queries": typeof organizations_invitations_queries;
+  "organizations/members/mutations": typeof organizations_members_mutations;
   "organizations/mutations": typeof organizations_mutations;
   "organizations/queries": typeof organizations_queries;
   storage: typeof storage;

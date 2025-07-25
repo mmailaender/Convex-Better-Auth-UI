@@ -1,0 +1,161 @@
+import './polyfills';
+import VerifyEmail from './model/emails/verifyEmail';
+import MagicLinkEmail from './model/emails/magicLink';
+import VerifyOTP from './model/emails/verifyOTP';
+import { render } from '@react-email/components';
+import ResetPasswordEmail from './model/emails/resetPassword';
+import { components } from './_generated/api';
+import { Resend } from '@convex-dev/resend';
+import { type RunMutationCtx } from '@convex-dev/better-auth';
+import InviteMember from './model/emails/inviteMember';
+
+if (!process.env.EMAIL_SEND_FROM) {
+	throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+}
+
+const EMAIL_SEND_FROM = process.env.EMAIL_SEND_FROM as string;
+const BRAND_NAME = process.env.BRAND_NAME;
+const BRAND_TAGLINE = process.env.BRAND_TAGLINE;
+const BRAND_LOGO_URL = process.env.BRAND_LOGO_URL;
+
+export const resend: Resend = new Resend(components.resend, {
+	testMode: false
+});
+
+export const sendEmailVerification = async (
+	ctx: RunMutationCtx,
+	{
+		to,
+		url
+	}: {
+		to: string;
+		url: string;
+	}
+) => {
+	await resend.sendEmail(ctx, {
+		from: EMAIL_SEND_FROM,
+		to,
+		subject: 'Verify your email address',
+		html: await render(
+			<VerifyEmail
+				url={url}
+				brandName={BRAND_NAME}
+				brandTagline={BRAND_TAGLINE}
+				brandLogoUrl={BRAND_LOGO_URL}
+			/>
+		)
+	});
+};
+
+export const sendOTPVerification = async (
+	ctx: RunMutationCtx,
+	{
+		to,
+		code
+	}: {
+		to: string;
+		code: string;
+	}
+) => {
+	await resend.sendEmail(ctx, {
+		from: EMAIL_SEND_FROM,
+		to,
+		subject: 'Verify your email address',
+		html: await render(
+			<VerifyOTP
+				code={code}
+				brandName={BRAND_NAME}
+				brandTagline={BRAND_TAGLINE}
+				brandLogoUrl={BRAND_LOGO_URL}
+			/>
+		)
+	});
+};
+
+export const sendMagicLink = async (
+	ctx: RunMutationCtx,
+	{
+		to,
+		url
+	}: {
+		to: string;
+		url: string;
+	}
+) => {
+	await resend.sendEmail(ctx, {
+		from: EMAIL_SEND_FROM,
+		to,
+		subject: 'Sign in to your account',
+		html: await render(
+			<MagicLinkEmail
+				url={url}
+				brandName={BRAND_NAME}
+				brandTagline={BRAND_TAGLINE}
+				brandLogoUrl={BRAND_LOGO_URL}
+			/>
+		)
+	});
+};
+
+export const sendResetPassword = async (
+	ctx: RunMutationCtx,
+	{
+		to,
+		url
+	}: {
+		to: string;
+		url: string;
+	}
+) => {
+	await resend.sendEmail(ctx, {
+		from: EMAIL_SEND_FROM,
+		to,
+		subject: 'Reset your password',
+		html: await render(
+			<ResetPasswordEmail
+				url={url}
+				brandName={BRAND_NAME}
+				brandTagline={BRAND_TAGLINE}
+				brandLogoUrl={BRAND_LOGO_URL}
+			/>
+		)
+	});
+};
+
+export const sendInviteMember = async (
+	ctx: RunMutationCtx,
+	{
+		to,
+		url,
+		inviter,
+		organization
+	}: {
+		to: string;
+		url: string;
+		inviter: {
+			name: string;
+			email: string;
+			image?: string;
+		};
+		organization: {
+			name: string;
+			logo?: string;
+		};
+	}
+) => {
+	await resend.sendEmail(ctx, {
+		from: EMAIL_SEND_FROM,
+		to,
+		subject: `Join ${organization.name} on ${BRAND_NAME}`,
+		html: await render(
+			<InviteMember
+				url={url}
+				inviter={inviter}
+				organization={organization}
+				brandName={BRAND_NAME}
+				brandTagline={BRAND_TAGLINE}
+				brandLogoUrl={BRAND_LOGO_URL}
+			/>
+		)
+	});
+};

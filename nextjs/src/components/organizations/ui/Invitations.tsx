@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 
 // API
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
 
@@ -12,33 +12,35 @@ import { toast } from 'sonner';
 import { Search } from 'lucide-react';
 
 // Types
-import { Doc, Id } from '@/convex/_generated/dataModel';
-type Role = Doc<'organizationMembers'>['role'];
+import { authClient } from '@/components/auth/lib/auth-client';
+type Role = typeof authClient.$Infer.Member.role;
 
 /**
  * Component that displays a list of organization invitations with revoke functionality
  */
 export default function Invitations(): React.ReactNode {
 	// State hooks
-	const [selectedInvitationId, setSelectedInvitationId] = useState<Id<'invitations'> | null>(null);
+	const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-	// Check if current user is an owner or admin
+	// Check if active user is an owner or admin
 	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
-	// Get invitations data and mutations
-	const invitations = useQuery(api.organizations.invitations.queries.getInvitations);
-	const revokeInvitation = useMutation(api.organizations.invitations.mutations.revokeInvitation);
+	// Get invitations data
+	const invitationList = useQuery(api.organizations.invitations.queries.listInvitations);
 
 	/**
-	 * Filter invitations based on search query
+	 * Filter invitations based on search query and only show pending invitations
 	 */
 	const filteredInvitations = useMemo(() => {
-		if (!invitations) return [];
+		if (!invitationList) return [];
 
-		return invitations
+		return invitationList
 			.filter((invitation) => {
+				// Only show pending invitations
+				if (invitation.status !== 'pending') return false;
+
 				if (!searchQuery) return true;
 
 				return invitation.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -46,19 +48,19 @@ export default function Invitations(): React.ReactNode {
 			.sort((a, b) => {
 				// Sort by role (owner first, then admin, then member)
 				const roleOrder: Record<Role, number> = {
-					role_organization_owner: 0,
-					role_organization_admin: 1,
-					role_organization_member: 2
+					owner: 0,
+					admin: 1,
+					member: 2
 				};
 
 				// Primary sort by role
-				const roleDiff = roleOrder[a.role] - roleOrder[b.role];
+				const roleDiff = roleOrder[a.role as Role] - roleOrder[b.role as Role];
 				if (roleDiff !== 0) return roleDiff;
 
 				// Secondary sort by email
 				return a.email.localeCompare(b.email);
 			});
-	}, [invitations, searchQuery]);
+	}, [invitationList, searchQuery]);
 
 	/**
 	 * Handles revoking an invitation
@@ -66,24 +68,24 @@ export default function Invitations(): React.ReactNode {
 	const handleRevokeInvitation = async (): Promise<void> => {
 		if (!selectedInvitationId) return;
 
-		try {
-			await revokeInvitation({ invitationId: selectedInvitationId });
+		const { error } = await authClient.organization.cancelInvitation({
+			invitationId: selectedInvitationId
+		});
+
+		if (error) {
+			toast.error(error.message);
+			return;
+		} else {
 			toast.success('Invitation revoked successfully');
 			setIsDialogOpen(false);
-		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: 'Unknown error. Please try again. If it persists, contact support.'
-			);
 		}
 	};
 
-	if (!invitations) {
+	if (!invitationList) {
 		return <div>Loading invitations...</div>;
 	}
 
-	if (invitations.length === 0 && !searchQuery) {
+	if (filteredInvitations.length === 0 && !searchQuery) {
 		return (
 			<div className="text-surface-600-400 p-8 text-center">
 				<p>No pending invitations.</p>
@@ -128,15 +130,12 @@ export default function Invitations(): React.ReactNode {
 										<th className="text-surface-700-300 hidden !w-32 p-2 text-left text-xs sm:table-cell">
 											Role
 										</th>
-										<th className="text-surface-700-300 hidden !w-24 p-2 text-left text-xs sm:table-cell">
-											Invited By
-										</th>
 										{isOwnerOrAdmin && <th className="!w-20 p-2 text-right"></th>}
 									</tr>
 								</thead>
 								<tbody>
 									{filteredInvitations.map((invitation) => (
-										<tr key={invitation._id} className="!border-surface-300-700 !border-t">
+										<tr key={invitation.id} className="!border-surface-300-700 !border-t">
 											{/* Email */}
 											<td className="!w-64 !max-w-64 !truncate !py-3 !pl-0">
 												<span className="truncate font-medium">{invitation.email}</span>
@@ -163,10 +162,6 @@ export default function Invitations(): React.ReactNode {
 													)}
 												</div>
 											</td>
-											{/* Invited By */}
-											<td className="!text-surface-700-300 hidden !h-fit !w-24 !truncate sm:table-cell">
-												{invitation.invitedBy.name}
-											</td>
 											{/* Actions */}
 											<td className="!w-20">
 												<div className="flex justify-end">
@@ -174,7 +169,7 @@ export default function Invitations(): React.ReactNode {
 														<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 															<Dialog.Trigger
 																className="btn btn-sm preset-filled-surface-300-700"
-																onClick={() => setSelectedInvitationId(invitation._id)}
+																onClick={() => setSelectedInvitationId(invitation.id)}
 															>
 																Revoke
 															</Dialog.Trigger>

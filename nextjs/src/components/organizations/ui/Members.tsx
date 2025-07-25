@@ -11,43 +11,34 @@ import { toast } from 'sonner';
 import { Search, Trash, Pencil } from 'lucide-react';
 
 // API Convex
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 // API Types
-import type { Doc, Id } from '@/convex/_generated/dataModel';
-import type { FunctionReturnType } from 'convex/server';
-type Role = Doc<'organizationMembers'>['role'];
-type GetOrganizationMembersReturnType = FunctionReturnType<
-	typeof api.organizations.members.queries.getOrganizationMembers
->;
-type GetOrganizationMemberReturnType =
-	GetOrganizationMembersReturnType extends Array<infer T> ? T : never;
+type Member = typeof authClient.$Infer.Member;
+type Role = Member['role'];
 
 // Hooks
 import { useRoles } from '@/components/organizations/api/hooks';
+import { authClient } from '@/components/auth/lib/auth-client';
 
 /**
  * Component that displays a list of organization members with role management functionality
  */
 export default function Members(): React.ReactNode {
 	// State hooks
-	const [selectedUserId, setSelectedUserId] = useState<Id<'users'> | null>(null);
+	const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-	const [selectedMember, setSelectedMember] = useState<GetOrganizationMemberReturnType | null>(
-		null
-	);
+	const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
 	// Get current organization data
-	const currentUser = useQuery(api.users.queries.getUser);
-	const currentOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const activeUser = useQuery(api.users.queries.getActiveUser);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
 	// Get members data and mutations
-	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
-	const updateMemberRole = useMutation(api.organizations.members.mutations.updateMemberRole);
-	const removeMember = useMutation(api.organizations.members.mutations.removeMember);
+	const members = activeOrganization?.members;
 
 	/**
 	 * Filter and sort members based on search query and role
@@ -65,9 +56,9 @@ export default function Members(): React.ReactNode {
 			.sort((a, b) => {
 				// Sort by role (owner first, then admin, then member)
 				const roleOrder: Record<Role, number> = {
-					role_organization_owner: 0,
-					role_organization_admin: 1,
-					role_organization_member: 2
+					owner: 0,
+					admin: 1,
+					member: 2
 				};
 
 				// Primary sort by role
@@ -82,20 +73,18 @@ export default function Members(): React.ReactNode {
 	/**
 	 * Handles updating a member's role
 	 */
-	const handleUpdateRole = async (userId: Id<'users'>, newRole: Role): Promise<void> => {
-		if (newRole === 'role_organization_owner') return; // Cannot set someone as owner this way
+	const handleUpdateRole = async (memberId: string, newRole: Role): Promise<void> => {
+		if (newRole === 'owner') return; // Cannot set someone as owner this way
 
-		try {
-			await updateMemberRole({
-				userId,
-				newRole
-			});
-
+		const { error } = await authClient.organization.updateMemberRole({
+			role: [newRole],
+			memberId
+		});
+		if (error) {
+			toast.error(error.message);
+		} else {
 			toast.success('Role updated successfully!');
 			setIsDrawerOpen(false);
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Failed to update role');
-			console.error(err);
 		}
 	};
 
@@ -105,38 +94,30 @@ export default function Members(): React.ReactNode {
 	const handleRemoveMember = async (): Promise<void> => {
 		if (!selectedUserId) return;
 
-		try {
-			await removeMember({
-				userId: selectedUserId
-			});
-
+		const { error } = await authClient.organization.removeMember({
+			memberIdOrEmail: selectedUserId // required
+		});
+		if (error) {
+			toast.error(error.message);
+		} else {
 			toast.success('Member removed successfully!');
 			setIsDialogOpen(false);
 			setIsDrawerOpen(false);
-		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: 'Unknown error. Please try again. If it persists, contact support.'
-			);
 		}
 	};
 
 	/**
 	 * Check if current user can edit a member
 	 */
-	const canEditMember = (member: GetOrganizationMemberReturnType): boolean => {
+	const canEditMember = (member: Member): boolean => {
 		if (!isOwnerOrAdmin) return false;
-		if (member.user._id === currentUser?._id) return false;
-		if (member.role === 'role_organization_owner') return false;
+		if (member.id === activeUser?.id) return false;
+		if (member.role === 'owner') return false;
 
 		// If current user is admin, they can't edit other admins
-		if (currentUser && members) {
-			const currentUserMember = members.find((m) => m.user._id === currentUser._id);
-			if (
-				currentUserMember?.role === 'role_organization_admin' &&
-				member.role === 'role_organization_admin'
-			) {
+		if (activeUser && members) {
+			const currentUserMember = members.find((m) => m.id === activeUser.id);
+			if (currentUserMember?.role === 'admin' && member.role === 'admin') {
 				return false;
 			}
 		}
@@ -147,7 +128,7 @@ export default function Members(): React.ReactNode {
 	/**
 	 * Handle member card click
 	 */
-	const handleMemberCardClick = (member: GetOrganizationMemberReturnType): void => {
+	const handleMemberCardClick = (member: Member): void => {
 		if (canEditMember(member)) {
 			setSelectedMember(member);
 			setIsDrawerOpen(true);
@@ -158,7 +139,7 @@ export default function Members(): React.ReactNode {
 		return <div>Loading members...</div>;
 	}
 
-	if (!currentOrganization || !currentUser) {
+	if (!activeOrganization || !activeUser) {
 		return <div>Failed to load members</div>;
 	}
 
@@ -185,7 +166,7 @@ export default function Members(): React.ReactNode {
 				<div className="flex max-h-[calc(100vh-12rem)] flex-col gap-2 overflow-y-auto pb-24">
 					{filteredMembers.map((member) => (
 						<div
-							key={member._id}
+							key={member.id}
 							className={`bg-surface-50-950 rounded-container flex items-center justify-between p-4 pr-6 ${
 								canEditMember(member) ? 'hover:bg-surface-100-900 cursor-pointer' : ''
 							}`}
@@ -205,12 +186,12 @@ export default function Members(): React.ReactNode {
 								<div className="flex flex-col">
 									<div className="flex items-center space-x-2">
 										<span className="font-medium">{member.user.name}</span>
-										{member.role === 'role_organization_owner' && (
+										{member.role === 'owner' && (
 											<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
 												Owner
 											</span>
 										)}
-										{member.role === 'role_organization_admin' && (
+										{member.role === 'admin' && (
 											<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
 												Admin
 											</span>
@@ -242,7 +223,7 @@ export default function Members(): React.ReactNode {
 							</thead>
 							<tbody>
 								{filteredMembers.map((member) => (
-									<tr key={member._id} className="!border-surface-300-700 !border-t">
+									<tr key={member.id} className="!border-surface-300-700 !border-t">
 										{/* Member Name */}
 										<td className="!w-48 !max-w-48 !truncate !py-3 !pl-0">
 											<div className="flex items-center space-x-2">
@@ -274,25 +255,23 @@ export default function Members(): React.ReactNode {
 										<td className="!w-32">
 											<div className="flex items-center">
 												{isOwnerOrAdmin &&
-												member.user._id !== currentUser._id &&
-												member.role !== 'role_organization_owner' ? (
+												member.id !== activeUser.id &&
+												member.role !== 'owner' ? (
 													<select
 														value={member.role}
-														onChange={(e) =>
-															handleUpdateRole(member.user._id, e.target.value as Role)
-														}
+														onChange={(e) => handleUpdateRole(member.id, e.target.value as Role)}
 														className="select cursor-pointer text-sm"
 													>
-														<option value="role_organization_admin">Admin</option>
-														<option value="role_organization_member">Member</option>
+														<option value="admin">Admin</option>
+														<option value="member">Member</option>
 													</select>
-												) : member.role === 'role_organization_owner' ? (
+												) : member.role === 'owner' ? (
 													<>
 														<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
 															Owner
 														</span>
 													</>
-												) : member.role === 'role_organization_admin' ? (
+												) : member.role === 'admin' ? (
 													<>
 														<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
 															Admin
@@ -309,12 +288,12 @@ export default function Members(): React.ReactNode {
 										<td className="!w-16">
 											<div className="flex justify-end space-x-2">
 												{isOwnerOrAdmin &&
-													member.user._id !== currentUser._id &&
-													member.role !== 'role_organization_owner' && (
+													member.id !== activeUser?.id &&
+													member.role !== 'owner' && (
 														<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 															<Dialog.Trigger
 																className="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
-																onClick={() => setSelectedUserId(member.user._id)}
+																onClick={() => setSelectedUserId(member.id)}
 															>
 																<Trash className="size-4 opacity-70" />
 															</Dialog.Trigger>
@@ -401,12 +380,12 @@ export default function Members(): React.ReactNode {
 											<select
 												value={selectedMember.role}
 												onChange={(e) =>
-													handleUpdateRole(selectedMember.user._id, e.target.value as Role)
+													handleUpdateRole(selectedMember.id, e.target.value as Role)
 												}
 												className="select w-full"
 											>
-												<option value="role_organization_admin">Admin</option>
-												<option value="role_organization_member">Member</option>
+												<option value="admin">Admin</option>
+												<option value="member">Member</option>
 											</select>
 										</label>
 									</div>
@@ -416,7 +395,7 @@ export default function Members(): React.ReactNode {
 										<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 											<Dialog.Trigger
 												className="btn preset-filled-surface-300-700"
-												onClick={() => setSelectedUserId(selectedMember.user._id)}
+												onClick={() => setSelectedUserId(selectedMember.id)}
 											>
 												<Trash className="size-4" /> Remove
 											</Dialog.Trigger>

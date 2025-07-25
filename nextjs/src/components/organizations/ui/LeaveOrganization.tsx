@@ -24,8 +24,8 @@ export default function LeaveOrganization(): React.ReactNode {
 
 	// Convex queries and mutations
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
-	const user = useQuery(api.users.queries.getUser);
+	const activeUser = useQuery(api.users.queries.getActiveUser);
+	const members = activeOrganization?.members;
 	const leaveOrganization = useMutation(api.organizations.members.mutations.leaveOrganization);
 
 	// Navigation
@@ -39,7 +39,7 @@ export default function LeaveOrganization(): React.ReactNode {
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.user._id !== user?._id
+				member.id !== activeUser?.id
 		) || [];
 
 	/**
@@ -59,14 +59,14 @@ export default function LeaveOrganization(): React.ReactNode {
 	const handleLeaveOrganization = async (): Promise<void> => {
 		if (!validateForm()) return;
 
-		if (!activeOrganization?._id) {
+		if (!activeOrganization?.id) {
 			toast.error('No active organization found.');
 			return;
 		}
 
 		try {
 			await leaveOrganization({
-				organizationId: activeOrganization._id,
+				organizationId: activeOrganization.id as Id<'organizations'>,
 				// Only send successorId if the user is an owner and a successor is selected
 				...(isOrgOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
 			});
@@ -124,7 +124,7 @@ export default function LeaveOrganization(): React.ReactNode {
 									Choose a successor
 								</option>
 								{organizationMembers.map((member) => (
-									<option key={member.user._id.toString()} value={member.user._id.toString()}>
+									<option key={member.id} value={member.id}>
 										{member.user.name} ({member.user.email})
 									</option>
 								))}

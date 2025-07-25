@@ -10,9 +10,10 @@ import * as Dialog from '@/components/primitives/ui/dialog';
 
 // API
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
+import { authClient } from '@/components/auth/lib/auth-client';
 
 /**
  * Component for deleting an organization
@@ -36,36 +37,35 @@ export default function DeleteOrganization({
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwner = useRoles().hasOwnerRole;
 
-	const deleteOrganization = useMutation(api.organizations.mutations.deleteOrganization);
-
 	if (!activeOrganization) {
 		return null;
 	}
 
 	const handleConfirm = async (): Promise<void> => {
-		try {
-			await deleteOrganization({ organizationId: activeOrganization._id });
-			setOpen(false);
+		console.log('activeOrganization.id', activeOrganization.id);
+		const { data, error } = await authClient.organization.delete({
+			organizationId: activeOrganization.id
+		});
+		console.log('data', data);
+		console.log('error', error);
+		if (error) {
+			toast.error(error.statusText);
+			return;
+		}
+		setOpen(false);
 
-			toast.success('Organization deleted successfully');
+		toast.success('Organization deleted successfully');
 
-			// Call the onSuccessfulDelete callback if provided
-			if (onSuccessfulDelete) {
-				onSuccessfulDelete();
-			}
+		// Call the onSuccessfulDelete callback if provided
+		if (onSuccessfulDelete) {
+			onSuccessfulDelete();
+		}
 
-			// Navigate to the specified URL or home by default
-			if (redirectTo) {
-				router.push(redirectTo);
-			} else {
-				router.push('/');
-			}
-		} catch (err) {
-			if (err instanceof Error) {
-				toast.error(err.message);
-			} else {
-				toast.error('Unknown error. Please try again. If it persists, contact support.');
-			}
+		// Navigate to the specified URL or home by default
+		if (redirectTo) {
+			router.push(redirectTo);
+		} else {
+			router.push('/');
 		}
 	};
 

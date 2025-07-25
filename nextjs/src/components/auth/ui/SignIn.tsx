@@ -48,13 +48,10 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	 * Handles sign in with the specified provider
 	 */
 	const handleSocialSignIn = (): void => {
-		const redirectUrl = getRedirectUrl();
-		console.log('Redirecting to:', redirectUrl);
-
 		authClient.signIn.social({ provider: 'github' }).then((result) => {
 			if (result.data) {
 				onSignIn?.();
-				redirect(redirectUrl);
+				redirect(getRedirectUrl());
 			} else {
 				console.error('Social sign in error:', result.error);
 				toast.error('Failed to sign in with GitHub. Please try again.');
@@ -106,7 +103,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	/**
 	 * Handles authentication form submission (login or register)
 	 */
-	const handleAuthSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+	const handlePasswordSignIn = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
 		event.preventDefault();
 		setSubmitting(true);
 
@@ -116,14 +113,14 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 			await authClient.signIn.email(
 				{
 					email,
-					password: formData.get('password') as string,
-					callbackURL: getRedirectUrl()
+					password: formData.get('password') as string
 				},
 				{
 					onSuccess: () => {
 						console.log('Sign in successful');
 						toast.success('Signed in successfully!');
 						onSignIn?.();
+						redirect(getRedirectUrl());
 					},
 					onError: (ctx) => {
 						console.error('Sign in error:', ctx.error);
@@ -155,14 +152,14 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 				{
 					email,
 					password: formData.get('password') as string,
-					name: formData.get('name') as string,
-					callbackURL: getRedirectUrl()
+					name: formData.get('name') as string
 				},
 				{
 					onSuccess: () => {
 						console.log('Sign up successful');
 						toast.success('Account created successfully!');
 						onSignIn?.();
+						redirect(getRedirectUrl());
 					},
 					onError: (ctx) => {
 						console.error('Sign up error:', ctx.error);
@@ -214,7 +211,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	);
 
 	const renderLoginStep = () => (
-		<form className="flex flex-col gap-2" onSubmit={handleAuthSubmit}>
+		<form className="flex flex-col gap-2" onSubmit={handlePasswordSignIn}>
 			<input className="input" type="email" name="email" value={email} disabled />
 			<input
 				className="input"
@@ -233,7 +230,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	);
 
 	const renderRegisterStep = () => (
-		<form className="flex flex-col gap-2" onSubmit={handleAuthSubmit}>
+		<form className="flex flex-col gap-2" onSubmit={handlePasswordSignIn}>
 			<input className="input" type="email" name="email" value={email} disabled />
 			<input className="input" type="text" name="name" placeholder="Enter your name" required />
 			<input
