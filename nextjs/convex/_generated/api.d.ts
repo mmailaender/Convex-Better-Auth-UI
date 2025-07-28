@@ -21,7 +21,6 @@ import type * as model_emails_templates_verification from "../model/emails/templ
 import type * as model_emails_verifyEmail from "../model/emails/verifyEmail.js";
 import type * as model_emails_verifyOTP from "../model/emails/verifyOTP.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
-import type * as model_organizations_invitations_index from "../model/organizations/invitations/index.js";
 import type * as model_users_index from "../model/users/index.js";
 import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
 import type * as organizations_members_mutations from "../organizations/members/mutations.js";
@@ -60,7 +59,6 @@ declare const fullApi: ApiFromModules<{
   "model/emails/verifyEmail": typeof model_emails_verifyEmail;
   "model/emails/verifyOTP": typeof model_emails_verifyOTP;
   "model/organizations/index": typeof model_organizations_index;
-  "model/organizations/invitations/index": typeof model_organizations_invitations_index;
   "model/users/index": typeof model_users_index;
   "organizations/invitations/queries": typeof organizations_invitations_queries;
   "organizations/members/mutations": typeof organizations_members_mutations;
