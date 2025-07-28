@@ -6,7 +6,6 @@ import { createAuth } from '../../../src/components/auth/lib/auth';
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
 import type { Doc, Id } from '../../_generated/dataModel';
 import { APIError } from 'better-auth/api';
-import { api } from '../../_generated/api';
 
 /**
  * Ensure the organization slug is unique by appending an incrementing postfix
@@ -97,23 +96,40 @@ export const createOrganizationModel = async (
 
 	// Create the organization
 	const auth = createAuth(ctx);
-	const org = await auth.api.createOrganization({
-		body: {
-			name,
-			slug: uniqueSlug,
-			logo: imageUrl ?? undefined
-		},
-		headers: await betterAuthComponent.getHeaders(ctx)
-	});
-	if (!org) {
-		throw new ConvexError('Failed to create organization');
-	}
-	await ctx.db.insert('organizations', {
-		betterAuthId: org.id,
-		logoId
-	});
+	let org: typeof auth.$Infer.Organization | null = null;
 
-	// Set the new organization as active
+	// Step 1: Create the organization in Better Auth
+	try {
+		org = await auth.api.createOrganization({
+			body: {
+				name,
+				slug: uniqueSlug,
+				logo: imageUrl ?? undefined
+			},
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+
+		// TODO: Move logoId to better-auth as soon v0.8 launches with organization.additionalFields support
+		await ctx.db.insert('organizations', {
+			betterAuthId: org!.id,
+			logoId
+		});
+	} catch (error) {
+		if (error instanceof APIError) {
+			console.log(error.message, error.status);
+			throw new ConvexError(error.message);
+		}
+		console.error('Unexpected error creating organization:', error);
+		throw new ConvexError('An unexpected error occurred while creating the organization');
+	}
+
+	// Step 2: Set the new organization as active
+
+	// Ensure organization was created successfully before proceeding
+	if (!org) {
+		throw new ConvexError('Organization creation failed - no organization data returned');
+	}
+
 	try {
 		await auth.api.setActiveOrganization({
 			body: {
@@ -126,8 +142,8 @@ export const createOrganizationModel = async (
 			console.log(error.message, error.status);
 			throw new ConvexError(error.message);
 		}
-		console.log('Failed to set active organization', error);
-		throw new ConvexError('Failed to set active organization');
+		console.error('Unexpected error setting active organization:', error);
+		throw new ConvexError('An unexpected error occurred while setting the organization as active');
 	}
 
 	return org.id as Id<'organizations'>;

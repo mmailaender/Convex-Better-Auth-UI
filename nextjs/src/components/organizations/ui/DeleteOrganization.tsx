@@ -87,7 +87,7 @@ export default function DeleteOrganization({
 
 				<article>
 					<p className="text-surface-700-300 text-sm">
-						Are you sure you want to delete the organization {activeOrganization.name}? All
+						Are you sure you want to delete the organization <b>{activeOrganization.name}</b>? All
 						organization data will be permanently deleted.
 					</p>
 				</article>

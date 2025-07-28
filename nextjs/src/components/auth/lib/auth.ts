@@ -54,6 +54,16 @@ export const createAuth = (ctx: GenericCtx) =>
 			// The Convex plugin is required
 			convex(),
 			organization({
+				schema: {
+					organization: {
+						additionalFields: {
+							logoId: {
+								type: 'string',
+								required: false
+							}
+						}
+					}
+				},
 				sendInvitationEmail: async (data) => {
 					await sendInviteMember(requireMutationCtx(ctx), {
 						to: data.email,
