@@ -20,7 +20,7 @@ import { Id } from '@/convex/_generated/dataModel';
 export default function LeaveOrganization(): React.ReactNode {
 	// State hooks
 	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const [selectedSuccessor, setSelectedSuccessor] = useState<Id<'users'> | null>(null);
+	const [selectedSuccessor, setSelectedSuccessor] = useState<string | null>(null);
 
 	// Convex queries and mutations
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
@@ -66,9 +66,9 @@ export default function LeaveOrganization(): React.ReactNode {
 
 		try {
 			await leaveOrganization({
-				organizationId: activeOrganization.id as Id<'organizations'>,
+				organizationId: activeOrganization.id,
 				// Only send successorId if the user is an owner and a successor is selected
-				...(isOrgOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
+				...(isOrgOwner && selectedSuccessor ? { successorMemberId: selectedSuccessor } : {})
 			});
 
 			setIsOpen(false);
@@ -99,10 +99,12 @@ export default function LeaveOrganization(): React.ReactNode {
 				<Dialog.Header>
 					<Dialog.Title>Leave organization</Dialog.Title>
 				</Dialog.Header>
-				<Dialog.Description>
-					<p>If you leave organization you’ll lose access to all projects and resources.</p>
+				<Dialog.Description className="flex flex-col gap-2">
+					<span>
+						If you leave organization you&apos;ll lose access to all projects and resources.
+					</span>
 					{isOrgOwner && (
-						<p className="my-6">As the owner, you must assign a new owner before leaving.</p>
+						<span className="my-2">As the owner, you must assign a new owner before leaving.</span>
 					)}
 				</Dialog.Description>
 				{isOrgOwner && (
@@ -114,20 +116,21 @@ export default function LeaveOrganization(): React.ReactNode {
 							<select
 								id="successor"
 								value={selectedSuccessor?.toString() || ''}
-								onChange={(e) =>
-									setSelectedSuccessor(e.target.value ? (e.target.value as Id<'users'>) : null)
-								}
+								onChange={(e) => setSelectedSuccessor(e.target.value ? e.target.value : null)}
 								className="select w-full cursor-pointer"
 								required={isOrgOwner}
 							>
 								<option value="" disabled>
 									Choose a successor
 								</option>
-								{organizationMembers.map((member) => (
-									<option key={member.id} value={member.id}>
-										{member.user.name} ({member.user.email})
-									</option>
-								))}
+								{/* TODO: Filter out the current user by email as the id is inconsistent between Convex and Better Auth. Replace with id once fixed */}
+								{organizationMembers
+									.filter((member) => member.user.email !== activeUser?.email)
+									.map((member) => (
+										<option key={member.id} value={member.id}>
+											{member.user.name} ({member.user.email})
+										</option>
+									))}
 							</select>
 						</div>
 					</>

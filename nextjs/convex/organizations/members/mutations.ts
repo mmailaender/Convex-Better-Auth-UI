@@ -9,8 +9,8 @@ import { createAuth } from '../../../src/components/auth/lib/auth';
  */
 export const leaveOrganization = mutation({
 	args: {
-		organizationId: v.id('organizations'),
-		successorId: v.optional(v.id('users'))
+		organizationId: v.string(),
+		successorMemberId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
 		const userId = await betterAuthComponent.getAuthUserId(ctx);
@@ -18,6 +18,25 @@ export const leaveOrganization = mutation({
 
 		const auth = createAuth(ctx);
 
+		// check if the user is the owner and if yes, check if a successor is provided, and if yes set the success as owner and downgrade the user to admin
+		const member = await auth.api.getActiveMember({
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+		if (member?.role === 'owner') {
+			if (!args.successorMemberId) {
+				throw new ConvexError('You must provide a successor to leave the organization');
+			}
+			await auth.api.updateMemberRole({
+				body: {
+					organizationId: args.organizationId,
+					memberId: args.successorMemberId,
+					role: 'owner'
+				},
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		}
+
+		// TODO: Throws error as it has problems to set the active organization. Wait for a fix https://github.com/get-convex/better-auth/issues/36
 		return await auth.api.leaveOrganization({
 			body: {
 				organizationId: args.organizationId
