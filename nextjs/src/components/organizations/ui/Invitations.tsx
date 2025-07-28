@@ -124,21 +124,30 @@ export default function Invitations(): React.ReactNode {
 							<table className="table w-full !table-fixed">
 								<thead className="sm:bg-surface-200-800 bg-surface-100-900 border-surface-300-700 sticky top-0 z-20 border-b">
 									<tr>
-										<th className="text-surface-700-300 !w-64 p-2 !pl-0 text-left text-xs">
-											Email
+										<th className="text-surface-700-300 w-64 truncate p-2 !pl-0 text-left text-xs">
+											User
 										</th>
-										<th className="text-surface-700-300 hidden !w-32 p-2 text-left text-xs sm:table-cell">
+										<th className="text-surface-700-300 w-32 p-2 !pl-0 text-left text-xs">
+											Expires
+										</th>
+										<th className="text-surface-700-300 hidden w-32 p-2 text-left text-xs sm:table-cell">
 											Role
 										</th>
-										{isOwnerOrAdmin && <th className="!w-20 p-2 text-right"></th>}
+										{isOwnerOrAdmin && <th className="w-20 p-2 text-right"></th>}
 									</tr>
 								</thead>
 								<tbody>
 									{filteredInvitations.map((invitation) => (
 										<tr key={invitation.id} className="!border-surface-300-700 !border-t">
-											{/* Email */}
+											{/* User */}
 											<td className="!w-64 !max-w-64 !truncate !py-3 !pl-0">
 												<span className="truncate font-medium">{invitation.email}</span>
+											</td>
+											{/* Expires */}
+											<td className="!w-64 !max-w-64 !truncate !py-3 !pl-0">
+												<span className="truncate font-medium">
+													{new Date(invitation.expiresAt).toLocaleDateString()}
+												</span>
 											</td>
 											{/* Role */}
 											<td className="!text-surface-700-300 hidden !w-32 sm:table-cell">
