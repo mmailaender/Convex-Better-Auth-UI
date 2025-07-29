@@ -16,8 +16,6 @@ import type * as model_emails_index from "../model/emails/index.js";
 import type * as model_emails_inviteMember from "../model/emails/inviteMember.js";
 import type * as model_emails_magicLink from "../model/emails/magicLink.js";
 import type * as model_emails_resetPassword from "../model/emails/resetPassword.js";
-import type * as model_emails_templates_organizationInvitation from "../model/emails/templates/organizationInvitation.js";
-import type * as model_emails_templates_verification from "../model/emails/templates/verification.js";
 import type * as model_emails_verifyEmail from "../model/emails/verifyEmail.js";
 import type * as model_emails_verifyOTP from "../model/emails/verifyOTP.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
@@ -54,8 +52,6 @@ declare const fullApi: ApiFromModules<{
   "model/emails/inviteMember": typeof model_emails_inviteMember;
   "model/emails/magicLink": typeof model_emails_magicLink;
   "model/emails/resetPassword": typeof model_emails_resetPassword;
-  "model/emails/templates/organizationInvitation": typeof model_emails_templates_organizationInvitation;
-  "model/emails/templates/verification": typeof model_emails_templates_verification;
   "model/emails/verifyEmail": typeof model_emails_verifyEmail;
   "model/emails/verifyOTP": typeof model_emails_verifyOTP;
   "model/organizations/index": typeof model_organizations_index;
