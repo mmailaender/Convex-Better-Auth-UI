@@ -12,8 +12,7 @@ import { organization } from 'better-auth/plugins';
 // import { api, internal } from '../../../../convex/_generated/api';
 // import { Id } from '@/convex/_generated/dataModel';
 
-// TODO: You'll want to replace this with an environment variable
-const siteUrl = 'http://localhost:3000';
+const siteUrl = process.env.SITE_URL;
 
 export const createAuth = (ctx: GenericCtx) =>
 	// Configure your Better Auth instance here
@@ -54,16 +53,16 @@ export const createAuth = (ctx: GenericCtx) =>
 			// The Convex plugin is required
 			convex(),
 			organization({
-				schema: {
-					organization: {
-						additionalFields: {
-							logoId: {
-								type: 'string',
-								required: false
-							}
-						}
-					}
-				},
+				// schema: {
+				// 	organization: {
+				// 		additionalFields: {
+				// 			logoId: {
+				// 				type: 'string',
+				// 				required: false
+				// 			}
+				// 		}
+				// 	}
+				// },
 				sendInvitationEmail: async (data) => {
 					await sendInviteMember(requireMutationCtx(ctx), {
 						to: data.email,

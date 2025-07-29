@@ -52,7 +52,7 @@ export default function OrganizationSwitcher({
 	 * Updates the active organization and replaces URL slug if needed
 	 */
 	const setActiveOrg = useCallback(
-		async (organizationId: string) => {
+		async (organizationId?: string) => {
 			try {
 				// Get current active organization slug before mutation
 				const currentActiveOrgSlug = activeOrganization?.slug;
@@ -102,7 +102,7 @@ export default function OrganizationSwitcher({
 	// check on mount if there is an active organization and if not, use the first organization from listOrganization and call with that setActiveOrg
 	useEffect(() => {
 		if (organizations && organizations.length > 0 && !activeOrganization) {
-			setActiveOrg(organizations[0].id);
+			setActiveOrg();
 		}
 	}, [organizations, activeOrganization, setActiveOrg]);
 

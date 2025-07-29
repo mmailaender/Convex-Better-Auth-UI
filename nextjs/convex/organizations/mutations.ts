@@ -49,7 +49,7 @@ export const _createOrganization = internalMutation({
 });
 
 /**
- * Sets the active organization for the current user. If no organizationId is provided, the first organization in the list will be set as active.
+ * Sets the active organization for the current user. If no organizationId is provided, try getting the activeOrganization from user table, if not found, the first organization in the list will be set as active.
  */
 export const setActiveOrganization = mutation({
 	args: {
@@ -93,22 +93,39 @@ export const setActiveOrganization = mutation({
 				if (organizations.length === 0) {
 					throw new ConvexError('No organizations found');
 				}
-				const betterAuthOrg = organizations[0];
-				await auth.api.setActiveOrganization({
-					body: {
-						organizationId: betterAuthOrg.id
-					},
-					headers: await betterAuthComponent.getHeaders(ctx)
-				});
+
 				const user = await ctx.db.get(userId as Id<'users'>);
-				const org = await ctx.db
-					.query('organizations')
-					.withIndex('betterAuthId', (q) => q.eq('betterAuthId', betterAuthOrg.id))
-					.first();
-				if (user && org) {
-					await ctx.db.patch(user._id, {
-						activeOrganizationId: org._id
+				if (!user) {
+					throw new ConvexError('User not found');
+				}
+
+				if (user.activeOrganizationId) {
+					const org = await ctx.db.get(user.activeOrganizationId);
+					if (org) {
+						await auth.api.setActiveOrganization({
+							body: {
+								organizationId: org.betterAuthId
+							},
+							headers: await betterAuthComponent.getHeaders(ctx)
+						});
+					}
+				} else {
+					const betterAuthOrg = organizations[0];
+					await auth.api.setActiveOrganization({
+						body: {
+							organizationId: betterAuthOrg.id
+						},
+						headers: await betterAuthComponent.getHeaders(ctx)
 					});
+					const org = await ctx.db
+						.query('organizations')
+						.withIndex('betterAuthId', (q) => q.eq('betterAuthId', betterAuthOrg.id))
+						.first();
+					if (user && org) {
+						await ctx.db.patch(user._id, {
+							activeOrganizationId: org._id
+						});
+					}
 				}
 			} catch (error) {
 				if (error instanceof APIError) {

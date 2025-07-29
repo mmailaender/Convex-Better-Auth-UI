@@ -1,7 +1,7 @@
 'use client';
 
 // React
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 // Nextjs
 import { redirect, useSearchParams } from 'next/navigation';
 
@@ -34,29 +34,53 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	const [verifyingEmail, setVerifyingEmail] = useState(false);
 
 	/**
-	 * Gets the redirect URL based on parameters and current page
+	 * Creates redirect URL and redirects based on priority conditions
 	 */
-	const getRedirectUrl = (): string => {
-		return (
-			redirectParam ??
-			searchParams.get('redirectTo') ??
-			(window.location.pathname.includes('/signin') ? '/' : window.location.pathname)
-		);
+	const handleRedirect = useCallback((): void => {
+		// First check for redirectParam
+		if (redirectParam) {
+			redirect(redirectParam);
+		}
+
+		// Second check for searchParams redirectTo
+		const redirectTo = searchParams.get('redirectTo');
+		if (redirectTo) {
+			redirect(redirectTo);
+		}
+
+		// Third check if we're on signin page, redirect to '/'
+		if (window.location.pathname.includes('/signin')) {
+			redirect('/');
+		}
+
+		// If none of the above conditions are true, don't redirect
+	}, [redirectParam, searchParams]);
+
+	/**
+	 * Waits for Convex authentication state to sync before redirecting
+	 */
+	const handleAuthSuccess = () => {
+		console.log('Sign in successful, waiting for Convex auth sync...');
+		toast.success('Signed in successfully!');
+		onSignIn?.();
+		handleRedirect();
+		setSubmitting(false);
 	};
 
 	/**
 	 * Handles sign in with the specified provider
 	 */
-	const handleSocialSignIn = (): void => {
-		authClient.signIn.social({ provider: 'github' }).then((result) => {
-			if (result.data) {
-				onSignIn?.();
-				redirect(getRedirectUrl());
-			} else {
-				console.error('Social sign in error:', result.error);
-				toast.error('Failed to sign in with GitHub. Please try again.');
+	const handleSocialSignIn = async (): Promise<void> => {
+		await authClient.signIn.social(
+			{ provider: 'github' },
+			{
+				onSuccess: handleAuthSuccess,
+				onError: (ctx) => {
+					console.error('Social sign in error:', ctx.error);
+					toast.error('Failed to sign in with GitHub. Please try again.');
+				}
 			}
-		});
+		);
 	};
 
 	/**
@@ -116,12 +140,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 					password: formData.get('password') as string
 				},
 				{
-					onSuccess: () => {
-						console.log('Sign in successful');
-						toast.success('Signed in successfully!');
-						onSignIn?.();
-						redirect(getRedirectUrl());
-					},
+					onSuccess: handleAuthSuccess,
 					onError: (ctx) => {
 						console.error('Sign in error:', ctx.error);
 						let errorMessage = 'Could not sign in. Please check your credentials.';
@@ -155,12 +174,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 					name: formData.get('name') as string
 				},
 				{
-					onSuccess: () => {
-						console.log('Sign up successful');
-						toast.success('Account created successfully!');
-						onSignIn?.();
-						redirect(getRedirectUrl());
-					},
+					onSuccess: handleAuthSuccess,
 					onError: (ctx) => {
 						console.error('Sign up error:', ctx.error);
 						let errorMessage = 'Could not create account. Please try again.';
