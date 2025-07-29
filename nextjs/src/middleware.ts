@@ -1,12 +1,8 @@
-import { api } from '@/convex/_generated/api';
-import {
-	convexAuthNextjsMiddleware,
-	convexAuthNextjsToken,
-	createRouteMatcher
-} from '@convex-dev/auth/nextjs/server';
 import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
+import { createRouteMatcher } from '@/components/primitives/utils/routeMatcher';
+import { createAuth } from './components/auth/lib/auth';
 
 /* --------------------------------------------------------- */
 /* -------------------- route match helpers ---------------- */
@@ -18,14 +14,13 @@ const isCreateOrg = createRouteMatcher(['/org/create']);
 const isPublic = createRouteMatcher([
 	'/',
 	'/signin',
-	'/api/auth(.*)',
+	'/api/auth{/*rest}',
 	'/pricing',
-	'/docs(.*)',
+	'/docs{/*rest}',
 	'/about',
 	'/terms',
 	'/privacy'
 ]);
-const isActiveOrganization = createRouteMatcher(['/active-org(.*)', '/active-organization(.*)']);
 
 /* --------------------------------------------------------- */
 /* ---------------------- auth helpers --------------------- */
@@ -62,30 +57,6 @@ const withRedirect = (to: string, request: NextRequest) => {
 // 	return NextResponse.redirect(new URL('/', request.url));
 // }
 
-// /* ---------- 4. Handle active organization redirects ---------- */
-// if (isActiveOrganization(request)) {
-// 	const activeOrganization = await fetchQuery(
-// 		api.organizations.queries.getActiveOrganization,
-// 		{},
-// 		{ token: await convexAuthNextjsToken() }
-// 	);
-
-// 	if (activeOrganization) {
-// 		// Replace /active-org or /active-organization with the organization slug
-// 		const url = new URL(request.url);
-// 		const newPath = url.pathname
-// 			.replace(/^\/active-org(?=\/|$)/, `/${activeOrganization.slug}`)
-// 			.replace(/^\/active-organization(?=\/|$)/, `/${activeOrganization.slug}`);
-
-// 		// Include query parameters if they exist
-// 		const fullUrl = newPath + url.search;
-// 		return NextResponse.redirect(new URL(fullUrl, request.url));
-// 	}
-
-// 	// If no active organization, redirect to create one
-// 	return NextResponse.redirect(new URL(withRedirect('/org/create', request), request.url));
-// }
-
 // /* ---------- 5. Authenticated user checks ---------- */
 // const activeOrganization = await fetchQuery(
 // 	api.organizations.queries.getActiveOrganization,
@@ -120,6 +91,7 @@ export async function middleware(request: NextRequest) {
 	if (!sessionCookie) {
 		return NextResponse.redirect(new URL(withRedirect('/signin', request), request.url));
 	}
+
 	return NextResponse.next();
 }
 

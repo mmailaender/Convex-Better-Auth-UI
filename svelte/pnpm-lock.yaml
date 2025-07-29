@@ -41,6 +41,9 @@ importers:
       convex-svelte:
         specifier: ^0.0.11
         version: 0.0.11(convex@1.24.8(react@19.1.0))(svelte@5.34.1)
+      path-to-regexp:
+        specifier: ^8.2.0
+        version: 8.2.0
       sharp:
         specifier: ^0.34.2
         version: 0.34.2

@@ -33,6 +33,7 @@
 		"install": "^0.13.0",
 		"lucide-react": "^0.533.0",
 		"next": "15.4.4",
+		"path-to-regexp": "^8.2.0",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"sharp": "^0.34.3",

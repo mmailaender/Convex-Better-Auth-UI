@@ -72,6 +72,7 @@
 		"convex-ents": "^0.13.0",
 		"convex-helpers": "^0.1.94",
 		"convex-svelte": "^0.0.11",
+		"path-to-regexp": "^8.2.0",
 		"sharp": "^0.34.2"
 	}
 }

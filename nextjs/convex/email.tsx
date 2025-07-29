@@ -4,16 +4,13 @@ import MagicLinkEmail from './model/emails/magicLink';
 import VerifyOTP from './model/emails/verifyOTP';
 import { render } from '@react-email/components';
 import ResetPasswordEmail from './model/emails/resetPassword';
-import { components } from './_generated/api';
-import { Resend } from '@convex-dev/resend';
 import { type RunMutationCtx } from '@convex-dev/better-auth';
 import InviteMember from './model/emails/inviteMember';
 
-if (!process.env.EMAIL_SEND_FROM) {
-	throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
-}
+import { Resend } from '@convex-dev/resend';
+import { components } from './_generated/api';
 
-const EMAIL_SEND_FROM = process.env.EMAIL_SEND_FROM as string;
+const EMAIL_SEND_FROM = process.env.EMAIL_SEND_FROM;
 const BRAND_NAME = process.env.BRAND_NAME;
 const BRAND_TAGLINE = process.env.BRAND_TAGLINE;
 const BRAND_LOGO_URL = process.env.BRAND_LOGO_URL;
@@ -32,6 +29,9 @@ export const sendEmailVerification = async (
 		url: string;
 	}
 ) => {
+	if (!EMAIL_SEND_FROM) {
+		throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+	}
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
@@ -57,6 +57,9 @@ export const sendOTPVerification = async (
 		code: string;
 	}
 ) => {
+	if (!EMAIL_SEND_FROM) {
+		throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+	}
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
@@ -82,6 +85,9 @@ export const sendMagicLink = async (
 		url: string;
 	}
 ) => {
+	if (!EMAIL_SEND_FROM) {
+		throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+	}
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
@@ -107,6 +113,9 @@ export const sendResetPassword = async (
 		url: string;
 	}
 ) => {
+	if (!EMAIL_SEND_FROM) {
+		throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+	}
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
@@ -143,6 +152,9 @@ export const sendInviteMember = async (
 		};
 	}
 ) => {
+	if (!EMAIL_SEND_FROM) {
+		throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+	}
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,

@@ -1,3 +1,5 @@
+'use client';
+
 // React
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -42,7 +44,7 @@ export default function CreateOrganization({
 
 	const [name, setName] = useState('');
 	const [slug, setSlug] = useState('');
-	const [logo, setLogo] = useState('');
+	const [logo, setLogo] = useState<string | undefined>();
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 
 	const generateSlug = (input: string): string => input.toLowerCase().replace(/\s+/g, '-');
@@ -167,7 +169,7 @@ export default function CreateOrganization({
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="mx-auto w-full">
+		<form onSubmit={handleSubmit} className="mx-auto w-full max-w-md">
 			<div className="my-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">

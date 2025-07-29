@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { action } from '../_generated/server';
 import { api } from '../_generated/api.js';
-import verifyEmail from '../model/emails/verifyEmail.js';
+import validateEmail from '../model/emails/validateEmail.js';
 
 // TODO: Eventually not more needed if we call the cleanup from onDelete function from better-auth
 // /**
@@ -48,7 +48,7 @@ export const checkEmailAvailabilityAndValidity = action({
 		}
 
 		// If user doesn't exist, verify email format and validity
-		const verificationResult = await verifyEmail(ctx, email);
+		const verificationResult = await validateEmail(ctx, email);
 		return verificationResult;
 	}
 });
