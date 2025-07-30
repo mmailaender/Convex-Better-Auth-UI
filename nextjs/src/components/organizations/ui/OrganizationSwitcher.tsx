@@ -124,7 +124,7 @@ export default function OrganizationSwitcher({
 					<Plus className="size-4" />
 					<span>Create Organization</span>
 				</Dialog.Trigger>
-				<Dialog.Content>
+				<Dialog.Content className="max-w-lg">
 					<Dialog.Header>
 						<Dialog.Title>Create Organization</Dialog.Title>
 					</Dialog.Header>
@@ -233,7 +233,7 @@ export default function OrganizationSwitcher({
 
 			{/* Create Organization Modal */}
 			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<Dialog.Content className="max-w-xl">
+				<Dialog.Content className="max-w-lg">
 					<Dialog.Header>
 						<Dialog.Title>Create Organization</Dialog.Title>
 					</Dialog.Header>
