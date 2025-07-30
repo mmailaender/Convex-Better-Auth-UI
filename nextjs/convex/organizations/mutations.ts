@@ -183,7 +183,7 @@ export const deleteOrganization = mutation({
 			headers: await betterAuthComponent.getHeaders(ctx)
 		});
 
-		//  Delete organization als from convex app table
+		// Delete organization also from convex app table and storage
 		// TODO: Remove as soon as convex better-auth supports additional organization fields
 		const appOrg = await ctx.db
 			.query('organizations')
@@ -191,6 +191,9 @@ export const deleteOrganization = mutation({
 			.first();
 		if (appOrg) {
 			await ctx.db.delete(appOrg._id);
+			if (appOrg.logoId) {
+				await ctx.storage.delete(appOrg.logoId);
+			}
 		}
 
 		// Set the first remaining organization as active
