@@ -146,8 +146,8 @@ export default function OrganizationSwitcher({
 					<div className="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 						<Avatar.Root className="rounded-container size-8 shrink-0">
 							<Avatar.Image
-								src={activeOrganization?.logo || ''}
-								alt={activeOrganization?.name || ''}
+								src={activeOrganization?.logo ?? undefined}
+								alt={activeOrganization?.name}
 							/>
 							<Avatar.Fallback>
 								<Building2 className="size-5" />
@@ -166,8 +166,8 @@ export default function OrganizationSwitcher({
 							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
 								<Avatar.Root className="rounded-container size-8 shrink-0">
 									<Avatar.Image
-										src={activeOrganization?.logo || ''}
-										alt={activeOrganization?.name || ''}
+										src={activeOrganization?.logo ?? undefined}
+										alt={activeOrganization?.name}
 									/>
 									<Avatar.Fallback>
 										<Building2 className="size-5" />
@@ -202,7 +202,7 @@ export default function OrganizationSwitcher({
 													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 												>
 													<Avatar.Root className="rounded-container size-8 shrink-0">
-														<Avatar.Image src={org.logo || ''} alt={org.name || ''} />
+														<Avatar.Image src={org.logo ?? undefined} alt={org.name} />
 														<Avatar.Fallback>
 															<Building2 className="size-5" />
 														</Avatar.Fallback>
