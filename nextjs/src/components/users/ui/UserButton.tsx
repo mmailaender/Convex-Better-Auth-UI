@@ -16,7 +16,7 @@ import SignIn from '@/components/auth/ui/SignIn';
 // API
 import { Authenticated, Unauthenticated, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { authClient } from '@/components/auth/lib/auth-client';
+import SignOutButton from '@/components/auth/ui/SignOutButton';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -80,15 +80,7 @@ export default function UserButton({
 										</div>
 										<ChevronRight className="size-4" />
 									</button>
-									<button
-										className="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-										onClick={async () => {
-											await authClient.signOut();
-											setUserPopoverOpen(false);
-										}}
-									>
-										Sign out
-									</button>
+									<SignOutButton onSuccess={() => setUserPopoverOpen(false)} />
 								</div>
 							</Popover.Content>
 						</Popover.Root>

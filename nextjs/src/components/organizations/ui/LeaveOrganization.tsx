@@ -11,7 +11,7 @@ import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
 
 // API Types
-import { Id } from '@/convex/_generated/dataModel';
+import { ConvexError } from 'convex/values';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -66,7 +66,6 @@ export default function LeaveOrganization(): React.ReactNode {
 
 		try {
 			await leaveOrganization({
-				organizationId: activeOrganization.id,
 				// Only send successorId if the user is an owner and a successor is selected
 				...(isOrgOwner && selectedSuccessor ? { successorMemberId: selectedSuccessor } : {})
 			});
@@ -78,7 +77,7 @@ export default function LeaveOrganization(): React.ReactNode {
 			router.refresh();
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
+				err instanceof ConvexError ? err.data : 'Failed to leave organization. Please try again.'
 			);
 			console.error(err);
 		}

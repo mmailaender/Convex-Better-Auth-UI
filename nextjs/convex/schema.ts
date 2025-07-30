@@ -6,7 +6,7 @@ const schema = defineSchema({
 	users: defineTable({
 		email: v.string(),
 		imageId: v.optional(v.id('_storage')),
-		activeOrganizationId: v.optional(v.id('organizations'))
+		activeOrganizationId: v.optional(v.string())
 	}).index('email', ['email']),
 
 	organizations: defineTable({

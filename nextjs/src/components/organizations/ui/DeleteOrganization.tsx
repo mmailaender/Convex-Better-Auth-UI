@@ -10,10 +10,10 @@ import * as Dialog from '@/components/primitives/ui/dialog';
 
 // API
 import { useRouter } from 'next/navigation';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
-import { authClient } from '@/components/auth/lib/auth-client';
+import { ConvexError } from 'convex/values';
 
 /**
  * Component for deleting an organization
@@ -35,6 +35,7 @@ export default function DeleteOrganization({
 	const [open, setOpen] = useState<boolean>(false);
 	const router = useRouter();
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const deleteOrganization = useMutation(api.organizations.mutations.deleteOrganization);
 	const isOwner = useRoles().hasOwnerRole;
 
 	if (!activeOrganization) {
@@ -42,30 +43,30 @@ export default function DeleteOrganization({
 	}
 
 	const handleConfirm = async (): Promise<void> => {
-		console.log('activeOrganization.id', activeOrganization.id);
-		const { data, error } = await authClient.organization.delete({
-			organizationId: activeOrganization.id
-		});
-		console.log('data', data);
-		console.log('error', error);
-		if (error) {
-			toast.error(error.statusText);
+		try {
+			await deleteOrganization({ organizationId: activeOrganization.id });
+
+			setOpen(false);
+			toast.success('Organization deleted successfully');
+
+			// Call the onSuccessfulDelete callback if provided
+			if (onSuccessfulDelete) {
+				onSuccessfulDelete();
+			}
+
+			// Navigate to the specified URL or home by default
+			if (redirectTo) {
+				router.push(redirectTo);
+			} else {
+				router.push('/');
+			}
+		} catch (error) {
+			if (error instanceof ConvexError) {
+				toast.error(error.data);
+				return;
+			}
+			toast.error('Failed to delete organization');
 			return;
-		}
-		setOpen(false);
-
-		toast.success('Organization deleted successfully');
-
-		// Call the onSuccessfulDelete callback if provided
-		if (onSuccessfulDelete) {
-			onSuccessfulDelete();
-		}
-
-		// Navigate to the specified URL or home by default
-		if (redirectTo) {
-			router.push(redirectTo);
-		} else {
-			router.push('/');
 		}
 	};
 

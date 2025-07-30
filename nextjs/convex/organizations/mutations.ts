@@ -2,12 +2,7 @@ import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../_generated/server';
 import { betterAuthComponent } from '../auth';
 import { APIError } from 'better-auth/api';
-import {
-	createOrganizationModel,
-	// leaveOrganizationModel,
-	updateOrganizationProfileModel
-	// deleteOrganizationModel
-} from '../model/organizations';
+import { createOrganizationModel, updateOrganizationProfileModel } from '../model/organizations';
 
 // Types
 import type { Id } from '../_generated/dataModel';
@@ -100,11 +95,15 @@ export const setActiveOrganization = mutation({
 				}
 
 				if (user.activeOrganizationId) {
-					const org = await ctx.db.get(user.activeOrganizationId);
+					const org = (
+						await auth.api.listOrganizations({
+							headers: await betterAuthComponent.getHeaders(ctx)
+						})
+					).find((org) => org.id === user.activeOrganizationId);
 					if (org) {
 						await auth.api.setActiveOrganization({
 							body: {
-								organizationId: org.betterAuthId
+								organizationId: org.id
 							},
 							headers: await betterAuthComponent.getHeaders(ctx)
 						});
@@ -117,13 +116,14 @@ export const setActiveOrganization = mutation({
 						},
 						headers: await betterAuthComponent.getHeaders(ctx)
 					});
-					const org = await ctx.db
-						.query('organizations')
-						.withIndex('betterAuthId', (q) => q.eq('betterAuthId', betterAuthOrg.id))
-						.first();
+					const org = (
+						await auth.api.listOrganizations({
+							headers: await betterAuthComponent.getHeaders(ctx)
+						})
+					).find((org) => org.id === betterAuthOrg.id);
 					if (user && org) {
 						await ctx.db.patch(user._id, {
-							activeOrganizationId: org._id
+							activeOrganizationId: org.id
 						});
 					}
 				}
@@ -136,35 +136,78 @@ export const setActiveOrganization = mutation({
 	}
 });
 
-// /**
-//  * Leave an organization (remove yourself as a member)
-//  */
-// export const leaveOrganization = mutation({
-// 	args: {
-// 		organizationId: v.id('organizations')
-// 	},
-// 	handler: async (ctx, args) => {
-// 		const userId = await getAuthUserId(ctx);
-// 		if (!userId) throw new ConvexError('Not authenticated');
-// 		// Validate membership exists
-// 		const membership = await ctx.db
-// 			.query('organizationMembers')
-// 			.withIndex('orgId_and_userId', (q) =>
-// 				q.eq('organizationId', args.organizationId).eq('userId', userId)
-// 			)
-// 			.first();
-// 		if (!membership) {
-// 			throw new ConvexError('Not a member of this organization');
-// 		}
+export const deleteOrganization = mutation({
+	args: {
+		organizationId: v.optional(v.string())
+	},
+	handler: async (ctx, args) => {
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		if (!userId) throw new ConvexError('Not authenticated');
 
-// 		return await leaveOrganizationModel(ctx, {
-// 			userId,
-// 			organizationId: args.organizationId,
-// 			membershipId: membership._id,
-// 			role: membership.role
-// 		});
-// 	}
-// });
+		let organizationId = args.organizationId;
+		const auth = createAuth(ctx);
+
+		// If no organizationId provided, get the current active organization
+		if (!organizationId) {
+			organizationId = (
+				await auth.api.getFullOrganization({
+					headers: await betterAuthComponent.getHeaders(ctx)
+				})
+			)?.id;
+		}
+
+		if (!organizationId) {
+			throw new ConvexError('Organization not found');
+		}
+
+		// Get all organizations before deletion to check count and find next active org
+		const allOrganizations = await auth.api.listOrganizations({
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+
+		// Check if at least two organizations exist
+		if (allOrganizations.length < 2) {
+			throw new ConvexError('Cannot delete organization. At least one organization must remain.');
+		}
+
+		// Find the first organization that is not the one being deleted
+		const nextActiveOrg = allOrganizations.find((org) => org.id !== organizationId);
+
+		if (!nextActiveOrg) {
+			throw new ConvexError('No alternative organization found to set as active');
+		}
+
+		// Delete the organization
+		await auth.api.deleteOrganization({
+			body: { organizationId },
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+
+		//  Delete organization als from convex app table
+		// TODO: Remove as soon as convex better-auth supports additional organization fields
+		const appOrg = await ctx.db
+			.query('organizations')
+			.withIndex('betterAuthId', (q) => q.eq('betterAuthId', organizationId))
+			.first();
+		if (appOrg) {
+			await ctx.db.delete(appOrg._id);
+		}
+
+		// Set the first remaining organization as active
+		await auth.api.setActiveOrganization({
+			body: { organizationId: nextActiveOrg.id },
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+
+		// Update user's active organization in the database
+		const user = await ctx.db.get(userId as Id<'users'>);
+		if (user) {
+			await ctx.db.patch(user._id, {
+				activeOrganizationId: nextActiveOrg.id
+			});
+		}
+	}
+});
 
 /**
  * Updates an organization's profile information
@@ -203,43 +246,3 @@ export const updateOrganizationProfile = mutation({
 		}
 	}
 });
-
-// /**
-//  * Updates an organization's profile information
-//  */
-// export const _updateOrganizationProfile = internalMutation({
-// 	args: {
-// 		organizationId: v.id('organizations'),
-// 		name: v.optional(v.string()),
-// 		slug: v.optional(v.string()),
-// 		logoId: v.optional(v.id('_storage'))
-// 	},
-// 	handler: async (ctx, args) => {
-// 		await updateOrganizationProfileModel(ctx, args);
-// 	}
-// });
-
-// /**
-//  * Deletes an organization and updates all members' active organization
-//  */
-// export const deleteOrganization = mutation({
-// 	args: {
-// 		organizationId: v.id('organizations')
-// 	},
-// 	handler: async (ctx, args) => {
-// 		const userId = await getAuthUserId(ctx);
-// 		if (!userId) throw new ConvexError('Not authenticated');
-// 		// Validate that the caller is an organization owner
-// 		const membership = await ctx.db
-// 			.query('organizationMembers')
-// 			.withIndex('orgId_and_userId', (q) =>
-// 				q.eq('organizationId', args.organizationId).eq('userId', userId)
-// 			)
-// 			.first();
-// 		if (!membership || membership.role !== 'role_organization_owner') {
-// 			throw new ConvexError('Only organization owners can delete an organization');
-// 		}
-
-// 		return await deleteOrganizationModel(ctx, { organizationId: args.organizationId });
-// 	}
-// });

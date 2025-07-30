@@ -296,6 +296,8 @@ export const updateOrganizationProfileModel = async (
 	if (logoId !== undefined) {
 		// Better Auth expects undefined to remove logo
 		betterAuthUpdateData.logo = imageUrl;
+		// TODO: Move logoId to better-auth as soon v0.8 launches with organization.additionalFields support
+		// betterAuthUpdateData.logoId = logoId as string;
 	}
 
 	// Update Better Auth if there are changes
