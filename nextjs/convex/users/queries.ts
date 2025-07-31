@@ -1,4 +1,3 @@
-import { getAuthUserId } from '@convex-dev/auth/server';
 import { isUserExistingModel } from '../model/users';
 import { query } from '../_generated/server';
 import { v } from 'convex/values';
@@ -22,7 +21,7 @@ export const isUserExisting = query({
  */
 export const getActiveUser = query({
 	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
 		if (!userId) {
 			return null;
 		}
