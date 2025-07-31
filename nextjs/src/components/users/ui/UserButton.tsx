@@ -101,17 +101,21 @@ export default function UserButton({
 				)}
 			</Authenticated>
 			<Unauthenticated>
-				<Dialog.Root open={signInDialogOpen} onOpenChange={setSignInDialogOpen}>
-					<Dialog.Trigger className="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
-					<Dialog.Content className="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md">
-						<Dialog.Header>
-							<Dialog.Title>Sign in</Dialog.Title>
-						</Dialog.Header>
-						<SignIn onSignIn={() => setSignInDialogOpen(false)} />
-						<Dialog.CloseX />
-					</Dialog.Content>
-				</Dialog.Root>
+				<button className="btn preset-filled-primary-500" onClick={() => setSignInDialogOpen(true)}>
+					Sign in
+				</button>
 			</Unauthenticated>
+
+			{/* SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration */}
+			<Dialog.Root open={signInDialogOpen} onOpenChange={setSignInDialogOpen}>
+				<Dialog.Content className="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md">
+					<Dialog.Header>
+						<Dialog.Title>Sign in</Dialog.Title>
+					</Dialog.Header>
+					<SignIn onSignIn={() => setSignInDialogOpen(false)} />
+					<Dialog.CloseX />
+				</Dialog.Content>
+			</Dialog.Root>
 		</>
 	);
 }

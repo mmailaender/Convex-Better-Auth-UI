@@ -15,7 +15,10 @@ import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { authClient } from '../lib/auth-client';
 
-type AuthStep = 'email' | 'login' | 'register';
+// Icons
+import { Mail } from 'lucide-react';
+
+type AuthStep = 'email' | 'login' | 'register' | 'verify-email';
 
 interface SignInProps {
 	redirectTo?: string;
@@ -32,6 +35,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	const [email, setEmail] = useState('');
 	const [submitting, setSubmitting] = useState(false);
 	const [verifyingEmail, setVerifyingEmail] = useState(false);
+	const [userEmail, setUserEmail] = useState('');
 
 	/**
 	 * Creates redirect URL and redirects based on priority conditions
@@ -68,25 +72,9 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	};
 
 	/**
-	 * Handles sign in with the specified provider
-	 */
-	const handleSocialSignIn = async (): Promise<void> => {
-		await authClient.signIn.social(
-			{ provider: 'github' },
-			{
-				onSuccess: handleAuthSuccess,
-				onError: (ctx) => {
-					console.error('Social sign in error:', ctx.error);
-					toast.error('Failed to sign in with GitHub. Please try again.');
-				}
-			}
-		);
-	};
-
-	/**
 	 * Verifies if email exists and determines the appropriate flow
 	 */
-	const verifyEmail = async (emailValue: string): Promise<void> => {
+	const validateEmail = async (emailValue: string): Promise<void> => {
 		setVerifyingEmail(true);
 
 		try {
@@ -102,9 +90,9 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 				toast.error('Invalid email. Please try again.');
 			}
 		} catch (error) {
-			toast.error('Failed to verify email. Please try again.');
+			toast.error('Failed to validate email. Please try again.');
 
-			console.error('Email verification error:', error);
+			console.error('Email validation error:', error);
 		} finally {
 			setVerifyingEmail(false);
 		}
@@ -120,7 +108,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 
 		if (emailValue) {
 			setEmail(emailValue);
-			void verifyEmail(emailValue);
+			void validateEmail(emailValue);
 		}
 	};
 
@@ -146,7 +134,9 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 						let errorMessage = 'Could not sign in. Please check your credentials.';
 
 						if (ctx.error.message) {
-							if (
+							if (ctx.error.status === 403) {
+								errorMessage = 'Please verify your email address.';
+							} else if (
 								ctx.error.message.includes('Invalid password') ||
 								ctx.error.message.includes('password')
 							) {
@@ -174,13 +164,20 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 					name: formData.get('name') as string
 				},
 				{
-					onSuccess: handleAuthSuccess,
+					onSuccess: () => {
+						console.log('Registration successful, showing email verification step...');
+						setUserEmail(email);
+						setCurrentStep('verify-email');
+						setSubmitting(false);
+					},
 					onError: (ctx) => {
 						console.error('Sign up error:', ctx.error);
 						let errorMessage = 'Could not create account. Please try again.';
 
 						if (ctx.error.message) {
-							if (
+							if (ctx.error.status === 403) {
+								errorMessage = 'Please verify your email address.';
+							} else if (
 								ctx.error.message.includes('already exists') ||
 								ctx.error.message.includes('duplicate')
 							) {
@@ -263,6 +260,56 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 		</form>
 	);
 
+	const renderVerifyEmailStep = () => (
+		<div className="flex flex-col gap-4 text-center">
+			<div className="mb-4 flex justify-center">
+				<div className="bg-surface-100-900 flex h-16 w-16 items-center justify-center rounded-full">
+					<Mail className="text-surface-600-400 size-8" />
+				</div>
+			</div>
+			<h3 className="text-xl font-semibold">Check your email</h3>
+			<p className="text-surface-600-400 text-sm">
+				We&apos;ve sent a verification link to <strong>{userEmail}</strong>
+			</p>
+			<p className="text-surface-600-400 text-sm">
+				Please check your email and click the verification link to complete your account setup.
+			</p>
+			<div className="mt-4 flex flex-col gap-2">
+				<button type="button" className="anchor text-center text-sm" onClick={resetFlow}>
+					Use a different email
+				</button>
+			</div>
+		</div>
+	);
+
+	/**
+	 * Handles sign in with the specified provider
+	 */
+	const handleSocialSignIn = async (): Promise<void> => {
+		await authClient.signIn.social(
+			{ provider: 'github' },
+			{
+				onSuccess: handleAuthSuccess,
+				onError: (ctx) => {
+					console.error('Social sign in error:', ctx.error);
+					toast.error('Failed to sign in with GitHub. Please try again.');
+				}
+			}
+		);
+	};
+
+	// Email verification step - clean UI
+	if (currentStep === 'verify-email') {
+		return (
+			<div className="flex h-full w-full flex-col items-center justify-center">
+				<div className="flex h-full w-full max-w-md flex-col justify-center p-8">
+					{renderVerifyEmailStep()}
+				</div>
+			</div>
+		);
+	}
+
+	// Default sign-in UI
 	return (
 		<div className="flex h-full w-full flex-col items-center justify-center">
 			<div className="flex h-full w-full max-w-md flex-col p-8">

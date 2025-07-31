@@ -22,6 +22,8 @@ export const createAuth = (ctx: GenericCtx) =>
 		database: convexAdapter(ctx, betterAuthComponent),
 
 		emailVerification: {
+			autoSignInAfterVerification: true,
+			sendOnSignUp: true,
 			sendVerificationEmail: async ({ user, url }) => {
 				await sendEmailVerification(requireMutationCtx(ctx), {
 					to: user.email,
@@ -33,7 +35,7 @@ export const createAuth = (ctx: GenericCtx) =>
 		// Simple non-verified email/password to get started
 		emailAndPassword: {
 			enabled: true,
-			requireEmailVerification: false
+			requireEmailVerification: true
 		},
 		socialProviders: {
 			github: {
@@ -53,16 +55,16 @@ export const createAuth = (ctx: GenericCtx) =>
 			// The Convex plugin is required
 			convex(),
 			organization({
-				// schema: {
-				// 	organization: {
-				// 		additionalFields: {
-				// 			logoId: {
-				// 				type: 'string',
-				// 				required: false
-				// 			}
-				// 		}
-				// 	}
-				// },
+				schema: {
+					organization: {
+						additionalFields: {
+							logoId: {
+								type: 'string',
+								required: false
+							}
+						}
+					}
+				},
 				sendInvitationEmail: async (data) => {
 					await sendInviteMember(requireMutationCtx(ctx), {
 						to: data.email,
