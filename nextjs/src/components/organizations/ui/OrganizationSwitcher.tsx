@@ -17,6 +17,7 @@ import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 // API
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { useRoles } from '../api/hooks';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
@@ -40,7 +41,7 @@ export default function OrganizationSwitcher({
 	// Queries and mutations
 	const organizations = useQuery(api.organizations.queries.listOrganizations);
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const role = useQuery(api.organizations.queries.getActiveOrganizationRole);
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 	const setActiveOrganization = useMutation(api.organizations.mutations.setActiveOrganization);
 
 	// State
@@ -176,7 +177,7 @@ export default function OrganizationSwitcher({
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
-								{role === 'owner' || role === 'admin' ? (
+								{isOwnerOrAdmin ? (
 									<button
 										onClick={() => {
 											setOpenOrganizationProfile(true);

@@ -1,14 +1,14 @@
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
 
-interface UseRolesArgs {
-	orgId?: Id<'organizations'>;
-}
-
-export const useRoles = ({ orgId }: UseRolesArgs = {}) => {
-	// TODO: add support to get the user role for a specific organization - custom convex query needed => waiting for better-auth v0.8
-	const role = useQuery(api.organizations.queries.getActiveOrganizationRole);
+export const useRoles = ({
+	orgId
+}: {
+	orgId?: string;
+} = {}) => {
+	const role = useQuery(api.organizations.queries.getOrganizationRole, {
+		organizationId: orgId
+	});
 
 	return {
 		get hasOwnerRole() {

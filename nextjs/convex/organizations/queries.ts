@@ -31,24 +31,35 @@ export const listOrganizations = query({
  * If organizationId is not provided, it will use the user's active organization
  * @returns The user's role in the organization or null if not a member or if no active organization exists when organizationId is not provided
  */
-export const getActiveOrganizationRole = query({
-	handler: async (ctx) => {
+export const getOrganizationRole = query({
+	args: {
+		organizationId: v.optional(v.string())
+	},
+	handler: async (ctx, args) => {
+		const { organizationId } = args;
 		const userId = await betterAuthComponent.getAuthUserId(ctx);
 		if (!userId) {
 			return null;
 		}
 
 		const auth = createAuth(ctx);
+		const headers = await betterAuthComponent.getHeaders(ctx);
 
 		try {
-			const activeMember = await auth.api.getActiveMember({
-				headers: await betterAuthComponent.getHeaders(ctx)
+			// Get role from active organization if no specific organizationId provided
+			if (!args.organizationId) {
+				const activeMember = await auth.api.getActiveMember({ headers });
+				return (activeMember?.role as typeof auth.$Infer.Member.role) || null;
+			}
+
+			// Get role from specific organization
+			const memberList = await auth.api.listMembers({
+				query: { organizationId },
+				headers
 			});
 
-			if (!activeMember) {
-				return null;
-			}
-			return activeMember.role as typeof auth.$Infer.Member.role;
+			const member = memberList.members.find((member) => member.userId === userId);
+			return (member?.role as typeof auth.$Infer.Member.role) || null;
 		} catch {
 			return null;
 		}
