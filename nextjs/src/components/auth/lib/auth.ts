@@ -1,7 +1,8 @@
 import { convexAdapter } from '@convex-dev/better-auth';
-import { betterAuth } from 'better-auth';
+import { Auth, betterAuth } from 'better-auth';
 import { betterAuthComponent } from '../../../../convex/auth';
 import { type GenericCtx } from '../../../../convex/_generated/server';
+import { components } from '../../../../convex/_generated/api';
 
 // Emails
 import { sendEmailVerification, sendInviteMember } from '../../../../convex/email';
@@ -83,6 +84,39 @@ export const createAuth = (ctx: GenericCtx) =>
 			})
 		]
 		// databaseHooks: {
+		// 	user: {
+		// 		create: {
+		// 			after: async (user) => {
+		// 				const auth = createAuth(ctx);
+		// 				try {
+		// 					const userWithUserId = (await ctx.runQuery(components.betterAuth.lib.findOne, {
+		// 						model: 'users',
+		// 						where: [{ field: 'email', operator: 'eq', value: user.email }]
+		// 					})) as typeof auth.$Infer.Session.user;
+		// 					console.log('userWithUserId', userWithUserId);
+		// 					await auth.api.createOrganization({
+		// 						body: {
+		// 							userId: userWithUserId.userId!,
+		// 							name: `Personal Organization`,
+		// 							slug: (() => {
+		// 								const userName: string = (user as { name?: string })?.name ?? '';
+		// 								const sanitizedName: string = userName
+		// 									.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
+		// 									.trim()
+		// 									.replace(/\s+/g, '-')
+		// 									.toLowerCase();
+		// 								return sanitizedName
+		// 									? `personal-organization-${sanitizedName}`
+		// 									: 'personal-organization';
+		// 							})()
+		// 						}
+		// 					});
+		// 				} catch (error) {
+		// 					console.error('Error creating organization:', error);
+		// 				}
+		// 			}
+		// 		}
+		// 	}
 		// 	session: {
 		// 		create: {
 		// 			before: async (session) => {
