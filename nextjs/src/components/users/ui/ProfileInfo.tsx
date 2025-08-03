@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { authClient } from '@/components/auth/lib/auth-client';
+import { authClient } from '@/components/auth/api/auth-client';
 
 // Icons
 import { Pencil } from 'lucide-react';

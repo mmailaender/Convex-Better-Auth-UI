@@ -6,7 +6,7 @@ import { createOrganizationModel, updateOrganizationProfileModel } from '../mode
 
 // Types
 import type { Id } from '../_generated/dataModel';
-import { createAuth } from '../../src/components/auth/lib/auth';
+import { createAuth } from '../../src/components/auth/api/auth';
 
 /**
  * Creates a new organization with the given name, slug, and optional logo

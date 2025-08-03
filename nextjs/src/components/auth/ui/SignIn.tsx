@@ -13,7 +13,7 @@ import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 // API
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { authClient } from '../lib/auth-client';
+import { authClient } from '../api/auth-client';
 
 // Icons
 import { Mail } from 'lucide-react';
@@ -198,6 +198,22 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	};
 
 	/**
+	 * Handles sign in with the specified provider
+	 */
+	const handleSocialSignIn = async (provider: string): Promise<void> => {
+		await authClient.signIn.social(
+			{ provider },
+			{
+				onSuccess: handleAuthSuccess,
+				onError: (ctx) => {
+					console.error('Social sign in error:', ctx.error);
+					toast.error('Failed to sign in with GitHub. Please try again.');
+				}
+			}
+		);
+	};
+
+	/**
 	 * Resets the flow back to email entry
 	 */
 	const resetFlow = (): void => {
@@ -282,22 +298,6 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 		</div>
 	);
 
-	/**
-	 * Handles sign in with the specified provider
-	 */
-	const handleSocialSignIn = async (): Promise<void> => {
-		await authClient.signIn.social(
-			{ provider: 'github' },
-			{
-				onSuccess: handleAuthSuccess,
-				onError: (ctx) => {
-					console.error('Social sign in error:', ctx.error);
-					toast.error('Failed to sign in with GitHub. Please try again.');
-				}
-			}
-		);
-	};
-
 	// Email verification step - clean UI
 	if (currentStep === 'verify-email') {
 		return (
@@ -323,7 +323,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 					{AUTH_CONSTANTS.providers.github && (
 						<button
 							className="btn preset-filled hover:border-surface-600-400 w-full shadow-sm"
-							onClick={handleSocialSignIn}
+							onClick={() => handleSocialSignIn('github')}
 						>
 							<svg
 								aria-label="GitHub logo"

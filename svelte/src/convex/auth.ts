@@ -1,100 +1,85 @@
-// Provider
-import GitHub from '@auth/core/providers/github';
-import { Password } from '@convex-dev/auth/providers/Password';
-import { ConvexCredentials } from '@convex-dev/auth/providers/ConvexCredentials';
+import { BetterAuth, type AuthFunctions, type PublicAuthFunctions } from '@convex-dev/better-auth';
+import { api, components, internal } from './_generated/api';
+import { GenericCtx, query } from './_generated/server';
+import type { Id, DataModel } from './_generated/dataModel';
+import { createAuth } from '../src/components/auth/lib/auth';
 
-import { convexAuth, getAuthUserId } from '@convex-dev/auth/server';
-import { internal } from './_generated/api.js';
-import { query } from './_generated/server.js';
+// Typesafe way to pass Convex functions defined in this file
+const authFunctions: AuthFunctions = internal.auth;
+const publicAuthFunctions: PublicAuthFunctions = api.auth;
 
-// Types
-import type { MutationCtx } from './_generated/server.js';
-import type { Id } from './_generated/dataModel.js';
-
-//Constants
-import { AUTH_CONSTANTS } from './auth.constants.js';
-
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-	providers: [
-		...(AUTH_CONSTANTS.providers.github ? [GitHub] : []),
-		...(AUTH_CONSTANTS.providers.password
-			? [
-					Password({
-						profile(params) {
-							return {
-								email: params.email as string,
-								name: params.name as string
-							};
-						}
-					})
-				]
-			: []),
-		ConvexCredentials({
-			id: 'secret',
-			authorize: async (params, ctx) => {
-				const secret = params.secret;
-				if (process.env.AUTH_E2E_TEST_SECRET && secret === process.env.AUTH_E2E_TEST_SECRET) {
-					const user = await ctx.runQuery(internal.tests.getTestUser);
-					return { userId: user!._id };
-				}
-				throw new Error('Invalid secret');
-			}
-		})
-	],
-
-	callbacks: {
-		async afterUserCreatedOrUpdated(ctx: MutationCtx, args) {
-			const { userId } = args;
-			const imageUrl = args.profile.image as string;
-
-			const user = await ctx.db.get(userId);
-
-			// Get the user's organizations. If there is no organization create one with the users name
-			const organizations = await ctx.db
-				.query('organizationMembers')
-				.withIndex('userId', (q) => q.eq('userId', userId))
-				.collect();
-
-			let orgId: Id<'organizations'> | undefined;
-			if (organizations.length === 0) {
-				orgId = await ctx.runMutation(internal.organizations.mutations._createOrganization, {
-					userId,
-					name: `Personal Organization`,
-					slug: (() => {
-						const userName: string = (user as { name?: string })?.name ?? '';
-						const sanitizedName: string = userName
-							.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
-							.trim()
-							.replace(/\s+/g, '-')
-							.toLowerCase();
-						return sanitizedName
-							? `personal-organization-${sanitizedName}`
-							: 'personal-organization';
-					})()
-				});
-			}
-
-			if (imageUrl && !user?.imageId) {
-				await ctx.scheduler.runAfter(0, internal.users.actions._downloadAndStoreProfileImage, {
-					userId,
-					orgId,
-					imageUrl
-				});
-			}
-		}
-	}
+// Initialize the component
+export const betterAuthComponent = new BetterAuth(components.betterAuth, {
+	authFunctions,
+	publicAuthFunctions
 });
 
-export const activeUser = query({
+export const withHeaders = async <T extends object>(ctx: GenericCtx, obj: T) => ({
+	...obj,
+	headers: await betterAuthComponent.getHeaders(ctx)
+});
+
+// These are required named exports
+export const { createUser, updateUser, deleteUser, createSession, isAuthenticated } =
+	betterAuthComponent.createAuthFunctions<DataModel>({
+		// Must create a user and return the user id
+		onCreateUser: async (ctx, user) => {
+			const userId = await ctx.db.insert('users', { email: user.email });
+			// console.log('userId', userId);
+
+			// const auth = createAuth(ctx);
+			// const organizationList = await auth.api.listOrganizations({});
+
+			// console.log('organizationList', organizationList);
+
+			// if (organizationList.length === 0) {
+			// await auth.api.createOrganization({
+			// 	body: {
+			// 		userId: userId! as string,
+			// 		name: `Personal Organization`,
+			// 		slug: (() => {
+			// 			const userName: string = (user as { name?: string })?.name ?? '';
+			// 			const sanitizedName: string = userName
+			// 				.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
+			// 				.trim()
+			// 				.replace(/\s+/g, '-')
+			// 				.toLowerCase();
+			// 			return sanitizedName
+			// 				? `personal-organization-${sanitizedName}`
+			// 				: 'personal-organization';
+			// 		})()
+			// 	}
+			// });
+			// }
+
+			return userId;
+		},
+
+		onUpdateUser: async (ctx, user) => {
+			return ctx.db.patch(user.userId as Id<'users'>, { email: user.email });
+		},
+
+		// Delete the user when they are deleted from Better Auth
+		onDeleteUser: async (ctx, userId) => {
+			await ctx.db.delete(userId as Id<'users'>);
+
+			// TODO: Add functionality from deleteUserModel
+		}
+	});
+
+// Example function for getting the current user
+// Feel free to edit, omit, etc.
+export const getCurrentUser = query({
+	args: {},
 	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
-		if (!userId) {
+		// Get user data from Better Auth - email, name, image, etc.
+		const userMetadata = await betterAuthComponent.getAuthUser(ctx);
+		if (!userMetadata) {
 			return null;
 		}
-		const user = await ctx.db.get(userId);
-		if (!user) {
-			return null;
-		}
-		return user;
+		// Get user data from your application's database
+		return {
+			...userMetadata
+		};
 	}
 });

@@ -19,7 +19,7 @@ type Role = Member['role'];
 
 // Hooks
 import { useRoles } from '@/components/organizations/api/hooks';
-import { authClient } from '@/components/auth/lib/auth-client';
+import { authClient } from '@/components/auth/api/auth-client';
 
 /**
  * Component that displays a list of organization members with role management functionality

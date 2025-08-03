@@ -1,23 +1,28 @@
-import { getAuthUserId } from '@convex-dev/auth/server';
-import { query } from '../_generated/server';
-import {
-	getUserOrganizationsModel,
-	getActiveOrganizationModel,
-	getOrganizationRoleModel
-} from '../model/organizations';
+import { internalQuery, query } from '../_generated/server';
+
+// better-auth
+import { createAuth } from '../../lib/auth/api/auth';
+import { betterAuthComponent } from '../auth';
 import { v } from 'convex/values';
 
 /**
  * Get all organizations for the current user
  */
-export const getUserOrganizations = query({
+export const listOrganizations = query({
 	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
 		if (!userId) {
 			return [];
 		}
 
-		return getUserOrganizationsModel(ctx, { userId });
+		try {
+			const auth = createAuth(ctx);
+			return await auth.api.listOrganizations({
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		} catch {
+			return [];
+		}
 	}
 });
 
@@ -28,15 +33,36 @@ export const getUserOrganizations = query({
  */
 export const getOrganizationRole = query({
 	args: {
-		organizationId: v.optional(v.id('organizations'))
+		organizationId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const userId = await getAuthUserId(ctx);
+		const { organizationId } = args;
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
 		if (!userId) {
 			return null;
 		}
 
-		return getOrganizationRoleModel(ctx, { organizationId: args.organizationId, userId });
+		const auth = createAuth(ctx);
+		const headers = await betterAuthComponent.getHeaders(ctx);
+
+		try {
+			// Get role from active organization if no specific organizationId provided
+			if (!args.organizationId) {
+				const activeMember = await auth.api.getActiveMember({ headers });
+				return (activeMember?.role as typeof auth.$Infer.Member.role) || null;
+			}
+
+			// Get role from specific organization
+			const memberList = await auth.api.listMembers({
+				query: { organizationId },
+				headers
+			});
+
+			const member = memberList.members.find((member) => member.userId === userId);
+			return (member?.role as typeof auth.$Infer.Member.role) || null;
+		} catch {
+			return null;
+		}
 	}
 });
 
@@ -45,11 +71,27 @@ export const getOrganizationRole = query({
  */
 export const getActiveOrganization = query({
 	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
 		if (!userId) {
 			return null;
 		}
 
-		return getActiveOrganizationModel(ctx, { userId });
+		try {
+			const auth = createAuth(ctx);
+			return await auth.api.getFullOrganization({
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		} catch {
+			return null;
+		}
+	}
+});
+
+export const _getActiveOrganizationFromDb = internalQuery({
+	args: { userId: v.id('users') },
+	handler: async (ctx, args) => {
+		const user = await ctx.db.get(args.userId);
+		if (!user || !user.activeOrganizationId) return null;
+		return user.activeOrganizationId;
 	}
 });

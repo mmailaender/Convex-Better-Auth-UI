@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 // API
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { authClient } from '@/components/auth/lib/auth-client';
+import { authClient } from '@/components/auth/api/auth-client';
 // API Types
 type Role = typeof authClient.$Infer.Member.role;
 

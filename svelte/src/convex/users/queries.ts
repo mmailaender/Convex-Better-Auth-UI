@@ -1,7 +1,8 @@
-import { getAuthUserId } from '@convex-dev/auth/server';
-import { isUserExistingModel, getUserModel } from '../model/users';
+import { isUserExistingModel } from '../model/users';
 import { query } from '../_generated/server';
 import { v } from 'convex/values';
+import { createAuth } from '../../lib/auth/api/auth';
+import { betterAuthComponent } from '../auth';
 
 /**
  * Check if a user with the given email exists.
@@ -16,14 +17,19 @@ export const isUserExisting = query({
 });
 
 /**
- * Return the currently authenticated user document with populated image URL (if any).
+ * Return the currently authenticated user
  */
-export const getUser = query({
+export const getActiveUser = query({
 	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
+		const userId = await betterAuthComponent.getAuthUserId(ctx);
 		if (!userId) {
 			return null;
 		}
-		return await getUserModel(ctx, { userId });
+
+		const auth = createAuth(ctx);
+		const session = await auth.api.getSession({
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+		return session?.user;
 	}
 });

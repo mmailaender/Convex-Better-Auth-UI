@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { api } from '../../../../convex/_generated/api';
 import { getToken } from '@convex-dev/better-auth/nextjs';
-import { createAuth } from '@/components/auth/lib/auth';
+import { createAuth } from '@/components/auth/api/auth';
 import { fetchQuery } from 'convex/nextjs';
 interface ActiveOrgPageProps {
 	params: Promise<{

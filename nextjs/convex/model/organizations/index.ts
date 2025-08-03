@@ -1,6 +1,6 @@
 import { ConvexError } from 'convex/values';
 import { betterAuthComponent } from '../../auth';
-import { createAuth } from '../../../src/components/auth/lib/auth';
+import { createAuth } from '../../../src/components/auth/api/auth';
 
 // Types
 import type { MutationCtx, QueryCtx } from '../../_generated/server';

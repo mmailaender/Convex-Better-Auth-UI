@@ -5,7 +5,7 @@ import { ConvexError } from 'convex/values';
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
 import type { WithoutSystemFields } from 'convex/server';
 import type { Doc, Id } from '../../_generated/dataModel';
-import { createAuth } from '../../../src/components/auth/lib/auth';
+import { createAuth } from '../../../src/components/auth/api/auth';
 import { betterAuthComponent } from '../../auth';
 
 /**

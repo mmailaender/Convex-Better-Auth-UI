@@ -1,7 +1,7 @@
 import { ConvexError, v } from 'convex/values';
 import { mutation } from '../../_generated/server';
 import { betterAuthComponent } from '../../auth';
-import { createAuth } from '../../../src/components/auth/lib/auth';
+import { createAuth } from '../../../src/components/auth/api/auth';
 import { APIError } from 'better-auth/api';
 import type { Id } from '../../_generated/dataModel';
 

@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { Search } from 'lucide-react';
 
 // Types
-import { authClient } from '@/components/auth/lib/auth-client';
+import { authClient } from '@/components/auth/api/auth-client';
 type Role = typeof authClient.$Infer.Member.role;
 
 /**

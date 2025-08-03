@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 // API
 import { ConvexError } from 'convex/values';
-import { authClient } from '@/components/auth/lib/auth-client';
+import { authClient } from '@/components/auth/api/auth-client';
 
 export default function DeleteUser() {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
