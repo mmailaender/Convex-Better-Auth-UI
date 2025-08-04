@@ -1,11 +1,12 @@
 import './polyfills';
-import VerifyEmail from './model/emails/verifyEmail';
-import MagicLinkEmail from './model/emails/magicLink';
-import VerifyOTP from './model/emails/verifyOTP';
-import { render } from '@react-email/components';
-import ResetPasswordEmail from './model/emails/resetPassword';
+import {
+	renderVerifyEmail,
+	renderMagicLink,
+	renderVerifyOTP,
+	renderResetPassword,
+	renderInviteMember
+} from './model/emails/templates/emailTemplates';
 import { type RunMutationCtx } from '@convex-dev/better-auth';
-import InviteMember from './model/emails/inviteMember';
 
 import { Resend } from '@convex-dev/resend';
 import { components } from './_generated/api';
@@ -36,14 +37,12 @@ export const sendEmailVerification = async (
 		from: EMAIL_SEND_FROM,
 		to,
 		subject: 'Verify your email address',
-		html: await render(
-			<VerifyEmail
-				url={url}
-				brandName={BRAND_NAME}
-				brandTagline={BRAND_TAGLINE}
-				brandLogoUrl={BRAND_LOGO_URL}
-			/>
-		)
+		html: renderVerifyEmail({
+			url,
+			brandName: BRAND_NAME,
+			brandTagline: BRAND_TAGLINE,
+			brandLogoUrl: BRAND_LOGO_URL
+		})
 	});
 };
 
@@ -64,14 +63,12 @@ export const sendOTPVerification = async (
 		from: EMAIL_SEND_FROM,
 		to,
 		subject: 'Verify your email address',
-		html: await render(
-			<VerifyOTP
-				code={code}
-				brandName={BRAND_NAME}
-				brandTagline={BRAND_TAGLINE}
-				brandLogoUrl={BRAND_LOGO_URL}
-			/>
-		)
+		html: renderVerifyOTP({
+			code,
+			brandName: BRAND_NAME,
+			brandTagline: BRAND_TAGLINE,
+			brandLogoUrl: BRAND_LOGO_URL
+		})
 	});
 };
 
@@ -92,14 +89,12 @@ export const sendMagicLink = async (
 		from: EMAIL_SEND_FROM,
 		to,
 		subject: 'Sign in to your account',
-		html: await render(
-			<MagicLinkEmail
-				url={url}
-				brandName={BRAND_NAME}
-				brandTagline={BRAND_TAGLINE}
-				brandLogoUrl={BRAND_LOGO_URL}
-			/>
-		)
+		html: renderMagicLink({
+			url,
+			brandName: BRAND_NAME,
+			brandTagline: BRAND_TAGLINE,
+			brandLogoUrl: BRAND_LOGO_URL
+		})
 	});
 };
 
@@ -120,14 +115,12 @@ export const sendResetPassword = async (
 		from: EMAIL_SEND_FROM,
 		to,
 		subject: 'Reset your password',
-		html: await render(
-			<ResetPasswordEmail
-				url={url}
-				brandName={BRAND_NAME}
-				brandTagline={BRAND_TAGLINE}
-				brandLogoUrl={BRAND_LOGO_URL}
-			/>
-		)
+		html: renderResetPassword({
+			url,
+			brandName: BRAND_NAME,
+			brandTagline: BRAND_TAGLINE,
+			brandLogoUrl: BRAND_LOGO_URL
+		})
 	});
 };
 
@@ -159,15 +152,13 @@ export const sendInviteMember = async (
 		from: EMAIL_SEND_FROM,
 		to,
 		subject: `Join ${organization.name} on ${BRAND_NAME}`,
-		html: await render(
-			<InviteMember
-				url={url}
-				inviter={inviter}
-				organization={organization}
-				brandName={BRAND_NAME}
-				brandTagline={BRAND_TAGLINE}
-				brandLogoUrl={BRAND_LOGO_URL}
-			/>
-		)
+		html: renderInviteMember({
+			url,
+			inviter,
+			organization,
+			brandName: BRAND_NAME,
+			brandTagline: BRAND_TAGLINE,
+			brandLogoUrl: BRAND_LOGO_URL
+		})
 	});
 };
