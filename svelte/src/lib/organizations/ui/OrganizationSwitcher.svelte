@@ -15,12 +15,12 @@
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
-	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { api } from '$convex/_generated/api';
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
 
 	// Types
-	import type { Id } from '$convex/_generated/dataModel';
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 
@@ -29,8 +29,8 @@
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type UserOrganizationsResponse = FunctionReturnType<
-		typeof api.organizations.queries.getUserOrganizations
+	type ListOrganizationsResponse = FunctionReturnType<
+		typeof api.organizations.queries.listOrganizations
 	>;
 
 	// Props
@@ -44,20 +44,21 @@
 		/** Alignment of the popover relative to the trigger */
 		popoverAlign?: PopoverProps['align'];
 		initialData?: {
-			userOrganizations: UserOrganizationsResponse;
+			listOrganizations: ListOrganizationsResponse;
 			activeOrganization: ActiveOrganizationResponse;
 		};
 	} = $props();
 
-	// Authentication state
-	const isLoading = $derived(useAuth().isLoading);
-	const isAuthenticated = $derived(useAuth().isAuthenticated);
+	// Auth state
+	const auth = useAuth();
+	const isLoading = $derived(auth.isLoading);
+	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Queries
 	const organizationsResponse = useQuery(
-		api.organizations.queries.getUserOrganizations,
+		api.organizations.queries.listOrganizations,
 		{},
-		{ initialData: initialData?.userOrganizations }
+		{ initialData: initialData?.listOrganizations }
 	);
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
@@ -67,6 +68,8 @@
 	// Derived state
 	const organizations = $derived(organizationsResponse.data);
 	const activeOrganization = $derived(activeOrganizationResponse.data);
+	const roles = useRoles();
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Component state
 	let switcherPopoverOpen: boolean = $state(false);
@@ -78,15 +81,23 @@
 	function closeCreateOrganization(): void {
 		createOrganizationDialogOpen = false;
 	}
+	function openCreateOrgModal(): void {
+		createOrganizationDialogOpen = true;
+		switcherPopoverOpen = false;
+	}
 
 	function closeOrganizationProfile(): void {
 		organizationProfileDialogOpen = false;
+	}
+	function openProfileModal(): void {
+		organizationProfileDialogOpen = true;
+		switcherPopoverOpen = false;
 	}
 
 	/**
 	 * Updates the active organization and replaces URL slug if needed
 	 */
-	async function updateActiveOrg(organizationId: Id<'organizations'>): Promise<void> {
+	async function updateActiveOrg(organizationId?: string): Promise<void> {
 		try {
 			// Get current active organization slug before mutation
 			const currentActiveOrgSlug = activeOrganization?.slug;
@@ -131,15 +142,12 @@
 		}
 	}
 
-	function openCreateOrgModal(): void {
-		createOrganizationDialogOpen = true;
-		switcherPopoverOpen = false;
-	}
-
-	function openProfileModal(): void {
-		organizationProfileDialogOpen = true;
-		switcherPopoverOpen = false;
-	}
+	// Check on mount if there is an active organization and if not, use the first organization from listOrganizations and call setActiveOrg (We use effect instead of useMount as organizations and activeOrganization are loaded async)
+	$effect(() => {
+		if (organizations && organizations.length > 0 && !activeOrganization) {
+			updateActiveOrg();
+		}
+	});
 </script>
 
 <!-- Not authenticated - don't show anything -->
@@ -147,25 +155,19 @@
 	<!-- Return null by not rendering anything -->
 
 	<!-- Loading state -->
-{:else if isLoading || !organizations}
+{:else if isLoading || !organizations || organizationsResponse.isLoading}
 	<div class="placeholder h-8 w-40 animate-pulse"></div>
 
-	<!-- No organizations - just show the create button -->
+	<!-- No organizations - show create organization modal -->
 {:else if organizations.length === 0}
 	<Dialog.Root bind:open={createOrganizationDialogOpen}>
-		<Dialog.Trigger class="btn variant-soft flex items-center gap-2">
+		<Dialog.Trigger class="btn preset-tonal flex items-center gap-2">
 			<Plus class="size-4" />
 			<span>Create Organization</span>
 		</Dialog.Trigger>
-
-		<Dialog.Content>
+		<Dialog.Content class="max-w-lg">
 			<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
-			<button
-				class="btn-icon variant-ghost absolute top-2 right-2"
-				onclick={closeCreateOrganization}
-			>
-				<X class="size-4" />
-			</button>
+			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
 
@@ -176,8 +178,8 @@
 			class="hover:bg-surface-200-800 border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
 		>
 			<div class="flex w-full max-w-64 items-center gap-3 overflow-hidden">
-				<Avatar.Root class="bg-surface-400-600 rounded-container size-8 shrink-0">
-					<Avatar.Image src={activeOrganization?.logo || ''} alt={activeOrganization?.name || ''} />
+				<Avatar.Root class="rounded-container size-8 shrink-0">
+					<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
 					<Avatar.Fallback>
 						<Building2 class="size-5" />
 					</Avatar.Fallback>
@@ -194,11 +196,8 @@
 					<div
 						class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6"
 					>
-						<Avatar.Root class="bg-surface-400-600 rounded-container size-8 shrink-0">
-							<Avatar.Image
-								src={activeOrganization?.logo || ''}
-								alt={activeOrganization?.name || ''}
-							/>
+						<Avatar.Root class="rounded-container size-8 shrink-0">
+							<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
 							<Avatar.Fallback>
 								<Building2 class="size-5" />
 							</Avatar.Fallback>
@@ -206,7 +205,7 @@
 						<span class="text-surface-700-300 text-medium w-full truncate text-base">
 							{activeOrganization?.name}
 						</span>
-						{#if activeOrganization?.role === 'role_organization_owner' || activeOrganization?.role === 'role_organization_admin'}
+						{#if isOwnerOrAdmin}
 							<button
 								onclick={openProfileModal}
 								class="btn-icon preset-faded-surface-50-950 hover:preset-filled-surface-300-700 flex gap-2"
@@ -218,25 +217,23 @@
 						{/if}
 					</div>
 
-					{#each organizations.filter((org) => org && org._id !== activeOrganization?._id) as org (org?._id)}
-						{#if org}
-							<div>
-								<button
-									onclick={() => updateActiveOrg(org._id)}
-									class="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
-								>
-									<Avatar.Root class="bg-surface-400-600 rounded-container size-8 shrink-0">
-										<Avatar.Image src={org.logo || ''} alt={org.name || ''} />
-										<Avatar.Fallback>
-											<Building2 class="size-5" />
-										</Avatar.Fallback>
-									</Avatar.Root>
-									<span class="text-surface-700-300 truncate text-base">
-										{org.name}
-									</span>
-								</button>
-							</div>
-						{/if}
+					{#each organizations.filter((org) => org && org.id !== activeOrganization?.id) as org (org?.id)}
+						<div>
+							<button
+								onclick={() => updateActiveOrg(org.id)}
+								class="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
+							>
+								<Avatar.Root class="rounded-container size-8 shrink-0">
+									<Avatar.Image src={org.logo} alt={org.name} />
+									<Avatar.Fallback>
+										<Building2 class="size-5" />
+									</Avatar.Fallback>
+								</Avatar.Root>
+								<span class="text-surface-700-300 truncate text-base">
+									{org.name}
+								</span>
+							</button>
+						</div>
 					{/each}
 				</div>
 				<button

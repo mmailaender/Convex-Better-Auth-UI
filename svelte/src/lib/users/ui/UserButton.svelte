@@ -7,18 +7,19 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	// Components
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
+	import SignIn from '$lib/auth/ui/SignIn.svelte';
 
 	// API
-	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	// Types
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
-	import SignIn from '$lib/auth/ui/SignIn.svelte';
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	const {
@@ -31,17 +32,18 @@
 		initialData?: UserResponse;
 	} = $props();
 
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
+	// Queries
+	const userResponse = useQuery(api.users.queries.getActiveUser, {}, { initialData });
+	const user = $derived(userResponse.data);
+
 	// State
 	let userPopoverOpen = $state(false);
 	let profileDialogOpen = $state(false);
-
-	// Auth
-	const { signOut } = useAuth();
-	const isAuthenticated = $derived(useAuth().isAuthenticated);
-
-	// Queries
-	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData });
-	const user = $derived(userResponse.data);
+	let signInDialogOpen = $state(false);
 
 	/**
 	 * Open profile modal and close popover
@@ -50,11 +52,18 @@
 		userPopoverOpen = false;
 		profileDialogOpen = true;
 	}
+
+	/**
+	 * Handle sign out
+	 */
+	async function handleSignOut(): Promise<void> {
+		await authClient.signOut();
+		userPopoverOpen = false;
+	}
 </script>
 
 {#if isAuthenticated}
 	{#if user}
-		<!-- User Popover -->
 		<Popover.Root bind:open={userPopoverOpen}>
 			<Popover.Trigger>
 				<Avatar.Root class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
@@ -64,7 +73,6 @@
 					</Avatar.Fallback>
 				</Avatar.Root>
 			</Popover.Trigger>
-
 			<Popover.Content side={popoverSide} align={popoverAlign}>
 				<div class="flex flex-col gap-1 p-0">
 					<button
@@ -87,10 +95,7 @@
 					</button>
 					<button
 						class="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-						onclick={() => {
-							signOut();
-							userPopoverOpen = false;
-						}}
+						onclick={handleSignOut}
 					>
 						Sign out
 					</button>
@@ -112,16 +117,20 @@
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
 {:else}
-	<Dialog.Root>
-		<Dialog.Trigger class="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
-		<Dialog.Content
-			class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
-		>
-			<Dialog.Header>
-				<Dialog.Title>Sign in</Dialog.Title>
-			</Dialog.Header>
-			<SignIn />
-			<Dialog.CloseX />
-		</Dialog.Content>
-	</Dialog.Root>
+	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
+		Sign in
+	</button>
 {/if}
+
+<!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
+<Dialog.Root bind:open={signInDialogOpen}>
+	<Dialog.Content
+		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
+	>
+		<Dialog.Header>
+			<Dialog.Title>Sign in</Dialog.Title>
+		</Dialog.Header>
+		<SignIn onSignIn={() => (signInDialogOpen = false)} />
+		<Dialog.CloseX />
+	</Dialog.Content>
+</Dialog.Root>

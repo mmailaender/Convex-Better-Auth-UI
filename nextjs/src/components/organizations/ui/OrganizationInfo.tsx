@@ -3,6 +3,9 @@
 // React
 import { useEffect, useState } from 'react';
 
+// Next.js
+import { useRouter, usePathname } from 'next/navigation';
+
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -31,6 +34,9 @@ type UpdateOrganizationProfileInput = FunctionArgs<
 
 export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── state & queries ── */
+	const router = useRouter();
+	const pathname = usePathname();
+
 	const user = useQuery(api.users.queries.getActiveUser);
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
@@ -140,6 +146,14 @@ export default function OrganizationInfo() {
 		try {
 			setIsUploading(true);
 
+			// Store the current slug before updating
+			const currentSlug = activeOrganization.slug;
+
+			// Check if current URL contains the active organization slug
+			const urlContainsCurrentSlug =
+				currentSlug &&
+				(pathname.includes(`/${currentSlug}/`) || pathname.includes(`/${currentSlug}`));
+
 			const updates: Partial<UpdateOrganizationProfileInput> = {};
 			if (activeOrganization.name !== formState.name) {
 				updates.name = formState.name;
@@ -149,8 +163,27 @@ export default function OrganizationInfo() {
 			}
 			await updateOrganization(updates);
 
+			// Close the modals
 			setIsDialogOpen(false);
 			setIsDrawerOpen(false);
+
+			// Handle URL redirection if slug was changed
+			if (
+				urlContainsCurrentSlug &&
+				currentSlug &&
+				formState.slug &&
+				currentSlug !== formState.slug
+			) {
+				// Replace the old slug with the new slug in the URL
+				const newPathname = pathname.replace(
+					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
+					`/${formState.slug}`
+				);
+
+				// Navigate to the new URL
+				router.replace(newPathname);
+			}
+
 			toast.success('Organization details updated successfully');
 		} catch (err) {
 			if (err instanceof ConvexError) {

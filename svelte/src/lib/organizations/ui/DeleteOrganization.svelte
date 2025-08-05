@@ -5,7 +5,7 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
 
 	/** UI **/
@@ -13,7 +13,8 @@
 	import { toast } from 'svelte-sonner';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 
-	const roles = createRoles();
+	const roles = useRoles();
+	const isOwner = $derived(roles.hasOwnerRole);
 
 	/**
 	 * Component for deleting an organization
@@ -45,10 +46,10 @@
 			if (!activeOrganization) return;
 
 			await client.mutation(api.organizations.mutations.deleteOrganization, {
-				organizationId: activeOrganization._id
+				organizationId: activeOrganization.id
 			});
-			dialogOpen = false;
 
+			dialogOpen = false;
 			toast.success('Organization deleted successfully');
 
 			// Call the onSuccessfulDelete callback if provided
@@ -72,7 +73,7 @@
 	}
 </script>
 
-{#if roles.hasOwnerRole && activeOrganization}
+{#if isOwner && activeOrganization}
 	<Dialog.Root bind:open={dialogOpen}>
 		<Dialog.Trigger
 			class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm"

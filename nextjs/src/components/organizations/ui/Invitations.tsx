@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
+import { authClient } from '@/components/auth/api/auth-client';
 
 // Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';
@@ -12,7 +13,6 @@ import { toast } from 'sonner';
 import { Search } from 'lucide-react';
 
 // Types
-import { authClient } from '@/components/auth/api/auth-client';
 type Role = typeof authClient.$Infer.Member.role;
 
 /**
@@ -152,13 +152,13 @@ export default function Invitations(): React.ReactNode {
 											{/* Role */}
 											<td className="!text-surface-700-300 hidden !w-32 sm:table-cell">
 												<div className="flex items-center">
-													{invitation.role === 'role_organization_owner' ? (
+													{invitation.role === 'owner' ? (
 														<>
 															<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
 																Owner
 															</span>
 														</>
-													) : invitation.role === 'role_organization_admin' ? (
+													) : invitation.role === 'admin' ? (
 														<>
 															<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
 																Admin

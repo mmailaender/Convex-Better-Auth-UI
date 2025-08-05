@@ -2,6 +2,7 @@
 	// API
 	import { api } from '$convex/_generated/api';
 	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { authClient } from '$lib/auth/api/auth-client';
 	const client = useConvexClient();
 
 	// Icons
@@ -20,29 +21,28 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 	import type { FunctionReturnType } from 'convex/server';
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	let { initialData }: { initialData?: UserResponse } = $props();
 
 	// Query
-	const response = useQuery(api.users.queries.getUser, {}, { initialData });
+	const activeUserResponse = useQuery(api.users.queries.getActiveUser, {}, { initialData });
+	// Derived state
+	const activeUser = $derived(activeUserResponse.data);
 
 	// State
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
-	let name: string = $state('');
+	let name: string = $derived(activeUser?.name ?? '');
 	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
 
 	let avatarKey: number = $state(0); // Force re-render when image changes
 
-	// Derived state
-	const user = $derived(response.data);
-
 	// Initialize state when user data is available
 	$effect(() => {
-		if (user && name === '') {
-			name = user.name;
+		if (activeUser && name === '') {
+			name = activeUser.name;
 		}
 	});
 
@@ -51,7 +51,7 @@
 		event.preventDefault();
 
 		try {
-			await client.mutation(api.users.mutations.updateUserName, { name });
+			await authClient.updateUser({ name });
 			isDialogOpen = false;
 			isDrawerOpen = false;
 			toast.success('Profile name updated successfully');
@@ -98,8 +98,10 @@
 			const result = await response.json();
 			const storageId = result.storageId as Id<'_storage'>;
 
-			// Update the user's avatar with the storage ID
-			await client.mutation(api.users.mutations.updateAvatar, { storageId });
+			// Update the user's avatar with the storage ID and get the image URL
+			const imageUrl = await client.mutation(api.users.mutations.updateAvatar, { storageId });
+
+			await authClient.updateUser({ image: imageUrl });
 
 			// Force avatar to re-render with new image - this will trigger new loading
 			avatarKey += 1;
@@ -115,7 +117,7 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	{#if !user}
+	{#if !activeUser}
 		<div class="bg-success-200-800 rounded-base h-16 w-full animate-pulse"></div>
 	{:else}
 		<!-- Avatar + Upload -->
@@ -126,7 +128,7 @@
 				>
 					{#key avatarKey}
 						<Avatar.Root class="size-20" bind:loadingStatus>
-							<Avatar.Image src={user.image} alt={user.name} />
+							<Avatar.Image src={activeUser.image} alt={activeUser.name} />
 							<Avatar.Fallback>
 								{#if loadingStatus === 'loading'}
 									<div
@@ -137,7 +139,7 @@
 										></div>
 									</div>
 								{:else}
-									<Avatar.Marble name={user.name} />
+									<Avatar.Marble name={activeUser.name} />
 								{/if}
 							</Avatar.Fallback>
 						</Avatar.Root>
@@ -160,7 +162,7 @@
 			>
 				<div class="flex w-full flex-col gap-1 text-left">
 					<span class="text-surface-600-400 text-xs">Name</span>
-					<span class="text-surface-800-200 font-medium">{user.name}</span>
+					<span class="text-surface-800-200 font-medium">{activeUser.name}</span>
 				</div>
 				<div class="btn preset-filled-surface-200-800 p-2">
 					<Pencil class="size-4" />
@@ -196,7 +198,7 @@
 			>
 				<div class="flex w-full flex-col gap-1 text-left">
 					<span class="text-surface-600-400 text-xs">Name</span>
-					<span class="text-surface-800-200 font-medium">{user.name}</span>
+					<span class="text-surface-800-200 font-medium">{activeUser.name}</span>
 				</div>
 				<div class="btn-icon preset-faded-surface-50-950">
 					<Pencil class="size-4" />

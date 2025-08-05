@@ -3,25 +3,20 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
 
-	// API (Convex)
-	import { useConvexClient } from 'convex-svelte';
-	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
-	import { api } from '$convex/_generated/api';
+	// API
 	import { ConvexError } from 'convex/values';
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	// State
 	let deleteDialogOpen: boolean = $state(false);
-
-	const client = useConvexClient();
-	const { signOut } = useAuth();
 
 	/**
 	 * Handle the delete confirmation action
 	 */
 	async function handleConfirm(): Promise<void> {
 		try {
-			await client.action(api.users.actions.invalidateAndDeleteUser, {});
-			await signOut();
+			await authClient.deleteUser();
+			await authClient.signOut();
 			deleteDialogOpen = false;
 		} catch (error) {
 			console.error('Error deleting user:', error);

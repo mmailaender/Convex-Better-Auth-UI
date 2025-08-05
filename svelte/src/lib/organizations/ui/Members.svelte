@@ -8,23 +8,19 @@
 	import { Search, Trash, Pencil } from '@lucide/svelte';
 
 	// API
-	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	const client = useConvexClient();
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	// API Types
-	import type { Doc, Id } from '$convex/_generated/dataModel';
-	type Role = Doc<'organizationMembers'>['role'];
+	type Member = typeof authClient.$Infer.Member;
+	type Role = Member['role'];
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.queries.getOrganizationMembers
-	>;
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
-	type GetOrganizationMemberReturnType = MembersResponse extends Array<infer T> ? T : never;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	let {
@@ -32,40 +28,35 @@
 	}: {
 		initialData?: {
 			activeOrganization: ActiveOrganizationResponse;
-			members: MembersResponse;
 			user: UserResponse;
 		};
 	} = $props();
 
 	// Queries
-	const currentUserResponse = useQuery(
-		api.users.queries.getUser,
+	const activeUserResponse = useQuery(
+		api.users.queries.getActiveUser,
 		{},
 		{ initialData: initialData?.user }
 	);
-	const currentOrganizationResponse = useQuery(
+	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
-	const membersResponse = useQuery(
-		api.organizations.members.queries.getOrganizationMembers,
-		{},
-		{ initialData: initialData?.members }
-	);
 
 	// State
-	let selectedUserId: Id<'users'> | null = $state(null);
+	let selectedUserId: string | null = $state(null);
 	let searchQuery: string = $state('');
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
-	let selectedMember: GetOrganizationMemberReturnType | null = $state(null);
+	let selectedMember: Member | null = $state(null);
 
 	// Derived data
-	const currentUser = $derived(currentUserResponse.data);
-	const currentOrganization = $derived(currentOrganizationResponse.data);
-	const members = $derived(membersResponse.data);
-	const roles = createRoles();
+	const activeUser = $derived(activeUserResponse.data);
+	const activeOrganization = $derived(activeOrganizationResponse.data);
+	const members = $derived(activeOrganization?.members);
+	const roles = useRoles();
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	/**
 	 * Filter and sort members based on search query and role
@@ -83,9 +74,9 @@
 			.sort((a, b) => {
 				// Sort by role (owner first, then admin, then member)
 				const roleOrder: Record<Role, number> = {
-					role_organization_owner: 0,
-					role_organization_admin: 1,
-					role_organization_member: 2
+					owner: 0,
+					admin: 1,
+					member: 2
 				};
 
 				// Primary sort by role
@@ -100,20 +91,18 @@
 	/**
 	 * Handles updating a member's role
 	 */
-	async function handleUpdateRole(userId: Id<'users'>, newRole: Role): Promise<void> {
-		if (newRole === 'role_organization_owner') return; // Cannot set someone as owner this way
+	async function handleUpdateRole(memberId: string, newRole: Role): Promise<void> {
+		if (newRole === 'owner') return; // Cannot set someone as owner this way
 
-		try {
-			await client.mutation(api.organizations.members.mutations.updateMemberRole, {
-				userId,
-				newRole
-			});
-
+		const { error } = await authClient.organization.updateMemberRole({
+			role: [newRole],
+			memberId
+		});
+		if (error) {
+			toast.error(error.statusText);
+		} else {
 			toast.success('Role updated successfully!');
 			isDrawerOpen = false;
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Failed to update role');
-			console.error(err);
 		}
 	}
 
@@ -121,40 +110,33 @@
 	 * Handles removing a member from the organization
 	 */
 	async function handleRemoveMember(): Promise<void> {
-		if (!selectedUserId) return;
+		if (!selectedUserId || !activeOrganization?.id) return;
 
-		try {
-			await client.mutation(api.organizations.members.mutations.removeMember, {
-				userId: selectedUserId
-			});
-
+		const { error } = await authClient.organization.removeMember({
+			memberIdOrEmail: selectedUserId,
+			organizationId: activeOrganization.id
+		});
+		if (error) {
+			toast.error(error.statusText);
+		} else {
 			toast.success('Member removed successfully!');
 			isDialogOpen = false;
 			isDrawerOpen = false;
-		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: 'Unknown error. Please try again. If it persists, contact support.'
-			);
 		}
 	}
 
 	/**
 	 * Check if current user can edit a member
 	 */
-	function canEditMember(member: GetOrganizationMemberReturnType): boolean {
-		if (!roles.hasOwnerOrAdminRole) return false;
-		if (member.user._id === currentUser?._id) return false;
-		if (member.role === 'role_organization_owner') return false;
+	function canEditMember(member: Member): boolean {
+		if (!isOwnerOrAdmin) return false;
+		if (member.id === activeUser?.id) return false;
+		if (member.role === 'owner') return false;
 
 		// If current user is admin, they can't edit other admins
-		if (currentUser && members) {
-			const currentUserMember = members.find((m) => m.user._id === currentUser._id);
-			if (
-				currentUserMember?.role === 'role_organization_admin' &&
-				member.role === 'role_organization_admin'
-			) {
+		if (activeUser && members) {
+			const currentUserMember = members.find((m) => m.id === activeUser.id);
+			if (currentUserMember?.role === 'admin' && member.role === 'admin') {
 				return false;
 			}
 		}
@@ -165,27 +147,11 @@
 	/**
 	 * Handle member card click
 	 */
-	function handleMemberCardClick(member: GetOrganizationMemberReturnType): void {
+	function handleMemberCardClick(member: Member): void {
 		if (canEditMember(member)) {
 			selectedMember = member;
 			isDrawerOpen = true;
 		}
-	}
-
-	/**
-	 * Handle search input change
-	 */
-	function handleSearchChange(e: Event): void {
-		const target = e.target as HTMLInputElement;
-		searchQuery = target.value;
-	}
-
-	/**
-	 * Handle role selection change
-	 */
-	function handleRoleChange(e: Event, userId: Id<'users'>): void {
-		const target = e.target as HTMLSelectElement;
-		handleUpdateRole(userId, target.value as Role);
 	}
 </script>
 
@@ -201,8 +167,7 @@
 					type="text"
 					class="input w-hug w-full !border-0 border-transparent pl-8 text-sm"
 					placeholder="Search members..."
-					value={searchQuery}
-					onchange={handleSearchChange}
+					bind:value={searchQuery}
 				/>
 			</div>
 		</div>
@@ -210,7 +175,7 @@
 		<!-- Mobile Layout -->
 		<div class="block min-h-0 flex-1 sm:hidden">
 			<div class="flex max-h-[calc(100vh-12rem)] flex-col gap-2 overflow-y-auto pb-24">
-				{#each filteredMembers as member (member._id)}
+				{#each filteredMembers as member (member.id)}
 					<div
 						class={`bg-surface-50-950 rounded-container flex items-center justify-between p-4 pr-6 ${
 							canEditMember(member) ? 'hover:bg-surface-100-900 cursor-pointer' : ''
@@ -238,14 +203,14 @@
 							<div class="flex flex-col">
 								<div class="flex items-center space-x-2">
 									<span class="font-medium">{member.user.name}</span>
-									{#if member.role === 'role_organization_owner'}
+									{#if member.role === 'owner'}
 										<span
 											class="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2"
 										>
 											Owner
 										</span>
 									{/if}
-									{#if member.role === 'role_organization_admin'}
+									{#if member.role === 'admin'}
 										<span
 											class="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2"
 										>
@@ -279,13 +244,13 @@
 								<th class="text-surface-700-300 !w-48 p-2 !pl-0 text-left text-xs">Name</th>
 								<th class="text-surface-700-300 hidden p-2 text-left text-xs sm:flex">Email</th>
 								<th class="text-surface-700-300 !w-32 p-2 text-left text-xs">Role</th>
-								{#if roles.hasOwnerOrAdminRole}
+								{#if isOwnerOrAdmin}
 									<th class="!w-16 p-2 text-right"></th>
 								{/if}
 							</tr>
 						</thead>
 						<tbody>
-							{#each filteredMembers as member (member._id)}
+							{#each filteredMembers as member (member.id)}
 								<tr class="!border-surface-300-700 !border-t">
 									<!-- Member Name -->
 									<td class="!w-48 !max-w-48 !truncate !py-3 !pl-0">
@@ -317,30 +282,34 @@
 									<!-- Member Role -->
 									<td class="!w-32">
 										<div class="flex items-center">
-											{#if roles.hasOwnerOrAdminRole && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
 												<select
 													value={member.role}
-													onchange={(e) => handleRoleChange(e, member.user._id)}
+													onchange={(e) =>
+														handleUpdateRole(
+															member.id,
+															(e.target as HTMLSelectElement).value as Role
+														)}
 													class="select cursor-pointer text-sm"
 												>
-													<option value="role_organization_admin">Admin</option>
-													<option value="role_organization_member">Member</option>
+													<option value="admin">Admin</option>
+													<option value="member">Member</option>
 												</select>
-											{:else if member.role === 'role_organization_owner'}
+											{:else if member.role === 'owner'}
 												<span
-													class="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2"
+													class="bg-warning-500 text-warning-50 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
 												>
 													Owner
 												</span>
-											{:else if member.role === 'role_organization_admin'}
+											{:else if member.role === 'admin'}
 												<span
-													class="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2"
+													class="bg-primary-500 text-primary-50 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
 												>
 													Admin
 												</span>
 											{:else}
 												<span
-													class="badge preset-filled-surface-300-700 border-surface-400-600 h-6 border px-2"
+													class="bg-surface-500 text-surface-50 inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
 												>
 													Member
 												</span>
@@ -350,11 +319,11 @@
 									<!-- Member Actions -->
 									<td class="!w-16">
 										<div class="flex justify-end space-x-2">
-											{#if roles.hasOwnerOrAdminRole && member.user._id !== currentUser?._id && member.role !== 'role_organization_owner'}
+											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
 												<Dialog.Root bind:open={isDialogOpen}>
 													<Dialog.Trigger
 														class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
-														onclick={() => (selectedUserId = member.user._id)}
+														onclick={() => (selectedUserId = member.id)}
 													>
 														<Trash class="size-4 opacity-70" />
 													</Dialog.Trigger>
@@ -439,11 +408,15 @@
 							<span class="label">Role</span>
 							<select
 								value={selectedMember!.role}
-								onchange={(e) => handleRoleChange(e, selectedMember!.user._id)}
+								onchange={(e) =>
+									handleUpdateRole(
+										selectedMember!.id,
+										(e.target as HTMLSelectElement).value as Role
+									)}
 								class="select w-full"
 							>
-								<option value="role_organization_admin">Admin</option>
-								<option value="role_organization_member">Member</option>
+								<option value="admin">Admin</option>
+								<option value="member">Member</option>
 							</select>
 						</label>
 
@@ -452,7 +425,7 @@
 							<Dialog.Root bind:open={isDialogOpen}>
 								<Dialog.Trigger
 									class="btn preset-filled-surface-300-700"
-									onclick={() => (selectedUserId = selectedMember!.user._id)}
+									onclick={() => (selectedUserId = selectedMember!.id)}
 								>
 									<Trash class="size-4" /> Remove
 								</Dialog.Trigger>
@@ -488,7 +461,7 @@
 			</Drawer.Content>
 		</Drawer.Root>
 	</div>
-{:else if !currentOrganization || !currentUser}
+{:else if !activeOrganization || !activeUser}
 	<div>Failed to load members</div>
 {:else}
 	<div>Loading members...</div>

@@ -92,10 +92,11 @@ export default function Members(): React.ReactNode {
 	 * Handles removing a member from the organization
 	 */
 	const handleRemoveMember = async (): Promise<void> => {
-		if (!selectedUserId) return;
+		if (!selectedUserId || !activeOrganization?.id) return;
 
 		const { error } = await authClient.organization.removeMember({
-			memberIdOrEmail: selectedUserId // required
+			memberIdOrEmail: selectedUserId,
+			organizationId: activeOrganization.id
 		});
 		if (error) {
 			toast.error(error.message);

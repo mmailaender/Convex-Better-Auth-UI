@@ -11,8 +11,21 @@
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
 
 	// API
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	const roles = createRoles();
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { api } from '$convex/_generated/api';
+	const roles = useRoles();
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+
+	// API Types
+	import type { FunctionReturnType } from 'convex/server';
+
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.queries.getActiveOrganization
+	>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type InvitationListResponse = FunctionReturnType<
+		typeof api.organizations.invitations.queries.listInvitations
+	>;
 
 	// Types
 	type OrganizationProfileProps = {
@@ -20,9 +33,21 @@
 		 * Optional callback that will be called when an organization is successfully deleted
 		 */
 		onSuccessfulDelete?: (() => void) | undefined;
+		/**
+		 * Optional initial data to pass to child components for faster initialization
+		 */
+		initialData?: {
+			// For OrganizationInfo component
+			user?: UserResponse;
+			activeOrganization?: ActiveOrganizationResponse;
+			// For MembersAndInvitations component
+			invitationList?: InvitationListResponse;
+			// For LeaveOrganization component
+			activeUser?: UserResponse;
+		};
 	};
 
-	const { onSuccessfulDelete }: OrganizationProfileProps = $props();
+	const { onSuccessfulDelete, initialData }: OrganizationProfileProps = $props();
 
 	// State
 	let activeMobileTab: string = $state('');
@@ -32,26 +57,24 @@
 		{
 			value: 'general',
 			label: 'General',
-			Icon: Bolt,
+			icon: Bolt,
 			showForAllUsers: true
 		},
 		{
 			value: 'members',
 			label: 'Members',
-			Icon: UserIcon,
+			icon: UserIcon,
 			showForAllUsers: false
 		},
 		{
 			value: 'billing',
 			label: 'Billing',
-			Icon: Wallet,
+			icon: Wallet,
 			showForAllUsers: false
 		}
 	];
 
-	const visibleTabs = $derived(
-		tabs.filter((tab) => tab.showForAllUsers || roles.hasOwnerOrAdminRole)
-	);
+	const visibleTabs = $derived(tabs.filter((tab) => tab.showForAllUsers || isOwnerOrAdmin));
 
 	function handleMobileTabChange(value: string) {
 		// Slight delay to allow tab state to update before showing content
@@ -76,7 +99,7 @@
 						class="sm:data-[state=active]:bg-surface-400-600/50 gap-2 px-2 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
 					>
 						<div class="flex h-6 w-6 shrink-0 items-center justify-center">
-							<tab.Icon />
+							<tab.icon />
 						</div>
 						<span class="w-full">{tab.label}</span>
 					</Tabs.Trigger>
@@ -93,22 +116,39 @@
 					>
 						General settings
 					</h6>
-					<OrganizationInfo />
+					<OrganizationInfo
+						initialData={initialData
+							? {
+									user: initialData.user,
+									activeOrganization: initialData.activeOrganization
+								}
+							: undefined}
+					/>
 				</div>
 				<div class="pt-16">
-					<LeaveOrganization />
+					<LeaveOrganization
+						initialData={{
+							activeUser: initialData?.activeUser,
+							activeOrganization: initialData?.activeOrganization
+						}}
+					/>
 					<DeleteOrganization {onSuccessfulDelete} />
 				</div>
 			</Tabs.Content>
 
-			{#if roles.hasOwnerOrAdminRole}
+			{#if isOwnerOrAdmin}
 				<Tabs.Content value="members">
 					<h6
 						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
 					>
 						Members
 					</h6>
-					<MembersAndInvitations />
+					<MembersAndInvitations
+						initialData={{
+							activeOrganization: initialData?.activeOrganization,
+							invitationList: initialData?.invitationList
+						}}
+					/>
 				</Tabs.Content>
 				<Tabs.Content value="billing">
 					<h6
@@ -141,7 +181,7 @@
 							<div
 								class="bg-surface-300-700 rounded-base flex h-7 w-7 shrink-0 items-center justify-center"
 							>
-								<tab.Icon />
+								<tab.icon />
 							</div>
 							<span class="w-full">{tab.label}</span>
 							<ChevronRight class="flex" />
@@ -175,17 +215,32 @@
 						>
 							General settings
 						</h6>
-						<OrganizationInfo />
+						<OrganizationInfo
+							initialData={{
+								user: initialData?.user,
+								activeOrganization: initialData?.activeOrganization
+							}}
+						/>
 					</div>
 					<DeleteOrganization {onSuccessfulDelete} />
-					<LeaveOrganization />
+					<LeaveOrganization
+						initialData={{
+							activeUser: initialData?.activeUser,
+							activeOrganization: initialData?.activeOrganization
+						}}
+					/>
 				{:else if activeMobileTab === 'members'}
 					<h6
 						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium"
 					>
 						Members
 					</h6>
-					<MembersAndInvitations />
+					<MembersAndInvitations
+						initialData={{
+							activeOrganization: initialData?.activeOrganization,
+							invitationList: initialData?.invitationList
+						}}
+					/>
 				{:else if activeMobileTab === 'billing'}
 					<h6
 						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium"

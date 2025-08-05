@@ -11,6 +11,7 @@
 
 	// API Auth
 	import { useConvexClient } from 'convex-svelte';
+	const client = useConvexClient();
 	import { authClient } from '$lib/auth/api/auth-client';
 	import { api } from '$convex/_generated/api';
 
@@ -69,12 +70,9 @@
 		verifyingEmail = true;
 
 		try {
-			const data = await useConvexClient().action(
-				api.users.actions.checkEmailAvailabilityAndValidity,
-				{
-					email: emailValue
-				}
-			);
+			const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
+				email: emailValue
+			});
 
 			if (data.exists) {
 				currentStep = 'login';

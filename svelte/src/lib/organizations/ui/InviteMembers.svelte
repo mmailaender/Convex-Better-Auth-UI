@@ -3,103 +3,100 @@
 	import { toast } from 'svelte-sonner';
 
 	// API
-	import { useConvexClient } from 'convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	const client = useConvexClient();
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	// API Types
+	type Role = typeof authClient.$Infer.Member.role;
 	import type { FunctionReturnType } from 'convex/server';
-	import type { Doc } from '$convex/_generated/dataModel';
-	type Role = Doc<'organizationMembers'>['role'];
-	type InvitationResponse =
-		FunctionReturnType<typeof api.organizations.invitations.actions.inviteMembers> extends Array<
-			infer T
-		>
-			? T
-			: never;
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.queries.getActiveOrganization
+	>;
 
 	// State
 	let emailInput: string = $state('');
-	let selectedRole: Role = $state('role_organization_member');
+	let selectedRole: Role = $state('member');
 	let isProcessing: boolean = $state(false);
 
 	// Props
-	let { onSuccess }: { onSuccess?: () => void } = $props();
+	let {
+		onSuccess,
+		initialData
+	}: { onSuccess?: () => void; initialData?: { activeOrganization?: ActiveOrganizationResponse } } =
+		$props();
+
+	// Queries
+	const activeOrganizationResponse = useQuery(
+		api.organizations.queries.getActiveOrganization,
+		{},
+		{ initialData: initialData?.activeOrganization }
+	);
+	const activeOrganization = $derived(activeOrganizationResponse.data);
 
 	/**
 	 * Handles the submission of the invitation form
 	 */
 	async function handleInvite(event: SubmitEvent): Promise<void> {
 		event.preventDefault();
-
 		if (isProcessing) return;
 		isProcessing = true;
 
-		try {
-			// Split and clean email addresses
-			const emails = emailInput
-				.replace(/[,;\s]+/g, ',') // Replace all delimiters (commas, semicolons, spaces) with a single comma
-				.split(',')
-				.map((email: string) => email.trim())
-				.filter((email: string) => email.length > 0);
+		const emails = emailInput
+			.replace(/[,;\s]+/g, ',')
+			.split(',')
+			.map((email) => email.trim())
+			.filter((email) => email.length > 0);
 
-			if (emails.length === 0) {
-				toast.error('Please enter at least one email address');
-				isProcessing = false;
-				return;
-			}
+		if (emails.length === 0) {
+			toast.error('Please enter at least one email address');
+			isProcessing = false;
+			return;
+		}
 
-			// Send invitations for all emails at once using Convex action
-			const results = await client.action(api.organizations.invitations.actions.inviteMembers, {
-				emails,
-				role: selectedRole
+		if (!activeOrganization?.id) {
+			toast.error('No active organization found');
+			isProcessing = false;
+			return;
+		}
+
+		const results = [];
+
+		// Send invitations one by one
+		for (const email of emails) {
+			const { data, error } = await authClient.organization.inviteMember({
+				email,
+				role: selectedRole,
+				organizationId: activeOrganization.id,
+				resend: true
 			});
 
-			// Process results
-			const successful = results.filter((r: InvitationResponse) => r.success);
-			const failed = results.filter((r: InvitationResponse) => !r.success);
-
-			if (successful.length > 0) {
-				const msg = `Sent ${successful.length} invitation(s) to: ${successful
-					.map((r: InvitationResponse) => r.email)
-					.join(', ')}`;
-				toast.success(msg);
-				emailInput = '';
-				if (onSuccess) {
-					onSuccess();
-				}
-			}
-
-			if (failed.length > 0) {
-				const msg = `Failed to send invitation(s) to: ${failed
-					.map((r: InvitationResponse) => r.email)
-					.join(', ')}`;
-				toast.error(msg);
-			}
-		} catch (err) {
-			console.error('An error occurred while processing invitations: ', err);
-			const errorMsg =
-				err instanceof Error ? err.message : 'An error occurred while processing invitations';
-			toast.error(errorMsg);
-		} finally {
-			isProcessing = false;
+			results.push({
+				email,
+				success: !error,
+				data,
+				error
+			});
 		}
-	}
 
-	/**
-	 * Handle email input change
-	 */
-	function handleEmailChange(e: Event): void {
-		const target = e.target as HTMLTextAreaElement;
-		emailInput = target.value;
-	}
+		const successful = results.filter((r) => r.success);
+		const failed = results.filter((r) => !r.success);
 
-	/**
-	 * Handle role selection change
-	 */
-	function handleRoleChange(e: Event): void {
-		const target = e.target as HTMLSelectElement;
-		selectedRole = target.value as Role;
+		if (successful.length > 0) {
+			const msg = `Sent ${successful.length} invitation(s) to: ${successful.map((r) => r.email).join(', ')}`;
+			toast.success(msg);
+			emailInput = '';
+			if (onSuccess) {
+				onSuccess();
+			}
+		}
+
+		if (failed.length > 0) {
+			const msg = `Failed to send invitation(s) to: ${failed.map((r) => r.email).join(', ')}`;
+			toast.error(msg);
+		}
+
+		isProcessing = false;
 	}
 </script>
 
@@ -108,9 +105,9 @@
 		<div class="flex flex-col">
 			<label>
 				<span class="label">Role</span>
-				<select value={selectedRole} onchange={handleRoleChange} class="select w-full">
-					<option value="role_organization_member">Member</option>
-					<option value="role_organization_admin">Admin</option>
+				<select bind:value={selectedRole} class="select w-full cursor-pointer">
+					<option value="member">Member</option>
+					<option value="admin">Admin</option>
 				</select>
 			</label>
 		</div>
@@ -118,8 +115,7 @@
 			<label>
 				<span class="label">Email(s)</span>
 				<textarea
-					value={emailInput}
-					onchange={handleEmailChange}
+					bind:value={emailInput}
 					placeholder="example@email.com, example2@email.com"
 					class="textarea min-h-24 grow"
 					required
