@@ -3,7 +3,7 @@
 // React
 import { ComponentProps, useState } from 'react';
 
-// Primitive
+// Primitives
 import * as Popover from '@/components/primitives/ui/popover';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import * as Avatar from '@/components/primitives/ui/avatar';

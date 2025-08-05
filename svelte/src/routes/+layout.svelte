@@ -2,7 +2,6 @@
 	import '../app.css';
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { authClient } from '$lib/auth/api/auth-client';
-	import { api } from '$convex/_generated/api';
 
 	import { Toaster } from '$lib/primitives/ui/sonner';
 	import OrganizationSwitcher from '$lib/organizations/ui/OrganizationSwitcher.svelte';
@@ -10,7 +9,7 @@
 
 	let { children } = $props();
 
-	createSvelteAuthClient({ authClient, api });
+	createSvelteAuthClient({ authClient });
 </script>
 
 <Toaster position="top-center" />

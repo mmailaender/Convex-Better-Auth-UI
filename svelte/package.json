@@ -64,7 +64,7 @@
 		"@auth/core": "^0.40.0",
 		"@convex-dev/better-auth": "^0.7.13",
 		"@convex-dev/resend": "0.1.7",
-		"@mmailaender/convex-better-auth-svelte": "^0.0.2",
+		"@mmailaender/convex-better-auth-svelte": "^0.0.4",
 		"@tailwindcss/vite": "^4.1.11",
 		"@vercel/blob": "^1.1.1",
 		"arktype": "^2.1.20",
