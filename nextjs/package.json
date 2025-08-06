@@ -19,6 +19,7 @@
 		"@convex-dev/better-auth": "^0.7.13",
 		"@convex-dev/resend": "0.1.7",
 		"@floating-ui/react": "^0.27.15",
+		"@icons-pack/react-simple-icons": "^13.7.0",
 		"@radix-ui/react-avatar": "^1.1.10",
 		"@radix-ui/react-dialog": "^1.1.14",
 		"@radix-ui/react-popover": "^1.1.14",

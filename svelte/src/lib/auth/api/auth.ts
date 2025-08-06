@@ -5,11 +5,17 @@ import { type GenericCtx } from '../../../convex/_generated/server';
 // import { components } from '../../../convex/_generated/api';
 
 // Emails
-import { sendEmailVerification, sendInviteMember } from '../../../convex/email';
+import {
+	sendEmailVerification,
+	sendInviteMember,
+	sendMagicLink,
+	sendOTPVerification,
+	sendResetPassword
+} from '../../../convex/email';
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
 import { requireMutationCtx } from '@convex-dev/better-auth/utils';
-import { organization } from 'better-auth/plugins';
+import { emailOTP, magicLink, organization } from 'better-auth/plugins';
 // import { api, internal } from '../../../../convex/_generated/api';
 // import { Id } from '@/convex/_generated/dataModel';
 
@@ -36,7 +42,13 @@ export const createAuth = (ctx: GenericCtx) =>
 		// Simple non-verified email/password to get started
 		emailAndPassword: {
 			enabled: true,
-			requireEmailVerification: true
+			requireEmailVerification: true,
+			sendResetPassword: async ({ user, url }) => {
+				await sendResetPassword(requireMutationCtx(ctx), {
+					to: user.email,
+					url
+				});
+			}
 		},
 		socialProviders: {
 			github: {
@@ -55,6 +67,22 @@ export const createAuth = (ctx: GenericCtx) =>
 		plugins: [
 			// The Convex plugin is required
 			convex(),
+			emailOTP({
+				sendVerificationOTP: async ({ email, otp }) => {
+					await sendOTPVerification(requireMutationCtx(ctx), {
+						to: email,
+						code: otp
+					});
+				}
+			}),
+			magicLink({
+				sendMagicLink: async ({ email, url }) => {
+					await sendMagicLink(requireMutationCtx(ctx), {
+						to: email,
+						url
+					});
+				}
+			}),
 			organization({
 				schema: {
 					organization: {

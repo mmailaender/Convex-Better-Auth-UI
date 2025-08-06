@@ -62,7 +62,7 @@ export const sendOTPVerification = async (
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
-		subject: 'Verify your email address',
+		subject: `${code} is your verification code`,
 		html: renderVerifyOTP({
 			code,
 			brandName: BRAND_NAME,

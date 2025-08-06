@@ -7,6 +7,7 @@ import type { WithoutSystemFields } from 'convex/server';
 import type { Doc, Id } from '../../_generated/dataModel';
 import { createAuth } from '../../../src/components/auth/api/auth';
 import { betterAuthComponent } from '../../auth';
+import { components } from '../../_generated/api';
 
 /**
  * Extract the first name from a user's full name.
@@ -149,10 +150,9 @@ export const patchUserModel = async (
  */
 export const isUserExistingModel = async (ctx: QueryCtx, args: { email: string }) => {
 	const { email } = args;
-
-	const user = await ctx.db
-		.query('users')
-		.filter((q) => q.eq(q.field('email'), email))
-		.first();
+	const user = await ctx.runQuery(components.betterAuth.lib.findOne, {
+		model: 'user',
+		where: [{ field: 'email', operator: 'eq', value: email }]
+	});
 	return user !== null;
 };

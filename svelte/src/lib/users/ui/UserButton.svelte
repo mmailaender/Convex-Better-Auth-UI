@@ -19,6 +19,7 @@
 	import type { ComponentProps } from 'svelte';
 	type PopoverProps = ComponentProps<typeof Popover.Content>;
 	import type { FunctionReturnType } from 'convex/server';
+	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
 	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
@@ -51,14 +52,6 @@
 	function openProfileModal(): void {
 		userPopoverOpen = false;
 		profileDialogOpen = true;
-	}
-
-	/**
-	 * Handle sign out
-	 */
-	async function handleSignOut(): Promise<void> {
-		await authClient.signOut();
-		userPopoverOpen = false;
 	}
 </script>
 
@@ -93,12 +86,10 @@
 						</div>
 						<ChevronRight class="size-4" />
 					</button>
-					<button
+					<SignOutButton
+						onSuccess={() => (userPopoverOpen = false)}
 						class="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-						onclick={handleSignOut}
-					>
-						Sign out
-					</button>
+					/>
 				</div>
 			</Popover.Content>
 		</Popover.Root>

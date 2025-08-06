@@ -4,10 +4,9 @@ import { v } from 'convex/values';
 // const schema = defineSchema({ ...authFullTables });
 const schema = defineSchema({
 	users: defineTable({
-		email: v.string(),
 		imageId: v.optional(v.id('_storage')),
 		activeOrganizationId: v.optional(v.string())
-	}).index('email', ['email']),
+	}),
 
 	organizations: defineTable({
 		logoId: v.optional(v.id('_storage')),

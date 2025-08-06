@@ -10,6 +10,7 @@ const isLogin = createRouteMatcher(['/signin']);
 const isPublic = createRouteMatcher([
 	'/',
 	'/signin',
+	'/reset-password',
 	'/api/auth{/*rest}',
 	'/pricing',
 	'/docs{/*rest}',
