@@ -1,6 +1,6 @@
 import { BetterAuth, type AuthFunctions, type PublicAuthFunctions } from '@convex-dev/better-auth';
 import { api, components, internal } from './_generated/api';
-import { GenericCtx, query } from './_generated/server';
+import { type GenericCtx } from './_generated/server';
 import type { Id, DataModel } from './_generated/dataModel';
 // import { createAuth } from '../lib/auth/api/auth';
 
@@ -66,20 +66,3 @@ export const { createUser, updateUser, deleteUser, createSession, isAuthenticate
 			// TODO: Add functionality from deleteUserModel
 		}
 	});
-
-// Example function for getting the current user
-// Feel free to edit, omit, etc.
-export const getCurrentUser = query({
-	args: {},
-	handler: async (ctx) => {
-		// Get user data from Better Auth - email, name, image, etc.
-		const userMetadata = await betterAuthComponent.getAuthUser(ctx);
-		if (!userMetadata) {
-			return null;
-		}
-		// Get user data from your application's database
-		return {
-			...userMetadata
-		};
-	}
-});

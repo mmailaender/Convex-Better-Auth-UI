@@ -1,17 +1,25 @@
-import { Popover as PopoverPrimitive } from "bits-ui";
-import Content from "./popover-content.svelte";
-import Trigger from "./popover-trigger.svelte";
+import { Popover as PopoverPrimitive } from '@ark-ui/svelte';
+import Content from './popover-content.svelte';
+import Trigger from './popover-trigger.svelte';
+
 const Root = PopoverPrimitive.Root;
-const Close = PopoverPrimitive.Close;
+const Title = PopoverPrimitive.Title;
+const Description = PopoverPrimitive.Description;
+const Close = PopoverPrimitive.CloseTrigger;
+const Positioner = PopoverPrimitive.Positioner;
 
 export {
 	Root,
-	Content,
 	Trigger,
+	Positioner,
+	Content,
+	Title,
+	Description,
 	Close,
 	//
 	Root as Popover,
+	Positioner as PopoverPositioner,
 	Content as PopoverContent,
 	Trigger as PopoverTrigger,
-	Close as PopoverClose,
+	Close as PopoverClose
 };

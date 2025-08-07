@@ -1,8 +1,11 @@
 export const AUTH_CONSTANTS = {
 	providers: {
 		github: true,
-		emailOTP: true,
+		google: false,
+		facebook: false,
+		keypass: false,
 		password: true,
+		emailOTP: true,
 		magicLink: true
 	},
 	terms: '#',

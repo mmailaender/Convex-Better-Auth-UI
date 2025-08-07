@@ -1,8 +1,13 @@
-import { ConvexError, v } from 'convex/values';
 import { mutation } from '../_generated/server';
-import { updateAvatarModel } from '../model/users';
+import { type Id } from '../_generated/dataModel';
+
 import { betterAuthComponent } from '../auth';
-import { Id } from '../_generated/dataModel';
+import { createAuth } from '../../src/components/auth/api/auth';
+
+import { ConvexError, v } from 'convex/values';
+import { APIError } from 'better-auth/api';
+
+import { updateAvatarModel } from '../model/users';
 
 /**
  * Update the authenticated user's avatar storage reference.
@@ -48,3 +53,29 @@ export const updateAvatar = mutation({
 // 		return await deleteUserModel(ctx, { userId });
 // 	}
 // });
+
+export const setPassword = mutation({
+	args: {
+		password: v.string()
+	},
+	handler: async (ctx, args) => {
+		const userId = (await betterAuthComponent.getAuthUserId(ctx)) as Id<'users'>;
+		if (!userId) {
+			throw new ConvexError('Not authenticated');
+		}
+
+		const auth = createAuth(ctx);
+		try {
+			await auth.api.setPassword({
+				body: { newPassword: args.password },
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		} catch (error) {
+			if (error instanceof APIError) {
+				throw new ConvexError(error.message);
+			}
+			console.error('Unexpected error setting password:', error);
+			throw new ConvexError('An unexpected error occurred while setting the password');
+		}
+	}
+});

@@ -8,28 +8,24 @@
 	// Components
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
 	import SignIn from '$lib/auth/ui/SignIn.svelte';
+	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { authClient } from '$lib/auth/api/auth-client';
 
 	// Types
-	import type { ComponentProps } from 'svelte';
-	type PopoverProps = ComponentProps<typeof Popover.Content>;
+	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { FunctionReturnType } from 'convex/server';
-	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
 	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	const {
-		popoverSide = 'bottom',
-		popoverAlign = 'end',
+		popoverPlacement = 'bottom',
 		initialData
 	}: {
-		popoverSide?: PopoverProps['side'];
-		popoverAlign?: PopoverProps['align'];
+		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: UserResponse;
 	} = $props();
 
@@ -57,7 +53,14 @@
 
 {#if isAuthenticated}
 	{#if user}
-		<Popover.Root bind:open={userPopoverOpen}>
+		<Popover.Root
+			bind:open={userPopoverOpen}
+			positioning={{
+				placement: popoverPlacement,
+				strategy: 'absolute',
+				offset: { mainAxis: 8, crossAxis: 0 }
+			}}
+		>
 			<Popover.Trigger>
 				<Avatar.Root class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
 					<Avatar.Image src={user.image} alt={user.name} />
@@ -66,7 +69,7 @@
 					</Avatar.Fallback>
 				</Avatar.Root>
 			</Popover.Trigger>
-			<Popover.Content side={popoverSide} align={popoverAlign}>
+			<Popover.Content>
 				<div class="flex flex-col gap-1 p-0">
 					<button
 						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"

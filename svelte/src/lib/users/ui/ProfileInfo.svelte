@@ -214,12 +214,12 @@
 							<span class="label">Name</span>
 							<input type="text" class="input w-full" bind:value={name} />
 						</label>
-						<Dialog.Footer>
-							<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
+						<Drawer.Footer>
+							<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>
 							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
 								Save
 							</button>
-						</Dialog.Footer>
+						</Drawer.Footer>
 					</div>
 				</form>
 				<Drawer.CloseX />

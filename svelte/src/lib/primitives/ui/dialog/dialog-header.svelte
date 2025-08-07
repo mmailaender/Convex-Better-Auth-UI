@@ -12,7 +12,8 @@
 
 <div
 	bind:this={ref}
-	data-slot="dialog-header"
+	data-scope="dialog"
+	data-part="header"
 	class={cn('flex flex-col gap-2 text-center sm:text-left', className)}
 	{...restProps}
 >

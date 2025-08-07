@@ -61,6 +61,7 @@
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
+		"@ark-ui/svelte": "^5.3.3",
 		"@auth/core": "^0.40.0",
 		"@convex-dev/better-auth": "^0.7.13",
 		"@convex-dev/resend": "0.1.7",
@@ -74,7 +75,6 @@
 		"convex-ents": "^0.15.0",
 		"convex-helpers": "^0.1.100",
 		"convex-svelte": "^0.0.11",
-		"path-to-regexp": "^8.2.0",
-		"sharp": "^0.34.3"
+		"path-to-regexp": "^8.2.0"
 	}
 }

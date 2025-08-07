@@ -100,7 +100,7 @@
 </script>
 
 {#if activeOrganization && members && members.length > 1}
-	<Dialog.Root open={isOpen} onOpenChange={(open) => (isOpen = open)}>
+	<Dialog.Root bind:open={isOpen}>
 		<Dialog.Trigger
 			class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm"
 		>

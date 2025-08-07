@@ -131,6 +131,48 @@ export function renderResetPassword({
 	});
 }
 
+export interface ChangeEmailVerificationProps {
+	url: string;
+	newEmail: string;
+	userName?: string;
+	brandName?: string;
+	brandTagline?: string;
+	brandLogoUrl?: string;
+}
+
+export function renderChangeEmailVerification({
+	url,
+	newEmail,
+	userName,
+	brandName,
+	brandTagline,
+	brandLogoUrl
+}: ChangeEmailVerificationProps): string {
+	const content = `
+		<h1 style="${styles.h1}">Verify your new email address</h1>
+		<p style="${styles.text}">
+			${userName ? `Hi ${userName}, ` : ''}You've requested to change your email address to <strong>${newEmail}</strong>.
+		</p>
+		<p style="${styles.text}">
+			To complete this change, please verify your new email address by clicking the link below:
+		</p>
+		<a href="${url}" target="_blank" style="${styles.link}; display: block; margin-bottom: 16px;">
+			Verify new email address
+		</a>
+		<p style="${styles.text}; color: #ababab; margin-top: 14px; margin-bottom: 16px;">
+			If you didn't request this change, you can safely ignore this email. Your current email address will remain unchanged.
+		</p>
+	`;
+
+	return renderBaseEmail({
+		children: content,
+		previewText: 'Verify your new email address',
+		brandName,
+		brandTagline,
+		brandLogoUrl
+	});
+}
+
 export interface InviteMemberProps {
 	url: string;
 	inviter: {

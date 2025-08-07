@@ -10,7 +10,8 @@ import {
 	sendInviteMember,
 	sendMagicLink,
 	sendOTPVerification,
-	sendResetPassword
+	sendResetPassword,
+	sendChangeEmailVerification
 } from '../../../convex/email';
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
@@ -57,10 +58,26 @@ export const createAuth = (ctx: GenericCtx) =>
 				clientSecret: process.env.GITHUB_CLIENT_SECRET as string
 			}
 		},
+		account: {
+			accountLinking: {
+				allowDifferentEmails: true
+			}
+		},
 
 		user: {
 			deleteUser: {
 				enabled: true
+			},
+			changeEmail: {
+				enabled: true,
+				sendChangeEmailVerification: async ({ user, newEmail, url }) => {
+					await sendChangeEmailVerification(requireMutationCtx(ctx), {
+						to: user.email,
+						url,
+						newEmail,
+						userName: user.name
+					});
+				}
 			}
 		},
 

@@ -21,9 +21,7 @@
 	const client = useConvexClient();
 
 	// Types
-	import type { ComponentProps } from 'svelte';
-	type PopoverProps = ComponentProps<typeof Popover.Content>;
-
+	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { FunctionReturnType } from 'convex/server';
 	import { page } from '$app/state';
 	type ActiveOrganizationResponse = FunctionReturnType<
@@ -35,14 +33,11 @@
 
 	// Props
 	const {
-		popoverSide = 'bottom',
-		popoverAlign = 'end',
+		popoverPlacement = 'bottom-end',
 		initialData
 	}: {
-		/** Side the popover appears on relative to the trigger */
-		popoverSide?: PopoverProps['side'];
-		/** Alignment of the popover relative to the trigger */
-		popoverAlign?: PopoverProps['align'];
+		/** Placement of the popover relative to the trigger */
+		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: {
 			listOrganizations: ListOrganizationsResponse;
 			activeOrganization: ActiveOrganizationResponse;
@@ -173,7 +168,7 @@
 
 	<!-- Has organizations - show the switcher -->
 {:else}
-	<Popover.Root bind:open={switcherPopoverOpen}>
+	<Popover.Root bind:open={switcherPopoverOpen} positioning={{ placement: popoverPlacement }}>
 		<Popover.Trigger
 			class="hover:bg-surface-200-800 border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
 		>
@@ -190,7 +185,7 @@
 			</div>
 			<ChevronsUpDown class="size-4 opacity-40" />
 		</Popover.Trigger>
-		<Popover.Content side={popoverSide} align={popoverAlign}>
+		<Popover.Content>
 			<div class="flex flex-col gap-1">
 				<div role="list" class="bg-surface-50-950 rounded-container flex flex-col">
 					<div

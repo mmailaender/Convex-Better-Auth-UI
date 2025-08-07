@@ -4,6 +4,7 @@ import {
 	renderMagicLink,
 	renderVerifyOTP,
 	renderResetPassword,
+	renderChangeEmailVerification,
 	renderInviteMember
 } from './model/emails/templates/emailTemplates';
 import { type RunMutationCtx } from '@convex-dev/better-auth';
@@ -117,6 +118,38 @@ export const sendResetPassword = async (
 		subject: 'Reset your password',
 		html: renderResetPassword({
 			url,
+			brandName: BRAND_NAME,
+			brandTagline: BRAND_TAGLINE,
+			brandLogoUrl: BRAND_LOGO_URL
+		})
+	});
+};
+
+export const sendChangeEmailVerification = async (
+	ctx: RunMutationCtx,
+	{
+		to,
+		url,
+		newEmail,
+		userName
+	}: {
+		to: string;
+		url: string;
+		newEmail: string;
+		userName?: string;
+	}
+) => {
+	if (!EMAIL_SEND_FROM) {
+		throw new Error('EMAIL_SEND_FROM environment variable is required but not set');
+	}
+	await resend.sendEmail(ctx, {
+		from: EMAIL_SEND_FROM,
+		to,
+		subject: 'Verify your new email address',
+		html: renderChangeEmailVerification({
+			url,
+			newEmail,
+			userName,
 			brandName: BRAND_NAME,
 			brandTagline: BRAND_TAGLINE,
 			brandLogoUrl: BRAND_LOGO_URL
