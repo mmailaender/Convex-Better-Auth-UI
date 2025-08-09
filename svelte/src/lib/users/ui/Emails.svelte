@@ -1,4 +1,6 @@
 <script lang="ts">
+	// Svelte
+	import { page } from '$app/state';
 	// API
 	import { api } from '$convex/_generated/api';
 	import { useQuery } from 'convex-svelte';
@@ -53,9 +55,17 @@
 
 		try {
 			isSubmitting = true;
+
+			const currentUrl = new URL(page.url);
+			if (
+				!currentUrl.searchParams.has('dialog') ||
+				currentUrl.searchParams.get('dialog') !== 'profile'
+			) {
+				currentUrl.searchParams.set('dialog', 'profile');
+			}
 			await authClient.changeEmail({
 				newEmail,
-				callbackURL: '/'
+				callbackURL: currentUrl.toString()
 			});
 			isDialogOpen = false;
 			isDrawerOpen = false;

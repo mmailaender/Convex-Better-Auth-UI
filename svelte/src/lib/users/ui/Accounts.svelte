@@ -1,7 +1,4 @@
 <script lang="ts">
-	// Svelte
-	import { onMount } from 'svelte';
-
 	// API
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
@@ -25,6 +22,7 @@
 	import { KeyRound, Lock, Plus, Trash2, ChevronDown } from '@lucide/svelte';
 
 	import { toast } from 'svelte-sonner';
+	import { page } from '$app/state';
 
 	let { initialData }: { initialData?: any } = $props();
 
@@ -121,8 +119,17 @@
 				return;
 			} else {
 				// For social providers
+				const currentUrl = new URL(page.url);
+				if (
+					!currentUrl.searchParams.has('dialog') ||
+					currentUrl.searchParams.get('dialog') !== 'profile'
+				) {
+					currentUrl.searchParams.set('dialog', 'profile');
+				}
+
 				await authClient.linkSocial({
-					provider: provider
+					provider: provider,
+					callbackURL: currentUrl.toString()
 				});
 				toast.success(`${getProviderLabel(provider)} account linked successfully`);
 			}

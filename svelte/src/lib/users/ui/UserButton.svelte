@@ -10,6 +10,11 @@
 	import SignIn from '$lib/auth/ui/SignIn.svelte';
 	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
 
+	// SvelteKit navigation/state
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { onMount } from 'svelte';
+
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
@@ -43,13 +48,75 @@
 	let profileDialogOpen = $state(false);
 	let signInDialogOpen = $state(false);
 	let avatarStatus = $state('');
+	// Track lifecycle and previous open state
+	let mounted = $state(false);
+	let prevProfileDialogOpen = $state(false);
+	// Guard to avoid reopening from URL while we're removing the param during a UI close
+	let closingViaUI = $state(false);
+
+	onMount(() => {
+		mounted = true;
+	});
+
+	// Opening is driven explicitly via openProfileModal() pushing the URL param.
 
 	/**
-	 * Open profile modal and close popover
+	 * Reflect dialog CLOSE to URL.
+	 * When the dialog transitions from open -> closed and the param exists,
+	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'profile';
+		if (mounted && prevProfileDialogOpen && !profileDialogOpen && has) {
+			closingViaUI = true;
+			const url = new URL(page.url);
+			url.searchParams.delete('dialog');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: true,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
+		prevProfileDialogOpen = profileDialogOpen;
+	});
+
+	/**
+	 * Source of truth: URL -> profileDialogOpen.
+	 * Open dialog when ?dialog=profile is present. Close when removed.
+	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'profile';
+		if (closingViaUI) {
+			if (!has) closingViaUI = false;
+			return;
+		}
+		if (has !== profileDialogOpen) {
+			profileDialogOpen = has;
+		}
+	});
+
+	// URL is the single source of truth; no state->URL/URL->state effects are needed.
+
+	/**
+	 * Open profile modal and close popover (via shallow routing)
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		profileDialogOpen = true;
+		const has = page.url.searchParams.get('dialog') === 'profile';
+		if (!has) {
+			const url = new URL(page.url);
+			url.searchParams.set('dialog', 'profile');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: false,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
 	}
 </script>
 
