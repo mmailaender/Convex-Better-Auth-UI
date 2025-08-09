@@ -1,17 +1,9 @@
 <script lang="ts">
-	import { Avatar as AvatarPrimitive } from "bits-ui";
-	import { cn } from "$lib/primitives/utils.js";
+	// import { Avatar as AvatarPrimitive } from 'bits-ui';
+	import { AvatarImage as ArkAvatarImage, type AvatarImageProps } from '@ark-ui/svelte';
+	import { cn } from '$lib/primitives/utils.js';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		...restProps
-	}: AvatarPrimitive.ImageProps = $props();
+	let { ref = $bindable(null), class: className, ...restProps }: AvatarImageProps = $props();
 </script>
 
-<AvatarPrimitive.Image
-	bind:ref
-	data-slot="avatar-image"
-	class={cn("aspect-square size-full", className)}
-	{...restProps}
-/>
+<ArkAvatarImage bind:ref class={cn('aspect-square size-full', className)} {...restProps} />

@@ -62,7 +62,9 @@
 	// State
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
-	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loading');
+	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+	let isUploading: boolean = $state(false);
+	let logoKey: number = $state(0); // Force re-render when logo changes
 
 	let formState = $state({ name: '', slug: '' });
 
@@ -109,8 +111,8 @@
 		if (!file || !activeOrganization) return;
 
 		try {
-			// Set loading status to show spinner immediately
-			imageLoadingStatus = 'loading';
+			// Show spinner immediately while uploading
+			isUploading = true;
 			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
@@ -136,12 +138,17 @@
 				logoId: storageId
 			});
 
+			// Force logo to re-render with new image - this will trigger new loading
+			logoKey += 1;
+
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
 			// Reset loading status on error
 			imageLoadingStatus = 'error';
+		} finally {
+			isUploading = false;
 		}
 	}
 
@@ -205,23 +212,32 @@
 			<div
 				class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 			>
-				<Avatar.Root class="rounded-container size-20" bind:loadingStatus={imageLoadingStatus}>
-					<Avatar.Image
-						src={activeOrganization.logo}
-						alt={activeOrganization.name || 'Organization'}
-					/>
-					<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
-						{#if imageLoadingStatus === 'loading'}
-							<div
-								class="rounded-container absolute inset-0 flex items-center justify-center bg-black/50"
-							>
-								<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-							</div>
-						{:else}
-							<Building2 class="size-10" />
-						{/if}
-					</Avatar.Fallback>
-				</Avatar.Root>
+				{#key logoKey}
+					<Avatar.Root
+						class="rounded-container size-20"
+						onStatusChange={(e) => {
+							console.log('Avatar status change:', e.status, 'URL:', activeOrganization.logo);
+							imageLoadingStatus = e.status;
+						}}
+					>
+						<Avatar.Image
+							src={isUploading ? undefined : activeOrganization.logo}
+							alt={activeOrganization.name || 'Organization'}
+						/>
+						<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
+							<!-- TODO: loadingStatus===error is a workaround and needs to be fixed as soon this issue is addressed https://github.com/get-convex/convex-js/issues/72-->
+							{#if imageLoadingStatus === 'loading' || imageLoadingStatus === 'error' || isUploading}
+								<div
+									class="rounded-container absolute inset-0 flex items-center justify-center bg-black/50"
+								>
+									<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
+								</div>
+							{:else}
+								<Building2 class="size-10" />
+							{/if}
+						</Avatar.Fallback>
+					</Avatar.Root>
+				{/key}
 
 				<div
 					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"

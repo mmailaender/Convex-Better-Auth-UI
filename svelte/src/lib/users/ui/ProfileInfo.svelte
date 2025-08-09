@@ -36,6 +36,7 @@
 	let isDrawerOpen: boolean = $state(false);
 	let name: string = $derived(activeUser?.name ?? '');
 	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+	let isUploading: boolean = $state(false);
 
 	let avatarKey: number = $state(0); // Force re-render when image changes
 
@@ -67,8 +68,8 @@
 		if (!file) return;
 
 		try {
-			// Set loading status to show spinner immediately
-			loadingStatus = 'loading';
+			// Show spinner immediately while uploading
+			isUploading = true;
 
 			// Optimize the image before upload
 			const optimizedFile = await optimizeImage(file, {
@@ -112,6 +113,8 @@
 			toast.error(`Failed to upload avatar: ${errorMsg}`);
 			// Reset loading status on error
 			loadingStatus = 'error';
+		} finally {
+			isUploading = false;
 		}
 	}
 </script>
@@ -127,10 +130,14 @@
 					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 				>
 					{#key avatarKey}
-						<Avatar.Root class="size-20" bind:loadingStatus>
-							<Avatar.Image src={activeUser.image} alt={activeUser.name} />
+						<Avatar.Root class="size-20" onStatusChange={(e) => (loadingStatus = e.status)}>
+							<Avatar.Image
+								src={isUploading ? undefined : activeUser.image}
+								alt={activeUser.name}
+							/>
 							<Avatar.Fallback>
-								{#if loadingStatus === 'loading'}
+								<!-- TODO: loadingStatus===error is a workaround and needs to be fixed as soon this issue is addressed https://github.com/get-convex/convex-js/issues/72-->
+								{#if loadingStatus === 'loading' || loadingStatus === 'error' || isUploading}
 									<div
 										class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50"
 									>

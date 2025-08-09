@@ -31,6 +31,7 @@
 
 	// Auth
 	const auth = useAuth();
+	const isLoading = $derived(auth.isLoading);
 	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Queries
@@ -41,6 +42,7 @@
 	let userPopoverOpen = $state(false);
 	let profileDialogOpen = $state(false);
 	let signInDialogOpen = $state(false);
+	let avatarStatus = $state('');
 
 	/**
 	 * Open profile modal and close popover
@@ -51,7 +53,9 @@
 	}
 </script>
 
-{#if isAuthenticated}
+{#if isLoading}
+	<div class="placeholder-circle size-10 animate-pulse"></div>
+{:else if isAuthenticated}
 	{#if user}
 		<Popover.Root
 			bind:open={userPopoverOpen}
@@ -62,10 +66,17 @@
 			}}
 		>
 			<Popover.Trigger>
-				<Avatar.Root class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
+				<Avatar.Root
+					class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4"
+					onStatusChange={(details) => (avatarStatus = details.status)}
+				>
 					<Avatar.Image src={user.image} alt={user.name} />
 					<Avatar.Fallback>
-						<Avatar.Marble name={user.name} />
+						{#if avatarStatus === 'loaded'}
+							<Avatar.Marble name={user.name} />
+						{:else}
+							<div class="placeholder-circle size-10 animate-pulse"></div>
+						{/if}
 					</Avatar.Fallback>
 				</Avatar.Root>
 			</Popover.Trigger>
