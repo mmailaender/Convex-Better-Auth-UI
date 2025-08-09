@@ -9,13 +9,12 @@
 	import { Pencil } from '@lucide/svelte';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Drawer from '$lib/primitives/ui/drawer';
-	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Avatar from '$lib/primitives/ui/avatar';
 	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { tick } from 'svelte';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
@@ -32,17 +31,18 @@
 	const activeUser = $derived(activeUserResponse.data);
 
 	// State
-	let isDialogOpen: boolean = $state(false);
-	let isDrawerOpen: boolean = $state(false);
-	let name: string = $derived(activeUser?.name ?? '');
+	let isEditingName: boolean = $state(false);
+	let name: string = $state('');
 	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
 	let isUploading: boolean = $state(false);
+
+	let nameInputEl: HTMLInputElement | null = $state(null);
 
 	let avatarKey: number = $state(0); // Force re-render when image changes
 
 	// Initialize state when user data is available
 	$effect(() => {
-		if (activeUser && name === '') {
+		if (activeUser && !isEditingName) {
 			name = activeUser.name;
 		}
 	});
@@ -53,8 +53,7 @@
 
 		try {
 			await authClient.updateUser({ name });
-			isDialogOpen = false;
-			isDrawerOpen = false;
+			isEditingName = false;
 			toast.success('Profile name updated successfully');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -161,76 +160,88 @@
 			</FileUpload>
 		</div>
 
-		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
-		<Dialog.Root bind:open={isDialogOpen}>
-			<Dialog.Trigger
-				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-				onclick={() => (isDialogOpen = true)}
-			>
-				<div class="flex w-full flex-col gap-1 text-left">
+		<!-- Inline editable name -->
+		<div
+			class={[
+				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
+				{
+					'cursor-pointer': !isEditingName,
+					'hover:bg-surface-50-950': !isEditingName,
+					'hover:border-surface-50-950': !isEditingName
+				}
+			]}
+		>
+			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
+				<div class="flex w-full flex-col gap-0">
 					<span class="text-surface-600-400 text-xs">Name</span>
-					<span class="text-surface-800-200 font-medium">{activeUser.name}</span>
-				</div>
-				<div class="btn preset-filled-surface-200-800 p-2">
-					<Pencil class="size-4" />
-				</div>
-			</Dialog.Trigger>
-
-			<Dialog.Content class="w-full max-w-md">
-				<Dialog.Header>
-					<Dialog.Title>Edit name</Dialog.Title>
-				</Dialog.Header>
-				<form onsubmit={handleSubmit} class="w-full">
-					<div class="flex flex-col">
-						<label class="flex flex-col">
-							<span class="label">Name</span>
-							<input type="text" class="input w-full" bind:value={name} />
-						</label>
-						<Dialog.Footer>
-							<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
-							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
-								Save
-							</button>
-						</Dialog.Footer>
+					<!-- View mode (collapses when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingName ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+							{ 'mt-1': !isEditingName }
+						]}
+					>
+						<div class="overflow-hidden">
+							<span class="text-surface-800-200 truncate font-medium">{activeUser.name}</span>
+						</div>
 					</div>
-				</form>
-			</Dialog.Content>
-		</Dialog.Root>
 
-		<!-- Mobile Drawer - shown on mobile, hidden on desktop -->
-		<Drawer.Root bind:open={isDrawerOpen}>
-			<Drawer.Trigger
-				onclick={() => (isDrawerOpen = true)}
-				class="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
-			>
-				<div class="flex w-full flex-col gap-1 text-left">
-					<span class="text-surface-600-400 text-xs">Name</span>
-					<span class="text-surface-800-200 font-medium">{activeUser.name}</span>
-				</div>
-				<div class="btn-icon preset-faded-surface-50-950">
-					<Pencil class="size-4" />
-				</div>
-			</Drawer.Trigger>
-			<Drawer.Content>
-				<Drawer.Header>
-					<Drawer.Title>Edit name</Drawer.Title>
-				</Drawer.Header>
-				<form onsubmit={handleSubmit} class="w-full">
-					<div class="flex flex-col">
-						<label class="flex flex-col">
-							<span class="label">Name</span>
-							<input type="text" class="input w-full" bind:value={name} />
-						</label>
-						<Drawer.Footer>
-							<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>
-							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
-								Save
-							</button>
-						</Drawer.Footer>
+					<!-- Edit mode (expands when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingName ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+							{ 'mt-1': isEditingName }
+						]}
+					>
+						<div class="overflow-hidden">
+							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">
+								<input bind:this={nameInputEl} type="text" class="input w-full" bind:value={name} />
+								<div class="flex gap-2">
+									<button
+										type="button"
+										class="btn preset-tonal w-full md:w-fit"
+										onclick={() => {
+											name = activeUser.name;
+											isEditingName = false;
+										}}
+									>
+										Cancel
+									</button>
+									<button
+										type="submit"
+										class="btn preset-filled-primary-500 w-full md:w-fit"
+										disabled={!name || name.trim() === '' || name.trim() === activeUser.name.trim()}
+									>
+										Save
+									</button>
+								</div>
+							</form>
+						</div>
 					</div>
-				</form>
-				<Drawer.CloseX />
-			</Drawer.Content>
-		</Drawer.Root>
+				</div>
+				<!-- Edit affordance and full-area overlay button in view mode -->
+				{#if !isEditingName}
+					<div class="shrink-0">
+						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
+							<Pencil class="size-4" />
+						</span>
+					</div>
+					<button
+						class="absolute inset-0 h-full w-full"
+						aria-label="Edit name"
+						type="button"
+						onclick={async () => {
+							isEditingName = true;
+							name = activeUser.name;
+							await tick();
+							nameInputEl?.focus();
+							nameInputEl?.select();
+						}}
+					></button>
+				{/if}
+			</div>
+		</div>
 	{/if}
 </div>

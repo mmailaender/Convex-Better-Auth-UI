@@ -10,8 +10,7 @@
 	import { Pencil } from '@lucide/svelte';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Drawer from '$lib/primitives/ui/drawer';
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import { tick } from 'svelte';
 
 	// Types
 	import type { FunctionReturnType } from 'convex/server';
@@ -26,16 +25,15 @@
 	const activeUser = $derived(activeUserResponse.data);
 
 	// State
-	let isDialogOpen: boolean = $state(false);
-	let isDrawerOpen: boolean = $state(false);
+	let isEditingEmail: boolean = $state(false);
 	let newEmail: string = $state('');
 	let isSubmitting: boolean = $state(false);
+	let emailInputEl: HTMLInputElement | null = $state(null);
 
-	// Reset form when dialog/drawer closes
+	// Initialize form value when user data is available and not editing
 	$effect(() => {
-		if (!isDialogOpen && !isDrawerOpen) {
-			newEmail = '';
-			isSubmitting = false;
+		if (activeUser && !isEditingEmail) {
+			newEmail = activeUser.email;
 		}
 	});
 
@@ -67,8 +65,7 @@
 				newEmail,
 				callbackURL: currentUrl.toString()
 			});
-			isDialogOpen = false;
-			isDrawerOpen = false;
+			isEditingEmail = false;
 			toast.success('Verification email sent to your new email address');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -83,129 +80,107 @@
 	{#if !activeUser}
 		<div class="bg-success-200-800 rounded-base h-16 w-full animate-pulse"></div>
 	{:else}
-		<!-- Email Display Section -->
-		<div class="rounded-base flex flex-col pt-6 pl-0.5">
-			<span class="text-surface-600-400 text-xs">Email Address</span>
-			<div class="flex items-center gap-2">
-				<span class="text-surface-800-200 font-medium">{activeUser.email}</span>
-				{#if activeUser.emailVerified}
-					<span class="badge preset-filled-success-100-900 text-xs">Verified</span>
-				{:else}
-					<span class="badge preset-filled-warning-100-900 text-xs">Not verified</span>
+		<!-- Inline editable email (matches ProfileInfo.svelte UX) -->
+		<div
+			class={[
+				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
+				{
+					'cursor-pointer': !isEditingEmail,
+					'hover:bg-surface-50-950': !isEditingEmail,
+					'hover:border-surface-50-950': !isEditingEmail
+				}
+			]}
+		>
+			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
+				<div class="flex w-full flex-col gap-0">
+					<span class="text-surface-600-400 text-xs">Email Address</span>
+					<!-- View mode (collapses when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingEmail ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+							{ 'mt-1': !isEditingEmail }
+						]}
+					>
+						<div class="overflow-hidden">
+							<div class="flex items-center gap-2">
+								<span class="text-surface-800-200 truncate font-medium">{activeUser.email}</span>
+								{#if activeUser.emailVerified}
+									<span class="badge preset-filled-success-100-900 text-xs">Verified</span>
+								{:else}
+									<span class="badge preset-filled-warning-100-900 text-xs">Not verified</span>
+								{/if}
+							</div>
+						</div>
+					</div>
+
+					<!-- Edit mode (expands when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingEmail ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+							{ 'mt-1': isEditingEmail }
+						]}
+					>
+						<div class="overflow-hidden">
+							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">
+								<input
+									bind:this={emailInputEl}
+									type="email"
+									class="input w-full"
+									bind:value={newEmail}
+									placeholder="Enter new email address"
+									required
+									disabled={isSubmitting}
+								/>
+								<div class="flex gap-2">
+									<button
+										type="button"
+										class="btn preset-tonal w-full md:w-fit"
+										onclick={() => {
+											newEmail = activeUser.email;
+											isEditingEmail = false;
+										}}
+										disabled={isSubmitting}
+									>
+										Cancel
+									</button>
+									<button
+										type="submit"
+										class="btn preset-filled-primary-500 w-full md:w-fit"
+										disabled={isSubmitting ||
+											!newEmail ||
+											newEmail.trim() === '' ||
+											newEmail === activeUser.email}
+									>
+										{isSubmitting ? 'Sending...' : 'Send Verification Email'}
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<!-- Edit affordance and full-area overlay button in view mode -->
+				{#if !isEditingEmail}
+					<div class="shrink-0">
+						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
+							<Pencil class="size-4" />
+						</span>
+					</div>
+					<button
+						class="absolute inset-0 h-full w-full"
+						aria-label="Change email"
+						type="button"
+						onclick={async () => {
+							isEditingEmail = true;
+							newEmail = activeUser.email;
+							await tick();
+							emailInputEl?.focus();
+							emailInputEl?.select();
+						}}
+					></button>
 				{/if}
 			</div>
 		</div>
-
-		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
-		<Dialog.Root bind:open={isDialogOpen}>
-			<Dialog.Trigger
-				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-				onclick={() => (isDialogOpen = true)}
-			>
-				<div class="flex w-full flex-col gap-1 text-left">
-					<span class="text-surface-600-400 text-xs">Change Email Address</span>
-					<span class="text-surface-800-200 font-medium">Update your email address</span>
-				</div>
-				<div class="btn-icon preset-filled-surface-200-800">
-					<Pencil class="size-4" />
-				</div>
-			</Dialog.Trigger>
-
-			<Dialog.Content class="w-full max-w-md">
-				<Dialog.Header>
-					<Dialog.Title>Change Email Address</Dialog.Title>
-					<Dialog.Description>
-						Enter your new email address. You'll need to verify it before the change takes effect.
-					</Dialog.Description>
-				</Dialog.Header>
-				<form onsubmit={handleSubmit} class="w-full">
-					<div class="flex flex-col gap-4">
-						<div class="flex flex-col gap-2">
-							<span class="text-surface-600-400 text-sm">Current Email</span>
-							<span class="text-surface-800-200 font-medium">{activeUser.email}</span>
-						</div>
-						<label class="flex flex-col">
-							<span class="label">New Email Address</span>
-							<input
-								type="email"
-								class="input w-full"
-								bind:value={newEmail}
-								placeholder="Enter new email address"
-								required
-								disabled={isSubmitting}
-							/>
-						</label>
-						<Dialog.Footer>
-							<Dialog.Close class="btn preset-tonal w-full md:w-fit" disabled={isSubmitting}
-								>Cancel</Dialog.Close
-							>
-							<button
-								type="submit"
-								class="btn preset-filled-primary-500 w-full md:w-fit"
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? 'Sending...' : 'Send Verification Email'}
-							</button>
-						</Dialog.Footer>
-					</div>
-				</form>
-			</Dialog.Content>
-		</Dialog.Root>
-
-		<!-- Mobile Drawer - shown on mobile, hidden on desktop -->
-		<Drawer.Root bind:open={isDrawerOpen}>
-			<Drawer.Trigger
-				onclick={() => (isDrawerOpen = true)}
-				class="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
-			>
-				<div class="flex w-full flex-col gap-1 text-left">
-					<span class="text-surface-600-400 text-xs">Change Email Address</span>
-					<span class="text-surface-800-200 font-medium">Update your email address</span>
-				</div>
-				<div class="btn-icon preset-faded-surface-50-950">
-					<Pencil class="size-4" />
-				</div>
-			</Drawer.Trigger>
-			<Drawer.Content>
-				<Drawer.Header>
-					<Drawer.Title>Change Email Address</Drawer.Title>
-					<Drawer.Description class="text-surface-600-400">
-						Enter your new email address. You'll need to verify it before the change takes effect.
-					</Drawer.Description>
-				</Drawer.Header>
-				<form onsubmit={handleSubmit} class="w-full">
-					<div class="flex flex-col gap-4">
-						<div class="flex flex-col gap-2">
-							<span class="text-surface-600-400 text-sm">Current Email</span>
-							<span class="text-surface-800-200 font-medium">{activeUser.email}</span>
-						</div>
-						<label class="flex flex-col">
-							<span class="label">New Email Address</span>
-							<input
-								type="email"
-								class="input w-full"
-								bind:value={newEmail}
-								placeholder="Enter new email address"
-								required
-								disabled={isSubmitting}
-							/>
-						</label>
-						<Drawer.Footer>
-							<Drawer.Close class="btn preset-tonal w-full md:w-fit" disabled={isSubmitting}
-								>Cancel</Drawer.Close
-							>
-							<button
-								type="submit"
-								class="btn preset-filled-primary-500 w-full md:w-fit"
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? 'Sending...' : 'Send Verification Email'}
-							</button>
-						</Drawer.Footer>
-					</div>
-				</form>
-				<Drawer.CloseX />
-			</Drawer.Content>
-		</Drawer.Root>
 	{/if}
 </div>
