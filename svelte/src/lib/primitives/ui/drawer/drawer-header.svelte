@@ -12,7 +12,8 @@
 
 <div
 	bind:this={ref}
-	data-slot="drawer-header"
+	data-scope="drawer"
+	data-part="header"
 	class={cn('flex flex-col gap-4', className)}
 	{...restProps}
 >

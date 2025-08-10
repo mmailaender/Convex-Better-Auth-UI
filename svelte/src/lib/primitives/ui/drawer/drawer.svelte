@@ -1,12 +1,22 @@
 <script lang="ts">
-	import { Drawer as DrawerPrimitive } from "vaul-svelte";
+  import { Dialog as ArkDialog } from '@ark-ui/svelte/dialog';
 
-	let {
-		shouldScaleBackground = true,
-		open = $bindable(false),
-		activeSnapPoint = $bindable(null),
-		...restProps
-	}: DrawerPrimitive.RootProps = $props();
+  let { open = $bindable(false), onInteractOutside, ...restProps }: ArkDialog.RootProps = $props();
 </script>
 
-<DrawerPrimitive.Root {shouldScaleBackground} bind:open bind:activeSnapPoint {...restProps} />
+<ArkDialog.Root
+  bind:open
+  onInteractOutside={onInteractOutside
+    ? onInteractOutside
+    : (e) => {
+        const originalEvent = e.detail?.originalEvent || e.detail;
+        if (originalEvent && originalEvent.target instanceof Element) {
+          const sonnerElement = originalEvent.target.closest('[data-sonner-toast]');
+          if (sonnerElement) {
+            e.preventDefault();
+            return;
+          }
+        }
+      }}
+  {...restProps}
+/>

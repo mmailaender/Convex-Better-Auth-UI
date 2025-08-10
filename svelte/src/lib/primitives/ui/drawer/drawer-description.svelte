@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { Drawer as DrawerPrimitive } from 'vaul-svelte';
+	import {
+		DialogDescription as ArkDialogDescription,
+		type DialogDescriptionProps
+	} from '@ark-ui/svelte/dialog';
 	import { cn } from '$lib/primitives/utils.js';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		...restProps
-	}: DrawerPrimitive.DescriptionProps = $props();
+	let { ref = $bindable(null), class: className, ...restProps }: DialogDescriptionProps = $props();
 </script>
 
-<DrawerPrimitive.Description
+<ArkDialogDescription
 	bind:ref
-	data-slot="drawer-description"
+	data-scope="drawer"
 	class={cn('text-surface-600-400 text-sm', className)}
 	{...restProps}
 />
