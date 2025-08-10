@@ -23,6 +23,7 @@
 
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/state';
+	import { tick } from 'svelte';
 
 	let { initialData }: { initialData?: any } = $props();
 
@@ -39,12 +40,12 @@
 	let password = $state('');
 	let isSettingPassword = $state(false);
 
-	// State for change password dialog/drawer
-	let isChangePasswordDialogOpen = $state(false);
-	let isChangePasswordDrawerOpen = $state(false);
+	// State for change password (inline editing)
+	let isEditingPasswordInline: boolean = $state(false);
 	let currentPassword = $state('');
 	let newPassword = $state('');
 	let isChangingPassword = $state(false);
+	let currentPasswordInputEl: HTMLInputElement | null = $state(null);
 	let isMobile = $derived(window.innerWidth < 768);
 
 	// Get available providers (only enabled ones, exclude emailOTP and magicLink)
@@ -231,9 +232,8 @@
 			}
 
 			toast.success('Password changed successfully');
-			// Close dialogs/drawers and reset fields
-			isChangePasswordDialogOpen = false;
-			isChangePasswordDrawerOpen = false;
+			// Close inline editor and reset fields
+			isEditingPasswordInline = false;
 			currentPassword = '';
 			newPassword = '';
 		} catch (error) {
@@ -248,7 +248,7 @@
 	};
 </script>
 
-<div class="flex flex-col gap-6">
+<div class="flex w-full flex-col gap-6">
 	<!-- Current Accounts -->
 	<div>
 		<span class="text-surface-600-400 text-xs">Linked Accounts</span>
@@ -257,7 +257,7 @@
 				{#each accountList as account}
 					{@const ProviderIcon = getProviderIcon(account.provider)}
 					<div
-						class="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center border py-2 pr-3 pl-4"
+						class="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center justify-between border py-2 pr-3 pl-4"
 					>
 						<div class="flex items-center gap-3">
 							<ProviderIcon size={20} class="text-muted-foreground" />
@@ -265,32 +265,88 @@
 								{getProviderLabel(account.provider)}
 							</div>
 						</div>
-						{#if account.provider === 'credential'}
-							<button
-								class="btn preset-tonal mr-2 ml-auto"
-								onclick={() => {
-									if (isMobile) {
-										isChangePasswordDrawerOpen = true;
-									} else {
-										isChangePasswordDialogOpen = true;
-									}
-								}}
-							>
-								Change Password
-							</button>
-						{/if}
-						<button
-							class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
-							disabled={accountList.length <= 1 || unlinkingAccountId === account.id}
-							onclick={() => unlinkAccount(account.accountId, account.provider)}
-						>
-							{#if unlinkingAccountId === account.id}
-								Unlinking...
-							{:else}
-								<Trash2 class="size-4" />
+						<div>
+							{#if account.provider === 'credential'}
+								<button
+									class="btn preset-tonal mr-2"
+									onclick={async () => {
+										isEditingPasswordInline = true;
+										currentPassword = '';
+										newPassword = '';
+										await tick();
+										currentPasswordInputEl?.focus();
+									}}
+								>
+									Change Password
+								</button>
 							{/if}
-						</button>
+							<button
+								class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
+								disabled={accountList.length <= 1 || unlinkingAccountId === account.id}
+								onclick={() => unlinkAccount(account.accountId, account.provider)}
+							>
+								{#if unlinkingAccountId === account.id}
+									Unlinking...
+								{:else}
+									<Trash2 class="size-4" />
+								{/if}
+							</button>
+						</div>
 					</div>
+					{#if account.provider === 'credential'}
+						<div
+							class={[
+								'grid transition-[grid-template-rows] duration-200 ease-in-out',
+								isEditingPasswordInline ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+								'mt-2'
+							]}
+						>
+							<div class="overflow-hidden">
+								<form onsubmit={handleChangePasswordSubmit} class="flex w-full flex-col gap-3">
+									<input
+										bind:this={currentPasswordInputEl}
+										type="password"
+										class="input w-full"
+										bind:value={currentPassword}
+										placeholder="Enter your current password"
+										autocomplete="current-password"
+										required
+										disabled={isChangingPassword}
+									/>
+									<input
+										type="password"
+										class="input w-full"
+										bind:value={newPassword}
+										placeholder="Enter your new password"
+										autocomplete="new-password"
+										required
+										disabled={isChangingPassword}
+									/>
+									<div class="flex gap-2">
+										<button
+											type="button"
+											class="btn preset-tonal w-full md:w-fit"
+											onclick={() => {
+												currentPassword = '';
+												newPassword = '';
+												isEditingPasswordInline = false;
+											}}
+											disabled={isChangingPassword}
+										>
+											Cancel
+										</button>
+										<button
+											type="submit"
+											class="btn preset-filled-primary-500 w-full md:w-fit"
+											disabled={isChangingPassword || !currentPassword || !newPassword}
+										>
+											{isChangingPassword ? 'Changing...' : 'Change Password'}
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					{/if}
 				{/each}
 			</div>
 		{:else}
@@ -416,106 +472,6 @@
 							Setting...
 						{:else}
 							Set Password
-						{/if}
-					</button>
-				</Drawer.Footer>
-			</div>
-		</form>
-		<Drawer.CloseX />
-	</Drawer.Content>
-</Drawer.Root>
-
-<!-- Change Password Dialog - Desktop -->
-<Dialog.Root bind:open={isChangePasswordDialogOpen}>
-	<Dialog.Content class="w-full max-w-md">
-		<Dialog.Header>
-			<Dialog.Title>Change Password</Dialog.Title>
-		</Dialog.Header>
-		<form onsubmit={handleChangePasswordSubmit} class="w-full">
-			<div class="flex flex-col gap-4">
-				<label class="flex flex-col gap-2">
-					<span class="text-sm font-medium">Current Password</span>
-					<input
-						type="password"
-						class="input w-full"
-						bind:value={currentPassword}
-						placeholder="Enter your current password"
-						autocomplete="current-password"
-						required
-					/>
-				</label>
-				<label class="flex flex-col gap-2">
-					<span class="text-sm font-medium">New Password</span>
-					<input
-						type="password"
-						class="input w-full"
-						bind:value={newPassword}
-						placeholder="Enter your new password"
-						autocomplete="new-password"
-						required
-					/>
-				</label>
-				<Dialog.Footer>
-					<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
-					<button
-						type="submit"
-						class="btn preset-filled-primary-500 w-full md:w-fit"
-						disabled={isChangingPassword}
-					>
-						{#if isChangingPassword}
-							Changing...
-						{:else}
-							Change Password
-						{/if}
-					</button>
-				</Dialog.Footer>
-			</div>
-		</form>
-		<Dialog.CloseX />
-	</Dialog.Content>
-</Dialog.Root>
-
-<!-- Change Password Drawer - Mobile -->
-<Drawer.Root bind:open={isChangePasswordDrawerOpen}>
-	<Drawer.Content>
-		<Drawer.Header>
-			<Drawer.Title>Change Password</Drawer.Title>
-		</Drawer.Header>
-		<form onsubmit={handleChangePasswordSubmit} class="w-full">
-			<div class="flex flex-col gap-4">
-				<label class="flex flex-col gap-2">
-					<span class="text-sm font-medium">Current Password</span>
-					<input
-						type="password"
-						class="input w-full"
-						bind:value={currentPassword}
-						placeholder="Enter your current password"
-						autocomplete="current-password"
-						required
-					/>
-				</label>
-				<label class="flex flex-col gap-2">
-					<span class="text-sm font-medium">New Password</span>
-					<input
-						type="password"
-						class="input w-full"
-						bind:value={newPassword}
-						placeholder="Enter your new password"
-						autocomplete="new-password"
-						required
-					/>
-				</label>
-				<Drawer.Footer>
-					<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>
-					<button
-						type="submit"
-						class="btn preset-filled-primary-500 w-full md:w-fit"
-						disabled={isChangingPassword}
-					>
-						{#if isChangingPassword}
-							Changing...
-						{:else}
-							Change Password
 						{/if}
 					</button>
 				</Drawer.Footer>
