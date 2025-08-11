@@ -101,6 +101,8 @@
 							isEditingEmail ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
 							{ 'mt-1': !isEditingEmail }
 						]}
+						aria-hidden={isEditingEmail}
+						inert={isEditingEmail}
 					>
 						<div class="overflow-hidden">
 							<div class="flex items-center gap-2">
@@ -121,6 +123,8 @@
 							isEditingEmail ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
 							{ 'mt-1': isEditingEmail }
 						]}
+						aria-hidden={!isEditingEmail}
+						inert={!isEditingEmail}
 					>
 						<div class="overflow-hidden">
 							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">

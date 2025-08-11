@@ -291,6 +291,8 @@
 								isEditingPasswordInline ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
 								'mt-2'
 							]}
+							aria-hidden={!isEditingPasswordInline}
+							inert={!isEditingPasswordInline}
 						>
 							<div class="overflow-hidden">
 								<form onsubmit={handleChangePasswordSubmit} class="flex w-full flex-col gap-3">

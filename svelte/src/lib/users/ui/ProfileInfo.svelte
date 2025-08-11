@@ -181,6 +181,8 @@
 							isEditingName ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
 							{ 'mt-1': !isEditingName }
 						]}
+						aria-hidden={isEditingName}
+						inert={isEditingName}
 					>
 						<div class="overflow-hidden">
 							<span class="text-surface-800-200 truncate font-medium">{activeUser.name}</span>
@@ -194,6 +196,8 @@
 							isEditingName ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
 							{ 'mt-1': isEditingName }
 						]}
+						aria-hidden={!isEditingName}
+						inert={!isEditingName}
 					>
 						<div class="overflow-hidden">
 							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">
