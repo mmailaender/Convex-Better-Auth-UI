@@ -7,15 +7,14 @@
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
 
-	// Icons
-	import { Mail } from '@lucide/svelte';
-
 	interface MagicLinkFlowProps {
 		email: string;
 		onBack: () => void;
 		submitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
 		callbackURL?: string;
+		onLinkSent?: () => void;
+		onAutoSendChange?: (pending: boolean) => void;
 	}
 
 	let {
@@ -23,7 +22,9 @@
 		onBack,
 		submitting,
 		onSubmittingChange,
-		callbackURL = '/'
+		callbackURL = '/',
+		onLinkSent,
+		onAutoSendChange
 	}: MagicLinkFlowProps = $props();
 
 	const client = useConvexClient();
@@ -41,6 +42,7 @@
 
 		const checkEmailAndSendMagicLink = async () => {
 			onSubmittingChange(true);
+			onAutoSendChange?.(true);
 
 			try {
 				// First, check if email exists
@@ -63,6 +65,8 @@
 								linkSent = true;
 								onSubmittingChange(false);
 								toast.success('Magic link sent to your email!');
+								onAutoSendChange?.(false);
+								onLinkSent?.();
 							},
 							onError: (ctx) => {
 								console.error('Magic link send error:', ctx.error);
@@ -71,12 +75,14 @@
 								// Reset the refs on error so user can retry
 								linkSentRef.current = false;
 								emailChecked = false;
+								onAutoSendChange?.(false);
 							}
 						}
 					);
 				} else {
 					// New user - just stop loading, we'll ask for name first
 					onSubmittingChange(false);
+					onAutoSendChange?.(false);
 				}
 			} catch (error) {
 				console.error('Email validation error:', error);
@@ -85,6 +91,7 @@
 				// Reset the refs on error so user can retry
 				linkSentRef.current = false;
 				emailChecked = false;
+				onAutoSendChange?.(false);
 			}
 		};
 
@@ -137,76 +144,58 @@
 	}
 </script>
 
-{#if linkSent}
-	<div class="flex flex-col gap-4 text-center">
-		<div class="mb-4 flex justify-center">
-			<div class="bg-surface-100-900 flex h-16 w-16 items-center justify-center rounded-full">
-				<Mail class="text-surface-600-400 size-8" />
-			</div>
-		</div>
-		<h3 class="text-xl font-semibold">Check your email</h3>
-		<p class="text-surface-600-400 text-sm">
-			We've sent a magic link to <strong>{email}</strong>
-		</p>
-		<p class="text-surface-600-400 text-sm">Click the link in your email to sign in instantly.</p>
-		<button type="button" class="anchor mt-4 text-center text-sm" onclick={onBack}>
-			Use a different email
-		</button>
+<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+	<div class="flex flex-col gap-2">
+		<label class="text-surface-950-50 text-sm font-medium" for="email">Email</label>
+		<input
+			type="email"
+			value={email}
+			disabled
+			class="input preset-filled-surface-200 cursor-not-allowed opacity-60"
+		/>
 	</div>
-{:else}
-	<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+
+	{#if mode === 'register' && emailChecked}
 		<div class="flex flex-col gap-2">
-			<label class="text-surface-950-50 text-sm font-medium" for="email">Email</label>
+			<label class="text-surface-950-50 text-sm font-medium" for="name">Full Name</label>
 			<input
-				type="email"
-				value={email}
-				disabled
-				class="input preset-filled-surface-200 cursor-not-allowed opacity-60"
+				type="text"
+				bind:value={name}
+				class="input preset-filled-surface-200"
+				placeholder="Enter your full name"
+				required
+				disabled={submitting || linkSent}
 			/>
 		</div>
+	{/if}
 
-		{#if mode === 'register' && emailChecked}
-			<div class="flex flex-col gap-2">
-				<label class="text-surface-950-50 text-sm font-medium" for="name">Full Name</label>
-				<input
-					type="text"
-					bind:value={name}
-					class="input preset-filled-surface-200"
-					placeholder="Enter your full name"
-					required
-					disabled={submitting || linkSent}
-				/>
-			</div>
-		{/if}
-
-		{#if mode === 'register' && emailChecked}
-			<button type="submit" class="btn preset-filled w-full" disabled={submitting || !name.trim()}>
-				{#if submitting}
-					<div class="flex items-center gap-2">
-						<div
-							class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-						></div>
-						Sending...
-					</div>
-				{:else}
-					Send Magic Link
-				{/if}
-			</button>
-		{/if}
-
-		{#if !emailChecked}
-			<div class="flex items-center justify-center py-4">
+	{#if mode === 'register' && emailChecked}
+		<button type="submit" class="btn preset-filled w-full" disabled={submitting || !name.trim()}>
+			{#if submitting}
 				<div class="flex items-center gap-2">
 					<div
 						class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
 					></div>
-					<span class="text-surface-600-400 text-sm">Checking email...</span>
+					Sending...
 				</div>
-			</div>
-		{/if}
-
-		<button type="button" class="anchor text-center text-sm" onclick={onBack} disabled={submitting}>
-			Use a different email
+			{:else}
+				Send Magic Link
+			{/if}
 		</button>
-	</form>
-{/if}
+	{/if}
+
+	{#if !emailChecked}
+		<div class="flex items-center justify-center py-4">
+			<div class="flex items-center gap-2">
+				<div
+					class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+				></div>
+				<span class="text-surface-600-400 text-sm">Checking email...</span>
+			</div>
+		</div>
+	{/if}
+
+	<button type="button" class="anchor text-center text-sm" onclick={onBack} disabled={submitting}>
+		Use a different email
+	</button>
+</form>

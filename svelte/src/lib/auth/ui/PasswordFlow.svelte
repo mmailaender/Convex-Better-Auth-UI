@@ -13,9 +13,19 @@
 		onBack: () => void;
 		submitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
+		onModeChange?: (mode: 'login' | 'register') => void;
+		onVerifyEmail?: () => void;
 	}
 
-	let { email, onSuccess, onBack, submitting, onSubmittingChange }: PasswordFlowProps = $props();
+	let {
+		email,
+		onSuccess,
+		onBack,
+		submitting,
+		onSubmittingChange,
+		onModeChange,
+		onVerifyEmail
+	}: PasswordFlowProps = $props();
 
 	const client = useConvexClient();
 	let mode = $state<'login' | 'register'>('login');
@@ -30,6 +40,7 @@
 					email
 				});
 				mode = data.exists ? 'login' : 'register';
+				onModeChange?.(mode);
 			} catch (error) {
 				console.error('Email validation error:', error);
 			}
@@ -80,8 +91,9 @@
 				{ email, password, name },
 				{
 					onSuccess: () => {
-						// For register, we might want to show email verification step
-						onSuccess();
+						onVerifyEmail?.();
+						onSubmittingChange(false);
+						toast.success('Verification email sent!');
 					},
 					onError: (ctx) => {
 						console.error('Sign up error:', ctx.error);

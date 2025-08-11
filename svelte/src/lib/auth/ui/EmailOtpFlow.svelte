@@ -13,9 +13,19 @@
 		onBack: () => void;
 		submitting: boolean;
 		onSubmittingChange: (submitting: boolean) => void;
+		onModeChange?: (mode: 'login' | 'register') => void;
+		onOtpSent?: () => void;
 	}
 
-	let { email, onSuccess, onBack, submitting, onSubmittingChange }: EmailOtpFlowProps = $props();
+	let {
+		email,
+		onSuccess,
+		onBack,
+		submitting,
+		onSubmittingChange,
+		onModeChange,
+		onOtpSent
+	}: EmailOtpFlowProps = $props();
 
 	const client = useConvexClient();
 	let otp = $state('');
@@ -40,6 +50,7 @@
 					email
 				});
 				mode = emailData.exists ? 'login' : 'register';
+				onModeChange?.(mode);
 				emailChecked = true;
 
 				// Then send OTP
@@ -50,6 +61,7 @@
 							otpSent = true;
 							onSubmittingChange(false);
 							toast.success('Verification code sent to your email!');
+							onOtpSent?.();
 						},
 						onError: (ctx) => {
 							console.error('OTP send error:', ctx.error);
