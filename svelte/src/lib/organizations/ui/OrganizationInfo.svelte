@@ -138,7 +138,8 @@
 				logoId: storageId
 			});
 
-			// Force logo to re-render with new image - this will trigger new loading
+			// Reset loading status and force logo to re-render with new image - this will trigger new loading
+			imageLoadingStatus = 'loading';
 			logoKey += 1;
 
 			toast.success('Organization logo updated successfully');
@@ -221,23 +222,24 @@
 						}}
 					>
 						<Avatar.Image
-							src={isUploading ? undefined : activeOrganization.logo}
+							src={activeOrganization.logo}
 							alt={activeOrganization.name || 'Organization'}
 						/>
 						<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
-							<!-- TODO: loadingStatus===error is a workaround and needs to be fixed as soon this issue is addressed https://github.com/get-convex/convex-js/issues/72-->
-							{#if imageLoadingStatus === 'loading' || imageLoadingStatus === 'error' || isUploading}
-								<div
-									class="rounded-container absolute inset-0 flex items-center justify-center bg-black/50"
-								>
-									<div class="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-								</div>
-							{:else}
-								<Building2 class="size-10" />
-							{/if}
+							<Building2 class="size-10" />
 						</Avatar.Fallback>
 					</Avatar.Root>
 				{/key}
+
+				{#if isUploading || imageLoadingStatus === 'loading'}
+					<div
+						class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
+					>
+						<div
+							class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+						></div>
+					</div>
+				{/if}
 
 				<div
 					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"

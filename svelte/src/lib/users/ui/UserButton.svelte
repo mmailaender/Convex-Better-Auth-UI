@@ -139,10 +139,10 @@
 				>
 					<Avatar.Image src={user.image} alt={user.name} />
 					<Avatar.Fallback>
-						{#if avatarStatus === 'loaded'}
-							<Avatar.Marble name={user.name} />
-						{:else}
+						{#if avatarStatus === 'loading'}
 							<div class="placeholder-circle size-10 animate-pulse"></div>
+						{:else}
+							<Avatar.Marble name={user.name} />
 						{/if}
 					</Avatar.Fallback>
 				</Avatar.Root>

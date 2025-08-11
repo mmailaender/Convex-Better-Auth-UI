@@ -33,7 +33,8 @@
 	// State
 	let isEditingName: boolean = $state(false);
 	let name: string = $state('');
-	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+	let loadingStatus = $state('loading');
+	$inspect('loadingStatus', loadingStatus);
 	let isUploading: boolean = $state(false);
 
 	let nameInputEl: HTMLInputElement | null = $state(null);
@@ -103,7 +104,8 @@
 
 			await authClient.updateUser({ image: imageUrl });
 
-			// Force avatar to re-render with new image - this will trigger new loading
+			// Reset loading status and force avatar to re-render with new image - this will trigger new loading
+			loadingStatus = 'loading';
 			avatarKey += 1;
 
 			toast.success('Avatar updated successfully');
@@ -130,26 +132,22 @@
 				>
 					{#key avatarKey}
 						<Avatar.Root class="size-20" onStatusChange={(e) => (loadingStatus = e.status)}>
-							<Avatar.Image
-								src={isUploading ? undefined : activeUser.image}
-								alt={activeUser.name}
-							/>
+							<Avatar.Image src={activeUser.image} alt={activeUser.name} />
 							<Avatar.Fallback>
-								<!-- TODO: loadingStatus===error is a workaround and needs to be fixed as soon this issue is addressed https://github.com/get-convex/convex-js/issues/72-->
-								{#if loadingStatus === 'loading' || loadingStatus === 'error' || isUploading}
-									<div
-										class="absolute inset-0 flex items-center justify-center rounded-full bg-black/50"
-									>
-										<div
-											class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
-										></div>
-									</div>
-								{:else}
-									<Avatar.Marble name={activeUser.name} />
-								{/if}
+								<Avatar.Marble name={activeUser.name} />
 							</Avatar.Fallback>
 						</Avatar.Root>
 					{/key}
+
+					{#if isUploading || loadingStatus === 'loading'}
+						<div
+							class="bg-surface-50-950 pointer-events-none absolute inset-0 flex items-center justify-center rounded-full"
+						>
+							<div
+								class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+							></div>
+						</div>
+					{/if}
 
 					<div
 						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
