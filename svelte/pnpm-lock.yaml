@@ -96,9 +96,6 @@ importers:
       '@zag-js/file-upload':
         specifier: ^1.21.1
         version: 1.21.1
-      bits-ui:
-        specifier: ^2.9.1
-        version: 2.9.1(@internationalized/date@3.8.2)(svelte@5.37.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -604,9 +601,6 @@ packages:
 
   '@floating-ui/dom@1.7.2':
     resolution: {integrity: sha512-7cfaOQuCS27HD7DX+6ib2OrnW+b4ZBwDNnCcT0uTyidcmyWb03FnQqJybDBoCnpdxwBSfA94UAYlRCt7mV+TbA==}
-
-  '@floating-ui/dom@1.7.3':
-    resolution: {integrity: sha512-uZA413QEpNuhtb3/iIKoYMSK07keHPYeXF02Zhd6e213j+d1NamLix/mCLxBUDW/Gx52sPH2m+chlUsyaBs/Ag==}
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
@@ -1426,13 +1420,6 @@ packages:
 
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
-
-  bits-ui@2.9.1:
-    resolution: {integrity: sha512-Fdtc1TKppfEio6fl0XzkrDG8DSvfbYJdrOh4j5KzaGh0kYA6BskMGIXL4JmsZxUS+O5ESFypNjrQ9z9qs3xAdQ==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@internationalized/date': ^3.8.1
-      svelte: ^5.33.0
 
   brace-expansion@1.1.12:
     resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
@@ -2359,11 +2346,6 @@ packages:
     peerDependencies:
       svelte: ^5.7.0
 
-  runed@0.29.2:
-    resolution: {integrity: sha512-0cq6cA6sYGZwl/FvVqjx9YN+1xEBu9sDDyuWdDW1yWX7JF2wmvmVKfH+hVCZs+csW+P3ARH92MjI3H9QTagOQA==}
-    peerDependencies:
-      svelte: ^5.7.0
-
   rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
 
@@ -2477,12 +2459,6 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  svelte-toolbelt@0.9.3:
-    resolution: {integrity: sha512-HCSWxCtVmv+c6g1ACb8LTwHVbDqLKJvHpo6J8TaqwUme2hj9ATJCpjCPNISR1OCq2Q4U1KT41if9ON0isINQZw==}
-    engines: {node: '>=18', pnpm: '>=8.7.0'}
-    peerDependencies:
-      svelte: ^5.30.2
-
   svelte@5.37.3:
     resolution: {integrity: sha512-7t/ejshehHd+95z3Z7ebS7wsqHDQxi/8nBTuTRwpMgNegfRBfuitCSKTUDKIBOExqfT2+DhQ2VLG8Xn+cBXoaQ==}
     engines: {node: '>=18'}
@@ -2492,9 +2468,6 @@ packages:
 
   svix@1.70.0:
     resolution: {integrity: sha512-ZrYvUoHPPtzp+C3t5c2hvMMleeZL7teFMigt6u/gdlpEKyPopeX74eMJuHtuPixB+nB24gfWJ1W1N3B5ZZ+AJw==}
-
-  tabbable@6.2.0:
-    resolution: {integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==}
 
   tailwind-merge@3.3.1:
     resolution: {integrity: sha512-gBXpgUm/3rp1lMZZrM/w7D8GKqshif0zAymAhbCyIt8KMe+0v9DQ7cdYLR4FHH/cKpdTXb+A/tKKU3eolfsI+g==}
@@ -3115,11 +3088,6 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/dom@1.7.2':
-    dependencies:
-      '@floating-ui/core': 1.7.3
-      '@floating-ui/utils': 0.2.10
-
-  '@floating-ui/dom@1.7.3':
     dependencies:
       '@floating-ui/core': 1.7.3
       '@floating-ui/utils': 0.2.10
@@ -4305,17 +4273,6 @@ snapshots:
     dependencies:
       file-uri-to-path: 1.0.0
 
-  bits-ui@2.9.1(@internationalized/date@3.8.2)(svelte@5.37.3):
-    dependencies:
-      '@floating-ui/core': 1.7.3
-      '@floating-ui/dom': 1.7.3
-      '@internationalized/date': 3.8.2
-      esm-env: 1.2.2
-      runed: 0.29.2(svelte@5.37.3)
-      svelte: 5.37.3
-      svelte-toolbelt: 0.9.3(svelte@5.37.3)
-      tabbable: 6.2.0
-
   brace-expansion@1.1.12:
     dependencies:
       balanced-match: 1.0.2
@@ -5104,11 +5061,6 @@ snapshots:
       esm-env: 1.2.2
       svelte: 5.37.3
 
-  runed@0.29.2(svelte@5.37.3):
-    dependencies:
-      esm-env: 1.2.2
-      svelte: 5.37.3
-
   rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
@@ -5220,13 +5172,6 @@ snapshots:
       style-to-object: 1.0.9
       svelte: 5.37.3
 
-  svelte-toolbelt@0.9.3(svelte@5.37.3):
-    dependencies:
-      clsx: 2.1.1
-      runed: 0.29.2(svelte@5.37.3)
-      style-to-object: 1.0.9
-      svelte: 5.37.3
-
   svelte@5.37.3:
     dependencies:
       '@ampproject/remapping': 2.3.0
@@ -5262,8 +5207,6 @@ snapshots:
       uuid: 10.0.0
     transitivePeerDependencies:
       - encoding
-
-  tabbable@6.2.0: {}
 
   tailwind-merge@3.3.1: {}
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	// import { Avatar as AvatarPrimitive } from 'bits-ui';
 	import { AvatarImage as ArkAvatarImage, type AvatarImageProps } from '@ark-ui/svelte';
 	import { cn } from '$lib/primitives/utils.js';
 
