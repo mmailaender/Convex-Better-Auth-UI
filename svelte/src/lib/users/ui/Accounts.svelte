@@ -10,10 +10,8 @@
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
 
 	// UI Components
-	import * as Combobox from '$lib/primitives/ui/combobox';
-	import { Portal } from '@ark-ui/svelte/portal';
-	import { useListCollection } from '@ark-ui/svelte/combobox';
-	import { useFilter } from '@ark-ui/svelte/locale';
+	import * as Select from '$lib/primitives/ui/select';
+	import { useListCollection } from '@ark-ui/svelte/select';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 
@@ -70,22 +68,14 @@
 	});
 
 	// Combobox setup
-	const filters = useFilter({ sensitivity: 'base' });
-	const comboboxCollection = useListCollection({
-		initialItems: [] as string[],
-		filter(itemString, filterText) {
-			return filters().contains(itemString, filterText);
-		}
+	const selectCollection = useListCollection({
+		initialItems: [] as string[]
 	});
 
 	// Update collection when available providers change
 	$effect(() => {
-		comboboxCollection.set(availableProviders);
+		selectCollection.set(availableProviders);
 	});
-
-	const handleInputChange = (details: any) => {
-		comboboxCollection.filter(details.inputValue);
-	};
 
 	const getProviderIcon = (provider: string) => {
 		switch (provider) {
@@ -104,6 +94,7 @@
 	};
 
 	const linkAccount = async (provider: string) => {
+		console.log('Linking account:', provider);
 		if (isLinking) return;
 		isLinking = true;
 
@@ -357,47 +348,26 @@
 	<!-- Link New Account -->
 	{#if availableProviders.length > 0}
 		<div>
-			<Combobox.Root
-				collection={comboboxCollection.collection()}
-				onInputValueChange={handleInputChange}
-				openOnClick={true}
-				class="w-full max-w-sm"
+			<Select.Root
+				collection={selectCollection.collection()}
+				onSelect={(e) => linkAccount(e.value)}
 			>
-				<Combobox.Label class="label">Link New Account</Combobox.Label>
-				<Combobox.Control class="relative">
-					<Combobox.Input
-						class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 pr-10 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-						placeholder="Select account type..."
-					/>
-					<Combobox.Trigger class="absolute top-1/2 right-3 -translate-y-1/2">
-						<ChevronDown size={16} class="text-muted-foreground" />
-					</Combobox.Trigger>
-				</Combobox.Control>
-				<Portal>
-					<Combobox.Positioner class="z-50">
-						<Combobox.Content
-							class="bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border shadow-md"
-						>
-							<Combobox.ItemGroup>
-								{#each comboboxCollection.collection().items as provider (provider)}
-									{@const ProviderIcon = getProviderIcon(provider)}
-									<Combobox.Item
-										item={provider}
-										class="data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground relative flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-										onclick={() => linkAccount(provider)}
-									>
-										<ProviderIcon size={16} class="mr-2" />
-										<Combobox.ItemText>{getProviderLabel(provider)}</Combobox.ItemText>
-										<Combobox.ItemIndicator class="ml-auto">
-											<Plus size={16} />
-										</Combobox.ItemIndicator>
-									</Combobox.Item>
-								{/each}
-							</Combobox.ItemGroup>
-						</Combobox.Content>
-					</Combobox.Positioner>
-				</Portal>
-			</Combobox.Root>
+				<Select.Label>Link New Account</Select.Label>
+				<Select.Trigger>Select an account</Select.Trigger>
+				<Select.Positioner>
+					<Select.Content>
+						<Select.Group>
+							{#each selectCollection.collection().items as provider (provider)}
+								{@const ProviderIcon = getProviderIcon(provider)}
+								<Select.Item item={provider}>
+									<ProviderIcon size={16} class="mr-2" />
+									<Select.ItemText>{getProviderLabel(provider)}</Select.ItemText>
+								</Select.Item>
+							{/each}
+						</Select.Group>
+					</Select.Content>
+				</Select.Positioner>
+			</Select.Root>
 			{#if isLinking}
 				<p class="text-surface-600-400 mt-2 text-sm">Linking account...</p>
 			{/if}
