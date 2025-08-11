@@ -61,8 +61,8 @@ importers:
         specifier: ^3.8.2
         version: 3.8.2
       '@lucide/svelte':
-        specifier: ^0.536.0
-        version: 0.536.0(svelte@5.37.3)
+        specifier: ^0.539.0
+        version: 0.539.0(svelte@5.37.3)
       '@skeletonlabs/skeleton':
         specifier: 3.1.7
         version: 3.1.7(tailwindcss@4.1.11)
@@ -671,8 +671,8 @@ packages:
   '@levischuck/tiny-cbor@0.2.11':
     resolution: {integrity: sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==}
 
-  '@lucide/svelte@0.536.0':
-    resolution: {integrity: sha512-YAeoWU+0B/RriFZZ3wHno1FMkbrVrFdityuo2B0YuphD0vtJWXStzZkWLGVhT3jMb7zhugmhayIg+gI4+AZu1g==}
+  '@lucide/svelte@0.539.0':
+    resolution: {integrity: sha512-OWhw4BhHO+owmOE/ijSNLnw/flbW2/DsLzMHAeM8oEjLsO0xE6glX0ADCDwxKItTs5ZJYssfyGNXxMXrea173w==}
     peerDependencies:
       svelte: ^5
 
@@ -3183,7 +3183,7 @@ snapshots:
 
   '@levischuck/tiny-cbor@0.2.11': {}
 
-  '@lucide/svelte@0.536.0(svelte@5.37.3)':
+  '@lucide/svelte@0.539.0(svelte@5.37.3)':
     dependencies:
       svelte: 5.37.3
 
