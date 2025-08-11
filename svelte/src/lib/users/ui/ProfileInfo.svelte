@@ -34,7 +34,6 @@
 	let isEditingName: boolean = $state(false);
 	let name: string = $state('');
 	let loadingStatus = $state('loading');
-	$inspect('loadingStatus', loadingStatus);
 	let isUploading: boolean = $state(false);
 
 	let nameInputEl: HTMLInputElement | null = $state(null);
