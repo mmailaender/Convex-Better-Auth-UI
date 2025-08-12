@@ -8,6 +8,7 @@
 
 @import '../../authapptheme.css';
 
+@source './**/*.{svelte,ts,js}';
 @source '../node_modules/@skeletonlabs/skeleton-svelte';
 
 @theme {
