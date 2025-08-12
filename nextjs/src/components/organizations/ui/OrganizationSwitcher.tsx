@@ -22,6 +22,9 @@ import { useRoles } from '../api/hooks';
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
 
+// Constants
+import { AUTH_CONSTANTS } from '@/convex/auth.constants';
+
 /**
  * Organization switcher component that allows switching between organizations,
  * creating new organizations, and accessing organization settings.
@@ -48,6 +51,13 @@ export default function OrganizationSwitcher({
 	const [openSwitcher, setOpenSwitcher] = useState<boolean>(false);
 	const [openCreateOrganization, setOpenCreateOrganization] = useState<boolean>(false);
 	const [openOrganizationProfile, setOpenOrganizationProfile] = useState<boolean>(false);
+
+	// Warn once if organizations are disabled in AUTH constants
+	useEffect(() => {
+		if (!AUTH_CONSTANTS.organizations) {
+			console.error('Organizations are disabled. Please turn them on in auth.constants.ts');
+		}
+	}, []);
 
 	/**
 	 * Updates the active organization and replaces URL slug if needed
@@ -107,8 +117,8 @@ export default function OrganizationSwitcher({
 		}
 	}, [organizations, activeOrganization, setActiveOrg]);
 
-	// Not authenticated - don't show anything
-	if (!isAuthenticated) {
+	// Not authenticated or organizations disabled - don't show anything
+	if (!isAuthenticated || !AUTH_CONSTANTS.organizations) {
 		return null;
 	}
 

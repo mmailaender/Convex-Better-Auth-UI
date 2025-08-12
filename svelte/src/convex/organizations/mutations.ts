@@ -15,7 +15,8 @@ export const createOrganization = mutation({
 	args: {
 		name: v.string(),
 		slug: v.string(),
-		logoId: v.optional(v.id('_storage'))
+		logoId: v.optional(v.id('_storage')),
+		skipActiveOrganization: v.optional(v.boolean())
 	},
 	handler: async (ctx, args): Promise<Id<'organizations'>> => {
 		const userId = await betterAuthComponent.getAuthUserId(ctx);
@@ -24,6 +25,7 @@ export const createOrganization = mutation({
 		}
 
 		return await createOrganizationModel(ctx, {
+			userId: userId as Id<'users'>,
 			name: args.name,
 			slug: args.slug,
 			logoId: args.logoId
@@ -36,7 +38,8 @@ export const _createOrganization = internalMutation({
 		userId: v.id('users'),
 		name: v.string(),
 		slug: v.string(),
-		logoId: v.optional(v.id('_storage'))
+		logoId: v.optional(v.id('_storage')),
+		skipActiveOrganization: v.optional(v.boolean())
 	},
 	handler: async (ctx, args) => {
 		return await createOrganizationModel(ctx, args);

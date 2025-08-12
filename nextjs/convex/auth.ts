@@ -25,32 +25,6 @@ export const { createUser, updateUser, deleteUser, createSession, isAuthenticate
 		// Must create a user and return the user id
 		onCreateUser: async (ctx, user) => {
 			const userId = await ctx.db.insert('users', {});
-			// console.log('userId', userId);
-
-			// const auth = createAuth(ctx);
-			// const organizationList = await auth.api.listOrganizations({});
-
-			// console.log('organizationList', organizationList);
-
-			// if (organizationList.length === 0) {
-			// await auth.api.createOrganization({
-			// 	body: {
-			// 		userId: userId! as string,
-			// 		name: `Personal Organization`,
-			// 		slug: (() => {
-			// 			const userName: string = (user as { name?: string })?.name ?? '';
-			// 			const sanitizedName: string = userName
-			// 				.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
-			// 				.trim()
-			// 				.replace(/\s+/g, '-')
-			// 				.toLowerCase();
-			// 			return sanitizedName
-			// 				? `personal-organization-${sanitizedName}`
-			// 				: 'personal-organization';
-			// 		})()
-			// 	}
-			// });
-			// }
 
 			return userId;
 		},

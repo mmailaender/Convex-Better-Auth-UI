@@ -2,7 +2,7 @@ import { convexAdapter } from '@convex-dev/better-auth';
 import { betterAuth } from 'better-auth';
 import { betterAuthComponent } from '../../../convex/auth';
 import { type GenericCtx } from '../../../convex/_generated/server';
-// import { components } from '../../../convex/_generated/api';
+import { components, internal } from '../../../convex/_generated/api';
 
 // Emails
 import {
@@ -17,8 +17,10 @@ import {
 import { convex } from '@convex-dev/better-auth/plugins';
 import { requireMutationCtx } from '@convex-dev/better-auth/utils';
 import { emailOTP, magicLink, organization } from 'better-auth/plugins';
-// import { api, internal } from '../../../../convex/_generated/api';
-// import { Id } from '@/convex/_generated/dataModel';
+
+// Constants
+import { AUTH_CONSTANTS } from '../../../convex/auth.constants';
+import type { Id } from '../../../convex/_generated/dataModel';
 
 const siteUrl = process.env.SITE_URL;
 
@@ -127,65 +129,68 @@ export const createAuth = (ctx: GenericCtx) =>
 					});
 				}
 			})
-		]
-		// databaseHooks: {
-		// 	user: {
-		// 		create: {
-		// 			after: async (user) => {
-		// 				const auth = createAuth(ctx);
-		// 				try {
-		// 					const userWithUserId = (await ctx.runQuery(components.betterAuth.lib.findOne, {
-		// 						model: 'users',
-		// 						where: [{ field: 'email', operator: 'eq', value: user.email }]
-		// 					})) as typeof auth.$Infer.Session.user;
-		// 					console.log('userWithUserId', userWithUserId);
-		// 					await auth.api.createOrganization({
-		// 						body: {
-		// 							userId: userWithUserId.userId!,
-		// 							name: `Personal Organization`,
-		// 							slug: (() => {
-		// 								const userName: string = (user as { name?: string })?.name ?? '';
-		// 								const sanitizedName: string = userName
-		// 									.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
-		// 									.trim()
-		// 									.replace(/\s+/g, '-')
-		// 									.toLowerCase();
-		// 								return sanitizedName
-		// 									? `personal-organization-${sanitizedName}`
-		// 									: 'personal-organization';
-		// 							})()
-		// 						}
-		// 					});
-		// 				} catch (error) {
-		// 					console.error('Error creating organization:', error);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	session: {
-		// 		create: {
-		// 			before: async (session) => {
-		// 				if ('runQuery' in ctx) {
-		// 					try {
-		// 						const activeOrganizationId = await ctx.runQuery(
-		// 							internal.organizations.queries._getActiveOrganizationFromDb,
-		// 							{ userId: session.userId as Id<'users'> }
-		// 						);
+		],
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user) => {
+						if ('runMutation' in ctx) {
+							if (AUTH_CONSTANTS.organizations) {
+								const auth = createAuth(ctx);
+								try {
+									const userWithUserId = (await ctx.runQuery(components.betterAuth.lib.findOne, {
+										model: 'user',
+										where: [{ field: 'email', operator: 'eq', value: user.email }]
+									})) as typeof auth.$Infer.Session.user;
 
-		// 						return {
-		// 							data: {
-		// 								...session,
-		// 								activeOrganizationId: activeOrganizationId || null
-		// 							}
-		// 						};
-		// 					} catch (error) {
-		// 						console.error('Error setting active organization:', error);
-		// 						return { data: session };
-		// 					}
-		// 				}
-		// 				return { data: session };
-		// 			}
-		// 		}
-		// 	}
-		// }
+									await ctx.runMutation(internal.organizations.mutations._createOrganization, {
+										userId: userWithUserId.userId as Id<'users'>,
+										name: `Personal Organization`,
+										slug: (() => {
+											const userName: string = (user as { name?: string })?.name ?? '';
+											const sanitizedName: string = userName
+												.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
+												.trim()
+												.replace(/\s+/g, '-')
+												.toLowerCase();
+											return sanitizedName
+												? `personal-organization-${sanitizedName}`
+												: 'personal-organization';
+										})(),
+										skipActiveOrganization: true
+									});
+								} catch (error) {
+									console.error('Error creating organization:', error);
+								}
+							}
+						}
+					}
+				}
+			}
+			// 	session: {
+			// 		create: {
+			// 			before: async (session) => {
+			// 				if ('runQuery' in ctx) {
+			// 					try {
+			// 						const activeOrganizationId = await ctx.runQuery(
+			// 							internal.organizations.queries._getActiveOrganizationFromDb,
+			// 							{ userId: session.userId as Id<'users'> }
+			// 						);
+
+			// 						return {
+			// 							data: {
+			// 								...session,
+			// 								activeOrganizationId: activeOrganizationId || null
+			// 							}
+			// 						};
+			// 					} catch (error) {
+			// 						console.error('Error setting active organization:', error);
+			// 						return { data: session };
+			// 					}
+			// 				}
+			// 				return { data: session };
+			// 			}
+			// 		}
+			// }
+		}
 	});

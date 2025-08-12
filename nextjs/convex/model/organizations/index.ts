@@ -78,13 +78,51 @@ export const getUniqueOrganizationSlug = async (
 // };
 
 /**
- * Creates a new organization with the given name, slug, and optional logo
+ * Create a new organization and perform related bookkeeping.
+ *
+ * Behavior:
+ * - Ensures the provided `slug` is unique via `getUniqueOrganizationSlug()`.
+ * - Uploads optional `logoId` to Convex storage and uses its URL when creating
+ *   the organization in Better Auth.
+ * - Persists a Convex-side organization record with the Better Auth `id` and
+ *   the raw `logoId` for storage management.
+ * - Updates the Convex user document (`users.activeOrganizationId`) to the
+ *   newly created organization's id.
+ * - Optionally sets the active organization for the Better Auth session (see below).
+ *
+ * Important note on `skipActiveOrganization`:
+ * - When `skipActiveOrganization` is `true`, only the Better Auth session update
+ *   (via `auth.api.setActiveOrganization`) is skipped. The Convex user document is
+ *   still updated to reference the newly created organization in
+ *   `users.activeOrganizationId`.
+ * - This is an intentional workaround for the current limitation mentioned in the
+ *   TODO that session-based active organization cannot be set during user creation.
+ *
+ * @param ctx - Convex mutation context.
+ * @param args - Input parameters.
+ * @param args.userId - The creator's Convex `users` document id.
+ * @param args.name - Organization name.
+ * @param args.slug - Desired organization slug (will be uniquified if necessary).
+ * @param args.logoId - Optional Convex storage id for the organization logo.
+ * @param args.skipActiveOrganization - If `true`, skip setting the active
+ *   organization in the Better Auth session. The Convex user document is still
+ *   updated.
+ *
+ * @returns The Better Auth organization id cast as `Id<'organizations'>`.
+ *
+ * @throws ConvexError - When Better Auth API calls fail or unexpected errors occur.
  */
 export const createOrganizationModel = async (
 	ctx: MutationCtx,
-	args: { name: string; slug: string; logoId?: Id<'_storage'> }
+	args: {
+		userId: Id<'users'>;
+		name: string;
+		slug: string;
+		logoId?: Id<'_storage'>;
+		skipActiveOrganization?: boolean;
+	}
 ) => {
-	const { name, slug, logoId } = args;
+	const { name, slug, logoId, skipActiveOrganization } = args;
 
 	// Ensure slug is unique across organizations
 	const uniqueSlug: string = await getUniqueOrganizationSlug(ctx, slug);
@@ -102,11 +140,11 @@ export const createOrganizationModel = async (
 	try {
 		org = await auth.api.createOrganization({
 			body: {
+				userId: args.userId,
 				name,
 				slug: uniqueSlug,
 				logo: imageUrl ?? undefined
-			},
-			headers: await betterAuthComponent.getHeaders(ctx)
+			}
 		});
 
 		// TODO: Move logoId to better-auth as soon v0.8 launches with organization.additionalFields support
@@ -114,36 +152,44 @@ export const createOrganizationModel = async (
 			betterAuthId: org!.id,
 			logoId
 		});
+		await ctx.db.patch(args.userId, {
+			activeOrganizationId: org!.id
+		});
 	} catch (error) {
+		console.error('Unexpected error creating organization:', error);
 		if (error instanceof APIError) {
-			console.log(error.message, error.status);
 			throw new ConvexError(error.message);
 		}
-		console.error('Unexpected error creating organization:', error);
 		throw new ConvexError('An unexpected error occurred while creating the organization');
 	}
 
 	// Step 2: Set the new organization as active
+	// TODO: Currently not possible during user creation as setActiveOrganization is session based and the session is not available
 
 	// Ensure organization was created successfully before proceeding
 	if (!org) {
 		throw new ConvexError('Organization creation failed - no organization data returned');
 	}
 
-	try {
-		await auth.api.setActiveOrganization({
-			body: {
-				organizationId: org.id
-			},
-			headers: await betterAuthComponent.getHeaders(ctx)
-		});
-	} catch (error) {
-		if (error instanceof APIError) {
-			console.log(error.message, error.status);
-			throw new ConvexError(error.message);
+	if (!skipActiveOrganization) {
+		try {
+			await auth.api.setActiveOrganization({
+				body: {
+					organizationId: org.id
+				},
+
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		} catch (error) {
+			if (error instanceof APIError) {
+				console.log(error.message, error.status);
+				throw new ConvexError(error.message);
+			}
+			console.error('Unexpected error setting active organization:', error);
+			throw new ConvexError(
+				'An unexpected error occurred while setting the organization as active'
+			);
 		}
-		console.error('Unexpected error setting active organization:', error);
-		throw new ConvexError('An unexpected error occurred while setting the organization as active');
 	}
 
 	return org.id as Id<'organizations'>;

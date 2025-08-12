@@ -31,6 +31,9 @@
 		typeof api.organizations.queries.listOrganizations
 	>;
 
+	// Constants
+	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+
 	// Props
 	const {
 		popoverPlacement = 'bottom-end',
@@ -43,6 +46,10 @@
 			activeOrganization: ActiveOrganizationResponse;
 		};
 	} = $props();
+
+	if (!AUTH_CONSTANTS.organizations) {
+		console.error('Organizations are disabled. Please turn them on in auth.constants.ts');
+	}
 
 	// Auth state
 	const auth = useAuth();
@@ -145,8 +152,8 @@
 	});
 </script>
 
-<!-- Not authenticated - don't show anything -->
-{#if !isAuthenticated}
+<!-- Not authenticated or organizations disabled - don't show anything -->
+{#if !isAuthenticated || !AUTH_CONSTANTS.organizations}
 	<!-- Return null by not rendering anything -->
 
 	<!-- Loading state -->

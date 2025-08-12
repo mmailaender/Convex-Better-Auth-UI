@@ -12,8 +12,8 @@ importers:
         specifier: 0.40.0
         version: 0.40.0
       '@convex-dev/better-auth':
-        specifier: ^0.7.13
-        version: 0.7.13(better-auth@1.3.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(convex@1.25.4(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)
+        specifier: 0.8.0-alpha.1
+        version: 0.8.0-alpha.1(better-auth@1.3.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(convex@1.25.4(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)
       '@convex-dev/resend':
         specifier: 0.1.7
         version: 0.1.7(convex-helpers@0.1.100(convex@1.25.4(react@19.1.1))(react@19.1.1)(typescript@5.8.3)(zod@3.25.76))(convex@1.25.4(react@19.1.1))(react@19.1.1)
@@ -163,8 +163,8 @@ packages:
   '@better-fetch/fetch@1.1.18':
     resolution: {integrity: sha512-rEFOE1MYIsBmoMJtQbl32PGHHXuG2hDxvEd7rUHE0vCBoFQVSDqaVs9hkZEtHCxRoY+CljXKFCOuJ8uxqw1LcA==}
 
-  '@convex-dev/better-auth@0.7.13':
-    resolution: {integrity: sha512-QOfbsDXScdBPggalZY85cSUPmwT1sABrlBd8kWjtQbAg0iy8CgKpK9ALlQ8QCHZv7FdQIwK0AsKUYTPFK5Ua6w==}
+  '@convex-dev/better-auth@0.8.0-alpha.1':
+    resolution: {integrity: sha512-SkUcF5psL7o60U88L++fMK3S2Um6vkaL5irn4hAWK/ng8/VWuQucUdAJjyj4zgbWCguhcJFt3MqW20D4b4FSnA==}
     peerDependencies:
       better-auth: 1.3.4
       convex: '>=1.25.0 <1.35.0'
@@ -3201,7 +3201,7 @@ snapshots:
 
   '@better-fetch/fetch@1.1.18': {}
 
-  '@convex-dev/better-auth@0.7.13(better-auth@1.3.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(convex@1.25.4(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)':
+  '@convex-dev/better-auth@0.8.0-alpha.1(better-auth@1.3.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(convex@1.25.4(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.8.3)':
     dependencies:
       better-auth: 1.3.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       common-tags: 1.8.2

@@ -8,6 +8,7 @@ export const AUTH_CONSTANTS = {
 		emailOTP: true,
 		magicLink: true
 	},
+	organizations: true,
 	terms: '#',
 	privacy: '#'
 };

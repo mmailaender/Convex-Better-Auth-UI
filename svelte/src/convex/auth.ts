@@ -2,7 +2,11 @@ import { BetterAuth, type AuthFunctions, type PublicAuthFunctions } from '@conve
 import { api, components, internal } from './_generated/api';
 import { type GenericCtx } from './_generated/server';
 import type { Id, DataModel } from './_generated/dataModel';
-// import { createAuth } from '../lib/auth/api/auth';
+import { createAuth } from '../lib/auth/api/auth';
+
+// Constants
+import { AUTH_CONSTANTS } from './auth.constants';
+import { ConvexError } from 'convex/values';
 
 // Typesafe way to pass Convex functions defined in this file
 const authFunctions: AuthFunctions = internal.auth;
@@ -25,32 +29,6 @@ export const { createUser, updateUser, deleteUser, createSession, isAuthenticate
 		// Must create a user and return the user id
 		onCreateUser: async (ctx, user) => {
 			const userId = await ctx.db.insert('users', {});
-			// console.log('userId', userId);
-
-			// const auth = createAuth(ctx);
-			// const organizationList = await auth.api.listOrganizations({});
-
-			// console.log('organizationList', organizationList);
-
-			// if (organizationList.length === 0) {
-			// await auth.api.createOrganization({
-			// 	body: {
-			// 		userId: userId! as string,
-			// 		name: `Personal Organization`,
-			// 		slug: (() => {
-			// 			const userName: string = (user as { name?: string })?.name ?? '';
-			// 			const sanitizedName: string = userName
-			// 				.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
-			// 				.trim()
-			// 				.replace(/\s+/g, '-')
-			// 				.toLowerCase();
-			// 			return sanitizedName
-			// 				? `personal-organization-${sanitizedName}`
-			// 				: 'personal-organization';
-			// 		})()
-			// 	}
-			// });
-			// }
 
 			return userId;
 		},

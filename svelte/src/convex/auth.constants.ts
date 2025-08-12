@@ -5,9 +5,10 @@ export const AUTH_CONSTANTS = {
 		facebook: false,
 		keypass: false,
 		password: true,
-		emailOTP: true,
-		magicLink: true
+		emailOTP: false,
+		magicLink: false
 	},
+	organizations: true,
 	terms: '#',
 	privacy: '#'
 };
