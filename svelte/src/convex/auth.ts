@@ -2,11 +2,6 @@ import { BetterAuth, type AuthFunctions, type PublicAuthFunctions } from '@conve
 import { api, components, internal } from './_generated/api';
 import { type GenericCtx } from './_generated/server';
 import type { Id, DataModel } from './_generated/dataModel';
-import { createAuth } from '../lib/auth/api/auth';
-
-// Constants
-import { AUTH_CONSTANTS } from './auth.constants';
-import { ConvexError } from 'convex/values';
 
 // Typesafe way to pass Convex functions defined in this file
 const authFunctions: AuthFunctions = internal.auth;

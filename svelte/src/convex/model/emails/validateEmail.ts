@@ -17,7 +17,7 @@ export interface VerifyEmailReturnData {
  * Function to verify an email address
  * Checks if the email exists and validates format using an external service
  */
-export default async function verifyEmail(
+export default async function validateEmail(
 	ctx: ActionCtx,
 	email: string
 ): Promise<VerifyEmailReturnData> {

@@ -2,6 +2,7 @@ import { v } from 'convex/values';
 import { action } from '../_generated/server';
 import { api } from '../_generated/api.js';
 import validateEmail from '../model/emails/validateEmail.js';
+import { AUTH_CONSTANTS } from '../auth.constants';
 
 // TODO: Eventually not more needed if we call the cleanup from onDelete function from better-auth
 // /**
@@ -47,8 +48,17 @@ export const checkEmailAvailabilityAndValidity = action({
 			};
 		}
 
-		// If user doesn't exist, verify email format and validity
-		const verificationResult = await validateEmail(ctx, email);
-		return verificationResult;
+		if (AUTH_CONSTANTS.validateEmails) {
+			// If user doesn't exist, verify email format and validity
+			const verificationResult = await validateEmail(ctx, email);
+			return verificationResult;
+		} else {
+			return {
+				valid: true,
+				exists: false,
+				email,
+				reason: 'Email verification disabled'
+			};
+		}
 	}
 });
