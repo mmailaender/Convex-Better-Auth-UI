@@ -75,5 +75,6 @@
 		"convex-helpers": "^0.1.100",
 		"convex-svelte": "^0.0.11",
 		"path-to-regexp": "^8.2.0"
-	}
+	},
+	"packageManager": "pnpm@10.14.0"
 }
