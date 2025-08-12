@@ -9,6 +9,7 @@
 		"build": "vite build",
 		"build:production": "npx convex deploy --cmd='vite build'",
 		"preview": "vite preview",
+		"postinstall": "svelte-kit sync",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
