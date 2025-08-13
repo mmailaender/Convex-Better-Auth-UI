@@ -184,7 +184,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 			case 'magic-link-flow':
 				return 'Sign in with magic link';
 			default:
-				return 'Build your app 10x faster with Skeleton Plus';
+				return 'Self hosted Auth in Minutes';
 		}
 	};
 
