@@ -12,7 +12,8 @@
 
 <div
 	bind:this={ref}
-	data-slot="dialog-footer"
+	data-scope="dialog"
+	data-part="footer"
 	class={cn('flex justify-end gap-2 pt-6 md:flex-row', className)}
 	{...restProps}
 >

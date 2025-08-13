@@ -12,7 +12,8 @@
 
 <div
 	bind:this={ref}
-	data-slot="drawer-footer"
+	data-scope="drawer"
+	data-part="footer"
 	class={cn('sticky bottom-0 mt-auto flex flex-row gap-2 pt-6', className)}
 	{...restProps}
 >

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Tabs as TabsPrimitive } from 'bits-ui';
+	import { TabList as ArkTabList, type TabListProps } from '@ark-ui/svelte';
 	import { cn } from '$lib/primitives/utils.js';
 
-	let { ref = $bindable(null), class: className, ...restProps }: TabsPrimitive.ListProps = $props();
+	let { ref = $bindable(null), class: className, ...restProps }: TabListProps = $props();
 </script>
 
-<TabsPrimitive.List
+<ArkTabList
 	bind:ref
 	data-slot="tabs-list"
 	class={cn(

@@ -1,7 +1,16 @@
 <script lang="ts">
-	import { Dialog as DialogPrimitive } from 'bits-ui';
+	import {
+		DialogCloseTrigger as ArkDialogCloseTrigger,
+		type DialogCloseTriggerProps
+	} from '@ark-ui/svelte/dialog';
 
-	let { ref = $bindable(null), ...restProps }: DialogPrimitive.CloseProps = $props();
+	let { ref = $bindable(null), ...restProps }: DialogCloseTriggerProps = $props();
 </script>
 
-<DialogPrimitive.Close bind:ref data-slot="dialog-close" type="button" {...restProps} />
+<ArkDialogCloseTrigger
+	bind:ref
+	data-scope="dialog"
+	data-part="close"
+	type="button"
+	{...restProps}
+/>

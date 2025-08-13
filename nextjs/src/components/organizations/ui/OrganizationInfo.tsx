@@ -3,11 +3,14 @@
 // React
 import { useEffect, useState } from 'react';
 
+// Next.js
+import { useRouter, usePathname } from 'next/navigation';
+
 // API
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
-import type { Id } from '@/convex/_generated/dataModel';
+import { FunctionArgs } from 'convex/server';
 
 // Icons
 import { Building2, Pencil } from 'lucide-react';
@@ -21,14 +24,20 @@ import { FileUpload } from '@skeletonlabs/skeleton-react';
 
 // utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
-import { preloadImage } from '@/components/primitives/utils/preloadImage';
 
 // Types
 import type { FileChangeDetails } from '@zag-js/file-upload';
+import { ConvexError } from 'convex/values';
+type UpdateOrganizationProfileInput = FunctionArgs<
+	typeof api.organizations.mutations.updateOrganizationProfile
+>;
 
 export default function OrganizationInfo() {
 	/* ───────────────────────────────────────────── state & queries ── */
-	const user = useQuery(api.users.queries.getUser);
+	const router = useRouter();
+	const pathname = usePathname();
+
+	const user = useQuery(api.users.queries.getActiveUser);
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 
@@ -38,7 +47,9 @@ export default function OrganizationInfo() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
-	const [isPreloading, setIsPreloading] = useState(false);
+	const [imageLoadingStatus, setImageLoadingStatus] = useState<
+		'idle' | 'loading' | 'loaded' | 'error'
+	>('idle');
 
 	const [formState, setFormState] = useState({ name: '', slug: '' });
 	const [displayLogoSrc, setDisplayLogoSrc] = useState('');
@@ -63,26 +74,6 @@ export default function OrganizationInfo() {
 			}
 		}
 	}, [activeOrganization, formState.name, formState.slug, displayLogoSrc]);
-
-	// Handle server logo updates - preload before showing
-	useEffect(() => {
-		if (!activeOrganization?.logo || isUploading) return;
-
-		// If server has a new logo URL that's different from what we're displaying
-		if (activeOrganization.logo !== displayLogoSrc) {
-			setIsPreloading(true);
-			preloadImage(activeOrganization.logo)
-				.then(() => {
-					setDisplayLogoSrc(activeOrganization.logo!);
-					setIsPreloading(false);
-				})
-				.catch(() => {
-					// If preload fails, still update
-					setDisplayLogoSrc(activeOrganization.logo!);
-					setIsPreloading(false);
-				});
-		}
-	}, [activeOrganization?.logo, displayLogoSrc, isUploading]);
 
 	if (!user || !activeOrganization) return null;
 
@@ -114,7 +105,7 @@ export default function OrganizationInfo() {
 		try {
 			setIsUploading(true);
 
-			const optimised = await optimizeImage(file, {
+			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -123,22 +114,20 @@ export default function OrganizationInfo() {
 				forceConvert: true
 			});
 
+			// Get a storage upload URL from Convex
 			const uploadUrl = await generateUploadUrl();
-			const res = await fetch(uploadUrl, {
+			// Upload the file to Convex storage
+			const response = await fetch(uploadUrl, {
 				method: 'POST',
-				headers: { 'Content-Type': optimised.type },
-				body: optimised
+				headers: { 'Content-Type': optimizedFile.type },
+				body: optimizedFile
 			});
-			if (!res.ok) throw new Error('Failed to upload file');
+			if (!response.ok) throw new Error('Failed to upload file');
 
-			const { storageId } = await res.json();
-			const logoStorageId = storageId as Id<'_storage'>;
+			const { storageId } = await response.json();
 
 			await updateOrganization({
-				organizationId: activeOrganization._id,
-				name: activeOrganization.name,
-				slug: activeOrganization.slug,
-				logoId: logoStorageId
+				logoId: storageId
 			});
 
 			toast.success('Organization logo updated successfully');
@@ -157,16 +146,50 @@ export default function OrganizationInfo() {
 		try {
 			setIsUploading(true);
 
-			await updateOrganization({
-				organizationId: activeOrganization._id,
-				name: formState.name,
-				slug: formState.slug
-			});
+			// Store the current slug before updating
+			const currentSlug = activeOrganization.slug;
 
+			// Check if current URL contains the active organization slug
+			const urlContainsCurrentSlug =
+				currentSlug &&
+				(pathname.includes(`/${currentSlug}/`) || pathname.includes(`/${currentSlug}`));
+
+			const updates: Partial<UpdateOrganizationProfileInput> = {};
+			if (activeOrganization.name !== formState.name) {
+				updates.name = formState.name;
+			}
+			if (activeOrganization.slug !== formState.slug) {
+				updates.slug = formState.slug;
+			}
+			await updateOrganization(updates);
+
+			// Close the modals
 			setIsDialogOpen(false);
 			setIsDrawerOpen(false);
+
+			// Handle URL redirection if slug was changed
+			if (
+				urlContainsCurrentSlug &&
+				currentSlug &&
+				formState.slug &&
+				currentSlug !== formState.slug
+			) {
+				// Replace the old slug with the new slug in the URL
+				const newPathname = pathname.replace(
+					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
+					`/${formState.slug}`
+				);
+
+				// Navigate to the new URL
+				router.replace(newPathname);
+			}
+
 			toast.success('Organization details updated successfully');
 		} catch (err) {
+			if (err instanceof ConvexError) {
+				toast.error(err.data);
+				return;
+			}
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update organization: ${message}`);
 		} finally {
@@ -228,22 +251,27 @@ export default function OrganizationInfo() {
 			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 				<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
 					<Avatar.Root className="rounded-container size-20">
-						<Avatar.Image src={displayLogoSrc} alt={activeOrganization.name || 'Organization'} />
+						<Avatar.Image
+							src={isUploading ? undefined : (activeOrganization?.logo as string | undefined)}
+							alt={activeOrganization.name || 'Organization'}
+							onLoadingStatusChange={(status) => {
+								setImageLoadingStatus(status);
+							}}
+						/>
 						<Avatar.Fallback className="bg-surface-400-600 rounded-container size-20">
-							<Building2 className="size-10" />
+							{imageLoadingStatus === 'loading' || isUploading ? (
+								<div className="rounded-container absolute inset-0 flex items-center justify-center bg-black/50">
+									<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
+								</div>
+							) : (
+								<Building2 className="size-10" />
+							)}
 						</Avatar.Fallback>
 					</Avatar.Root>
 
 					<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 						<Pencil className="size-4" />
 					</div>
-
-					{/* Loading indicator during upload or preloading */}
-					{(isUploading || isPreloading) && (
-						<div className="bg-opacity-50 rounded-container absolute inset-0 flex items-center justify-center bg-black">
-							<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-						</div>
-					)}
 				</div>
 			</FileUpload>
 

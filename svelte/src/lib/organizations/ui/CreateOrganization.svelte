@@ -17,7 +17,7 @@
 	// API
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	const client = useConvexClient();
 
 	// Types
@@ -25,7 +25,7 @@
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 
 	// Queries
-	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization);
+	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization, {});
 	const activeOrganization = $derived(activeOrgResponse.data);
 
 	// Props
@@ -43,8 +43,9 @@
 	const props: CreateOrganizationProps = $props();
 
 	// Auth state
-	const isLoading = $derived(useAuth().isLoading);
-	const isAuthenticated = $derived(useAuth().isAuthenticated);
+	const auth = useAuth();
+	const isLoading = $derived(auth.isLoading);
+	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Component state
 	let name: string = $state('');

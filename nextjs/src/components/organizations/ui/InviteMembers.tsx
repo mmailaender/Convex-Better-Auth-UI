@@ -6,63 +6,80 @@ import { useState, FormEvent } from 'react';
 import { toast } from 'sonner';
 
 // API
-import { useAction } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Doc } from '@/convex/_generated/dataModel';
+import { authClient } from '@/components/auth/api/auth-client';
 // API Types
-type Role = Doc<'organizationMembers'>['role'];
+type Role = typeof authClient.$Infer.Member.role;
 
 export default function InviteMembers({ onSuccess }: { onSuccess?: () => void }) {
 	const [emailInput, setEmailInput] = useState('');
-	const [selectedRole, setSelectedRole] = useState<Role>('role_organization_member');
+	const [selectedRole, setSelectedRole] = useState<Role>('member');
 	const [isProcessing, setIsProcessing] = useState(false);
 
-	const inviteMembers = useAction(api.organizations.invitations.actions.inviteMembers);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
 
 	const handleInvite = async (event: FormEvent) => {
 		event.preventDefault();
 		if (isProcessing) return;
 		setIsProcessing(true);
 
-		try {
-			const emails = emailInput
-				.replace(/[,;\s]+/g, ',')
-				.split(',')
-				.map((email) => email.trim())
-				.filter((email) => email.length > 0);
+		const emails = emailInput
+			.replace(/[,;\s]+/g, ',')
+			.split(',')
+			.map((email) => email.trim())
+			.filter((email) => email.length > 0);
 
-			if (emails.length === 0) {
-				toast.error('Please enter at least one email address');
-				setIsProcessing(false);
-				return;
-			}
-
-			const results = await inviteMembers({ emails, role: selectedRole });
-			const successful = results.filter((r) => r.success);
-			const failed = results.filter((r) => !r.success);
-
-			if (successful.length > 0) {
-				const msg = `Sent ${successful.length} invitation(s) to: ${successful.map((r) => r.email).join(', ')}`;
-				toast.success(msg);
-				setEmailInput('');
-				if (onSuccess) {
-					onSuccess();
-				}
-			}
-
-			if (failed.length > 0) {
-				const msg = `Failed to send invitation(s) to: ${failed.map((r) => r.email).join(', ')}`;
-				toast.error(msg);
-			}
-		} catch (err) {
-			const errorMsg =
-				err instanceof Error ? err.message : 'An error occurred while processing invitations';
-			toast.error(errorMsg);
-		} finally {
+		if (emails.length === 0) {
+			toast.error('Please enter at least one email address');
 			setIsProcessing(false);
+			return;
 		}
-	};
 
+		if (!activeOrganization?.id) {
+			toast.error('No active organization found');
+			setIsProcessing(false);
+			return;
+		}
+
+		const results = [];
+
+		// Send invitations one by one
+		for (const email of emails) {
+			const { data, error } = await authClient.organization.inviteMember({
+				email,
+				role: selectedRole,
+				organizationId: activeOrganization.id,
+				resend: true
+			});
+
+			results.push({
+				email,
+				success: !error,
+				data,
+				error
+			});
+		}
+
+		const successful = results.filter((r) => r.success);
+		const failed = results.filter((r) => !r.success);
+
+		if (successful.length > 0) {
+			const msg = `Sent ${successful.length} invitation(s) to: ${successful.map((r) => r.email).join(', ')}`;
+			toast.success(msg);
+			setEmailInput('');
+			if (onSuccess) {
+				onSuccess();
+			}
+		}
+
+		if (failed.length > 0) {
+			const msg = `Failed to send invitation(s) to: ${failed.map((r) => r.email).join(', ')}`;
+			toast.error(msg);
+		}
+
+		setIsProcessing(false);
+	};
 	return (
 		<form onSubmit={handleInvite} className="flex flex-col gap-4">
 			<div className="flex flex-col gap-4">
@@ -72,10 +89,10 @@ export default function InviteMembers({ onSuccess }: { onSuccess?: () => void })
 						<select
 							value={selectedRole}
 							onChange={(e) => setSelectedRole(e.target.value as Role)}
-							className="select w-full"
+							className="select w-full cursor-pointer"
 						>
-							<option value="role_organization_member">Member</option>
-							<option value="role_organization_admin">Admin</option>
+							<option value="member">Member</option>
+							<option value="admin">Admin</option>
 						</select>
 					</label>
 				</div>

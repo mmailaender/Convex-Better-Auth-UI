@@ -176,8 +176,8 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 									</h6>
 									<OrganizationInfo />
 								</div>
-								<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
 								<LeaveOrganization />
+								<DeleteOrganization onSuccessfulDelete={onSuccessfulDelete} />
 							</>
 						)}
 

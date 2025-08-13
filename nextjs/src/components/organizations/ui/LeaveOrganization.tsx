@@ -11,7 +11,7 @@ import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
 
 // API Types
-import { Id } from '@/convex/_generated/dataModel';
+import { ConvexError } from 'convex/values';
 
 /**
  * LeaveOrganization component allows a user to leave the current organization
@@ -20,12 +20,12 @@ import { Id } from '@/convex/_generated/dataModel';
 export default function LeaveOrganization(): React.ReactNode {
 	// State hooks
 	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const [selectedSuccessor, setSelectedSuccessor] = useState<Id<'users'> | null>(null);
+	const [selectedSuccessor, setSelectedSuccessor] = useState<string | null>(null);
 
 	// Convex queries and mutations
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
-	const user = useQuery(api.users.queries.getUser);
+	const activeUser = useQuery(api.users.queries.getActiveUser);
+	const members = activeOrganization?.members;
 	const leaveOrganization = useMutation(api.organizations.members.mutations.leaveOrganization);
 
 	// Navigation
@@ -39,7 +39,7 @@ export default function LeaveOrganization(): React.ReactNode {
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.user._id !== user?._id
+				member.id !== activeUser?.id
 		) || [];
 
 	/**
@@ -59,16 +59,15 @@ export default function LeaveOrganization(): React.ReactNode {
 	const handleLeaveOrganization = async (): Promise<void> => {
 		if (!validateForm()) return;
 
-		if (!activeOrganization?._id) {
+		if (!activeOrganization?.id) {
 			toast.error('No active organization found.');
 			return;
 		}
 
 		try {
 			await leaveOrganization({
-				organizationId: activeOrganization._id,
 				// Only send successorId if the user is an owner and a successor is selected
-				...(isOrgOwner && selectedSuccessor ? { successorId: selectedSuccessor } : {})
+				...(isOrgOwner && selectedSuccessor ? { successorMemberId: selectedSuccessor } : {})
 			});
 
 			setIsOpen(false);
@@ -78,7 +77,7 @@ export default function LeaveOrganization(): React.ReactNode {
 			router.refresh();
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
+				err instanceof ConvexError ? err.data : 'Failed to leave organization. Please try again.'
 			);
 			console.error(err);
 		}
@@ -99,10 +98,12 @@ export default function LeaveOrganization(): React.ReactNode {
 				<Dialog.Header>
 					<Dialog.Title>Leave organization</Dialog.Title>
 				</Dialog.Header>
-				<Dialog.Description>
-					<p>If you leave organization you’ll lose access to all projects and resources.</p>
+				<Dialog.Description className="flex flex-col gap-2">
+					<span>
+						If you leave organization you&apos;ll lose access to all projects and resources.
+					</span>
 					{isOrgOwner && (
-						<p className="my-6">As the owner, you must assign a new owner before leaving.</p>
+						<span className="my-2">As the owner, you must assign a new owner before leaving.</span>
 					)}
 				</Dialog.Description>
 				{isOrgOwner && (
@@ -114,20 +115,21 @@ export default function LeaveOrganization(): React.ReactNode {
 							<select
 								id="successor"
 								value={selectedSuccessor?.toString() || ''}
-								onChange={(e) =>
-									setSelectedSuccessor(e.target.value ? (e.target.value as Id<'users'>) : null)
-								}
+								onChange={(e) => setSelectedSuccessor(e.target.value ? e.target.value : null)}
 								className="select w-full cursor-pointer"
 								required={isOrgOwner}
 							>
 								<option value="" disabled>
 									Choose a successor
 								</option>
-								{organizationMembers.map((member) => (
-									<option key={member.user._id.toString()} value={member.user._id.toString()}>
-										{member.user.name} ({member.user.email})
-									</option>
-								))}
+								{/* TODO: Filter out the current user by email as the id is inconsistent between Convex and Better Auth. Replace with id once fixed */}
+								{organizationMembers
+									.filter((member) => member.user.email !== activeUser?.email)
+									.map((member) => (
+										<option key={member.id} value={member.id}>
+											{member.user.name} ({member.user.email})
+										</option>
+									))}
 							</select>
 						</div>
 					</>

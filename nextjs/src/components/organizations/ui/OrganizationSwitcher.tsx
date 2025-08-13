@@ -1,6 +1,6 @@
 'use client';
 
-import { ComponentProps, useState } from 'react';
+import { ComponentProps, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Primitives
@@ -15,12 +15,15 @@ import OrganizationProfile from '@/components/organizations/ui/OrganizationProfi
 import LeaveOrganization from '@/components/organizations/ui/LeaveOrganization';
 
 // API
-import { useQuery, useMutation, useConvexAuth } from 'convex/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import type { Id } from '@/convex/_generated/dataModel';
+import { useRoles } from '../api/hooks';
 
 // Types
 type PopoverProps = ComponentProps<typeof Popover.Content>;
+
+// Constants
+import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 
 /**
  * Organization switcher component that allows switching between organizations,
@@ -39,65 +42,83 @@ export default function OrganizationSwitcher({
 	const { isLoading, isAuthenticated } = useConvexAuth();
 
 	// Queries and mutations
-	const organizations = useQuery(api.organizations.queries.getUserOrganizations);
+	const organizations = useQuery(api.organizations.queries.listOrganizations);
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const setActiveOrg = useMutation(api.organizations.mutations.setActiveOrganization);
+	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
+	const setActiveOrganization = useMutation(api.organizations.mutations.setActiveOrganization);
 
 	// State
 	const [openSwitcher, setOpenSwitcher] = useState<boolean>(false);
 	const [openCreateOrganization, setOpenCreateOrganization] = useState<boolean>(false);
 	const [openOrganizationProfile, setOpenOrganizationProfile] = useState<boolean>(false);
 
+	// Warn once if organizations are disabled in AUTH constants
+	useEffect(() => {
+		if (!AUTH_CONSTANTS.organizations) {
+			console.error('Organizations are disabled. Please turn them on in auth.constants.ts');
+		}
+	}, []);
+
 	/**
 	 * Updates the active organization and replaces URL slug if needed
 	 */
-	const updateActiveOrg = async (organizationId: Id<'organizations'>) => {
-		try {
-			// Get current active organization slug before mutation
-			const currentActiveOrgSlug = activeOrganization?.slug;
-			const currentPathname = window.location.pathname;
+	const setActiveOrg = useCallback(
+		async (organizationId?: string) => {
+			try {
+				// Get current active organization slug before mutation
+				const currentActiveOrgSlug = activeOrganization?.slug;
+				const currentPathname = window.location.pathname;
 
-			// Check if current URL contains the active organization slug
-			const urlContainsCurrentSlug =
-				currentActiveOrgSlug &&
-				(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
-					currentPathname.includes(`/${currentActiveOrgSlug}`));
+				// Check if current URL contains the active organization slug
+				const urlContainsCurrentSlug =
+					currentActiveOrgSlug &&
+					(currentPathname.includes(`/${currentActiveOrgSlug}/`) ||
+						currentPathname.includes(`/${currentActiveOrgSlug}`));
 
-			// Execute the mutation to set new active organization
-			await setActiveOrg({ organizationId });
+				// Execute the mutation to set new active organization
+				await setActiveOrganization({ organizationId });
 
-			// Get the new active organization data
-			const newActiveOrgSlug = activeOrganization?.slug;
+				// Get the new active organization data
+				const newActiveOrgSlug = activeOrganization?.slug;
 
-			// If URL contained old slug and we have a new slug, replace it
-			if (
-				urlContainsCurrentSlug &&
-				currentActiveOrgSlug &&
-				newActiveOrgSlug &&
-				currentActiveOrgSlug !== newActiveOrgSlug
-			) {
-				// Replace the old slug with the new slug in the URL
-				const newPathname = currentPathname.replace(
-					new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
-					`/${newActiveOrgSlug}`
-				);
+				// If URL contained old slug and we have a new slug, replace it
+				if (
+					urlContainsCurrentSlug &&
+					currentActiveOrgSlug &&
+					newActiveOrgSlug &&
+					currentActiveOrgSlug !== newActiveOrgSlug
+				) {
+					// Replace the old slug with the new slug in the URL
+					const newPathname = currentPathname.replace(
+						new RegExp(`/${currentActiveOrgSlug}(?=/|$)`, 'g'),
+						`/${newActiveOrgSlug}`
+					);
 
-				// Navigate to the new URL
-				router.push(newPathname);
-			} else {
-				// No slug replacement needed, just refresh current page
-				router.refresh();
+					// Navigate to the new URL
+					router.push(newPathname);
+				} else {
+					// No slug replacement needed, just refresh current page
+					router.refresh();
+				}
+
+				// Close popover
+				setOpenSwitcher(false);
+			} catch (err) {
+				console.error('Error updating active organization:', err);
 			}
+		},
+		[activeOrganization, setActiveOrganization, router, setOpenSwitcher]
+	);
 
-			// Close popover
-			setOpenSwitcher(false);
-		} catch (err) {
-			console.error('Error updating active organization:', err);
+	// check on mount if there is an active organization and if not, use the first organization from listOrganization and call with that setActiveOrg
+	useEffect(() => {
+		if (organizations && organizations.length > 0 && !activeOrganization) {
+			setActiveOrg();
 		}
-	};
+	}, [organizations, activeOrganization, setActiveOrg]);
 
-	// Not authenticated - don't show anything
-	if (!isAuthenticated) {
+	// Not authenticated or organizations disabled - don't show anything
+	if (!isAuthenticated || !AUTH_CONSTANTS.organizations) {
 		return null;
 	}
 
@@ -114,7 +135,7 @@ export default function OrganizationSwitcher({
 					<Plus className="size-4" />
 					<span>Create Organization</span>
 				</Dialog.Trigger>
-				<Dialog.Content>
+				<Dialog.Content className="max-w-lg">
 					<Dialog.Header>
 						<Dialog.Title>Create Organization</Dialog.Title>
 					</Dialog.Header>
@@ -136,8 +157,8 @@ export default function OrganizationSwitcher({
 					<div className="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 						<Avatar.Root className="rounded-container size-8 shrink-0">
 							<Avatar.Image
-								src={activeOrganization?.logo || ''}
-								alt={activeOrganization?.name || ''}
+								src={activeOrganization?.logo ?? undefined}
+								alt={activeOrganization?.name}
 							/>
 							<Avatar.Fallback>
 								<Building2 className="size-5" />
@@ -156,8 +177,8 @@ export default function OrganizationSwitcher({
 							<div className="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6">
 								<Avatar.Root className="rounded-container size-8 shrink-0">
 									<Avatar.Image
-										src={activeOrganization?.logo || ''}
-										alt={activeOrganization?.name || ''}
+										src={activeOrganization?.logo ?? undefined}
+										alt={activeOrganization?.name}
 									/>
 									<Avatar.Fallback>
 										<Building2 className="size-5" />
@@ -166,8 +187,7 @@ export default function OrganizationSwitcher({
 								<span className="text-surface-700-300 text-medium w-full truncate text-base">
 									{activeOrganization?.name}
 								</span>
-								{activeOrganization?.role === 'role_organization_owner' ||
-								activeOrganization?.role === 'role_organization_admin' ? (
+								{isOwnerOrAdmin ? (
 									<button
 										onClick={() => {
 											setOpenOrganizationProfile(true);
@@ -183,17 +203,17 @@ export default function OrganizationSwitcher({
 							</div>
 
 							{organizations
-								.filter((org) => org && org._id !== activeOrganization?._id)
+								.filter((org) => org && org.id !== activeOrganization?.id)
 								.map(
 									(org) =>
 										org && (
-											<div key={org._id}>
+											<div key={org.id}>
 												<button
-													onClick={() => updateActiveOrg(org._id)}
+													onClick={() => setActiveOrg(org.id)}
 													className="group hover:bg-surface-100-900/50 flex w-full max-w-80 items-center gap-3 p-3"
 												>
 													<Avatar.Root className="rounded-container size-8 shrink-0">
-														<Avatar.Image src={org.logo || ''} alt={org.name || ''} />
+														<Avatar.Image src={org.logo ?? undefined} alt={org.name} />
 														<Avatar.Fallback>
 															<Building2 className="size-5" />
 														</Avatar.Fallback>
@@ -224,7 +244,7 @@ export default function OrganizationSwitcher({
 
 			{/* Create Organization Modal */}
 			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<Dialog.Content className="max-w-xl">
+				<Dialog.Content className="max-w-lg">
 					<Dialog.Header>
 						<Dialog.Title>Create Organization</Dialog.Title>
 					</Dialog.Header>

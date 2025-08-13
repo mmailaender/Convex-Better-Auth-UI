@@ -1,42 +1,19 @@
-import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from '../../_generated/server';
-import { getInvitationsModel } from '../../model/organizations/invitations';
+import { betterAuthComponent } from '../../auth';
+import { createAuth } from '../../../src/components/auth/api/auth';
 
 /**
  * Get pending invitations for the current active organization
  */
-export const getInvitations = query({
+export const listInvitations = query({
 	handler: async (ctx) => {
-		const userId = await getAuthUserId(ctx);
-		if (!userId) {
+		const auth = createAuth(ctx);
+		try {
+			return await auth.api.listInvitations({
+				headers: await betterAuthComponent.getHeaders(ctx)
+			});
+		} catch {
 			return [];
 		}
-
-		// Get the user's active organization
-		const user = await ctx.db.get(userId);
-		if (!user || !user.activeOrganizationId) {
-			return [];
-		}
-
-		const organizationId = user.activeOrganizationId;
-
-		// Check if the user is an admin or owner
-		const membership = await ctx.db
-			.query('organizationMembers')
-			.withIndex('orgId_and_userId', (q) =>
-				q.eq('organizationId', organizationId).eq('userId', userId)
-			)
-			.first();
-
-		if (
-			!membership ||
-			!['role_organization_owner', 'role_organization_admin'].includes(membership.role)
-		) {
-			// Not authorized to view invitations
-			return [];
-		}
-
-		// Fetch invitations via model
-		return await getInvitationsModel(ctx, { organizationId });
 	}
 });

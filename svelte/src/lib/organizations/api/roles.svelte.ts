@@ -7,7 +7,7 @@ import type { FunctionReturnType } from 'convex/server';
 import type { Id } from '$convex/_generated/dataModel';
 type Role = FunctionReturnType<typeof api.organizations.queries.getOrganizationRole>;
 
-export function createRoles(args: { orgId?: Id<'organizations'>; initialData?: Role } = {}) {
+export function useRoles(args: { orgId?: Id<'organizations'>; initialData?: Role } = {}) {
 	const role = useQuery(
 		api.organizations.queries.getOrganizationRole,
 		{ organizationId: args.orgId },
@@ -16,13 +16,13 @@ export function createRoles(args: { orgId?: Id<'organizations'>; initialData?: R
 
 	return {
 		get hasOwnerRole() {
-			return role.data === 'role_organization_owner';
+			return role.data === 'owner';
 		},
 		get hasAdminRole() {
-			return role.data === 'role_organization_admin';
+			return role.data === 'admin';
 		},
 		get hasOwnerOrAdminRole() {
-			return ['role_organization_owner', 'role_organization_admin'].includes(role.data ?? '');
+			return ['owner', 'admin'].includes(role.data ?? '');
 		},
 		get isMember() {
 			return role.data != null;

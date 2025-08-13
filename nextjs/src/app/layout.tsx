@@ -1,8 +1,6 @@
-import { ConvexAuthNextjsServerProvider } from '@convex-dev/auth/nextjs/server';
 import { ConvexClientProvider } from './ConvexClientProvider';
 
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
 // Primitives
@@ -10,16 +8,6 @@ import { Toaster } from '@/components/primitives/ui/sonner';
 // Components
 import OrganizationSwitcher from '@/components/organizations/ui/OrganizationSwitcher';
 import UserButton from '@/components/users/ui/UserButton';
-
-const geistSans = Geist({
-	variable: '--font-geist-sans',
-	subsets: ['latin']
-});
-
-const geistMono = Geist_Mono({
-	variable: '--font-geist-mono',
-	subsets: ['latin']
-});
 
 export const metadata: Metadata = {
 	title: 'Create Next App',
@@ -32,22 +20,18 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<ConvexAuthNextjsServerProvider>
-			<html lang="en" data-theme="authapp">
-				<body
-					className={`${geistSans.variable} ${geistMono.variable} grid h-screen grid-rows-[auto_1fr] antialiased`}
-				>
-					<ConvexClientProvider>
-						<div className="flex items-center justify-between gap-5 p-4">
-							<div className="mr-auto text-2xl font-bold text-white">Next.js</div>
-							<OrganizationSwitcher />
-							<UserButton />
-						</div>
-						{children}
-					</ConvexClientProvider>
-					<Toaster position="top-center" />
-				</body>
-			</html>
-		</ConvexAuthNextjsServerProvider>
+		<html lang="en" data-theme="authapp">
+			<body className={`grid h-screen grid-rows-[auto_1fr] antialiased`}>
+				<ConvexClientProvider>
+					<div className="flex items-center justify-between gap-5 p-4">
+						<div className="mr-auto text-2xl font-bold text-white">Next.js</div>
+						<OrganizationSwitcher />
+						<UserButton />
+					</div>
+					{children}
+				</ConvexClientProvider>
+				<Toaster position="top-center" />
+			</body>
+		</html>
 	);
 }

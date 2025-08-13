@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tabs as TabsPrimitive } from 'bits-ui';
+	import { TabsRoot as ArkTabsRoot, type TabsRootProps } from '@ark-ui/svelte';
 	import { cn } from '$lib/primitives/utils.js';
 
 	let {
@@ -7,13 +7,12 @@
 		value = $bindable(''),
 		class: className,
 		...restProps
-	}: TabsPrimitive.RootProps = $props();
+	}: TabsRootProps = $props();
 </script>
 
-<TabsPrimitive.Root
+<ArkTabsRoot
 	bind:ref
 	bind:value
-	data-slot="tabs"
 	class={cn(
 		'flex',
 		'data-[orientation=vertical]:w-full data-[orientation=vertical]:shrink-0 data-[orientation=vertical]:flex-row data-[orientation=vertical]:items-start',

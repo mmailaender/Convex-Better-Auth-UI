@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-// Convex
-import { useQuery, useMutation } from 'convex/react';
+// API
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { authClient } from '@/components/auth/api/auth-client';
 
 // Icons
 import { Pencil } from 'lucide-react';
@@ -18,17 +19,14 @@ import { FileUpload } from '@skeletonlabs/skeleton-react';
 
 // utils
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
-import { preloadImage } from '@/components/primitives/utils/preloadImage';
 
 // types
-import type { Id } from '@/convex/_generated/dataModel';
 import type { FileChangeDetails } from '@zag-js/file-upload';
 
 export default function ProfileInfo() {
 	/* ─────────────────────────────────────────────  Convex queries    */
-	const user = useQuery(api.users.queries.getUser);
+	const user = useQuery(api.users.queries.getActiveUser);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-	const updateUserName = useMutation(api.users.mutations.updateUserName);
 	const updateAvatar = useMutation(api.users.mutations.updateAvatar);
 
 	/* ─────────────────────────────────────────────  local state       */
@@ -36,43 +34,21 @@ export default function ProfileInfo() {
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [name, setName] = useState('');
 	const [isUploading, setIsUploading] = useState(false);
-	const [isPreloading, setIsPreloading] = useState(false);
-	const [displayImageSrc, setDisplayImageSrc] = useState('');
+	const [imageLoadingStatus, setImageLoadingStatus] = useState<
+		'idle' | 'loading' | 'loaded' | 'error'
+	>('idle');
 
 	// Initialize state when user data is available
 	useEffect(() => {
 		if (user && name === '') {
 			setName(user.name);
 		}
-		if (user?.image && displayImageSrc === '') {
-			setDisplayImageSrc(user.image);
-		}
-	}, [user, name, displayImageSrc]);
-
-	// Handle server image updates - preload before showing
-	useEffect(() => {
-		if (!user?.image || isUploading) return;
-
-		// If server has a new image URL that's different from what we're displaying
-		if (user.image !== displayImageSrc) {
-			setIsPreloading(true);
-			preloadImage(user.image)
-				.then(() => {
-					setDisplayImageSrc(user.image!);
-					setIsPreloading(false);
-				})
-				.catch(() => {
-					// If preload fails, still update
-					setDisplayImageSrc(user.image!);
-					setIsPreloading(false);
-				});
-		}
-	}, [user?.image, displayImageSrc, isUploading]);
+	}, [user, name]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
-			await updateUserName({ name });
+			await authClient.updateUser({ name });
 			setIsDialogOpen(false);
 			setIsDrawerOpen(false);
 			toast.success('Profile name updated successfully');
@@ -101,21 +77,15 @@ export default function ProfileInfo() {
 
 			// Get a storage upload URL from Convex
 			const uploadUrl = await generateUploadUrl();
-
 			// Upload the file to Convex storage
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': optimizedFile.type },
 				body: optimizedFile
 			});
+			if (!response.ok) throw new Error('Failed to upload file');
 
-			if (!response.ok) {
-				throw new Error('Failed to upload file');
-			}
-
-			// Get the storage ID from the response
-			const result = await response.json();
-			const storageId = result.storageId as Id<'_storage'>;
+			const { storageId } = await response.json();
 
 			// Update the user's avatar with the storage ID
 			await updateAvatar({ storageId });
@@ -165,22 +135,27 @@ export default function ProfileInfo() {
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">
 						<Avatar.Root className="bg-surface-400-600 size-20">
-							<Avatar.Image src={displayImageSrc} alt={user.name} />
+							<Avatar.Image
+								src={isUploading ? undefined : (user.image as string | undefined)}
+								alt={user.name}
+								onLoadingStatusChange={(status) => {
+									setImageLoadingStatus(status);
+								}}
+							/>
 							<Avatar.Fallback>
-								<Avatar.Marble name={user.name} />
+								{imageLoadingStatus === 'loading' || isUploading ? (
+									<div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+										<div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"></div>
+									</div>
+								) : (
+									<Avatar.Marble name={user.name} />
+								)}
 							</Avatar.Fallback>
 						</Avatar.Root>
 
 						<div className="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2">
 							<Pencil className="size-4" />
 						</div>
-
-						{/* Loading indicator during upload or preloading */}
-						{(isUploading || isPreloading) && (
-							<div className="bg-opacity-50 absolute inset-0 flex items-center justify-center rounded-full bg-black">
-								<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-white"></div>
-							</div>
-						)}
 					</div>
 				</FileUpload>
 			</div>

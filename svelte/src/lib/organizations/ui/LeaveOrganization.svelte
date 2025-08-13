@@ -1,66 +1,60 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
 
 	// API
-	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	import { goto } from '$app/navigation';
-	const roles = createRoles();
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	const roles = useRoles();
 	const client = useConvexClient();
 
 	// Types
-	import type { Id } from '$convex/_generated/dataModel';
 	import type { FunctionReturnType } from 'convex/server';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.queries.getOrganizationMembers
-	>;
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
+	type ActiveUserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	let {
 		initialData
 	}: {
 		initialData?: {
-			activeOrganization: ActiveOrganizationResponse;
-			members: MembersResponse;
-			user: UserResponse;
+			activeOrganization?: ActiveOrganizationResponse;
+			activeUser?: ActiveUserResponse;
 		};
 	} = $props();
 
 	// Queries
-	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData: initialData?.user });
-	const organizationResponse = useQuery(
+	const activeUserResponse = useQuery(
+		api.users.queries.getActiveUser,
+		{},
+		{ initialData: initialData?.activeUser }
+	);
+	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		{},
 		{ initialData: initialData?.activeOrganization }
 	);
-	const membersResponse = useQuery(
-		api.organizations.members.queries.getOrganizationMembers,
-		{},
-		{ initialData: initialData?.members }
-	);
 
 	// State
-	let modalOpen: boolean = $state(false);
-	let selectedSuccessor: Id<'users'> | null = $state(null);
+	let isOpen: boolean = $state(false);
+	let selectedSuccessor: string | null = $state(null);
 
 	// Derived data
-	const currentUser = $derived(userResponse.data);
-	const activeOrganization = $derived(organizationResponse.data);
-	const members = $derived(membersResponse.data);
+	const activeUser = $derived(activeUserResponse.data);
+	const activeOrganization = $derived(activeOrganizationResponse.data);
+	const members = $derived(activeOrganization?.members);
 
 	// Organization members excluding current user for successor selection
 	const organizationMembers = $derived(
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.user._id !== currentUser?._id
+				member.id !== activeUser?.id
 		) || []
 	);
 
@@ -81,19 +75,18 @@
 	async function handleLeaveOrganization(): Promise<void> {
 		if (!validateForm()) return;
 
-		if (!activeOrganization?._id) {
+		if (!activeOrganization?.id) {
 			toast.error('No active organization found.');
 			return;
 		}
 
 		try {
 			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
-				organizationId: activeOrganization._id,
-				// Only send successorId if the user is an owner and a successor is selected
-				...(roles.hasOwnerRole && selectedSuccessor ? { successorId: selectedSuccessor } : {})
+				// Only send successorMemberId if the user is an owner and a successor is selected
+				...(roles.hasOwnerRole && selectedSuccessor ? { successorMemberId: selectedSuccessor } : {})
 			});
 
-			modalOpen = false;
+			isOpen = false;
 
 			// Navigate to home page after leaving
 			goto('/');
@@ -104,18 +97,10 @@
 			console.error(err);
 		}
 	}
-
-	/**
-	 * Handles successor selection change
-	 */
-	function handleSuccessorChange(e: Event): void {
-		const select = e.target as HTMLSelectElement;
-		selectedSuccessor = select.value ? (select.value as Id<'users'>) : null;
-	}
 </script>
 
 {#if activeOrganization && members && members.length > 1}
-	<Dialog.Root open={modalOpen} onOpenChange={(open) => (modalOpen = open)}>
+	<Dialog.Root bind:open={isOpen}>
 		<Dialog.Trigger
 			class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 w-fit justify-between gap-1 text-sm"
 		>
@@ -127,10 +112,10 @@
 				<Dialog.Title>Leave organization</Dialog.Title>
 			</Dialog.Header>
 
-			<Dialog.Description>
-				<p>If you leave organization you'll lose access to all projects and resources.</p>
+			<Dialog.Description class="flex flex-col gap-2">
+				<span> If you leave organization you'll lose access to all projects and resources. </span>
 				{#if roles.hasOwnerRole}
-					<p class="my-6">As the owner, you must assign a new owner before leaving.</p>
+					<span class="my-2">As the owner, you must assign a new owner before leaving.</span>
 				{/if}
 			</Dialog.Description>
 
@@ -139,14 +124,14 @@
 					<label for="successor" class="label"> New owner: </label>
 					<select
 						id="successor"
-						value={selectedSuccessor?.toString() || ''}
-						onchange={handleSuccessorChange}
+						bind:value={selectedSuccessor}
 						class="select w-full cursor-pointer"
 						required={roles.hasOwnerRole}
 					>
 						<option value="" disabled> Choose a successor </option>
-						{#each organizationMembers as member (member.user._id)}
-							<option value={member.user._id.toString()}>
+						<!-- TODO: Filter out the current user by email as the id is inconsistent between Convex and Better Auth. Replace with id once fixed -->
+						{#each organizationMembers.filter((member) => member.user.email !== activeUser?.email) as member (member.id)}
+							<option value={member.id}>
 								{member.user.name} ({member.user.email})
 							</option>
 						{/each}
@@ -155,7 +140,7 @@
 			{/if}
 
 			<Dialog.Footer>
-				<button class="btn preset-tonal" onclick={() => (modalOpen = false)}> Cancel </button>
+				<button class="btn preset-tonal" onclick={() => (isOpen = false)}> Cancel </button>
 				<button
 					type="button"
 					class="btn bg-error-500 hover:bg-error-600 text-white"

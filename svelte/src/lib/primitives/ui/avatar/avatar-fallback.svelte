@@ -1,17 +1,12 @@
 <script lang="ts">
-	import { Avatar as AvatarPrimitive } from "bits-ui";
-	import { cn } from "$lib/primitives/utils.js";
+	import { AvatarFallback as ArkAvatarFallback, type AvatarFallbackProps } from '@ark-ui/svelte';
+	import { cn } from '$lib/primitives/utils.js';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		...restProps
-	}: AvatarPrimitive.FallbackProps = $props();
+	let { ref = $bindable(null), class: className, ...restProps }: AvatarFallbackProps = $props();
 </script>
 
-<AvatarPrimitive.Fallback
+<ArkAvatarFallback
 	bind:ref
-	data-slot="avatar-fallback"
-	class={cn("bg-muted flex size-full items-center justify-center rounded-full", className)}
+	class={cn('bg-muted flex size-full items-center justify-center rounded-full', className)}
 	{...restProps}
 />

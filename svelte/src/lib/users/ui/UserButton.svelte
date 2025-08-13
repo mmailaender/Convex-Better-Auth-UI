@@ -7,65 +7,147 @@
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	// Components
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
+	import SignIn from '$lib/auth/ui/SignIn.svelte';
+	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
+
+	// SvelteKit navigation/state
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	// API
-	import { useAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 
 	// Types
-	import type { ComponentProps } from 'svelte';
-	type PopoverProps = ComponentProps<typeof Popover.Content>;
+	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { FunctionReturnType } from 'convex/server';
-	import SignIn from '$lib/auth/ui/SignIn.svelte';
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	const {
-		popoverSide = 'bottom',
-		popoverAlign = 'end',
+		popoverPlacement = 'bottom',
 		initialData
 	}: {
-		popoverSide?: PopoverProps['side'];
-		popoverAlign?: PopoverProps['align'];
+		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: UserResponse;
 	} = $props();
+
+	// Auth
+	const auth = useAuth();
+	const isLoading = $derived(auth.isLoading);
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
+	// Queries
+	const userResponse = useQuery(api.users.queries.getActiveUser, {}, { initialData });
+	const user = $derived(userResponse.data);
 
 	// State
 	let userPopoverOpen = $state(false);
 	let profileDialogOpen = $state(false);
+	let signInDialogOpen = $state(false);
+	let avatarStatus = $state('');
+	// Track lifecycle and previous open state
+	let mounted = $state(false);
+	let prevProfileDialogOpen = $state(false);
+	// Guard to avoid reopening from URL while we're removing the param during a UI close
+	let closingViaUI = $state(false);
 
-	// Auth
-	const { signOut } = useAuth();
-	const isAuthenticated = $derived(useAuth().isAuthenticated);
+	onMount(() => {
+		mounted = true;
+	});
 
-	// Queries
-	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData });
-	const user = $derived(userResponse.data);
+	// Opening is driven explicitly via openProfileModal() pushing the URL param.
 
 	/**
-	 * Open profile modal and close popover
+	 * Reflect dialog CLOSE to URL.
+	 * When the dialog transitions from open -> closed and the param exists,
+	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'profile';
+		if (mounted && prevProfileDialogOpen && !profileDialogOpen && has) {
+			closingViaUI = true;
+			const url = new URL(page.url);
+			url.searchParams.delete('dialog');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: true,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
+		prevProfileDialogOpen = profileDialogOpen;
+	});
+
+	/**
+	 * Source of truth: URL -> profileDialogOpen.
+	 * Open dialog when ?dialog=profile is present. Close when removed.
+	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'profile';
+		if (closingViaUI) {
+			if (!has) closingViaUI = false;
+			return;
+		}
+		if (has !== profileDialogOpen) {
+			profileDialogOpen = has;
+		}
+	});
+
+	// URL is the single source of truth; no state->URL/URL->state effects are needed.
+
+	/**
+	 * Open profile modal and close popover (via shallow routing)
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		profileDialogOpen = true;
+		const has = page.url.searchParams.get('dialog') === 'profile';
+		if (!has) {
+			const url = new URL(page.url);
+			url.searchParams.set('dialog', 'profile');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: false,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
 	}
 </script>
 
-{#if isAuthenticated}
+{#if isLoading}
+	<div class="placeholder-circle size-10 animate-pulse"></div>
+{:else if isAuthenticated}
 	{#if user}
-		<!-- User Popover -->
-		<Popover.Root bind:open={userPopoverOpen}>
+		<Popover.Root
+			bind:open={userPopoverOpen}
+			positioning={{
+				placement: popoverPlacement,
+				strategy: 'absolute',
+				offset: { mainAxis: 8, crossAxis: 0 }
+			}}
+		>
 			<Popover.Trigger>
-				<Avatar.Root class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4">
+				<Avatar.Root
+					class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4"
+					onStatusChange={(details) => (avatarStatus = details.status)}
+				>
 					<Avatar.Image src={user.image} alt={user.name} />
 					<Avatar.Fallback>
-						<Avatar.Marble name={user.name} />
+						{#if avatarStatus === 'loading'}
+							<div class="placeholder-circle size-10 animate-pulse"></div>
+						{:else}
+							<Avatar.Marble name={user.name} />
+						{/if}
 					</Avatar.Fallback>
 				</Avatar.Root>
 			</Popover.Trigger>
-
-			<Popover.Content side={popoverSide} align={popoverAlign}>
+			<Popover.Content>
 				<div class="flex flex-col gap-1 p-0">
 					<button
 						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
@@ -85,15 +167,10 @@
 						</div>
 						<ChevronRight class="size-4" />
 					</button>
-					<button
+					<SignOutButton
+						onSuccess={() => (userPopoverOpen = false)}
 						class="btn preset-faded-surface-50-950 hover:bg-surface-200-800 h-10 justify-between gap-1 text-sm"
-						onclick={() => {
-							signOut();
-							userPopoverOpen = false;
-						}}
-					>
-						Sign out
-					</button>
+					/>
 				</div>
 			</Popover.Content>
 		</Popover.Root>
@@ -112,16 +189,20 @@
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
 {:else}
-	<Dialog.Root>
-		<Dialog.Trigger class="btn preset-filled-primary-500">Sign in</Dialog.Trigger>
-		<Dialog.Content
-			class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
-		>
-			<Dialog.Header>
-				<Dialog.Title>Sign in</Dialog.Title>
-			</Dialog.Header>
-			<SignIn />
-			<Dialog.CloseX />
-		</Dialog.Content>
-	</Dialog.Root>
+	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
+		Sign in
+	</button>
 {/if}
+
+<!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
+<Dialog.Root bind:open={signInDialogOpen}>
+	<Dialog.Content
+		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
+	>
+		<Dialog.Header>
+			<Dialog.Title>Sign in</Dialog.Title>
+		</Dialog.Header>
+		<SignIn onSignIn={() => (signInDialogOpen = false)} />
+		<Dialog.CloseX />
+	</Dialog.Content>
+</Dialog.Root>

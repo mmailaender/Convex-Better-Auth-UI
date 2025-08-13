@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Drawer as DrawerPrimitive } from "vaul-svelte";
+  import { Dialog as ArkDialog, type DialogTriggerProps } from '@ark-ui/svelte/dialog';
 
-	let { ref = $bindable(null), ...restProps }: DrawerPrimitive.TriggerProps = $props();
+  let { ref = $bindable(null), ...restProps }: DialogTriggerProps = $props();
 </script>
 
-<DrawerPrimitive.Trigger bind:ref data-slot="drawer-trigger" {...restProps} />
+<ArkDialog.Trigger bind:ref data-slot="drawer-trigger" {...restProps} />

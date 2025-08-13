@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { Tabs as TabsPrimitive } from 'bits-ui';
+	import { TabContent as ArkTabContent, type TabContentProps } from '@ark-ui/svelte';
 	import { cn } from '$lib/primitives/utils.js';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		...restProps
-	}: TabsPrimitive.ContentProps = $props();
+	let { ref = $bindable(null), class: className, ...restProps }: TabContentProps = $props();
 </script>
 
-<TabsPrimitive.Content
+<ArkTabContent
 	bind:ref
 	data-slot="tabs-content"
 	class={cn(

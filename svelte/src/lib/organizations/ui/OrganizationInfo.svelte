@@ -6,19 +6,19 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
 
 	// API Types
-	import type { Id } from '$convex/_generated/dataModel';
 	import type { FunctionReturnType } from 'convex/server';
 
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getUser>;
+	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	const client = useConvexClient();
-	const roles = createRoles();
+	const roles = useRoles();
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// UI Components
 	// Icons
@@ -40,11 +40,19 @@
 	// Props
 	let {
 		initialData
-	}: { initialData?: { user: UserResponse; activeOrganization: ActiveOrganizationResponse } } =
-		$props();
+	}: {
+		initialData?: {
+			user?: UserResponse;
+			activeOrganization?: ActiveOrganizationResponse;
+		};
+	} = $props();
 
 	// Queries
-	const userResponse = useQuery(api.users.queries.getUser, {}, { initialData: initialData?.user });
+	const userResponse = useQuery(
+		api.users.queries.getActiveUser,
+		{},
+		{ initialData: initialData?.user }
+	);
 	const organizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		{},
@@ -54,8 +62,9 @@
 	// State
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
-	let loadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
-	let avatarKey: number = $state(0); // Force re-render when image changes
+	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
+	let isUploading: boolean = $state(false);
+	let logoKey: number = $state(0); // Force re-render when logo changes
 
 	let formState = $state({ name: '', slug: '' });
 
@@ -77,12 +86,12 @@
 
 	// Handlers
 	function toggleDialogEdit(): void {
-		if (!roles.hasOwnerOrAdminRole) return;
+		if (!isOwnerOrAdmin) return;
 		isDialogOpen = true;
 	}
 
 	function toggleDrawerEdit(): void {
-		if (!roles.hasOwnerOrAdminRole) return;
+		if (!isOwnerOrAdmin) return;
 		isDrawerOpen = true;
 	}
 
@@ -102,10 +111,9 @@
 		if (!file || !activeOrganization) return;
 
 		try {
-			// Set loading status to show spinner immediately
-			loadingStatus = 'loading';
-
-			const optimised = await optimizeImage(file, {
+			// Show spinner immediately while uploading
+			isUploading = true;
+			const optimizedFile = await optimizeImage(file, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -114,33 +122,34 @@
 				forceConvert: true
 			});
 
+			// Get a storage upload URL from Convex
 			const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
-			const res = await fetch(uploadUrl, {
+			// Upload the file to Convex storage
+			const response = await fetch(uploadUrl, {
 				method: 'POST',
-				headers: { 'Content-Type': optimised.type },
-				body: optimised
+				headers: { 'Content-Type': optimizedFile.type },
+				body: optimizedFile
 			});
-			if (!res.ok) throw new Error('Failed to upload file');
+			if (!response.ok) throw new Error('Failed to upload file');
 
-			const { storageId } = await res.json();
-			const logoStorageId = storageId as Id<'_storage'>;
+			const { storageId } = await response.json();
 
 			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
-				organizationId: activeOrganization._id,
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || '',
-				logoId: logoStorageId
+				logoId: storageId
 			});
 
-			// Force avatar to re-render with new image - this will trigger new loading
-			avatarKey += 1;
+			// Reset loading status and force logo to re-render with new image - this will trigger new loading
+			imageLoadingStatus = 'loading';
+			logoKey += 1;
 
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
 			// Reset loading status on error
-			loadingStatus = 'error';
+			imageLoadingStatus = 'error';
+		} finally {
+			isUploading = false;
 		}
 	}
 
@@ -160,11 +169,14 @@
 					currentPathname.includes(`/${currentSlug}`));
 
 			// Update the organization profile
-			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
-				organizationId: activeOrganization._id,
-				name: formState.name,
-				slug: formState.slug
-			});
+			const updates: { name?: string; slug?: string } = {};
+			if (activeOrganization.name !== formState.name) {
+				updates.name = formState.name;
+			}
+			if (activeOrganization.slug !== formState.slug) {
+				updates.slug = formState.slug;
+			}
+			await client.mutation(api.organizations.mutations.updateOrganizationProfile, updates);
 
 			// Close the modals
 			isDialogOpen = false;
@@ -201,27 +213,33 @@
 			<div
 				class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
 			>
-				{#key avatarKey}
-					<Avatar.Root class="rounded-container size-20" bind:loadingStatus>
+				{#key logoKey}
+					<Avatar.Root
+						class="rounded-container size-20"
+						onStatusChange={(e) => {
+							console.log('Avatar status change:', e.status, 'URL:', activeOrganization.logo);
+							imageLoadingStatus = e.status;
+						}}
+					>
 						<Avatar.Image
 							src={activeOrganization.logo}
 							alt={activeOrganization.name || 'Organization'}
 						/>
 						<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
-							{#if loadingStatus === 'loading'}
-								<div
-									class="rounded-container absolute inset-0 flex items-center justify-center bg-black/50"
-								>
-									<div
-										class="rounded-container h-6 w-6 animate-spin border-2 border-white border-b-transparent"
-									></div>
-								</div>
-							{:else}
-								<Building2 class="size-10" />
-							{/if}
+							<Building2 class="size-10" />
 						</Avatar.Fallback>
 					</Avatar.Root>
 				{/key}
+
+				{#if isUploading || imageLoadingStatus === 'loading'}
+					<div
+						class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
+					>
+						<div
+							class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+						></div>
+					</div>
+				{/if}
 
 				<div
 					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"

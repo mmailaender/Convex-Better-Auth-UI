@@ -1,23 +1,24 @@
-import { api } from '@/convex/_generated/api';
 import { useQuery } from 'convex/react';
-import type { Id } from '@/convex/_generated/dataModel';
+import { api } from '@/convex/_generated/api';
 
-interface UseRolesArgs {
-	orgId?: Id<'organizations'>;
-}
-
-export const useRoles = ({ orgId }: UseRolesArgs = {}) => {
-	const role = useQuery(api.organizations.queries.getOrganizationRole, { organizationId: orgId });
+export const useRoles = ({
+	orgId
+}: {
+	orgId?: string;
+} = {}) => {
+	const role = useQuery(api.organizations.queries.getOrganizationRole, {
+		organizationId: orgId
+	});
 
 	return {
 		get hasOwnerRole() {
-			return role === 'role_organization_owner';
+			return role === 'owner';
 		},
 		get hasAdminRole() {
-			return role === 'role_organization_admin';
+			return role === 'admin';
 		},
 		get hasOwnerOrAdminRole() {
-			return ['role_organization_owner', 'role_organization_admin'].includes(role ?? '');
+			return ['owner', 'admin'].includes(role ?? '');
 		},
 		get isMember() {
 			return role != null;

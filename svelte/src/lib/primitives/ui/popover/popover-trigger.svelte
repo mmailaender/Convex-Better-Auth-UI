@@ -1,17 +1,8 @@
 <script lang="ts">
-	import { cn } from "$lib/primitives/utils.js";
-	import { Popover as PopoverPrimitive } from "bits-ui";
+	import { cn } from '$lib/primitives/utils.js';
+	import { PopoverTrigger as ArkPopoverTrigger, type PopoverTriggerProps } from '@ark-ui/svelte';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		...restProps
-	}: PopoverPrimitive.TriggerProps = $props();
+	let { ref = $bindable(null), class: className, ...restProps }: PopoverTriggerProps = $props();
 </script>
 
-<PopoverPrimitive.Trigger
-	bind:ref
-	data-slot="popover-trigger"
-	class={cn("", className)}
-	{...restProps}
-/>
+<ArkPopoverTrigger bind:ref data-slot="popover-trigger" class={cn('', className)} {...restProps} />

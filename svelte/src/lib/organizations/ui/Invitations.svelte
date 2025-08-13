@@ -6,45 +6,45 @@
 	import { Search } from '@lucide/svelte';
 
 	// API
-	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	const client = useConvexClient();
-	const roles = createRoles();
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	const roles = useRoles();
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	// Types
-	import type { Doc, Id } from '$convex/_generated/dataModel';
-	type Role = Doc<'organizationMembers'>['role'];
+	type Role = typeof authClient.$Infer.Member.role;
 	import type { FunctionReturnType } from 'convex/server';
-	type InvitationResponse = FunctionReturnType<
-		typeof api.organizations.invitations.queries.getInvitations
+	type InvitationListResponse = FunctionReturnType<
+		typeof api.organizations.invitations.queries.listInvitations
 	>;
 
 	// Props
-	let { initialData }: { initialData?: InvitationResponse } = $props();
-
+	let { initialData }: { initialData?: InvitationListResponse } = $props();
 	// Queries
-	const invitationsResponse = useQuery(
-		api.organizations.invitations.queries.getInvitations,
+	const invitationListResponse = useQuery(
+		api.organizations.invitations.queries.listInvitations,
 		{},
 		{ initialData }
 	);
-	const invitations = $derived(invitationsResponse.data);
+	const invitationList = $derived(invitationListResponse.data);
 
 	// State
-	let errorMessage: string = $state('');
-	let selectedInvitationId: Id<'invitations'> | null = $state(null);
+	let selectedInvitationId: string | null = $state(null);
 	let searchQuery: string = $state('');
-	let revokeModalOpen: boolean = $state(false);
+	let isDialogOpen: boolean = $state(false);
 
 	/**
-	 * Filter invitations based on search query
+	 * Filter invitations based on search query and only show pending invitations
 	 */
 	const filteredInvitations = $derived.by(() => {
-		if (!invitations) return [];
+		if (!invitationList) return [];
 
-		return invitations
+		return invitationList
 			.filter((invitation) => {
+				// Only show pending invitations
+				if (invitation.status !== 'pending') return false;
+
 				if (!searchQuery) return true;
 
 				return invitation.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -52,13 +52,13 @@
 			.sort((a, b) => {
 				// Sort by role (owner first, then admin, then member)
 				const roleOrder: Record<Role, number> = {
-					role_organization_owner: 0,
-					role_organization_admin: 1,
-					role_organization_member: 2
+					owner: 0,
+					admin: 1,
+					member: 2
 				};
 
 				// Primary sort by role
-				const roleDiff = roleOrder[a.role] - roleOrder[b.role];
+				const roleDiff = roleOrder[a.role as Role] - roleOrder[b.role as Role];
 				if (roleDiff !== 0) return roleDiff;
 
 				// Secondary sort by email
@@ -72,20 +72,16 @@
 	async function handleRevokeInvitation(): Promise<void> {
 		if (!selectedInvitationId) return;
 
-		try {
-			await client.mutation(api.organizations.invitations.mutations.revokeInvitation, {
-				invitationId: selectedInvitationId
-			});
+		const { error } = await authClient.organization.cancelInvitation({
+			invitationId: selectedInvitationId
+		});
 
-			errorMessage = '';
-			revokeModalOpen = false;
+		if (error?.message) {
+			toast.error(error.message);
+			return;
+		} else {
 			toast.success('Invitation revoked successfully');
-		} catch (err) {
-			errorMessage =
-				err instanceof Error
-					? err.message
-					: 'Unknown error. Please try again. If it persists, contact support.';
-			toast.error(errorMessage);
+			isDialogOpen = false;
 		}
 	}
 
@@ -98,8 +94,12 @@
 	}
 </script>
 
-{#if !invitations}
+{#if !invitationList}
 	<div>Loading invitations...</div>
+{:else if filteredInvitations.length === 0 && !searchQuery}
+	<div class="text-surface-600-400 p-8 text-center">
+		<p>No pending invitations.</p>
+	</div>
 {:else}
 	<div class="flex h-full flex-col">
 		<!-- Search Section - Fixed at top -->
@@ -120,11 +120,7 @@
 
 		<!-- Table Section - Scrollable area -->
 		<div class="min-h-0 flex-1">
-			{#if invitations.length === 0 && !searchQuery}
-				<div class="text-surface-600-400 p-8 text-center">
-					<p>No pending invitations.</p>
-				</div>
-			{:else if filteredInvitations.length === 0 && searchQuery}
+			{#if filteredInvitations.length === 0 && searchQuery}
 				<div class="text-surface-600-400 p-8 text-center">
 					<p>No invitations match your search.</p>
 				</div>
@@ -139,35 +135,41 @@
 								class="sm:bg-surface-200-800 bg-surface-100-900 border-surface-300-700 sticky top-0 z-20 border-b"
 							>
 								<tr>
-									<th class="text-surface-700-300 !w-64 p-2 !pl-0 text-left text-xs"> Email </th>
-									<th class="text-surface-700-300 hidden !w-32 p-2 text-left text-xs sm:table-cell">
+									<th class="text-surface-700-300 w-64 truncate p-2 !pl-0 text-left text-xs">
+										User
+									</th>
+									<th class="text-surface-700-300 w-32 p-2 !pl-0 text-left text-xs"> Expires </th>
+									<th class="text-surface-700-300 hidden w-32 p-2 text-left text-xs sm:table-cell">
 										Role
 									</th>
-									<th class="text-surface-700-300 hidden !w-24 p-2 text-left text-xs sm:table-cell">
-										Invited By
-									</th>
 									{#if roles.hasOwnerOrAdminRole}
-										<th class="!w-20 p-2 text-right"></th>
+										<th class="w-20 p-2 text-right"></th>
 									{/if}
 								</tr>
 							</thead>
 							<tbody>
-								{#each filteredInvitations as invitation (invitation._id)}
+								{#each filteredInvitations as invitation (invitation.id)}
 									<tr class="!border-surface-300-700 !border-t">
-										<!-- Email -->
+										<!-- User -->
 										<td class="!w-64 !max-w-64 !truncate !py-3 !pl-0">
 											<span class="truncate font-medium">{invitation.email}</span>
+										</td>
+										<!-- Expires -->
+										<td class="!w-64 !max-w-64 !truncate !py-3 !pl-0">
+											<span class="truncate font-medium">
+												{new Date(invitation.expiresAt).toLocaleDateString()}
+											</span>
 										</td>
 										<!-- Role -->
 										<td class="!text-surface-700-300 hidden !w-32 sm:table-cell">
 											<div class="flex items-center">
-												{#if invitation.role === 'role_organization_owner'}
+												{#if invitation.role === 'owner'}
 													<span
 														class="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2"
 													>
 														Owner
 													</span>
-												{:else if invitation.role === 'role_organization_admin'}
+												{:else if invitation.role === 'admin'}
 													<span
 														class="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2"
 													>
@@ -182,20 +184,16 @@
 												{/if}
 											</div>
 										</td>
-										<!-- Invited By -->
-										<td class="!text-surface-700-300 hidden !h-fit !w-24 !truncate sm:table-cell">
-											{invitation.invitedBy.name}
-										</td>
 										<!-- Actions -->
 										<td class="!w-20">
 											<div class="flex justify-end">
 												{#if roles.hasOwnerOrAdminRole}
-													<Dialog.Root bind:open={revokeModalOpen}>
+													<Dialog.Root bind:open={isDialogOpen}>
 														<Dialog.Trigger
 															class="btn btn-sm preset-filled-surface-300-700"
 															onclick={() => {
-																selectedInvitationId = invitation._id;
-																revokeModalOpen = true;
+																selectedInvitationId = invitation.id;
+																isDialogOpen = true;
 															}}
 														>
 															Revoke
@@ -214,7 +212,7 @@
 																<button
 																	type="button"
 																	class="btn preset-tonal"
-																	onclick={() => (revokeModalOpen = false)}
+																	onclick={() => (isDialogOpen = false)}
 																>
 																	Cancel
 																</button>

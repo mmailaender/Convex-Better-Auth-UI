@@ -1,3 +1,5 @@
+'use client';
+
 // React
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,8 +16,9 @@ import { FileUpload } from '@skeletonlabs/skeleton-react';
 import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 
 // API
-import { useConvexAuth, useMutation, useQuery } from 'convex/react';
+import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { authClient } from '@/components/auth/api/auth-client';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
@@ -36,11 +39,12 @@ export default function CreateOrganization({
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
 	// Query for active organization
-	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const { data: activeOrganization, refetch: refetchActiveOrganization } =
+		authClient.useActiveOrganization();
 
 	const [name, setName] = useState('');
 	const [slug, setSlug] = useState('');
-	const [logo, setLogo] = useState('');
+	const [logo, setLogo] = useState<string | undefined>();
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 
 	const generateSlug = (input: string): string => input.toLowerCase().replace(/\s+/g, '-');
@@ -105,6 +109,7 @@ export default function CreateOrganization({
 
 			// Create the organization
 			await createOrganization({ name, slug, logoId: logoStorageId });
+			await refetchActiveOrganization();
 			toast.success('Organization created successfully!');
 
 			// Call the onSuccessfulCreate callback if provided
@@ -155,7 +160,7 @@ export default function CreateOrganization({
 
 	if (!isAuthenticated) {
 		return (
-			<div className="border-surface-200-800 rounded-container mx-auto w-full max-w-md border p-6 text-center">
+			<div className="border-surface-200-800 rounded-container mx-auto h-45 w-full max-w-md border p-6 text-center">
 				<LogIn className="text-surface-400-600 mx-auto mb-4 size-10" />
 				<h2 className="mb-2 text-xl font-semibold">Authentication Required</h2>
 				<p className="text-surface-600-400 mb-4">Please sign in to create an organization</p>
@@ -164,7 +169,7 @@ export default function CreateOrganization({
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="mx-auto w-full">
+		<form onSubmit={handleSubmit} className="mx-auto w-full max-w-md">
 			<div className="my-6">
 				<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
 					<div className="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75">

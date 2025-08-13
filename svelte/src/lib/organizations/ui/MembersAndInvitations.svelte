@@ -13,16 +13,15 @@
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { createRoles } from '$lib/organizations/api/roles.svelte';
-	const roles = createRoles();
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
 
 	// API Types
 	import type { FunctionReturnType } from 'convex/server';
-	type MembersResponse = FunctionReturnType<
-		typeof api.organizations.members.queries.getOrganizationMembers
+	type ActiveOrganizationResponse = FunctionReturnType<
+		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type InvitationsResponse = FunctionReturnType<
-		typeof api.organizations.invitations.queries.getInvitations
+	type InvitationListResponse = FunctionReturnType<
+		typeof api.organizations.invitations.queries.listInvitations
 	>;
 
 	// Props
@@ -30,26 +29,29 @@
 		initialData
 	}: {
 		initialData?: {
-			members: MembersResponse;
-			invitations: InvitationsResponse;
+			activeOrganization?: ActiveOrganizationResponse;
+			invitationList?: InvitationListResponse;
 		};
 	} = $props();
 
 	// Queries
-	const membersResponse = useQuery(
-		api.organizations.members.queries.getOrganizationMembers,
+	const activeOrganizationResponse = useQuery(
+		api.organizations.queries.getActiveOrganization,
 		{},
-		{ initialData: initialData?.members }
+		{ initialData: initialData?.activeOrganization }
 	);
-	const invitationsResponse = useQuery(
-		api.organizations.invitations.queries.getInvitations,
+	const invitationListResponse = useQuery(
+		api.organizations.invitations.queries.listInvitations,
 		{},
-		{ initialData: initialData?.invitations }
+		{ initialData: initialData?.invitationList }
 	);
 
 	// Derived data
-	const members = $derived(membersResponse.data);
-	const invitations = $derived(invitationsResponse.data);
+	const activeOrganization = $derived(activeOrganizationResponse.data);
+	const members = $derived(activeOrganization?.members);
+	const invitationList = $derived(invitationListResponse.data);
+	const roles = useRoles();
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// State
 	let inviteMembersDialogOpen = $state(false);
@@ -68,21 +70,21 @@
 	>
 		<Tabs.List>
 			<Tabs.Trigger value="members" class="gap-2">
-				handleInviteMembersSuccess
+				Members
 				<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
 					{members && `${members.length}`}
 				</span>
 			</Tabs.Trigger>
-			{#if roles.hasOwnerOrAdminRole}
+			{#if isOwnerOrAdmin}
 				<Tabs.Trigger value="invitations" class="gap-2">
 					Invitations
-					<span class="badge preset-filled-surface-300-700 size-6 rounded-full text-center">
-						{invitations && `${invitations.length}`}
+					<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
+						{invitationList && `${invitationList.filter((i) => i.status === 'pending').length}`}
 					</span>
 				</Tabs.Trigger>
 			{/if}
 		</Tabs.List>
-		{#if roles.hasOwnerOrAdminRole}
+		{#if isOwnerOrAdmin}
 			<Dialog.Root bind:open={inviteMembersDialogOpen}>
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
@@ -119,7 +121,7 @@
 		<Members />
 	</Tabs.Content>
 
-	{#if roles.hasOwnerOrAdminRole}
+	{#if isOwnerOrAdmin}
 		<Tabs.Content value="invitations">
 			<Invitations />
 		</Tabs.Content>

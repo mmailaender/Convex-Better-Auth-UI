@@ -17,8 +17,9 @@ import { useRoles } from '@/components/organizations/api/hooks';
 import { useState } from 'react';
 
 export default function MembersAndInvitations() {
-	const members = useQuery(api.organizations.members.queries.getOrganizationMembers);
-	const invitations = useQuery(api.organizations.invitations.queries.getInvitations);
+	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
+	const members = activeOrganization?.members;
+	const invitationList = useQuery(api.organizations.invitations.queries.listInvitations);
 	const isOwnerOrAdmin = useRoles().hasOwnerOrAdminRole;
 	const [inviteMembersDialogOpen, setInviteMembersDialogOpen] = useState(false);
 	const [inviteMembersDrawerOpen, setInviteMembersDrawerOpen] = useState(false);
@@ -42,7 +43,7 @@ export default function MembersAndInvitations() {
 						<Tabs.Trigger value="invitations" className="gap-2">
 							Invitations{' '}
 							<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
-								{invitations && `${invitations.length}`}
+								{invitationList && `${invitationList.filter((i) => i.status === 'pending').length}`}
 							</span>
 						</Tabs.Trigger>
 					)}

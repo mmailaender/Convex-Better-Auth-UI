@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
+import { ConvexError } from 'convex/values';
 
 /**
  * Component for deleting an organization
@@ -34,9 +35,8 @@ export default function DeleteOrganization({
 	const [open, setOpen] = useState<boolean>(false);
 	const router = useRouter();
 	const activeOrganization = useQuery(api.organizations.queries.getActiveOrganization);
-	const isOwner = useRoles().hasOwnerRole;
-
 	const deleteOrganization = useMutation(api.organizations.mutations.deleteOrganization);
+	const isOwner = useRoles().hasOwnerRole;
 
 	if (!activeOrganization) {
 		return null;
@@ -44,9 +44,9 @@ export default function DeleteOrganization({
 
 	const handleConfirm = async (): Promise<void> => {
 		try {
-			await deleteOrganization({ organizationId: activeOrganization._id });
-			setOpen(false);
+			await deleteOrganization({ organizationId: activeOrganization.id });
 
+			setOpen(false);
 			toast.success('Organization deleted successfully');
 
 			// Call the onSuccessfulDelete callback if provided
@@ -60,12 +60,13 @@ export default function DeleteOrganization({
 			} else {
 				router.push('/');
 			}
-		} catch (err) {
-			if (err instanceof Error) {
-				toast.error(err.message);
-			} else {
-				toast.error('Unknown error. Please try again. If it persists, contact support.');
+		} catch (error) {
+			if (error instanceof ConvexError) {
+				toast.error(error.data);
+				return;
 			}
+			toast.error('Failed to delete organization');
+			return;
 		}
 	};
 
@@ -87,7 +88,7 @@ export default function DeleteOrganization({
 
 				<article>
 					<p className="text-surface-700-300 text-sm">
-						Are you sure you want to delete the organization {activeOrganization.name}? All
+						Are you sure you want to delete the organization <b>{activeOrganization.name}</b>? All
 						organization data will be permanently deleted.
 					</p>
 				</article>

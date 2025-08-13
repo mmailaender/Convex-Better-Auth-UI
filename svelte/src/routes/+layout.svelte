@@ -1,14 +1,15 @@
 <script lang="ts">
 	import '../app.css';
-	import { setupConvexAuth } from '@mmailaender/convex-auth-svelte/sveltekit';
+	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	import { Toaster } from '$lib/primitives/ui/sonner';
 	import OrganizationSwitcher from '$lib/organizations/ui/OrganizationSwitcher.svelte';
 	import UserButton from '$lib/users/ui/UserButton.svelte';
 
-	let { children, data } = $props();
+	let { children } = $props();
 
-	setupConvexAuth({ getServerState: () => data.authState });
+	createSvelteAuthClient({ authClient });
 </script>
 
 <Toaster position="top-center" />
