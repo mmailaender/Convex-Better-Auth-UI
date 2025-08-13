@@ -197,7 +197,7 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 			case 'magic-link-flow':
 				return "We'll send a magic link to your email address.";
 			default:
-				return 'Pre-built auth, UI kit, theme generator, and guides — everything you need to start fast.';
+				return 'Plug & Play Auth Widgets for your application.';
 		}
 	};
 
