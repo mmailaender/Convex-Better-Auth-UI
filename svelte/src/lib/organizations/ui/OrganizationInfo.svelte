@@ -216,10 +216,7 @@
 				{#key logoKey}
 					<Avatar.Root
 						class="rounded-container size-20"
-						onStatusChange={(e) => {
-							console.log('Avatar status change:', e.status, 'URL:', activeOrganization.logo);
-							imageLoadingStatus = e.status;
-						}}
+						onStatusChange={(e) => (imageLoadingStatus = e.status)}
 					>
 						<Avatar.Image
 							src={activeOrganization.logo}

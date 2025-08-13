@@ -372,91 +372,95 @@
 					<Drawer.Title>Edit Member</Drawer.Title>
 				</Drawer.Header>
 				<div class="">
-					<!-- Member Info -->
-					<div class="flex items-center gap-3 pt-1 pb-8">
-						<div class="avatar">
-							<div class="size-12">
-								{#if selectedMember!.user.image}
-									<Avatar.Root class="size-12">
-										<Avatar.Image
-											src={selectedMember!.user.image}
-											alt={selectedMember!.user.name}
-										/>
-										<Avatar.Fallback>
-											<Avatar.Marble name={selectedMember!.user.name} />
-										</Avatar.Fallback>
-									</Avatar.Root>
-								{:else}
-									<div
-										class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
-									>
-										{selectedMember!.user.name?.charAt(0) || 'U'}
-									</div>
-								{/if}
+					{#if selectedMember}
+						<!-- Member Info -->
+						<div class="flex items-center gap-3 pt-1 pb-8">
+							<div class="avatar">
+								<div class="size-12">
+									{#if selectedMember.user.image}
+										<Avatar.Root class="size-12">
+											<Avatar.Image
+												src={selectedMember.user.image}
+												alt={selectedMember.user.name}
+											/>
+											<Avatar.Fallback>
+												<Avatar.Marble name={selectedMember.user.name} />
+											</Avatar.Fallback>
+										</Avatar.Root>
+									{:else}
+										<div
+											class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
+										>
+											{selectedMember.user.name?.charAt(0) || 'U'}
+										</div>
+									{/if}
+								</div>
+							</div>
+							<div class="flex flex-col">
+								<span>{selectedMember.user.name}</span>
+								<p class="text-surface-700-300 text-sm">{selectedMember.user.email}</p>
 							</div>
 						</div>
-						<div class="flex flex-col">
-							<span>{selectedMember!.user.name}</span>
-							<p class="text-surface-700-300 text-sm">{selectedMember!.user.email}</p>
-						</div>
-					</div>
 
-					<!-- Actions -->
-					<div class="flex flex-col gap-3">
-						<!-- Role Select -->
-						<label class="flex-1">
-							<span class="label">Role</span>
-							<select
-								value={selectedMember!.role}
-								onchange={(e) =>
-									handleUpdateRole(
-										selectedMember!.id,
-										(e.target as HTMLSelectElement).value as Role
-									)}
-								class="select w-full"
-							>
-								<option value="admin">Admin</option>
-								<option value="member">Member</option>
-							</select>
-						</label>
-
-						<!-- Remove Button -->
-						<div class="flex flex-col justify-end">
-							<Dialog.Root bind:open={isDialogOpen}>
-								<Dialog.Trigger
-									class="btn preset-filled-surface-300-700"
-									onclick={() => (selectedUserId = selectedMember!.id)}
+						<!-- Actions -->
+						<div class="flex flex-col gap-3">
+							<!-- Role Select -->
+							<label class="flex-1">
+								<span class="label">Role</span>
+								<select
+									value={selectedMember.role}
+									onchange={(e) =>
+										handleUpdateRole(
+											selectedMember!.id,
+											(e.target as HTMLSelectElement).value as Role
+										)}
+									class="select w-full"
 								>
-									<Trash class="size-4" /> Remove
-								</Dialog.Trigger>
-								<Dialog.Content class="md:max-w-108">
-									<Dialog.Header class="flex-shrink-0">
-										<Dialog.Title>Remove member</Dialog.Title>
-									</Dialog.Header>
-									<Dialog.Description>
-										Are you sure you want to remove the member {selectedMember!.user.name}?
-									</Dialog.Description>
+									<option value="admin">Admin</option>
+									<option value="member">Member</option>
+								</select>
+							</label>
 
-									<Dialog.Footer class="flex-shrink-0">
-										<button
-											type="button"
-											class="btn preset-tonal"
-											onclick={() => (isDialogOpen = false)}
-										>
-											Cancel
-										</button>
-										<button
-											type="button"
-											class="btn preset-filled-error-500"
-											onclick={handleRemoveMember}
-										>
-											Confirm
-										</button>
-									</Dialog.Footer>
-								</Dialog.Content>
-							</Dialog.Root>
+							<!-- Remove Button -->
+							<div class="flex flex-col justify-end">
+								<Dialog.Root bind:open={isDialogOpen}>
+									<Dialog.Trigger
+										class="btn preset-filled-surface-300-700"
+										onclick={() => (selectedUserId = selectedMember!.id)}
+									>
+										<Trash class="size-4" /> Remove
+									</Dialog.Trigger>
+									<Dialog.Content class="md:max-w-108">
+										<Dialog.Header class="flex-shrink-0">
+											<Dialog.Title>Remove member</Dialog.Title>
+										</Dialog.Header>
+										<Dialog.Description>
+											Are you sure you want to remove the member {selectedMember.user.name}?
+										</Dialog.Description>
+
+										<Dialog.Footer class="flex-shrink-0">
+											<button
+												type="button"
+												class="btn preset-tonal"
+												onclick={() => (isDialogOpen = false)}
+											>
+												Cancel
+											</button>
+											<button
+												type="button"
+												class="btn preset-filled-error-500"
+												onclick={handleRemoveMember}
+											>
+												Confirm
+											</button>
+										</Dialog.Footer>
+									</Dialog.Content>
+								</Dialog.Root>
+							</div>
 						</div>
-					</div>
+					{:else}
+						<div class="text-surface-500 p-4 text-center">No member selected</div>
+					{/if}
 				</div>
 			</Drawer.Content>
 		</Drawer.Root>
