@@ -1,6 +1,7 @@
 <script lang="ts">
 	// SvelteKit
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	// Primitives
 	import * as Popover from '$lib/primitives/ui/popover';
@@ -77,6 +78,15 @@
 	let switcherPopoverOpen: boolean = $state(false);
 	let createOrganizationDialogOpen: boolean = $state(false);
 	let organizationProfileDialogOpen: boolean = $state(false);
+	// Track lifecycle and previous open state for organization profile dialog
+	let mounted = $state(false);
+	let prevOrganizationProfileDialogOpen = $state(false);
+	// Guard to avoid reopening from URL while we're removing the param during a UI close
+	let closingViaUI = $state(false);
+
+	onMount(() => {
+		mounted = true;
+	});
 
 	// Handler functions
 
@@ -92,9 +102,58 @@
 		organizationProfileDialogOpen = false;
 	}
 	function openProfileModal(): void {
-		organizationProfileDialogOpen = true;
 		switcherPopoverOpen = false;
+		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		if (!has) {
+			const url = new URL(page.url);
+			url.searchParams.set('dialog', 'organization-profile');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: false,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
 	}
+
+	/**
+	 * Reflect organization profile dialog CLOSE to URL.
+	 * When the dialog transitions from open -> closed and the param exists,
+	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen && has) {
+			closingViaUI = true;
+			const url = new URL(page.url);
+			url.searchParams.delete('dialog');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: true,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
+		prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
+	});
+
+	/**
+	 * Source of truth: URL -> organizationProfileDialogOpen.
+	 * Open dialog when ?dialog=organization-profile is present. Close when removed.
+	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		if (closingViaUI) {
+			if (!has) closingViaUI = false;
+			return;
+		}
+		if (has !== organizationProfileDialogOpen) {
+			organizationProfileDialogOpen = has;
+		}
+	});
 
 	/**
 	 * Updates the active organization and replaces URL slug if needed

@@ -66,7 +66,7 @@
 	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
 	 */
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'profile';
+		const has = page.url.searchParams.get('dialog') === 'user-profile';
 		if (mounted && prevProfileDialogOpen && !profileDialogOpen && has) {
 			closingViaUI = true;
 			const url = new URL(page.url);
@@ -84,11 +84,11 @@
 
 	/**
 	 * Source of truth: URL -> profileDialogOpen.
-	 * Open dialog when ?dialog=profile is present. Close when removed.
+	 * Open dialog when ?dialog=user-profile is present. Close when removed.
 	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
 	 */
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'profile';
+		const has = page.url.searchParams.get('dialog') === 'user-profile';
 		if (closingViaUI) {
 			if (!has) closingViaUI = false;
 			return;
@@ -105,10 +105,10 @@
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		const has = page.url.searchParams.get('dialog') === 'profile';
+		const has = page.url.searchParams.get('dialog') === 'user-profile';
 		if (!has) {
 			const url = new URL(page.url);
-			url.searchParams.set('dialog', 'profile');
+			url.searchParams.set('dialog', 'user-profile');
 			const path = `${url.pathname}${url.search}${url.hash}`;
 			void goto(path, {
 				replaceState: false,
