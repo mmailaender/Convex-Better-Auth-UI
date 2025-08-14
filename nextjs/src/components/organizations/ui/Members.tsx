@@ -51,7 +51,12 @@ export default function Members(): React.ReactNode {
 				if (!searchQuery) return true;
 
 				const memberName = member.user.name;
-				return memberName.toLowerCase().includes(searchQuery.toLowerCase());
+				const memberEmail = member.user.email;
+				const query = searchQuery.toLowerCase();
+
+				return (
+					memberName.toLowerCase().includes(query) || memberEmail.toLowerCase().includes(query)
+				);
 			})
 			.sort((a, b) => {
 				// Sort by role (owner first, then admin, then member)
@@ -268,18 +273,18 @@ export default function Members(): React.ReactNode {
 													</select>
 												) : member.role === 'owner' ? (
 													<>
-														<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-6 border px-2">
+														<span className="badge preset-filled-primary-50-950 border-primary-200-800 h-7 border px-2">
 															Owner
 														</span>
 													</>
 												) : member.role === 'admin' ? (
 													<>
-														<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-6 border px-2">
+														<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-7 border px-2">
 															Admin
 														</span>
 													</>
 												) : (
-													<span className="badge preset-filled-surface-300-700 border-surface-400-600 h-6 border px-2">
+													<span className="badge preset-filled-surface-300-700 border-surface-400-600 h-7 border px-2">
 														Member
 													</span>
 												)}

@@ -32,15 +32,15 @@ export default function MembersAndInvitations() {
 	return (
 		<Tabs.Root defaultValue="members">
 			<div className="border-surface-300-700 flex w-full flex-row justify-between border-b pb-6 align-middle">
-				<Tabs.List>
-					<Tabs.Trigger value="members" className="gap-2">
+				<Tabs.List className="flex-1 md:flex-initial">
+					<Tabs.Trigger value="members" className="flex-1 gap-2 md:flex-initial">
 						Members{' '}
 						<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
 							{members && `${members.length}`}{' '}
 						</span>
 					</Tabs.Trigger>
 					{isOwnerOrAdmin && (
-						<Tabs.Trigger value="invitations" className="gap-2">
+						<Tabs.Trigger value="invitations" className="flex-1 gap-2 md:flex-initial">
 							Invitations{' '}
 							<span className="badge preset-filled-surface-300-700 size-6 rounded-full">
 								{invitationList && `${invitationList.filter((i) => i.status === 'pending').length}`}

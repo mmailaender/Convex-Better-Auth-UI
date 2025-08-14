@@ -1,6 +1,7 @@
 <script lang="ts">
 	// SvelteKit
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	// Primitives
 	import * as Popover from '$lib/primitives/ui/popover';
@@ -77,6 +78,15 @@
 	let switcherPopoverOpen: boolean = $state(false);
 	let createOrganizationDialogOpen: boolean = $state(false);
 	let organizationProfileDialogOpen: boolean = $state(false);
+	// Track lifecycle and previous open state for organization profile dialog
+	let mounted = $state(false);
+	let prevOrganizationProfileDialogOpen = $state(false);
+	// Guard to avoid reopening from URL while we're removing the param during a UI close
+	let closingViaUI = $state(false);
+
+	onMount(() => {
+		mounted = true;
+	});
 
 	// Handler functions
 
@@ -92,9 +102,58 @@
 		organizationProfileDialogOpen = false;
 	}
 	function openProfileModal(): void {
-		organizationProfileDialogOpen = true;
 		switcherPopoverOpen = false;
+		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		if (!has) {
+			const url = new URL(page.url);
+			url.searchParams.set('dialog', 'organization-profile');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: false,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
 	}
+
+	/**
+	 * Reflect organization profile dialog CLOSE to URL.
+	 * When the dialog transitions from open -> closed and the param exists,
+	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen && has) {
+			closingViaUI = true;
+			const url = new URL(page.url);
+			url.searchParams.delete('dialog');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: true,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
+		prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
+	});
+
+	/**
+	 * Source of truth: URL -> organizationProfileDialogOpen.
+	 * Open dialog when ?dialog=organization-profile is present. Close when removed.
+	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
+	 */
+	$effect(() => {
+		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		if (closingViaUI) {
+			if (!has) closingViaUI = false;
+			return;
+		}
+		if (has !== organizationProfileDialogOpen) {
+			organizationProfileDialogOpen = has;
+		}
+	});
 
 	/**
 	 * Updates the active organization and replaces URL slug if needed
@@ -167,7 +226,7 @@
 			<Plus class="size-4" />
 			<span>Create Organization</span>
 		</Dialog.Trigger>
-		<Dialog.Content class="max-w-lg">
+		<Dialog.Content class="max-w-md">
 			<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
 			<Dialog.CloseX />
 		</Dialog.Content>
@@ -255,7 +314,7 @@
 
 	<!-- Create Organization Modal -->
 	<Dialog.Root bind:open={createOrganizationDialogOpen}>
-		<Dialog.Content class="max-w-xl">
+		<Dialog.Content class="max-w-md">
 			<Dialog.Header>
 				<Dialog.Title>Create Organization</Dialog.Title>
 			</Dialog.Header>
@@ -267,7 +326,7 @@
 	<!-- Organization Profile Modal -->
 	<Dialog.Root bind:open={organizationProfileDialogOpen}>
 		<Dialog.Content
-			class="md:rounded-container h-[100dvh] max-h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl"
+			class="md:rounded-container top-0 left-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl"
 		>
 			<Dialog.Header class="hidden">
 				<Dialog.Title></Dialog.Title>

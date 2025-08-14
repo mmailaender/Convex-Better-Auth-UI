@@ -135,7 +135,7 @@ export default function OrganizationSwitcher({
 					<Plus className="size-4" />
 					<span>Create Organization</span>
 				</Dialog.Trigger>
-				<Dialog.Content className="max-w-lg">
+				<Dialog.Content className="max-w-md">
 					<Dialog.Header>
 						<Dialog.Title>Create Organization</Dialog.Title>
 					</Dialog.Header>
@@ -244,7 +244,7 @@ export default function OrganizationSwitcher({
 
 			{/* Create Organization Modal */}
 			<Dialog.Root open={openCreateOrganization} onOpenChange={setOpenCreateOrganization}>
-				<Dialog.Content className="max-w-lg">
+				<Dialog.Content className="max-w-md">
 					<Dialog.Header>
 						<Dialog.Title>Create Organization</Dialog.Title>
 					</Dialog.Header>
@@ -255,7 +255,7 @@ export default function OrganizationSwitcher({
 
 			{/* Organization Profile Modal */}
 			<Dialog.Root open={openOrganizationProfile} onOpenChange={setOpenOrganizationProfile}>
-				<Dialog.Content className="md:rounded-container h-[100dvh] max-h-[100dvh] w-[100dvw] rounded-none p-0 md:h-[70vh] md:w-4xl">
+				<Dialog.Content className="md:rounded-container top-0 left-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl">
 					<Dialog.Header className="hidden">
 						<Dialog.Title></Dialog.Title>
 					</Dialog.Header>

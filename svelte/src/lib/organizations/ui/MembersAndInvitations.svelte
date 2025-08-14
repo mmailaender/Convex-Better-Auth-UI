@@ -68,15 +68,15 @@
 	<div
 		class="border-surface-300-700 flex w-full flex-row justify-between border-b pb-6 align-middle"
 	>
-		<Tabs.List>
-			<Tabs.Trigger value="members" class="gap-2">
+		<Tabs.List class="flex-1 md:flex-initial">
+			<Tabs.Trigger value="members" class="flex-1 gap-2 md:flex-initial">
 				Members
 				<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
 					{members && `${members.length}`}
 				</span>
 			</Tabs.Trigger>
 			{#if isOwnerOrAdmin}
-				<Tabs.Trigger value="invitations" class="gap-2">
+				<Tabs.Trigger value="invitations" class="flex-1 gap-2 md:flex-initial">
 					Invitations
 					<span class="badge preset-filled-surface-300-700 size-6 rounded-full">
 						{invitationList && `${invitationList.filter((i) => i.status === 'pending').length}`}

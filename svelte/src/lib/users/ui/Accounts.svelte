@@ -17,7 +17,7 @@
 
 	// Icons
 	import { SiGithub } from '@icons-pack/svelte-simple-icons';
-	import { KeyRound, Lock, Plus, Trash2, ChevronDown } from '@lucide/svelte';
+	import { KeyRound, Lock, Trash2 } from '@lucide/svelte';
 
 	import { toast } from 'svelte-sonner';
 	import { page } from '$app/state';
@@ -268,7 +268,7 @@
 										currentPasswordInputEl?.focus();
 									}}
 								>
-									Change Password
+									Update
 								</button>
 							{/if}
 							<button

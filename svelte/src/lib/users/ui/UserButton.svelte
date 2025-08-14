@@ -66,7 +66,7 @@
 	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
 	 */
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'profile';
+		const has = page.url.searchParams.get('dialog') === 'user-profile';
 		if (mounted && prevProfileDialogOpen && !profileDialogOpen && has) {
 			closingViaUI = true;
 			const url = new URL(page.url);
@@ -84,11 +84,11 @@
 
 	/**
 	 * Source of truth: URL -> profileDialogOpen.
-	 * Open dialog when ?dialog=profile is present. Close when removed.
+	 * Open dialog when ?dialog=user-profile is present. Close when removed.
 	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
 	 */
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'profile';
+		const has = page.url.searchParams.get('dialog') === 'user-profile';
 		if (closingViaUI) {
 			if (!has) closingViaUI = false;
 			return;
@@ -105,10 +105,10 @@
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		const has = page.url.searchParams.get('dialog') === 'profile';
+		const has = page.url.searchParams.get('dialog') === 'user-profile';
 		if (!has) {
 			const url = new URL(page.url);
-			url.searchParams.set('dialog', 'profile');
+			url.searchParams.set('dialog', 'user-profile');
 			const path = `${url.pathname}${url.search}${url.hash}`;
 			void goto(path, {
 				replaceState: false,
@@ -177,7 +177,12 @@
 
 		<!-- Profile Dialog -->
 		<Dialog.Root bind:open={profileDialogOpen}>
-			<Dialog.Content class="max-w-xl">
+			<Dialog.Content
+				class="md:rounded-container top-0 left-0 h-full max-h-full
+		       w-full max-w-full translate-x-0 translate-y-0 rounded-none md:top-[50%]
+		       md:left-[50%] md:h-auto md:max-h-[80vh] md:w-auto
+		       md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%]"
+			>
 				<Dialog.Header>
 					<Dialog.Title>Profile</Dialog.Title>
 				</Dialog.Header>

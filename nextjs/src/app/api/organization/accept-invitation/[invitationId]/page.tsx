@@ -1,6 +1,8 @@
 'use client';
 
 import { authClient } from '@/components/auth/api/auth-client';
+import { CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -21,7 +23,7 @@ const InvitationPage = () => {
 				.then(({ data }) => {
 					const orgId = data?.invitation?.organizationId;
 					if (!orgId) {
-						throw new Error('Invalid invitation response');
+						throw new Error('Invalid invitation');
 					}
 					setAccepted(true);
 					router.push(`/`);
@@ -37,21 +39,34 @@ const InvitationPage = () => {
 	}, [invitationId]);
 
 	if (isLoading) {
-		return <div className="flex h-screen w-screen items-center justify-center">Loading...</div>;
+		return (
+			<div className="flex flex-col items-center gap-4">
+				<Loader2 className="size-10 animate-spin" />
+				<h1 className="text-lg font-semibold">Accepting invitation…</h1>
+				<p className="text-sm opacity-60">Please wait a moment.</p>
+			</div>
+		);
 	}
 
 	if (accepted) {
 		return (
-			<div className="flex h-screen w-screen items-center justify-center">
-				Invitation accepted! Redirecting to dashboard...
+			<div className="flex flex-col items-center gap-4">
+				<CheckCircle2 className="size-10" />
+				<h1 className="text-lg font-semibold">Invitation accepted</h1>
+				<p className="text-sm opacity-60">Redirecting to dashboard…</p>
 			</div>
 		);
 	}
 
 	if (error) {
 		return (
-			<div className="flex h-screen w-screen items-center justify-center">
-				Error Accepting Invite: {error}
+			<div className="flex flex-col items-center gap-4">
+				<TriangleAlert className="size-10" />
+				<h1 className="text-lg font-semibold">Couldn&apos;t accept invitation</h1>
+				<p className="text-sm opacity-80">{error}</p>
+				<Link className="btn preset-tonal hover:preset-filled" href="/">
+					Go to Home
+				</Link>
 			</div>
 		);
 	}
