@@ -157,7 +157,7 @@
 											newEmail.trim() === '' ||
 											newEmail === activeUser.email}
 									>
-										{isSubmitting ? 'Sending...' : 'Send Verification Email'}
+										{isSubmitting ? 'Sending...' : 'Verify Email'}
 									</button>
 								</div>
 							</form>
