@@ -74,11 +74,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 						{visibleTabs.map((tab) => {
 							const IconComponent = tab.icon;
 							return (
-								<Tabs.Trigger
-									key={tab.value}
-									value={tab.value}
-									className="sm:data-[state=active]:bg-surface-400-600/50 gap-2 px-2 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
-								>
+								<Tabs.Trigger key={tab.value} value={tab.value} className="gap-2 pl-2">
 									<div className="flex h-6 w-6 shrink-0 items-center justify-center">
 										<IconComponent />
 									</div>
@@ -139,7 +135,7 @@ export default function OrganizationProfile({ onSuccessfulDelete }: Organization
 									<Tabs.Trigger
 										value={tab.value}
 										onClick={() => handleMobileTabChange(tab.value)}
-										className="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
+										className="gap-3 aria-selected:bg-transparent aria-selected:text-inherit"
 									>
 										<div className="bg-surface-300-700 rounded-base flex h-7 w-7 shrink-0 items-center justify-center">
 											<IconComponent />

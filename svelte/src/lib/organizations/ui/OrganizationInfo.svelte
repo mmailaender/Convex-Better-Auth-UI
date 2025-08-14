@@ -26,8 +26,6 @@
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Drawer from '$lib/primitives/ui/drawer';
-	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Avatar from '$lib/primitives/ui/avatar';
 	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
 
@@ -36,6 +34,7 @@
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { tick } from 'svelte';
 
 	// Props
 	let {
@@ -60,13 +59,19 @@
 	);
 
 	// State
-	let isDialogOpen: boolean = $state(false);
-	let isDrawerOpen: boolean = $state(false);
 	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
 	let isUploading: boolean = $state(false);
 	let logoKey: number = $state(0); // Force re-render when logo changes
 
-	let formState = $state({ name: '', slug: '' });
+	// Inline name editing state
+	let isEditingName: boolean = $state(false);
+	let name: string = $state('');
+	let nameInputEl: HTMLInputElement | null = $state(null);
+
+	// Inline slug editing state
+	let isEditingSlug: boolean = $state(false);
+	let slug: string = $state('');
+	let slugInputEl: HTMLInputElement | null = $state(null);
 
 	// Derived data
 	const user = $derived(userResponse.data);
@@ -75,36 +80,16 @@
 	// Initialize state when organization data is available
 	$effect(() => {
 		if (activeOrganization) {
-			if (formState.name === '') {
-				formState.name = activeOrganization.name;
+			if (!isEditingName) {
+				name = activeOrganization.name;
 			}
-			if (formState.slug === '') {
-				formState.slug = activeOrganization.slug || '';
+			if (!isEditingSlug) {
+				slug = activeOrganization.slug || '';
 			}
 		}
 	});
 
 	// Handlers
-	function toggleDialogEdit(): void {
-		if (!isOwnerOrAdmin) return;
-		isDialogOpen = true;
-	}
-
-	function toggleDrawerEdit(): void {
-		if (!isOwnerOrAdmin) return;
-		isDrawerOpen = true;
-	}
-
-	function cancelEdit(): void {
-		isDialogOpen = false;
-		isDrawerOpen = false;
-		if (activeOrganization) {
-			formState = {
-				name: activeOrganization.name,
-				slug: activeOrganization.slug || ''
-			};
-		}
-	}
 
 	async function handleFileChange(details: FileChangeDetails): Promise<void> {
 		const file = details.acceptedFiles.at(0);
@@ -153,53 +138,61 @@
 		}
 	}
 
-	async function handleEditNameSubmit(e: SubmitEvent): Promise<void> {
+	async function handleNameSubmit(e: SubmitEvent): Promise<void> {
 		e.preventDefault();
 		if (!activeOrganization) return;
 
 		try {
-			// Store the current slug before updating
-			const currentSlug = activeOrganization.slug;
-			const currentPathname = page.url.pathname;
+			const trimmed = name.trim();
+			if (!trimmed || trimmed === activeOrganization.name.trim()) {
+				isEditingName = false;
+				return;
+			}
+			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
+				name: trimmed
+			});
+			isEditingName = false;
+			toast.success('Organization name updated successfully');
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'An unknown error occurred';
+			toast.error(`Failed to update organization: ${message}`);
+		}
+	}
 
-			// Check if current URL contains the active organization slug
+	async function handleSlugSubmit(e: SubmitEvent): Promise<void> {
+		e.preventDefault();
+		if (!activeOrganization) return;
+
+		try {
+			const trimmed = slug.trim();
+			const currentSlug = activeOrganization.slug || '';
+			if (trimmed === '' || trimmed === currentSlug) {
+				isEditingSlug = false;
+				return;
+			}
+
+			// Update slug
+			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
+				slug: trimmed
+			});
+
+			// If current URL contains the old slug, replace it with the new slug
+			const currentPathname = page.url.pathname;
 			const urlContainsCurrentSlug =
 				currentSlug &&
 				(currentPathname.includes(`/${currentSlug}/`) ||
-					currentPathname.includes(`/${currentSlug}`));
+					currentPathname.endsWith(`/${currentSlug}`));
 
-			// Update the organization profile
-			const updates: { name?: string; slug?: string } = {};
-			if (activeOrganization.name !== formState.name) {
-				updates.name = formState.name;
-			}
-			if (activeOrganization.slug !== formState.slug) {
-				updates.slug = formState.slug;
-			}
-			await client.mutation(api.organizations.mutations.updateOrganizationProfile, updates);
-
-			// Close the modals
-			isDialogOpen = false;
-			isDrawerOpen = false;
-
-			// Handle URL redirection if slug was changed
-			if (
-				urlContainsCurrentSlug &&
-				currentSlug &&
-				formState.slug &&
-				currentSlug !== formState.slug
-			) {
-				// Replace the old slug with the new slug in the URL
+			if (urlContainsCurrentSlug) {
 				const newPathname = currentPathname.replace(
 					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
-					`/${formState.slug}`
+					`/${trimmed}`
 				);
-
-				// Navigate to the new URL
 				await goto(newPathname, { replaceState: true });
 			}
 
-			toast.success('Organization details updated successfully');
+			isEditingSlug = false;
+			toast.success('Organization slug updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update organization: ${message}`);
@@ -246,92 +239,187 @@
 			</div>
 		</FileUpload>
 
-		<!-- Desktop Dialog - hidden on mobile, shown on desktop -->
-		<Dialog.Root bind:open={isDialogOpen}>
-			<Dialog.Trigger
-				class="border-surface-300-700 hover:bg-surface-50-950 hover:border-surface-50-950 rounded-container hidden w-full flex-row content-center items-center border py-2 pr-3 pl-4 duration-300 ease-in-out md:flex"
-				onclick={toggleDialogEdit}
-			>
-				<div class="flex w-full flex-col gap-1 text-left">
+		<!-- Inline editable organization name -->
+		<div
+			class={[
+				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
+				{
+					'cursor-pointer': isOwnerOrAdmin && !isEditingName,
+					'hover:bg-surface-50-950': isOwnerOrAdmin && !isEditingName,
+					'hover:border-surface-50-950': isOwnerOrAdmin && !isEditingName
+				}
+			]}
+		>
+			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
+				<div class="flex w-full flex-col gap-0">
 					<span class="text-surface-600-400 text-xs">Organization name</span>
-					<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
-				</div>
-				<div class="btn preset-filled-surface-200-800 p-2">
-					<Pencil class="size-4" />
-				</div>
-			</Dialog.Trigger>
-
-			<Dialog.Content class="md:max-w-108">
-				<Dialog.Header>
-					<Dialog.Title>Edit Organization Name</Dialog.Title>
-				</Dialog.Header>
-				<form onsubmit={handleEditNameSubmit} class="w-full">
-					<div class="flex flex-col gap-4">
-						<div>
-							<label for="name" class="label"> Organization Name </label>
-							<input type="text" name="name" class="input" bind:value={formState.name} required />
-						</div>
-
-						<div>
-							<label for="slug" class="label"> Slug URL </label>
-							<input type="text" name="slug" class="input" bind:value={formState.slug} />
-						</div>
-
-						<div class="flex justify-end gap-2 pt-6 md:flex-row">
-							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
-								Cancel
-							</button>
-							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
-								Save
-							</button>
+					<!-- View mode (collapses when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingName ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+							{ 'mt-1': !isEditingName }
+						]}
+						aria-hidden={isEditingName}
+						inert={isEditingName}
+					>
+						<div class="overflow-hidden">
+							<span class="text-surface-800-200 truncate font-medium"
+								>{activeOrganization.name}</span
+							>
 						</div>
 					</div>
-				</form>
-			</Dialog.Content>
-		</Dialog.Root>
 
-		<!-- Mobile Drawer - shown on mobile, hidden on desktop -->
-		<Drawer.Root bind:open={isDrawerOpen}>
-			<Drawer.Trigger
-				onclick={toggleDrawerEdit}
-				class="border-surface-300-700 rounded-container flex w-full flex-row content-center items-center border py-2 pr-3 pl-4 md:hidden"
-			>
-				<div class="flex w-full flex-col gap-1 text-left">
-					<span class="text-surface-600-400 text-xs">Organization name</span>
-					<span class="text-surface-800-200 font-medium">{activeOrganization.name}</span>
-				</div>
-				<div class="btn-icon preset-filled-surface-200-800">
-					<Pencil class="size-4" />
-				</div>
-			</Drawer.Trigger>
-
-			<Drawer.Content>
-				<Drawer.Header>
-					<Drawer.Title>Edit Organization Name</Drawer.Title>
-				</Drawer.Header>
-				<form onsubmit={handleEditNameSubmit} class="w-full">
-					<div class="flex flex-col gap-4">
-						<div>
-							<label for="name" class="label"> Organization Name </label>
-							<input type="text" name="name" class="input" bind:value={formState.name} required />
-						</div>
-
-						<div>
-							<label for="slug" class="label"> Slug URL </label>
-							<input type="text" name="slug" class="input" bind:value={formState.slug} />
-						</div>
-
-						<div class="flex justify-end gap-2 pt-6 md:flex-row">
-							<button type="button" class="btn preset-tonal w-full md:w-fit" onclick={cancelEdit}>
-								Cancel
-							</button>
-							<button type="submit" class="btn preset-filled-primary-500 w-full md:w-fit">
-								Save
-							</button>
+					<!-- Edit mode (expands when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingName ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+							{ 'mt-1': isEditingName }
+						]}
+						aria-hidden={!isEditingName}
+						inert={!isEditingName}
+					>
+						<div class="overflow-hidden">
+							<form onsubmit={handleNameSubmit} class="flex w-full flex-col gap-3">
+								<input bind:this={nameInputEl} type="text" class="input w-full" bind:value={name} />
+								<div class="flex gap-2">
+									<button
+										type="button"
+										class="btn preset-tonal w-full md:w-fit"
+										onclick={() => {
+											name = activeOrganization.name;
+											isEditingName = false;
+										}}
+									>
+										Cancel
+									</button>
+									<button
+										type="submit"
+										class="btn preset-filled-primary-500 w-full md:w-fit"
+										disabled={!name ||
+											name.trim() === '' ||
+											name.trim() === activeOrganization.name.trim()}
+									>
+										Save
+									</button>
+								</div>
+							</form>
 						</div>
 					</div>
-				</form>
-			</Drawer.Content>
-		</Drawer.Root>
+				</div>
+				<!-- Edit affordance and full-area overlay button in view mode -->
+				{#if isOwnerOrAdmin && !isEditingName}
+					<div class="shrink-0">
+						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
+							<Pencil class="size-4" />
+						</span>
+					</div>
+					<button
+						class="absolute inset-0 h-full w-full"
+						aria-label="Edit organization name"
+						type="button"
+						onclick={async () => {
+							isEditingName = true;
+							name = activeOrganization.name;
+							await tick();
+							nameInputEl?.focus();
+							nameInputEl?.select();
+						}}
+					></button>
+				{/if}
+			</div>
+		</div>
+
+		<!-- Inline editable organization slug -->
+		<div
+			class={[
+				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
+				{
+					'cursor-pointer': isOwnerOrAdmin && !isEditingSlug,
+					'hover:bg-surface-50-950': isOwnerOrAdmin && !isEditingSlug,
+					'hover:border-surface-50-950': isOwnerOrAdmin && !isEditingSlug
+				}
+			]}
+		>
+			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
+				<div class="flex w-full flex-col gap-0">
+					<span class="text-surface-600-400 text-xs">Slug</span>
+					<!-- View mode (collapses when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingSlug ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+							{ 'mt-1': !isEditingSlug }
+						]}
+						aria-hidden={isEditingSlug}
+						inert={isEditingSlug}
+					>
+						<div class="overflow-hidden">
+							<span class="text-surface-800-200 truncate font-medium"
+								>{activeOrganization.slug}</span
+							>
+						</div>
+					</div>
+
+					<!-- Edit mode (expands when editing) -->
+					<div
+						class={[
+							'grid transition-[grid-template-rows] duration-200 ease-in-out',
+							isEditingSlug ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+							{ 'mt-1': isEditingSlug }
+						]}
+						aria-hidden={!isEditingSlug}
+						inert={!isEditingSlug}
+					>
+						<div class="overflow-hidden">
+							<form onsubmit={handleSlugSubmit} class="flex w-full flex-col gap-3">
+								<input bind:this={slugInputEl} type="text" class="input w-full" bind:value={slug} />
+								<div class="flex gap-2">
+									<button
+										type="button"
+										class="btn preset-tonal w-full md:w-fit"
+										onclick={() => {
+											slug = activeOrganization.slug || '';
+											isEditingSlug = false;
+										}}
+									>
+										Cancel
+									</button>
+									<button
+										type="submit"
+										class="btn preset-filled-primary-500 w-full md:w-fit"
+										disabled={!slug ||
+											slug.trim() === '' ||
+											slug.trim() === (activeOrganization.slug || '').trim()}
+									>
+										Save
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				{#if isOwnerOrAdmin && !isEditingSlug}
+					<div class="shrink-0">
+						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
+							<Pencil class="size-4" />
+						</span>
+					</div>
+					<button
+						class="absolute inset-0 h-full w-full"
+						aria-label="Edit organization slug"
+						type="button"
+						onclick={async () => {
+							isEditingSlug = true;
+							slug = activeOrganization.slug || '';
+							await tick();
+							slugInputEl?.focus();
+							slugInputEl?.select();
+						}}
+					></button>
+				{/if}
+			</div>
+		</div>
 	</div>
 {/if}

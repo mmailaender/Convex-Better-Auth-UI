@@ -268,7 +268,7 @@
 										currentPasswordInputEl?.focus();
 									}}
 								>
-									Change Password
+									Update
 								</button>
 							{/if}
 							<button

@@ -94,10 +94,7 @@
 			<div class="px-3 py-4 text-xl font-medium">Organization</div>
 			<Tabs.List class="flex flex-col">
 				{#each visibleTabs as tab (tab.value)}
-					<Tabs.Trigger
-						value={tab.value}
-						class="sm:data-[state=active]:bg-surface-400-600/50 gap-2 px-2 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
-					>
+					<Tabs.Trigger value={tab.value} class="gap-2 pl-2">
 						<div class="flex h-6 w-6 shrink-0 items-center justify-center">
 							<tab.icon />
 						</div>
@@ -170,28 +167,26 @@
 				: 'translate-x-0'}"
 		>
 			<div class="px-3 py-4 text-2xl font-medium">Organization</div>
-			<Tabs.List class="flex flex-col pt-8">
+			<Tabs.List class="flex w-full flex-col pt-8">
 				{#each visibleTabs as tab, index (tab.value)}
-					<div>
-						<Tabs.Trigger
-							value={tab.value}
-							onclick={() => handleMobileTabChange(tab.value)}
-							class="gap-3 data-[state=active]:bg-transparent data-[state=active]:text-inherit"
+					<Tabs.Trigger
+						value={tab.value}
+						onclick={() => handleMobileTabChange(tab.value)}
+						class="w-full gap-3 aria-selected:bg-transparent aria-selected:text-inherit"
+					>
+						<div
+							class="bg-surface-300-700 rounded-base flex h-7 w-7 shrink-0 items-center justify-center"
 						>
-							<div
-								class="bg-surface-300-700 rounded-base flex h-7 w-7 shrink-0 items-center justify-center"
-							>
-								<tab.icon />
-							</div>
-							<span class="w-full">{tab.label}</span>
-							<ChevronRight class="flex" />
-						</Tabs.Trigger>
-						{#if index < visibleTabs.length - 1}
-							<div class="flex h-2 w-full items-center justify-center px-3">
-								<hr class="border-0.5 border-surface-200-800 w-full" />
-							</div>
-						{/if}
-					</div>
+							<tab.icon />
+						</div>
+						<span class="w-full">{tab.label}</span>
+						<ChevronRight class="flex" />
+					</Tabs.Trigger>
+					{#if index < visibleTabs.length - 1}
+						<div class="flex h-2 w-full items-center justify-center px-3">
+							<hr class="border-0.5 border-surface-200-800 w-full" />
+						</div>
+					{/if}
 				{/each}
 			</Tabs.List>
 		</div>

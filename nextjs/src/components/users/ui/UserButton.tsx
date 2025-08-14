@@ -87,7 +87,7 @@ export default function UserButton({
 
 						{/* ProfileInfo Popup */}
 						<Dialog.Root open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
-							<Dialog.Content className="max-w-xl">
+							<Dialog.Content className="md:rounded-container top-0 left-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 rounded-none md:top-[50%] md:left-[50%] md:h-auto md:max-h-[80vh] md:w-auto md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%]">
 								<Dialog.Header>
 									<Dialog.Title>Profile</Dialog.Title>
 								</Dialog.Header>

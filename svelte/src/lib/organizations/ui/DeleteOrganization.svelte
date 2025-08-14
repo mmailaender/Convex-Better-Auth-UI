@@ -86,10 +86,17 @@
 			</Dialog.Header>
 
 			<article>
-				<p class="text-surface-700-300 text-sm">
-					Are you sure you want to delete the organization {activeOrganization.name}? All
-					organization data will be permanently deleted.
-				</p>
+				<div class="text-surface-700-300 space-y-3 text-sm">
+					<p>Are you sure you want to delete this organization?</p>
+					<div
+						class="bg-surface-100-900 border-surface-200-800 rounded-container border p-3 text-center"
+					>
+						<span class="text-surface-800-200 text-base font-semibold"
+							>{activeOrganization.name}</span
+						>
+					</div>
+					<p>All organization data will be permanently deleted and cannot be recovered.</p>
+				</div>
 			</article>
 
 			<Dialog.Footer>
