@@ -380,75 +380,90 @@
 <!-- Password Dialog - Desktop -->
 <Dialog.Root bind:open={isPasswordDialogOpen}>
 	<Dialog.Content class="w-full max-w-md">
-		<Dialog.Header>
-			<Dialog.Title>Set Password</Dialog.Title>
-		</Dialog.Header>
-		<form onsubmit={handlePasswordSubmit} class="w-full">
-			<div class="flex flex-col gap-4">
-				<label class="flex flex-col gap-2">
-					<span class="text-sm font-medium">Password</span>
-					<input
-						type="password"
-						class="input w-full"
-						bind:value={password}
-						placeholder="Enter your password"
-						required
-					/>
-				</label>
-				<Dialog.Footer>
-					<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
-					<button
-						type="submit"
-						class="btn preset-filled-primary-500 w-full md:w-fit"
-						disabled={isSettingPassword}
-					>
-						{#if isSettingPassword}
-							Setting...
-						{:else}
-							Set Password
-						{/if}
-					</button>
-				</Dialog.Footer>
-			</div>
-		</form>
-		<Dialog.CloseX />
+		<div
+			class="max-h-[100dvh] overflow-auto overscroll-contain"
+			onfocusin={(e) => (e.target as HTMLElement)?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })}
+		>
+			<Dialog.Header>
+				<Dialog.Title>Set Password</Dialog.Title>
+			</Dialog.Header>
+			<form onsubmit={handlePasswordSubmit} class="w-full">
+				<div class="flex flex-col gap-4">
+					<label class="flex flex-col gap-2">
+						<span class="text-sm font-medium">Password</span>
+						<input
+							type="password"
+							class="input w-full"
+							bind:value={password}
+							placeholder="Enter your password"
+							required
+						/>
+					</label>
+					<Dialog.Footer>
+						<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
+						<button
+							type="submit"
+							class="btn preset-filled-primary-500 w-full md:w-fit"
+							disabled={isSettingPassword}
+						>
+							{#if isSettingPassword}
+								Setting...
+							{:else}
+								Set Password
+							{/if}
+						</button>
+					</Dialog.Footer>
+				</div>
+			</form>
+			<Dialog.CloseX />
+		</div>
 	</Dialog.Content>
 </Dialog.Root>
 
 <!-- Password Drawer - Mobile -->
 <Drawer.Root bind:open={isPasswordDrawerOpen}>
 	<Drawer.Content>
-		<Drawer.Header>
-			<Drawer.Title>Set Password</Drawer.Title>
-		</Drawer.Header>
-		<form onsubmit={handlePasswordSubmit} class="w-full">
-			<div class="flex flex-col gap-4">
-				<label class="flex flex-col gap-2">
-					<span class="text-sm font-medium">Password</span>
-					<input
-						type="password"
-						class="input w-full"
-						bind:value={password}
-						placeholder="Enter your password"
-						required
-					/>
-				</label>
-				<Drawer.Footer>
-					<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>
-					<button
-						type="submit"
-						class="btn preset-filled-primary-500 w-full md:w-fit"
-						disabled={isSettingPassword}
-					>
-						{#if isSettingPassword}
-							Setting...
-						{:else}
-							Set Password
-						{/if}
-					</button>
-				</Drawer.Footer>
-			</div>
-		</form>
-		<Drawer.CloseX />
+		<div
+			class="max-h-[100dvh] overflow-auto overscroll-contain"
+			onfocusin={(e) =>
+				(e.target as HTMLElement)?.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center',
+					inline: 'nearest'
+				})}
+		>
+			<Drawer.Header>
+				<Drawer.Title>Set Password</Drawer.Title>
+			</Drawer.Header>
+			<form onsubmit={handlePasswordSubmit} class="w-full">
+				<div class="flex flex-col gap-4">
+					<label class="flex flex-col gap-2">
+						<span class="text-sm font-medium">Password</span>
+						<input
+							type="password"
+							class="input w-full"
+							bind:value={password}
+							placeholder="Enter your password"
+							required
+						/>
+					</label>
+					<Drawer.Footer>
+						<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>
+						<button
+							type="submit"
+							class="btn preset-filled-primary-500 w-full md:w-fit"
+							disabled={isSettingPassword}
+						>
+							{#if isSettingPassword}
+								Setting...
+							{:else}
+								Set Password
+							{/if}
+						</button>
+					</Drawer.Footer>
+				</div>
+			</form>
+			<Drawer.CloseX />
+		</div>
 	</Drawer.Content>
 </Drawer.Root>

@@ -178,7 +178,7 @@
 		<!-- Profile Dialog -->
 		<Dialog.Root bind:open={profileDialogOpen}>
 			<Dialog.Content
-				class="md:rounded-container top-0 left-0 h-full max-h-full
+				class="md:rounded-container top-0 left-0 h-full max-h-[100dvh]
 		       w-full max-w-full translate-x-0 translate-y-0 rounded-none md:top-[50%]
 		       md:left-[50%] md:h-auto md:max-h-[80vh] md:w-auto
 		       md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%]"
@@ -186,7 +186,17 @@
 				<Dialog.Header>
 					<Dialog.Title>Profile</Dialog.Title>
 				</Dialog.Header>
-				<UserProfile />
+				<div
+					class="max-h-[100dvh] overflow-auto overscroll-contain"
+					onfocusin={(e) =>
+						(e.target as HTMLElement)?.scrollIntoView({
+							behavior: 'smooth',
+							block: 'center',
+							inline: 'nearest'
+						})}
+				>
+					<UserProfile />
+				</div>
 				<Dialog.CloseX />
 			</Dialog.Content>
 		</Dialog.Root>
