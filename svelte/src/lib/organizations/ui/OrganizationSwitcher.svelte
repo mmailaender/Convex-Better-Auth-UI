@@ -83,19 +83,35 @@
 	let prevOrganizationProfileDialogOpen = $state(false);
 	// Suppress dialog transitions around popstate (iOS swipe)
 	let suppressDialogTransition: boolean = $state(false);
+	// Ignore $page.url-driven sync while we handle a native popstate to avoid racey reopen
+	let handlingPopState: boolean = $state(false);
 	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
 
 	onMount(() => {
 		mounted = true;
-		const onPopState = () => {
+		const onPopState = (e: PopStateEvent) => {
 			suppressDialogTransition = true;
-			// Immediately sync dialog open state from current URL so UI matches history entry
-			const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-			organizationProfileDialogOpen = has;
+			handlingPopState = true;
+			// Prefer state-based detection to avoid timing glitches on iOS Safari
+			const st: any = e.state;
+			if (st && typeof st === 'object' && 'dialog' in st) {
+				organizationProfileDialogOpen = st.dialog === 'organization-profile';
+			} else {
+				// Fallback: defer reading window.location to the next frame so URL is up-to-date
+				requestAnimationFrame(() => {
+					const has =
+						new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+					organizationProfileDialogOpen = has;
+					// finished syncing from popstate
+					handlingPopState = false;
+				});
+			}
 			if (popstateTimer) clearTimeout(popstateTimer);
 			popstateTimer = setTimeout(() => {
 				suppressDialogTransition = false;
 				popstateTimer = null;
+				// in case state path was taken (no RAF), clear the flag here
+				handlingPopState = false;
 			}, 400);
 		};
 		window.addEventListener('popstate', onPopState);
@@ -117,19 +133,21 @@
 	}
 	function openProfileModal(): void {
 		switcherPopoverOpen = false;
-		const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+		const has =
+			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
 		if (!has) {
 			const url = new URL(window.location.href);
 			url.searchParams.set('dialog', 'organization-profile');
 			const path = `${url.pathname}${url.search}${url.hash}`;
-			pushState(path, {});
+			pushState(path, { dialog: 'organization-profile' });
 		}
 		// Open immediately; URL param is updated via History API above.
 		organizationProfileDialogOpen = true;
 	}
 
 	$effect(() => {
-		const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+		const has =
+			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
 		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen && has) {
 			const url = new URL(window.location.href);
 			url.searchParams.delete('dialog');
@@ -144,7 +162,9 @@
 	$effect(() => {
 		// Use $page.url as a reactive dependency, but compute from window to avoid router animation timing on iOS
 		const _ = page.url;
-		const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+		if (handlingPopState) return;
+		const has =
+			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
 		if (has !== organizationProfileDialogOpen) {
 			organizationProfileDialogOpen = has;
 		}
