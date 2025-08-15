@@ -1,7 +1,8 @@
 <script lang="ts">
-	// SvelteKit
-	import { goto } from '$app/navigation';
+	// Svelte
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	// Primitives
 	import * as Popover from '$lib/primitives/ui/popover';
@@ -24,7 +25,6 @@
 	// Types
 	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { FunctionReturnType } from 'convex/server';
-	import { page } from '$app/state';
 	type ActiveOrganizationResponse = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
@@ -83,9 +83,24 @@
 	let prevOrganizationProfileDialogOpen = $state(false);
 	// Guard to avoid reopening from URL while we're removing the param during a UI close
 	let closingViaUI = $state(false);
+	// Guard to avoid immediate close while opening via UI before page.url updates
+	let openingViaUI = $state(false);
+	// Suppress dialog transitions around popstate (iOS swipe)
+	let suppressDialogTransition: boolean = $state(false);
+	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
 
 	onMount(() => {
 		mounted = true;
+		const onPopState = () => {
+			suppressDialogTransition = true;
+			if (popstateTimer) clearTimeout(popstateTimer);
+			popstateTimer = setTimeout(() => {
+				suppressDialogTransition = false;
+				popstateTimer = null;
+			}, 400);
+		};
+		window.addEventListener('popstate', onPopState);
+		return () => window.removeEventListener('popstate', onPopState);
 	});
 
 	// Handler functions
@@ -105,6 +120,7 @@
 		switcherPopoverOpen = false;
 		const has = page.url.searchParams.get('dialog') === 'organization-profile';
 		if (!has) {
+			openingViaUI = true;
 			const url = new URL(page.url);
 			url.searchParams.set('dialog', 'organization-profile');
 			const path = `${url.pathname}${url.search}${url.hash}`;
@@ -115,6 +131,8 @@
 				invalidateAll: false
 			});
 		}
+		// Open immediately; URL param will be added by goto above.
+		organizationProfileDialogOpen = true;
 	}
 
 	/**
@@ -150,6 +168,10 @@
 		const has = page.url.searchParams.get('dialog') === 'organization-profile';
 		if (closingViaUI) {
 			if (!has) closingViaUI = false;
+			return;
+		}
+		if (openingViaUI) {
+			if (has) openingViaUI = false;
 			return;
 		}
 		if (has !== organizationProfileDialogOpen) {
@@ -337,7 +359,7 @@
 	<!-- Organization Profile Modal -->
 	<Dialog.Root bind:open={organizationProfileDialogOpen}>
 		<Dialog.Content
-			class="md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl"
+			class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl ${suppressDialogTransition ? 'animate-none transition-none' : ''}`}
 		>
 			<Dialog.Header class="hidden">
 				<Dialog.Title></Dialog.Title>
