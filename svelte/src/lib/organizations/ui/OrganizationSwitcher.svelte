@@ -256,29 +256,38 @@
 		<Popover.Content>
 			<div class="flex flex-col gap-1">
 				<div role="list" class="bg-surface-50-950 rounded-container flex flex-col">
-					<div
-						class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6"
-					>
-						<Avatar.Root class="rounded-container size-8 shrink-0">
-							<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-							<Avatar.Fallback>
-								<Building2 class="size-5" />
-							</Avatar.Fallback>
-						</Avatar.Root>
-						<span class="text-surface-700-300 text-medium w-full truncate text-base">
-							{activeOrganization?.name}
-						</span>
-						{#if isOwnerOrAdmin}
-							<button
-								onclick={openProfileModal}
-								class="btn-icon preset-faded-surface-50-950 hover:preset-filled-surface-300-700 flex gap-2"
-							>
-								<Settings class="size-4" />
-							</button>
-						{:else if activeOrganization}
+					{#if isOwnerOrAdmin}
+						<button
+							onclick={openProfileModal}
+							class="btn text-surface-700-300 border-surface-200-800 flex w-full max-w-80 items-center gap-3 border-b p-3 text-left text-sm/6"
+						>
+							<Avatar.Root class="rounded-container size-8 shrink-0">
+								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
+								<Avatar.Fallback>
+									<Building2 class="size-5" />
+								</Avatar.Fallback>
+							</Avatar.Root>
+							<span class="text-surface-700-300 text-medium w-full truncate text-base">
+								{activeOrganization?.name}
+							</span>
+							<Settings class="size-6" />
+						</button>
+					{:else}
+						<div
+							class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-b p-3 text-sm/6"
+						>
+							<Avatar.Root class="rounded-container size-8 shrink-0">
+								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
+								<Avatar.Fallback>
+									<Building2 class="size-5" />
+								</Avatar.Fallback>
+							</Avatar.Root>
+							<span class="text-surface-700-300 text-medium w-full truncate text-base">
+								{activeOrganization?.name}
+							</span>
 							<LeaveOrganization />
-						{/if}
-					</div>
+						</div>
+					{/if}
 
 					{#each organizations.filter((org) => org && org.id !== activeOrganization?.id) as org (org?.id)}
 						<div>
