@@ -2,6 +2,7 @@
 	// Svelte
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { pushState, replaceState } from '$app/navigation';
 
 	/** UI **/
 	// Primitives
@@ -65,10 +66,12 @@
 	onMount(() => {
 		const onPopState = () => {
 			suppressMobileTransition = true;
-			// Immediately sync mobile tab from current URL so UI matches history entry
+			// Immediately sync mobile & desktop tabs from current URL so UI matches history entry
 			const params = new URLSearchParams(window.location.search);
 			const tabParam = params.get('tab') ?? '';
 			const allowed = new Set(visibleTabs.map((t) => t.value));
+			const normalized = tabParam && allowed.has(tabParam) ? tabParam : 'general';
+			activeDesktopTab = normalized;
 			activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
 			if (popstateTimer) clearTimeout(popstateTimer);
 			popstateTimer = setTimeout(() => {
@@ -108,25 +111,28 @@
 		// Slight delay to allow tab state to update before showing content
 		setTimeout(() => (activeMobileTab = value), 10);
 		// Push shallow route via history so iOS doesn't trigger a full navigation
-		const url = new URL(page.url);
+		const url = new URL(window.location.href);
 		url.searchParams.set('tab', value);
-		history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`);
+		pushState(`${url.pathname}${url.search}${url.hash}`, {});
 	}
 
 	function closeMobileTab() {
 		// Remove tab param to return to list view within dialog (no navigation)
-		const url = new URL(page.url);
+		const url = new URL(window.location.href);
 		if (url.searchParams.has('tab')) {
 			url.searchParams.delete('tab');
-			history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+			replaceState(`${url.pathname}${url.search}${url.hash}`, {});
 		}
 		activeMobileTab = '';
 	}
 
 	// Sync tabs with URL params
 	$effect(() => {
-		const dialogOpen = page.url.searchParams.get('dialog') === 'organization-profile';
-		const tabParam = page.url.searchParams.get('tab') ?? '';
+		// Anchor to SvelteKit navigations, but read from window for instant shallow history updates
+		const _ = page.url;
+		const sp = new URLSearchParams(window.location.search);
+		const dialogOpen = sp.get('dialog') === 'organization-profile';
+		const tabParam = sp.get('tab') ?? '';
 		const allowed = new Set(visibleTabs.map((t) => t.value));
 		const normalized = tabParam && allowed.has(tabParam) ? tabParam : 'general';
 
