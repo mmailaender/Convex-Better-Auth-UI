@@ -9,10 +9,11 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
-	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import { FileUpload } from '@ark-ui/svelte/file-upload';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { createDragState } from '$lib/primitives/utils/dragState.svelte';
 
 	// API
 	import { useConvexClient, useQuery } from 'convex-svelte';
@@ -52,6 +53,7 @@
 	let slug: string = $state('');
 	let logo: string = $state('');
 	let logoFile: File | null = $state(null);
+	const dragState = createDragState();
 
 	/**
 	 * Generates a URL-friendly slug from the provided input string
@@ -195,23 +197,36 @@
 {:else}
 	<form onsubmit={handleSubmit} class="mx-auto w-full">
 		<div class="my-6">
-			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-				<div
-					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
-				>
-					<Avatar.Root class="rounded-container size-20">
-						<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
-						<Avatar.Fallback class="bg-surface-400-600 rounded-container">
-							<Building2 class="size-10" />
-						</Avatar.Fallback>
-					</Avatar.Root>
+			<FileUpload.Root accept={{ 'image/*': [] }} maxFiles={1} onFileChange={handleFileChange}>
+				<FileUpload.Dropzone class="group/drop" ondrop={dragState.resetDragState}>
 					<div
-						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+						class={[
+							// base
+							'rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75',
+
+							// gentle GLOBAL hint while dragging files anywhere in the window
+							dragState.isDragging &&
+								'ring-primary-500 ring-offset-surface-50-950 scale-105 ring-1 ring-offset-2',
+
+							// STRONG hint only when Ark sets data-dragging on the dropzone
+							'group-data-[dragging]/drop:ring-primary-500 group-data-[dragging]/drop:ring-offset-surface-50-950 group-data-[dragging]/drop:scale-110 group-data-[dragging]/drop:ring-2 group-data-[dragging]/drop:ring-offset-2'
+						]}
 					>
-						<Pencil class="size-4" />
+						<Avatar.Root class="rounded-container size-20">
+							<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
+							<Avatar.Fallback class="bg-surface-400-600 rounded-container">
+								<Building2 class="size-10" />
+							</Avatar.Fallback>
+						</Avatar.Root>
+						<div
+							class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+						>
+							<Pencil class="size-4" />
+						</div>
 					</div>
-				</div>
-			</FileUpload>
+				</FileUpload.Dropzone>
+				<FileUpload.HiddenInput />
+			</FileUpload.Root>
 		</div>
 
 		<div class="flex flex-col gap-2">
