@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Svelte
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { goto, pushState, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 
 	// Primitives
@@ -84,18 +84,14 @@
 	// Suppress dialog transitions around popstate (iOS swipe)
 	let suppressDialogTransition: boolean = $state(false);
 	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
-	// Local override to mirror History API changes until $page updates (reads stay Svelte-native)
-	let dialogParamOverride: boolean | null = $state(null);
-	const hasDialogParam = $derived(
-		dialogParamOverride ?? (page.url.searchParams.get('dialog') === 'organization-profile')
-	);
 
 	onMount(() => {
 		mounted = true;
 		const onPopState = () => {
 			suppressDialogTransition = true;
-			// Release override: let $page.url be the source of truth on browser nav
-			dialogParamOverride = null;
+			// Immediately sync dialog open state from current URL so UI matches history entry
+			const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+			organizationProfileDialogOpen = has;
 			if (popstateTimer) clearTimeout(popstateTimer);
 			popstateTimer = setTimeout(() => {
 				suppressDialogTransition = false;
@@ -121,36 +117,34 @@
 	}
 	function openProfileModal(): void {
 		switcherPopoverOpen = false;
-		const has = hasDialogParam;
+		const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
 		if (!has) {
-			const url = new URL(page.url);
+			const url = new URL(window.location.href);
 			url.searchParams.set('dialog', 'organization-profile');
 			const path = `${url.pathname}${url.search}${url.hash}`;
-			history.pushState(null, '', path);
-			// Mirror the change immediately for reactive reads
-			dialogParamOverride = true;
+			pushState(path, {});
 		}
 		// Open immediately; URL param is updated via History API above.
 		organizationProfileDialogOpen = true;
 	}
 
 	$effect(() => {
-		const has = hasDialogParam;
+		const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
 		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen && has) {
-			const url = new URL(page.url);
+			const url = new URL(window.location.href);
 			url.searchParams.delete('dialog');
 			// Also remove any tab selection to keep URL clean when dialog closes
 			url.searchParams.delete('tab');
 			const path = `${url.pathname}${url.search}${url.hash}`;
-			history.replaceState(null, '', path);
-			// Mirror the change immediately for reactive reads
-			dialogParamOverride = false;
+			replaceState(path, {});
 		}
 		prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
 	});
 
 	$effect(() => {
-		const has = hasDialogParam;
+		// Use $page.url as a reactive dependency, but compute from window to avoid router animation timing on iOS
+		const _ = page.url;
+		const has = new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
 		if (has !== organizationProfileDialogOpen) {
 			organizationProfileDialogOpen = has;
 		}
