@@ -97,13 +97,20 @@
 			if (st && typeof st === 'object' && 'dialog' in st) {
 				organizationProfileDialogOpen = st.dialog === 'organization-profile';
 			} else {
-				// Fallback: defer reading window.location to the next frame so URL is up-to-date
+				// Fallback: on iOS the URL can lag during swipe. Avoid proactive close and set
+				// the immediate state from the current URL so the dialog doesn't blink closed
+				// when navigating back from a tab to the dialog list. We'll confirm after two RAFs.
+				const immediateHas =
+					new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+				organizationProfileDialogOpen = immediateHas;
 				requestAnimationFrame(() => {
-					const has =
-						new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-					organizationProfileDialogOpen = has;
-					// finished syncing from popstate
-					handlingPopState = false;
+					requestAnimationFrame(() => {
+						const has =
+							new URLSearchParams(window.location.search).get('dialog') ===
+							'organization-profile';
+						organizationProfileDialogOpen = has;
+						// Keep handlingPopState true; the timeout will clear it after the swipe settles
+					});
 				});
 			}
 			if (popstateTimer) clearTimeout(popstateTimer);
@@ -148,7 +155,12 @@
 	$effect(() => {
 		const has =
 			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen && has) {
+		// During native popstate, avoid mutating history; just record previous state and exit.
+		if (handlingPopState) {
+			prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
+			return;
+		}
+		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen) {
 			const url = new URL(window.location.href);
 			url.searchParams.delete('dialog');
 			// Also remove any tab selection to keep URL clean when dialog closes
@@ -163,8 +175,14 @@
 		// Use $page.url as a reactive dependency, but compute from window to avoid router animation timing on iOS
 		const _ = page.url;
 		if (handlingPopState) return;
-		const has =
-			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+		let has = false;
+		const st: any = history.state;
+		if (st && typeof st === 'object' && 'dialog' in st) {
+			has = st.dialog === 'organization-profile';
+		} else {
+			has =
+				new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
+		}
 		if (has !== organizationProfileDialogOpen) {
 			organizationProfileDialogOpen = has;
 		}
@@ -364,7 +382,7 @@
 						inline: 'nearest'
 					})}
 			>
-				<OrganizationProfile onSuccessfulDelete={closeOrganizationProfile} />
+				<OrganizationProfile open={organizationProfileDialogOpen} onSuccessfulDelete={closeOrganizationProfile} />
 			</div>
 			<Dialog.CloseX />
 		</Dialog.Content>

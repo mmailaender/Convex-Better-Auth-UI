@@ -35,6 +35,10 @@
 	// Types
 	type OrganizationProfileProps = {
 		/**
+		 * Whether the dialog is open. Used to reset internal state on close.
+		 */
+		open?: boolean;
+		/**
 		 * Optional callback that will be called when an organization is successfully deleted
 		 */
 		onSuccessfulDelete?: (() => void) | undefined;
@@ -52,7 +56,7 @@
 		};
 	};
 
-	const { onSuccessfulDelete, initialData }: OrganizationProfileProps = $props();
+	const { open = false, onSuccessfulDelete, initialData }: OrganizationProfileProps = $props();
 
 	// State
 	let activeMobileTab: string = $state('');
@@ -63,15 +67,21 @@
 	let suppressMobileTransition: boolean = $state(false);
 	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
 
+	// Reset internal tab state when dialog closes so reopen shows the list by default
+	$effect(() => {
+		if (!open) {
+			initializedDesktopFromUrl = false;
+			activeMobileTab = '';
+		}
+	});
+
 	onMount(() => {
 		const onPopState = () => {
 			suppressMobileTransition = true;
-			// Immediately sync mobile & desktop tabs from current URL so UI matches history entry
+			// Immediately sync mobile tab from current URL so UI matches history entry
 			const params = new URLSearchParams(window.location.search);
 			const tabParam = params.get('tab') ?? '';
 			const allowed = new Set(visibleTabs.map((t) => t.value));
-			const normalized = tabParam && allowed.has(tabParam) ? tabParam : 'general';
-			activeDesktopTab = normalized;
 			activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
 			if (popstateTimer) clearTimeout(popstateTimer);
 			popstateTimer = setTimeout(() => {
@@ -113,7 +123,9 @@
 		// Push shallow route via history so iOS doesn't trigger a full navigation
 		const url = new URL(window.location.href);
 		url.searchParams.set('tab', value);
-		pushState(`${url.pathname}${url.search}${url.hash}`, {});
+		// Ensure dialog stays present in the URL and state while navigating tabs inside the dialog
+		url.searchParams.set('dialog', 'organization-profile');
+		pushState(`${url.pathname}${url.search}${url.hash}`, { dialog: 'organization-profile' });
 	}
 
 	function closeMobileTab() {
@@ -121,7 +133,9 @@
 		const url = new URL(window.location.href);
 		if (url.searchParams.has('tab')) {
 			url.searchParams.delete('tab');
-			replaceState(`${url.pathname}${url.search}${url.hash}`, {});
+			// Keep dialog open in URL/state
+			url.searchParams.set('dialog', 'organization-profile');
+			replaceState(`${url.pathname}${url.search}${url.hash}`, { dialog: 'organization-profile' });
 		}
 		activeMobileTab = '';
 	}
