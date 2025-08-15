@@ -81,18 +81,21 @@
 	// Track lifecycle and previous open state for organization profile dialog
 	let mounted = $state(false);
 	let prevOrganizationProfileDialogOpen = $state(false);
-	// Guard to avoid reopening from URL while we're removing the param during a UI close
-	let closingViaUI = $state(false);
-	// Guard to avoid immediate close while opening via UI before page.url updates
-	let openingViaUI = $state(false);
 	// Suppress dialog transitions around popstate (iOS swipe)
 	let suppressDialogTransition: boolean = $state(false);
 	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
+	// Local override to mirror History API changes until $page updates (reads stay Svelte-native)
+	let dialogParamOverride: boolean | null = $state(null);
+	const hasDialogParam = $derived(
+		dialogParamOverride ?? (page.url.searchParams.get('dialog') === 'organization-profile')
+	);
 
 	onMount(() => {
 		mounted = true;
 		const onPopState = () => {
 			suppressDialogTransition = true;
+			// Release override: let $page.url be the source of truth on browser nav
+			dialogParamOverride = null;
 			if (popstateTimer) clearTimeout(popstateTimer);
 			popstateTimer = setTimeout(() => {
 				suppressDialogTransition = false;
@@ -118,62 +121,36 @@
 	}
 	function openProfileModal(): void {
 		switcherPopoverOpen = false;
-		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		const has = hasDialogParam;
 		if (!has) {
-			openingViaUI = true;
 			const url = new URL(page.url);
 			url.searchParams.set('dialog', 'organization-profile');
 			const path = `${url.pathname}${url.search}${url.hash}`;
-			void goto(path, {
-				replaceState: false,
-				noScroll: true,
-				keepFocus: true,
-				invalidateAll: false
-			});
+			history.pushState(null, '', path);
+			// Mirror the change immediately for reactive reads
+			dialogParamOverride = true;
 		}
-		// Open immediately; URL param will be added by goto above.
+		// Open immediately; URL param is updated via History API above.
 		organizationProfileDialogOpen = true;
 	}
 
-	/**
-	 * Reflect organization profile dialog CLOSE to URL.
-	 * When the dialog transitions from open -> closed and the param exists,
-	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
-	 */
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'organization-profile';
+		const has = hasDialogParam;
 		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen && has) {
-			closingViaUI = true;
 			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
 			// Also remove any tab selection to keep URL clean when dialog closes
 			url.searchParams.delete('tab');
 			const path = `${url.pathname}${url.search}${url.hash}`;
-			void goto(path, {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true,
-				invalidateAll: false
-			});
+			history.replaceState(null, '', path);
+			// Mirror the change immediately for reactive reads
+			dialogParamOverride = false;
 		}
 		prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
 	});
 
-	/**
-	 * Source of truth: URL -> organizationProfileDialogOpen.
-	 * Open dialog when ?dialog=organization-profile is present. Close when removed.
-	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
-	 */
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'organization-profile';
-		if (closingViaUI) {
-			if (!has) closingViaUI = false;
-			return;
-		}
-		if (openingViaUI) {
-			if (has) openingViaUI = false;
-			return;
-		}
+		const has = hasDialogParam;
 		if (has !== organizationProfileDialogOpen) {
 			organizationProfileDialogOpen = has;
 		}
