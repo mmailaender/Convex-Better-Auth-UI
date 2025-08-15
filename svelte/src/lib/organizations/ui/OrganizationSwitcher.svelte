@@ -128,6 +128,8 @@
 			closingViaUI = true;
 			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
+			// Also remove any tab selection to keep URL clean when dialog closes
+			url.searchParams.delete('tab');
 			const path = `${url.pathname}${url.search}${url.hash}`;
 			void goto(path, {
 				replaceState: true,

@@ -1,4 +1,8 @@
 <script lang="ts">
+	// Svelte
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+
 	/** UI **/
 	// Primitives
 	import * as Tabs from '$lib/primitives/ui/tabs';
@@ -51,6 +55,9 @@
 
 	// State
 	let activeMobileTab: string = $state('');
+	let activeDesktopTab: string = $state('general');
+	// Guard to only initialize desktop tab from URL on open
+	let initializedDesktopFromUrl: boolean = $state(false);
 
 	// Tab configuration
 	const tabs = [
@@ -79,14 +86,62 @@
 	function handleMobileTabChange(value: string) {
 		// Slight delay to allow tab state to update before showing content
 		setTimeout(() => (activeMobileTab = value), 10);
+		// Push shallow route so a back gesture returns to the list
+		const url = new URL(page.url);
+		url.searchParams.set('tab', value);
+		const path = `${url.pathname}${url.search}${url.hash}`;
+		void goto(path, {
+			replaceState: false,
+			noScroll: true,
+			keepFocus: true,
+			invalidateAll: false
+		});
 	}
 
 	function closeMobileTab() {
+		// Remove tab param to return to list view within dialog
+		const url = new URL(page.url);
+		if (url.searchParams.has('tab')) {
+			url.searchParams.delete('tab');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: true,
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
 		activeMobileTab = '';
 	}
+
+	// Sync tabs with URL params
+	$effect(() => {
+		const dialogOpen = page.url.searchParams.get('dialog') === 'organization-profile';
+		const tabParam = page.url.searchParams.get('tab') ?? '';
+		const allowed = new Set(visibleTabs.map((t) => t.value));
+		const normalized = tabParam && allowed.has(tabParam) ? tabParam : 'general';
+
+		if (dialogOpen) {
+			// Initialize desktop selection once from URL when dialog is open
+			if (!initializedDesktopFromUrl) {
+				activeDesktopTab = normalized;
+				initializedDesktopFromUrl = true;
+			}
+			// Mobile overlay uses empty => list, value => content
+			activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
+		} else {
+			// Reset guards when dialog closes
+			initializedDesktopFromUrl = false;
+			activeMobileTab = '';
+		}
+	});
 </script>
 
-<Tabs.Root value="general" orientation="vertical" class="relative h-full overflow-hidden">
+<Tabs.Root
+	bind:value={activeDesktopTab}
+	orientation="vertical"
+	class="relative h-full overflow-hidden"
+>
 	<!-- Desktop Layout -->
 	<div class="hidden h-full w-full md:flex">
 		<!-- Desktop Navigation -->
