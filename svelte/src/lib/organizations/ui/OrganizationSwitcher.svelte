@@ -128,6 +128,8 @@
 			closingViaUI = true;
 			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
+			// Also remove any tab selection to keep URL clean when dialog closes
+			url.searchParams.delete('tab');
 			const path = `${url.pathname}${url.search}${url.hash}`;
 			void goto(path, {
 				replaceState: true,
@@ -326,12 +328,22 @@
 	<!-- Organization Profile Modal -->
 	<Dialog.Root bind:open={organizationProfileDialogOpen}>
 		<Dialog.Content
-			class="md:rounded-container top-0 left-0 h-full max-h-full w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl"
+			class="md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl"
 		>
 			<Dialog.Header class="hidden">
 				<Dialog.Title></Dialog.Title>
 			</Dialog.Header>
-			<OrganizationProfile onSuccessfulDelete={closeOrganizationProfile} />
+			<div
+				class="max-h-[100dvh] overflow-auto overscroll-contain"
+				onfocusin={(e) =>
+					(e.target as HTMLElement)?.scrollIntoView({
+						behavior: 'smooth',
+						block: 'center',
+						inline: 'nearest'
+					})}
+			>
+				<OrganizationProfile onSuccessfulDelete={closeOrganizationProfile} />
+			</div>
 			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>

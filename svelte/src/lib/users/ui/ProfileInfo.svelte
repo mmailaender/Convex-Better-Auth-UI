@@ -1,4 +1,7 @@
 <script lang="ts">
+	// Svelte
+	import { tick } from 'svelte';
+
 	// API
 	import { api } from '$convex/_generated/api';
 	import { useQuery, useConvexClient } from 'convex-svelte';
@@ -10,11 +13,11 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
-	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import { FileUpload } from '@ark-ui/svelte/file-upload';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { tick } from 'svelte';
+	import { createDragState } from '$lib/primitives/utils/dragState.svelte';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
@@ -35,6 +38,7 @@
 	let name: string = $state('');
 	let loadingStatus = $state('loading');
 	let isUploading: boolean = $state(false);
+	const dragState = createDragState();
 
 	let nameInputEl: HTMLInputElement | null = $state(null);
 
@@ -125,36 +129,52 @@
 	{:else}
 		<!-- Avatar + Upload -->
 		<div class="rounded-base flex items-center justify-start pt-6 pl-0.5">
-			<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-				<div
-					class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
-				>
-					{#key avatarKey}
-						<Avatar.Root class="size-20" onStatusChange={(e) => (loadingStatus = e.status)}>
-							<Avatar.Image src={activeUser.image} alt={activeUser.name} />
-							<Avatar.Fallback>
-								<Avatar.Marble name={activeUser.name} />
-							</Avatar.Fallback>
-						</Avatar.Root>
-					{/key}
-
-					{#if isUploading || loadingStatus === 'loading'}
-						<div
-							class="bg-surface-50-950 pointer-events-none absolute inset-0 flex items-center justify-center rounded-full"
-						>
-							<div
-								class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
-							></div>
-						</div>
-					{/if}
-
+			<FileUpload.Root accept={{ 'image/*': [] }} maxFiles={1} onFileChange={handleFileChange}>
+				<FileUpload.Dropzone class="group/drop" ondrop={dragState.resetDragState}>
 					<div
-						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+						class={[
+							'rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75 ',
+
+							// gentle GLOBAL hint while dragging files anywhere in the window
+							dragState.isDragging &&
+								'ring-primary-500 ring-offset-surface-50-950 scale-105 ring-1 ring-offset-2',
+
+							// STRONG hint only when Ark sets data-dragging on the dropzone
+							'group-data-[dragging]/drop:ring-primary-500 group-data-[dragging]/drop:ring-offset-surface-50-950 group-data-[dragging]/drop:scale-110 group-data-[dragging]/drop:ring-2 group-data-[dragging]/drop:ring-offset-2'
+						]}
 					>
-						<Pencil class="size-4" />
-					</div>
-				</div>
-			</FileUpload>
+						<div
+							class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
+						>
+							{#key avatarKey}
+								<Avatar.Root class="size-20" onStatusChange={(e) => (loadingStatus = e.status)}>
+									<Avatar.Image src={activeUser.image} alt={activeUser.name} />
+									<Avatar.Fallback>
+										<Avatar.Marble name={activeUser.name} />
+									</Avatar.Fallback>
+								</Avatar.Root>
+							{/key}
+
+							{#if isUploading || loadingStatus === 'loading'}
+								<div
+									class="bg-surface-50-950 pointer-events-none absolute inset-0 flex items-center justify-center rounded-full"
+								>
+									<div
+										class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+									></div>
+								</div>
+							{/if}
+
+							<div
+								class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+							>
+								<Pencil class="size-4" />
+							</div>
+						</div>
+					</div></FileUpload.Dropzone
+				>
+				<FileUpload.HiddenInput />
+			</FileUpload.Root>
 		</div>
 
 		<!-- Inline editable name -->

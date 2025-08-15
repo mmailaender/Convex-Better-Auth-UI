@@ -187,7 +187,7 @@
 					<Dialog.Title>Profile</Dialog.Title>
 				</Dialog.Header>
 				<div
-					class="max-h-[100dvh] overflow-auto overscroll-contain"
+					class="max-h-[100dvh] overflow-auto overscroll-contain p-2"
 					onfocusin={(e) =>
 						(e.target as HTMLElement)?.scrollIntoView({
 							behavior: 'smooth',

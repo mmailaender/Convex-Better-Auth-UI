@@ -1,5 +1,6 @@
 <script lang="ts">
-	// SvelteKit
+	// Svelte
+	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
@@ -27,14 +28,14 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
-	import { FileUpload } from '@skeletonlabs/skeleton-svelte';
+	import { FileUpload } from '@ark-ui/svelte/file-upload';
 
 	// Primitive Types
 	import { type FileChangeDetails } from '@zag-js/file-upload';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { tick } from 'svelte';
+	import { createDragState } from '$lib/primitives/utils/dragState.svelte';
 
 	// Props
 	let {
@@ -58,10 +59,11 @@
 		{ initialData: initialData?.activeOrganization }
 	);
 
-	// State
+	// Avatar State
 	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
 	let isUploading: boolean = $state(false);
 	let logoKey: number = $state(0); // Force re-render when logo changes
+	const dragState = createDragState();
 
 	// Inline name editing state
 	let isEditingName: boolean = $state(false);
@@ -202,42 +204,54 @@
 
 {#if user && activeOrganization}
 	<div class="flex flex-col items-start gap-6">
-		<FileUpload accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-			<div
-				class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
-			>
-				{#key logoKey}
-					<Avatar.Root
-						class="rounded-container size-20"
-						onStatusChange={(e) => (imageLoadingStatus = e.status)}
-					>
-						<Avatar.Image
-							src={activeOrganization.logo}
-							alt={activeOrganization.name || 'Organization'}
-						/>
-						<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
-							<Building2 class="size-10" />
-						</Avatar.Fallback>
-					</Avatar.Root>
-				{/key}
-
-				{#if isUploading || imageLoadingStatus === 'loading'}
-					<div
-						class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
-					>
-						<div
-							class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
-						></div>
-					</div>
-				{/if}
-
+		<FileUpload.Root accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
+			<FileUpload.Dropzone ondrop={dragState.resetDragState}>
 				<div
-					class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+					class={[
+						'rounded-container relative cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75',
+
+						// gentle GLOBAL hint while dragging files anywhere in the window
+						dragState.isDragging &&
+							'ring-primary-500 ring-offset-surface-50-950 scale-105 ring-1 ring-offset-2',
+
+						// STRONG hint only when Ark sets data-dragging on the dropzone
+						'group-data-[dragging]/drop:ring-primary-500 group-data-[dragging]/drop:ring-offset-surface-50-950 group-data-[dragging]/drop:scale-110 group-data-[dragging]/drop:ring-2 group-data-[dragging]/drop:ring-offset-2'
+					]}
 				>
-					<Pencil class="size-4" />
+					{#key logoKey}
+						<Avatar.Root
+							class="rounded-container size-20"
+							onStatusChange={(e) => (imageLoadingStatus = e.status)}
+						>
+							<Avatar.Image
+								src={activeOrganization.logo}
+								alt={activeOrganization.name || 'Organization'}
+							/>
+							<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
+								<Building2 class="size-10" />
+							</Avatar.Fallback>
+						</Avatar.Root>
+					{/key}
+
+					{#if isUploading || imageLoadingStatus === 'loading'}
+						<div
+							class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
+						>
+							<div
+								class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+							></div>
+						</div>
+					{/if}
+
+					<div
+						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+					>
+						<Pencil class="size-4" />
+					</div>
 				</div>
-			</div>
-		</FileUpload>
+			</FileUpload.Dropzone>
+			<FileUpload.HiddenInput />
+		</FileUpload.Root>
 
 		<!-- Inline editable organization name -->
 		<div
