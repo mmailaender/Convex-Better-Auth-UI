@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Svelte
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	/** UI **/
 	// Primitives
@@ -58,6 +58,27 @@
 	let activeDesktopTab: string = $state('general');
 	// Guard to only initialize desktop tab from URL on open
 	let initializedDesktopFromUrl: boolean = $state(false);
+	// Suppress mobile transitions when coming from browser back/forward (iOS swipe)
+	let suppressMobileTransition: boolean = $state(false);
+	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
+
+	onMount(() => {
+		const onPopState = () => {
+			suppressMobileTransition = true;
+			// Immediately sync mobile tab from current URL so UI matches history entry
+			const params = new URLSearchParams(window.location.search);
+			const tabParam = params.get('tab') ?? '';
+			const allowed = new Set(visibleTabs.map((t) => t.value));
+			activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
+			if (popstateTimer) clearTimeout(popstateTimer);
+			popstateTimer = setTimeout(() => {
+				suppressMobileTransition = false;
+				popstateTimer = null;
+			}, 400);
+		};
+		window.addEventListener('popstate', onPopState);
+		return () => window.removeEventListener('popstate', onPopState);
+	});
 
 	// Tab configuration
 	const tabs = [
@@ -86,30 +107,18 @@
 	function handleMobileTabChange(value: string) {
 		// Slight delay to allow tab state to update before showing content
 		setTimeout(() => (activeMobileTab = value), 10);
-		// Push shallow route so a back gesture returns to the list
+		// Push shallow route via history so iOS doesn't trigger a full navigation
 		const url = new URL(page.url);
 		url.searchParams.set('tab', value);
-		const path = `${url.pathname}${url.search}${url.hash}`;
-		void goto(path, {
-			replaceState: false,
-			noScroll: true,
-			keepFocus: true,
-			invalidateAll: false
-		});
+		history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`);
 	}
 
 	function closeMobileTab() {
-		// Remove tab param to return to list view within dialog
+		// Remove tab param to return to list view within dialog (no navigation)
 		const url = new URL(page.url);
 		if (url.searchParams.has('tab')) {
 			url.searchParams.delete('tab');
-			const path = `${url.pathname}${url.search}${url.hash}`;
-			void goto(path, {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true,
-				invalidateAll: false
-			});
+			history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 		}
 		activeMobileTab = '';
 	}
@@ -217,7 +226,9 @@
 	<div class="relative h-full w-full md:hidden">
 		<!-- Mobile Navigation -->
 		<div
-			class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full transform p-2 transition-transform duration-300 {activeMobileTab
+			class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-full transform p-2 {suppressMobileTransition
+				? ''
+				: 'transition-transform duration-300'} {activeMobileTab
 				? '-translate-x-full'
 				: 'translate-x-0'}"
 		>
@@ -249,7 +260,9 @@
 		<!-- Mobile Content -->
 		{#if activeMobileTab}
 			<div
-				class="bg-surface-100-900 absolute inset-0 flex translate-x-0 transform flex-col gap-4 px-4 py-6 transition-transform duration-300"
+				class="bg-surface-100-900 absolute inset-0 flex translate-x-0 transform flex-col gap-4 px-4 py-6 {suppressMobileTransition
+					? ''
+					: 'transition-transform duration-300'}"
 			>
 				<button
 					class="ring-offset-background focus:ring-ring hover:bg-surface-300-700 rounded-base absolute top-5 left-4 p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
