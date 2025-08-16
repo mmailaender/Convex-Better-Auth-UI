@@ -1,7 +1,6 @@
 <script lang="ts">
 	// Svelte
-	import { onMount } from 'svelte';
-	import { goto, pushState, replaceState } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
 	// Primitives
@@ -78,52 +77,6 @@
 	let switcherPopoverOpen: boolean = $state(false);
 	let createOrganizationDialogOpen: boolean = $state(false);
 	let organizationProfileDialogOpen: boolean = $state(false);
-	// Track lifecycle and previous open state for organization profile dialog
-	let mounted = $state(false);
-	let prevOrganizationProfileDialogOpen = $state(false);
-	// Suppress dialog transitions around popstate (iOS swipe)
-	let suppressDialogTransition: boolean = $state(false);
-	// Ignore $page.url-driven sync while we handle a native popstate to avoid racey reopen
-	let handlingPopState: boolean = $state(false);
-	let popstateTimer: ReturnType<typeof setTimeout> | null = null;
-
-	onMount(() => {
-		mounted = true;
-		const onPopState = (e: PopStateEvent) => {
-			suppressDialogTransition = true;
-			handlingPopState = true;
-			// Prefer state-based detection to avoid timing glitches on iOS Safari
-			const st: any = e.state;
-			if (st && typeof st === 'object' && 'dialog' in st) {
-				organizationProfileDialogOpen = st.dialog === 'organization-profile';
-			} else {
-				// Fallback: on iOS the URL can lag during swipe. Avoid proactive close and set
-				// the immediate state from the current URL so the dialog doesn't blink closed
-				// when navigating back from a tab to the dialog list. We'll confirm after two RAFs.
-				const immediateHas =
-					new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-				organizationProfileDialogOpen = immediateHas;
-				requestAnimationFrame(() => {
-					requestAnimationFrame(() => {
-						const has =
-							new URLSearchParams(window.location.search).get('dialog') ===
-							'organization-profile';
-						organizationProfileDialogOpen = has;
-						// Keep handlingPopState true; the timeout will clear it after the swipe settles
-					});
-				});
-			}
-			if (popstateTimer) clearTimeout(popstateTimer);
-			popstateTimer = setTimeout(() => {
-				suppressDialogTransition = false;
-				popstateTimer = null;
-				// in case state path was taken (no RAF), clear the flag here
-				handlingPopState = false;
-			}, 400);
-		};
-		window.addEventListener('popstate', onPopState);
-		return () => window.removeEventListener('popstate', onPopState);
-	});
 
 	// Handler functions
 
@@ -138,55 +91,46 @@
 	function closeOrganizationProfile(): void {
 		organizationProfileDialogOpen = false;
 	}
-	function openProfileModal(): void {
+
+	const DIALOG_KEY = 'organization-profile';
+
+	// 1 + 2: Keep dialog state in sync with the *committed* URL only.
+	// Fires when the URL actually updates (after a swipe-back finishes).
+	$effect(() => {
+		organizationProfileDialogOpen = page.url.searchParams.get('dialog') === DIALOG_KEY;
+	});
+
+	// 3: Open via button — push history entry + open immediately for snappy UX
+	function openProfileModal() {
 		switcherPopoverOpen = false;
-		const has =
-			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-		if (!has) {
-			const url = new URL(window.location.href);
-			url.searchParams.set('dialog', 'organization-profile');
-			const path = `${url.pathname}${url.search}${url.hash}`;
-			pushState(path, { dialog: 'organization-profile' });
+
+		const url = new URL(page.url);
+		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
+			url.searchParams.set('dialog', DIALOG_KEY);
+			// IMPORTANT: use goto so $page.url updates and back works properly
+			goto(`${url.pathname}${url.search}${url.hash}`, {
+				replaceState: false, // create a back entry
+				noScroll: true,
+				keepFocus: true
+			});
 		}
-		// Open immediately; URL param is updated via History API above.
-		organizationProfileDialogOpen = true;
 	}
 
-	$effect(() => {
-		const has =
-			new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-		// During native popstate, avoid mutating history; just record previous state and exit.
-		if (handlingPopState) {
-			prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
-			return;
-		}
-		if (mounted && prevOrganizationProfileDialogOpen && !organizationProfileDialogOpen) {
-			const url = new URL(window.location.href);
+	// 4: If user closes via backdrop / X, remove the param with replaceState
+	function closeProfileModal() {
+		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
+		console.log('hasDialog', hasDialog);
+		if (hasDialog) {
+			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
-			// Also remove any tab selection to keep URL clean when dialog closes
 			url.searchParams.delete('tab');
-			const path = `${url.pathname}${url.search}${url.hash}`;
-			replaceState(path, {});
+			goto(`${url.pathname}${url.search}${url.hash}`, {
+				replaceState: true, // no extra history entry
+				noScroll: true,
+				keepFocus: true
+			});
 		}
-		prevOrganizationProfileDialogOpen = organizationProfileDialogOpen;
-	});
-
-	$effect(() => {
-		// Use $page.url as a reactive dependency, but compute from window to avoid router animation timing on iOS
-		const _ = page.url;
-		if (handlingPopState) return;
-		let has = false;
-		const st: any = history.state;
-		if (st && typeof st === 'object' && 'dialog' in st) {
-			has = st.dialog === 'organization-profile';
-		} else {
-			has =
-				new URLSearchParams(window.location.search).get('dialog') === 'organization-profile';
-		}
-		if (has !== organizationProfileDialogOpen) {
-			organizationProfileDialogOpen = has;
-		}
-	});
+	}
 
 	/**
 	 * Updates the active organization and replaces URL slug if needed
@@ -366,9 +310,16 @@
 	</Dialog.Root>
 
 	<!-- Organization Profile Modal -->
-	<Dialog.Root bind:open={organizationProfileDialogOpen}>
+	<Dialog.Root
+		bind:open={organizationProfileDialogOpen}
+		onOpenChange={(status) => {
+			if (!status.open) {
+				closeProfileModal();
+			}
+		}}
+	>
 		<Dialog.Content
-			class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl ${suppressDialogTransition ? 'animate-none transition-none' : ''}`}
+			class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl`}
 		>
 			<Dialog.Header class="hidden">
 				<Dialog.Title></Dialog.Title>
@@ -382,7 +333,10 @@
 						inline: 'nearest'
 					})}
 			>
-				<OrganizationProfile open={organizationProfileDialogOpen} onSuccessfulDelete={closeOrganizationProfile} />
+				<OrganizationProfile
+					open={organizationProfileDialogOpen}
+					onSuccessfulDelete={closeOrganizationProfile}
+				/>
 			</div>
 			<Dialog.CloseX />
 		</Dialog.Content>
