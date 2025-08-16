@@ -81,18 +81,27 @@
 	});
 
 	onMount(() => {
+		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
+		const ua = navigator.userAgent;
+		const isIOS =
+			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+
 		const onPopState = () => {
-			suppressMobileTransition = true;
+			if (isIOS) {
+				suppressMobileTransition = true;
+			}
 			// Immediately sync mobile tab from current URL so UI matches history entry
 			const params = new URLSearchParams(window.location.search);
 			const tabParam = params.get('tab') ?? '';
 			const allowed = new Set(visibleTabs.map((t) => t.value));
 			activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
-			if (popstateTimer) clearTimeout(popstateTimer);
-			popstateTimer = setTimeout(() => {
-				suppressMobileTransition = false;
-				popstateTimer = null;
-			}, 400);
+			if (isIOS) {
+				if (popstateTimer) clearTimeout(popstateTimer);
+				popstateTimer = setTimeout(() => {
+					suppressMobileTransition = false;
+					popstateTimer = null;
+				}, 400);
+			}
 		};
 		window.addEventListener('popstate', onPopState);
 		return () => window.removeEventListener('popstate', onPopState);
