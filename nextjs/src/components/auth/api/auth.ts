@@ -15,11 +15,12 @@ import {
 } from '../../../../convex/email';
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
-import { requireMutationCtx } from '@convex-dev/better-auth/utils';
 import { emailOTP, magicLink, organization } from 'better-auth/plugins';
-import { AUTH_CONSTANTS } from '@/convex/auth.constants';
+
+import { requireMutationCtx } from '@convex-dev/better-auth/utils';
+import { AUTH_CONSTANTS } from '../../../../convex/auth.constants';
 import { internal } from '../../../../convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { Id } from '../../../../convex/_generated/dataModel';
 
 const siteUrl = process.env.SITE_URL;
 
