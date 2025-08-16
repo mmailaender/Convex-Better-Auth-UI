@@ -48,54 +48,43 @@
 	let profileDialogOpen = $state(false);
 	let signInDialogOpen = $state(false);
 	let avatarStatus = $state('');
-	// Track lifecycle and previous open state
-	let mounted = $state(false);
-	let prevProfileDialogOpen = $state(false);
-	// Guard to avoid reopening from URL while we're removing the param during a UI close
-	let closingViaUI = $state(false);
 
-	onMount(() => {
-		mounted = true;
-	});
+	// iOS back-swipe handling (mirrors OrganizationSwitcher)
+	let isIOS: boolean = $state(false);
+	let suppressDialogTransition: boolean = $state(false);
+
+	// Back-swipe guard
+	let backSwipeGuard: boolean = $state(false);
+	let guardTimer: ReturnType<typeof setTimeout> | null = null;
+	let prevShouldBeOpen = false;
+	let suppressDialogRender: boolean = $state(false);
+	let internalCloseGuard: boolean = $state(false);
+	let internalCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+	const DIALOG_KEY = 'user-profile';
 
 	// Opening is driven explicitly via openProfileModal() pushing the URL param.
 
-	/**
-	 * Reflect dialog CLOSE to URL.
-	 * When the dialog transitions from open -> closed and the param exists,
-	 * remove the param via shallow replace; set a guard to avoid immediate reopen.
-	 */
+	// 1 + 2: Keep dialog state in sync with the URL only.
+	// During iOS interactive back, block a brief re-open only when closing-from-URL.
+	// If popstate doesn't fire on iOS Chrome, arm the guard when we detect URL-driven close.
 	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'user-profile';
-		if (mounted && prevProfileDialogOpen && !profileDialogOpen && has) {
-			closingViaUI = true;
-			const url = new URL(page.url);
-			url.searchParams.delete('dialog');
-			const path = `${url.pathname}${url.search}${url.hash}`;
-			void goto(path, {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true,
-				invalidateAll: false
-			});
-		}
-		prevProfileDialogOpen = profileDialogOpen;
-	});
+		const shouldBeOpen = page.url.searchParams.get('dialog') === DIALOG_KEY;
+		const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
 
-	/**
-	 * Source of truth: URL -> profileDialogOpen.
-	 * Open dialog when ?dialog=user-profile is present. Close when removed.
-	 * While closingViaUI is true, ignore URL->state until the URL reflects the change.
-	 */
-	$effect(() => {
-		const has = page.url.searchParams.get('dialog') === 'user-profile';
-		if (closingViaUI) {
-			if (!has) closingViaUI = false;
-			return;
+		if (isIOS && closingCandidate && !backSwipeGuard && !internalCloseGuard) {
+			backSwipeGuard = true;
+			if (guardTimer) clearTimeout(guardTimer);
+			guardTimer = setTimeout(() => {
+				backSwipeGuard = false;
+				guardTimer = null;
+			}, 650);
 		}
-		if (has !== profileDialogOpen) {
-			profileDialogOpen = has;
-		}
+
+		const closingFromUrl = closingCandidate && backSwipeGuard;
+		suppressDialogRender = !!closingFromUrl;
+		profileDialogOpen = closingFromUrl ? false : shouldBeOpen;
+		prevShouldBeOpen = shouldBeOpen;
 	});
 
 	// URL is the single source of truth; no state->URL/URL->state effects are needed.
@@ -105,10 +94,10 @@
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		const has = page.url.searchParams.get('dialog') === 'user-profile';
+		const has = page.url.searchParams.get('dialog') === DIALOG_KEY;
 		if (!has) {
 			const url = new URL(page.url);
-			url.searchParams.set('dialog', 'user-profile');
+			url.searchParams.set('dialog', DIALOG_KEY);
 			const path = `${url.pathname}${url.search}${url.hash}`;
 			void goto(path, {
 				replaceState: false,
@@ -118,6 +107,64 @@
 			});
 		}
 	}
+
+	// 4: If user closes via backdrop / X, remove the param with replaceState
+	function closeProfileModal() {
+		// Mark programmatic close so we don't arm back-swipe guard from URL-driven close
+		internalCloseGuard = true;
+		if (internalCloseTimer) clearTimeout(internalCloseTimer);
+		internalCloseTimer = setTimeout(() => {
+			internalCloseGuard = false;
+			internalCloseTimer = null;
+		}, 500);
+		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
+		if (hasDialog) {
+			const url = new URL(page.url);
+			url.searchParams.delete('dialog');
+			const path = `${url.pathname}${url.search}${url.hash}`;
+			void goto(path, {
+				replaceState: true, // no extra history entry
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: false
+			});
+		}
+	}
+
+	// iOS Safari back-swipe guard only: do not mutate state here, only arm guard
+	onMount(() => {
+		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
+		const ua = navigator.userAgent;
+		isIOS =
+			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+
+		const onPopState = () => {
+			if (!isIOS) return;
+			// Only arm guard when the dialog is actually closing via history
+			const url = new URL(window.location.href);
+			const shouldBeOpen = url.searchParams.get('dialog') === DIALOG_KEY;
+			const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
+			if (closingCandidate) {
+				backSwipeGuard = true;
+				if (guardTimer) clearTimeout(guardTimer);
+				guardTimer = setTimeout(() => {
+					backSwipeGuard = false;
+					guardTimer = null;
+				}, 650);
+			}
+		};
+		window.addEventListener('popstate', onPopState);
+		return () => window.removeEventListener('popstate', onPopState);
+	});
+
+	// While guard is active, suppress transitions; release slightly after.
+	$effect(() => {
+		if (backSwipeGuard) {
+			suppressDialogTransition = true;
+		} else if (suppressDialogTransition) {
+			setTimeout(() => (suppressDialogTransition = false), 100);
+		}
+	});
 </script>
 
 {#if isLoading}
@@ -176,44 +223,57 @@
 		</Popover.Root>
 
 		<!-- Profile Dialog -->
-		<Dialog.Root bind:open={profileDialogOpen}>
-			<Dialog.Content
-				class="md:rounded-container top-0 left-0 h-full max-h-[100dvh]
+		{#if !suppressDialogRender}
+			<Dialog.Root
+				bind:open={profileDialogOpen}
+				onOpenChange={(status) => {
+					if (!status.open) {
+						closeProfileModal();
+					}
+				}}
+			>
+				<Dialog.Content
+					class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh]
 		       w-full max-w-full translate-x-0 translate-y-0 rounded-none md:top-[50%]
 		       md:left-[50%] md:h-auto md:max-h-[80vh] md:w-auto
-		       md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%]"
-			>
-				<Dialog.Header>
-					<Dialog.Title>Profile</Dialog.Title>
-				</Dialog.Header>
-				<div
-					class="max-h-[100dvh] overflow-auto overscroll-contain p-2"
-					onfocusin={(e) => {
-						const el = e.target as HTMLElement | null;
-						if (!el) return;
-
-						// Only scroll for actual editable controls to avoid jumping the dialog
-						const tag = el.tagName.toLowerCase();
-						const isEditableTag = tag === 'input' || tag === 'textarea' || tag === 'select';
-						const isContentEditable =
-							el.isContentEditable || el.getAttribute('contenteditable') === 'true';
-						const role = el.getAttribute('role');
-						const isTextboxLike = role === 'textbox' || role === 'combobox' || role === 'searchbox';
-
-						// Ignore non-editable interactions (e.g., buttons that open nested dialogs)
-						const isButtonLike =
-							tag === 'button' || tag === 'a' || el.closest('[data-part="trigger"]');
-
-						if ((isEditableTag || isContentEditable || isTextboxLike) && !isButtonLike) {
-							el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-						}
-					}}
+		       md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%] ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
 				>
-					<UserProfile />
-				</div>
-				<Dialog.CloseX />
-			</Dialog.Content>
-		</Dialog.Root>
+					<Dialog.Header>
+						<Dialog.Title>Profile</Dialog.Title>
+					</Dialog.Header>
+					<div
+						class="max-h-[100dvh] overflow-auto overscroll-contain p-2"
+						onfocusin={(e) => {
+							const el = e.target as HTMLElement | null;
+							if (!el) return;
+
+							// On iOS, avoid programmatic scrolling to prevent subtle jank during history gestures
+							if (isIOS) return;
+
+							// Only scroll for actual editable controls to avoid jumping the dialog
+							const tag = el.tagName.toLowerCase();
+							const isEditableTag = tag === 'input' || tag === 'textarea' || tag === 'select';
+							const isContentEditable =
+								el.isContentEditable || el.getAttribute('contenteditable') === 'true';
+							const role = el.getAttribute('role');
+							const isTextboxLike =
+								role === 'textbox' || role === 'combobox' || role === 'searchbox';
+
+							// Ignore non-editable interactions (e.g., buttons that open nested dialogs)
+							const isButtonLike =
+								tag === 'button' || tag === 'a' || el.closest('[data-part="trigger"]');
+
+							if ((isEditableTag || isContentEditable || isTextboxLike) && !isButtonLike) {
+								el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+							}
+						}}
+					>
+						<UserProfile />
+					</div>
+					<Dialog.CloseX />
+				</Dialog.Content>
+			</Dialog.Root>
+		{/if}
 	{:else}
 		<div class="placeholder-circle size-10 animate-pulse"></div>
 	{/if}
