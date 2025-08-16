@@ -70,6 +70,8 @@
 	let closingFromContent: boolean = $state(false);
 	// Track previous dialog open state to detect external closes while on content
 	let prevDialogOpen: boolean = $state(false);
+	// During iOS interactive back, ignore URL-sync effect until we settle
+	let handlingPopState: boolean = $state(false);
 
 	// Reset internal tab state when dialog closes so reopen shows the list by default
 	$effect(() => {
@@ -88,20 +90,30 @@
 
 		const onPopState = () => {
 			if (isIOS) {
+				// Defer applying URL-driven tab state to avoid mid-gesture jank
+				handlingPopState = true;
 				suppressMobileTransition = true;
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						const params = new URLSearchParams(window.location.search);
+						const tabParam = params.get('tab') ?? '';
+						const allowed = new Set(visibleTabs.map((t) => t.value));
+						activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
+						if (popstateTimer) clearTimeout(popstateTimer);
+						popstateTimer = setTimeout(() => {
+							suppressMobileTransition = false;
+							handlingPopState = false;
+							popstateTimer = null;
+						}, 450);
+					});
+				});
+				return;
 			}
-			// Immediately sync mobile tab from current URL so UI matches history entry
+			// Non-iOS: apply immediately
 			const params = new URLSearchParams(window.location.search);
 			const tabParam = params.get('tab') ?? '';
 			const allowed = new Set(visibleTabs.map((t) => t.value));
 			activeMobileTab = tabParam && allowed.has(tabParam) ? tabParam : '';
-			if (isIOS) {
-				if (popstateTimer) clearTimeout(popstateTimer);
-				popstateTimer = setTimeout(() => {
-					suppressMobileTransition = false;
-					popstateTimer = null;
-				}, 400);
-			}
 		};
 		window.addEventListener('popstate', onPopState);
 		return () => window.removeEventListener('popstate', onPopState);
@@ -184,6 +196,13 @@
 		const tabParam = sp.get('tab') ?? '';
 		const allowed = new Set(visibleTabs.map((t) => t.value));
 		const normalized = tabParam && allowed.has(tabParam) ? tabParam : 'general';
+
+		// During iOS interactive back, onPopState already synced state.
+		// Avoid extra churn here to prevent visual jank.
+		if (handlingPopState) {
+			prevDialogOpen = dialogOpen;
+			return;
+		}
 
 		// If dialog just closed while we were on content, synthesize centered close
 		if (!dialogOpen && prevDialogOpen && activeMobileTab !== '') {

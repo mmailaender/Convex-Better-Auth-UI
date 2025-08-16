@@ -9,7 +9,7 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Avatar from '$lib/primitives/ui/avatar';
 	// Icons
-	import { Building2, ChevronsUpDown, Plus, Settings, X } from '@lucide/svelte';
+	import { Building2, ChevronsUpDown, Plus, Settings } from '@lucide/svelte';
 	// Components
 	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
 	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
@@ -155,7 +155,6 @@
 			internalCloseTimer = null;
 		}, 500);
 		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
-		console.log('hasDialog', hasDialog);
 		if (hasDialog) {
 			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
@@ -177,32 +176,29 @@
 
 		const onPopState = () => {
 			if (!isIOS) return;
-			backSwipeGuard = true;
-			if (guardTimer) clearTimeout(guardTimer);
-			guardTimer = setTimeout(() => {
-				backSwipeGuard = false;
-				guardTimer = null;
-			}, 650);
+			// Only arm guard when the dialog is actually closing via history (not when switching tabs)
+			const url = new URL(window.location.href);
+			const shouldBeOpen = url.searchParams.get('dialog') === DIALOG_KEY;
+			const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
+			if (closingCandidate) {
+				backSwipeGuard = true;
+				if (guardTimer) clearTimeout(guardTimer);
+				guardTimer = setTimeout(() => {
+					backSwipeGuard = false;
+					guardTimer = null;
+				}, 650);
+			}
 		};
 		window.addEventListener('popstate', onPopState);
 		return () => window.removeEventListener('popstate', onPopState);
 	});
 
 	// While guard is active, suppress transitions; release slightly after.
-	// Also set a global html[data-popstate] attribute to nuke animations broadly.
 	$effect(() => {
 		if (backSwipeGuard) {
 			suppressDialogTransition = true;
-			if (typeof document !== 'undefined') {
-				document.documentElement.setAttribute('data-popstate', '');
-			}
-		} else {
-			if (typeof document !== 'undefined') {
-				document.documentElement.removeAttribute('data-popstate');
-			}
-			if (suppressDialogTransition) {
-				setTimeout(() => (suppressDialogTransition = false), 100);
-			}
+		} else if (suppressDialogTransition) {
+			setTimeout(() => (suppressDialogTransition = false), 100);
 		}
 	});
 
@@ -405,6 +401,9 @@
 						const el = e.target as HTMLElement | null;
 						if (!el) return;
 
+						// On iOS, avoid programmatic scrolling to prevent subtle jank during history gestures
+						if (isIOS) return;
+
 						// Only scroll for actual editable controls to avoid jumping the dialog
 						const tag = el.tagName.toLowerCase();
 						const isEditableTag = tag === 'input' || tag === 'textarea' || tag === 'select';
@@ -432,14 +431,3 @@
 		</Dialog.Root>
 	{/if}
 {/if}
-
-<style>
-	/* Nuke animations app-wide during interactive back settle */
-	:global(html[data-popstate] [data-part='backdrop']),
-	:global(html[data-popstate] [data-part='content']),
-	:global(html[data-popstate] [data-part='positioner']),
-	:global(html[data-popstate] [data-scope='dialog']) {
-		transition: none !important;
-		animation: none !important;
-	}
-</style>
