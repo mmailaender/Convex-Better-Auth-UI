@@ -188,12 +188,26 @@
 				</Dialog.Header>
 				<div
 					class="max-h-[100dvh] overflow-auto overscroll-contain p-2"
-					onfocusin={(e) =>
-						(e.target as HTMLElement)?.scrollIntoView({
-							behavior: 'smooth',
-							block: 'center',
-							inline: 'nearest'
-						})}
+					onfocusin={(e) => {
+						const el = e.target as HTMLElement | null;
+						if (!el) return;
+
+						// Only scroll for actual editable controls to avoid jumping the dialog
+						const tag = el.tagName.toLowerCase();
+						const isEditableTag = tag === 'input' || tag === 'textarea' || tag === 'select';
+						const isContentEditable =
+							el.isContentEditable || el.getAttribute('contenteditable') === 'true';
+						const role = el.getAttribute('role');
+						const isTextboxLike = role === 'textbox' || role === 'combobox' || role === 'searchbox';
+
+						// Ignore non-editable interactions (e.g., buttons that open nested dialogs)
+						const isButtonLike =
+							tag === 'button' || tag === 'a' || el.closest('[data-part="trigger"]');
+
+						if ((isEditableTag || isContentEditable || isTextboxLike) && !isButtonLike) {
+							el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+						}
+					}}
 				>
 					<UserProfile />
 				</div>
