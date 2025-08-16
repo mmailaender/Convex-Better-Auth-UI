@@ -36,3 +36,11 @@
 @utility label {
 	@apply mb-1 text-xs font-medium;
 }
+
+@layer base {
+	@media (hover: none) and (pointer: coarse) {
+		:where(a, button, [role='button'], input, label, textarea, select) {
+			-webkit-tap-highlight-color: transparent;
+		}
+	}
+}
