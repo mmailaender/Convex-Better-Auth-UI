@@ -10,6 +10,9 @@ import { toast } from 'sonner';
 // Icons
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
+// Utils
+import { cn } from '@/components/lib/utils';
+
 // Constants
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 // API
@@ -34,10 +37,15 @@ type AuthMethod = 'password' | 'emailOTP' | 'magicLink';
 interface SignInProps {
 	redirectTo?: string;
 	onSignIn?: () => void;
+	className?: string;
 }
 
 // Main SignIn Component
-export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInProps = {}) {
+export default function SignIn({
+	redirectTo: redirectParam,
+	onSignIn,
+	className
+}: SignInProps = {}) {
 	const searchParams = useSearchParams();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const [currentStep, setCurrentStep] = useState<AuthStep>('email');
@@ -202,8 +210,8 @@ export default function SignIn({ redirectTo: redirectParam, onSignIn }: SignInPr
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col items-center justify-center">
-			<div className="flex h-full w-full max-w-md flex-col p-8">
+		<div className={cn('flex h-full w-full flex-col items-center justify-center p-8', className)}>
+			<div className="flex h-full w-full max-w-md flex-col">
 				<h5 className="h4 max-w-96 text-left leading-9 tracking-tighter">{getStepTitle()}</h5>
 				<p className="text-surface-600-400 mt-3 mb-10 max-w-96 text-left text-sm">
 					{getStepDescription()}

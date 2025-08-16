@@ -217,7 +217,7 @@
 		<Dialog.Header>
 			<Dialog.Title>Sign in</Dialog.Title>
 		</Dialog.Header>
-		<SignIn onSignIn={() => (signInDialogOpen = false)} />
+		<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
 		<Dialog.CloseX />
 	</Dialog.Content>
 </Dialog.Root>
