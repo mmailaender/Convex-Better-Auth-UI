@@ -16,6 +16,9 @@
 	import { SiGithub } from '@icons-pack/svelte-simple-icons';
 	import { Mail } from '@lucide/svelte';
 
+	// Utils
+	import { cn } from '$lib/primitives/utils';
+
 	// Constants
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
 	import { page } from '$app/state';
@@ -34,9 +37,10 @@
 	interface SignInProps {
 		onSignIn?: () => void;
 		redirectTo?: string;
+		class?: string;
 	}
 
-	let { onSignIn, redirectTo: redirectParam }: SignInProps = $props();
+	let { onSignIn, redirectTo: redirectParam, class: className }: SignInProps = $props();
 
 	// State
 	let currentStep = $state<AuthStep>('email');
@@ -211,8 +215,8 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col items-center justify-center">
-	<div class="flex h-full w-full max-w-md flex-col p-8">
+<div class={cn('flex h-full w-full flex-col items-center justify-center p-8', className)}>
+	<div class="flex h-full w-full max-w-md flex-col">
 		{#if currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent))}
 			<div class="flex flex-col items-center gap-4 py-8 text-center">
 				<div class="mb-2 flex justify-center">

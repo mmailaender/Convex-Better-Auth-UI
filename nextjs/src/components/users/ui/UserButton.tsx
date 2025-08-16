@@ -112,7 +112,7 @@ export default function UserButton({
 					<Dialog.Header>
 						<Dialog.Title>Sign in</Dialog.Title>
 					</Dialog.Header>
-					<SignIn onSignIn={() => setSignInDialogOpen(false)} />
+					<SignIn onSignIn={() => setSignInDialogOpen(false)} className="p-2 sm:p-8" />
 					<Dialog.CloseX />
 				</Dialog.Content>
 			</Dialog.Root>
