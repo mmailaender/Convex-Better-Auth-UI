@@ -1,6 +1,7 @@
 <script lang="ts">
 	// Svelte
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
 
 	// API
@@ -99,49 +100,94 @@
 		return provider.charAt(0).toUpperCase() + provider.slice(1);
 	};
 
+	// OAuth callback handling guard (prevents duplicate toasts)
+	let handledCallbackKey: string | null = $state(null);
+
+	function mapLinkErrorMessage(code: string): string {
+		switch (code) {
+			case 'account_already_linked_to_different_user':
+				return 'This account is already linked to another user.';
+			case 'account_already_linked':
+				return 'This account is already linked.';
+			case 'account_linking_disabled':
+				return 'Linking accounts is disabled. Please contact support.';
+			default:
+				return 'Failed to link account. Please try again.';
+		}
+	}
+
+	// Handle Better Auth OAuth callbacks
+	$effect(() => {
+		const errorCode = page.url.searchParams.get('error');
+		const success = page.url.searchParams.get('success');
+		const key = errorCode ? `e:${errorCode}` : success ? `s:${success}` : null;
+		if (!key || handledCallbackKey === key) return;
+		handledCallbackKey = key;
+
+		if (errorCode) {
+			toast.error(mapLinkErrorMessage(errorCode));
+		} else if (success) {
+			toast.success(success);
+		}
+
+		// Sanitize current URL in-place: keep dialog, remove success/error
+		const url = new URL(page.url);
+		url.searchParams.set('dialog', 'user-profile');
+		url.searchParams.delete('success');
+		url.searchParams.delete('error');
+		const path = `${url.pathname}${url.search}${url.hash}`;
+		void goto(path, { replaceState: true, noScroll: true, keepFocus: true, invalidateAll: false });
+	});
+
 	const linkAccount = async (provider: string) => {
 		console.log('Linking account:', provider);
 		if (isLinking) return;
 		isLinking = true;
 
-		try {
-			if (provider === 'password') {
-				// For credential, open dialog/drawer for input
-				password = '';
-				if (isMobile) {
-					isPasswordDrawerOpen = true;
-				} else {
-					isPasswordDialogOpen = true;
-				}
-				isLinking = false; // Reset linking state, will be set again in handlePasswordSubmit
-				return;
+		if (provider === 'password') {
+			// For credential, open dialog/drawer for input
+			password = '';
+			if (isMobile) {
+				isPasswordDrawerOpen = true;
 			} else {
-				// For social providers
-				const currentUrl = new URL(page.url);
-				if (
-					!currentUrl.searchParams.has('dialog') ||
-					currentUrl.searchParams.get('dialog') !== 'profile'
-				) {
-					currentUrl.searchParams.set('dialog', 'profile');
-				}
+				isPasswordDialogOpen = true;
+			}
+			isLinking = false; // Reset linking state, will be set again in handlePasswordSubmit
+			return;
+		} else {
+			// For social providers
+			const baseUrl = new URL(page.url);
+			// Ensure callback keeps the dialog open on return
+			baseUrl.searchParams.set('dialog', 'user-profile');
+			// Success URL carries a friendly message
+			const successMsg = `${getProviderLabel(provider)} account linked successfully`;
+			const successUrl = new URL(baseUrl);
+			successUrl.searchParams.set('success', successMsg);
+			// Error URL must NOT contain success param
+			const errorUrl = new URL(baseUrl);
+			errorUrl.searchParams.delete('success');
 
-				await authClient.linkSocial({
-					provider: provider,
-					callbackURL: currentUrl.toString()
-				});
-				toast.success(`${getProviderLabel(provider)} account linked successfully`);
+			// Pre-purge the current open-dialog entry from history without triggering navigation
+			// This removes entry #2 (/?dialog=user-profile) so Back from callback goes to '/'
+			try {
+				if (typeof window !== 'undefined') {
+					const preUrl = new URL(window.location.href);
+					preUrl.searchParams.delete('dialog');
+					const cleaned = `${preUrl.pathname}${preUrl.search}${preUrl.hash}`;
+					window.history.replaceState(window.history.state, '', cleaned);
+				}
+			} catch (e) {
+				// no-op
 			}
-		} catch (error) {
-			if (error instanceof ConvexError) {
-				toast.error(error.data);
-			} else if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error(`Failed to link ${getProviderLabel(provider)} account`);
-			}
-		} finally {
-			isLinking = false;
+
+			await authClient.linkSocial({
+				provider: provider,
+				callbackURL: successUrl.toString(),
+				errorCallbackURL: errorUrl.toString()
+			});
+			// Don't toast here. Success/failure will be handled after redirect via the effect above.
 		}
+		isLinking = false;
 	};
 
 	const handlePasswordSubmit = async (event: SubmitEvent) => {
