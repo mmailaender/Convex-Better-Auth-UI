@@ -14,6 +14,9 @@
 	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
 	import MembersAndInvitations from '$lib/organizations/ui/MembersAndInvitations.svelte';
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
+	// Utils
+	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
+	const mobileState = useMobileState();
 
 	// API
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
@@ -72,6 +75,7 @@
 	let prevDialogOpen: boolean = $state(false);
 	// During iOS interactive back, ignore URL-sync effect until we settle
 	let handlingPopState: boolean = $state(false);
+	const isDesktop = $derived(mobileState.isDesktop);
 
 	// Reset internal tab state when dialog closes so reopen shows the list by default
 	$effect(() => {
@@ -239,6 +243,28 @@
 
 		// Remember current open state for next run
 		prevDialogOpen = dialogOpen;
+	});
+
+	// Desktop: keep URL `tab` param in sync with selected tab without adding history entries.
+	// This ensures reload opens the same tab while Back closes the dialog (no tab history).
+	$effect(() => {
+		const currentTab = activeDesktopTab;
+		// Only when dialog is open, not during iOS interactive back handling, and on desktop
+		const sp = new URLSearchParams(window.location.search);
+		const dialogOpen = sp.get('dialog') === 'organization-profile';
+		if (!dialogOpen || handlingPopState || !isDesktop) return;
+
+		const allowed = new Set(visibleTabs.map((t) => t.value));
+		const normalized = allowed.has(currentTab) ? currentTab : 'general';
+
+		const url = new URL(window.location.href);
+		const existing = url.searchParams.get('tab');
+		if (existing !== normalized) {
+			url.searchParams.set('tab', normalized);
+			// Ensure dialog param remains so OrganizationSwitcher keeps the dialog open on reload
+			url.searchParams.set('dialog', 'organization-profile');
+			replaceState(`${url.pathname}${url.search}${url.hash}`, { dialog: 'organization-profile' });
+		}
 	});
 </script>
 

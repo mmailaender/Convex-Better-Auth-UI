@@ -1,4 +1,8 @@
 <script lang="ts">
+	// Svelte
+	import { page } from '$app/state';
+	import { tick } from 'svelte';
+
 	// API
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
@@ -10,18 +14,20 @@
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
 
 	// UI Components
+	// Primitives
 	import * as Select from '$lib/primitives/ui/select';
 	import { useListCollection } from '@ark-ui/svelte/select';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
+	import { toast } from 'svelte-sonner';
 
 	// Icons
 	import { SiGithub } from '@icons-pack/svelte-simple-icons';
 	import { KeyRound, Lock, Trash2 } from '@lucide/svelte';
 
-	import { toast } from 'svelte-sonner';
-	import { page } from '$app/state';
-	import { tick } from 'svelte';
+	// Utils
+	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
+	const mobileState = useMobileState();
 
 	let { initialData }: { initialData?: any } = $props();
 
@@ -44,7 +50,7 @@
 	let newPassword = $state('');
 	let isChangingPassword = $state(false);
 	let currentPasswordInputEl: HTMLInputElement | null = $state(null);
-	let isMobile = $derived(window.innerWidth < 768);
+	let isMobile = $derived(mobileState.isMobile);
 
 	// Get available providers (only enabled ones, exclude emailOTP and magicLink)
 	const allProviders = Object.keys(AUTH_CONSTANTS.providers).filter(
@@ -382,7 +388,12 @@
 	<Dialog.Content class="w-full max-w-md">
 		<div
 			class="max-h-[100dvh] overflow-auto overscroll-contain"
-			onfocusin={(e) => (e.target as HTMLElement)?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })}
+			onfocusin={(e) =>
+				(e.target as HTMLElement)?.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center',
+					inline: 'nearest'
+				})}
 		>
 			<Dialog.Header>
 				<Dialog.Title>Set Password</Dialog.Title>
