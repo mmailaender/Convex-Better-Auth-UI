@@ -28,14 +28,11 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
-	import { FileUpload } from '@ark-ui/svelte/file-upload';
-
-	// Primitive Types
-	import { type FileChangeDetails } from '@zag-js/file-upload';
+	import * as ImageCropper from '$lib/primitives/ui/image-cropper';
+	import { getFileFromUrl } from '$lib/primitives/ui/image-cropper';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { createDragState } from '$lib/primitives/utils/dragState.svelte';
 
 	// Props
 	let {
@@ -63,7 +60,7 @@
 	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
 	let isUploading: boolean = $state(false);
 	let logoKey: number = $state(0); // Force re-render when logo changes
-	const dragState = createDragState();
+	let cropSrc: string = $state('');
 
 	// Inline name editing state
 	let isEditingName: boolean = $state(false);
@@ -91,16 +88,21 @@
 		}
 	});
 
+	// Keep crop preview in sync with org logo
+	$effect(() => {
+		if (activeOrganization?.logo) {
+			cropSrc = activeOrganization.logo;
+		}
+	});
+
 	// Handlers
 
-	async function handleFileChange(details: FileChangeDetails): Promise<void> {
-		const file = details.acceptedFiles.at(0);
-		if (!file || !activeOrganization) return;
-
+	async function handleCropped(url: string): Promise<void> {
+		if (!activeOrganization) return;
 		try {
-			// Show spinner immediately while uploading
 			isUploading = true;
-			const optimizedFile = await optimizeImage(file, {
+			const croppedFile = await getFileFromUrl(url, 'logo.png');
+			const optimizedFile = await optimizeImage(croppedFile, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -109,9 +111,7 @@
 				forceConvert: true
 			});
 
-			// Get a storage upload URL from Convex
 			const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
-			// Upload the file to Convex storage
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': optimizedFile.type },
@@ -120,20 +120,16 @@
 			if (!response.ok) throw new Error('Failed to upload file');
 
 			const { storageId } = await response.json();
-
 			await client.mutation(api.organizations.mutations.updateOrganizationProfile, {
 				logoId: storageId
 			});
 
-			// Reset loading status and force logo to re-render with new image - this will trigger new loading
 			imageLoadingStatus = 'loading';
 			logoKey += 1;
-
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
-			// Reset loading status on error
 			imageLoadingStatus = 'error';
 		} finally {
 			isUploading = false;
@@ -204,19 +200,10 @@
 
 {#if user && activeOrganization}
 	<div class="flex flex-col items-start gap-6">
-		<FileUpload.Root accept="image/*" allowDrop maxFiles={1} onFileChange={handleFileChange}>
-			<FileUpload.Dropzone ondrop={dragState.resetDragState}>
+		<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
+			<ImageCropper.UploadTrigger>
 				<div
-					class={[
-						'rounded-container relative cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75',
-
-						// gentle GLOBAL hint while dragging files anywhere in the window
-						dragState.isDragging &&
-							'ring-primary-500 ring-offset-surface-50-950 scale-105 ring-1 ring-offset-2',
-
-						// STRONG hint only when Ark sets data-dragging on the dropzone
-						'group-data-[dragging]/drop:ring-primary-500 group-data-[dragging]/drop:ring-offset-surface-50-950 group-data-[dragging]/drop:scale-110 group-data-[dragging]/drop:ring-2 group-data-[dragging]/drop:ring-offset-2'
-					]}
+					class="rounded-container relative cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
 				>
 					{#key logoKey}
 						<Avatar.Root
@@ -249,9 +236,15 @@
 						<Pencil class="size-4" />
 					</div>
 				</div>
-			</FileUpload.Dropzone>
-			<FileUpload.HiddenInput />
-		</FileUpload.Root>
+			</ImageCropper.UploadTrigger>
+			<ImageCropper.Dialog>
+				<ImageCropper.Cropper />
+				<ImageCropper.Controls>
+					<ImageCropper.Cancel />
+					<ImageCropper.Crop />
+				</ImageCropper.Controls>
+			</ImageCropper.Dialog>
+		</ImageCropper.Root>
 
 		<!-- Inline editable organization name -->
 		<div
