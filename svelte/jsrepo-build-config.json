@@ -1,0 +1,19 @@
+{
+	"$schema": "https://unpkg.com/jsrepo@2.4.5/schemas/registry-config.json",
+	"name": "@auth/svelte",
+	"version": "0.0.1",
+	"readme": "README.md",
+	"dirs": ["./src"],
+	"allowSubdirectories": true,
+	"doNotListBlocks": [],
+	"doNotListCategories": [],
+	"listBlocks": [],
+	"listCategories": [],
+	"excludeDeps": [],
+	"includeBlocks": [],
+	"includeCategories": [],
+	"excludeBlocks": ["convex/_generated"],
+	"excludeCategories": ["convex/_generated"],
+	"preview": false,
+	"includeDocs": false
+}
