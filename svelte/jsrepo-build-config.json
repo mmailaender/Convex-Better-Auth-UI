@@ -3,17 +3,29 @@
 	"name": "@auth/svelte",
 	"version": "0.0.1",
 	"readme": "README.md",
-	"dirs": ["./src"],
+	"dirs": [
+		"./src/convex",
+		"./src/routes",
+		"./src/lib/auth",
+		"./src/lib/organizations",
+		"./src/lib/users",
+		"./src/lib/primitives"
+	],
 	"allowSubdirectories": true,
 	"doNotListBlocks": [],
 	"doNotListCategories": [],
 	"listBlocks": [],
 	"listCategories": [],
-	"excludeDeps": [],
+	"excludeDeps": ["svelte", "@sveltejs/kit"],
 	"includeBlocks": [],
 	"includeCategories": [],
-	"excludeBlocks": ["convex/_generated"],
-	"excludeCategories": ["convex/_generated"],
+	"excludeBlocks": [],
+	"excludeCategories": ["_generated"],
 	"preview": false,
-	"includeDocs": false
+	"includeDocs": false,
+	"rules": {
+		"require-local-dependency-exists": "warn",
+		"no-circular-dependency": "error",
+		"no-framework-dependency": "warn"
+	}
 }
