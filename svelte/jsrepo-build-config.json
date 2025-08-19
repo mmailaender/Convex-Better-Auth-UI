@@ -3,6 +3,13 @@
 	"name": "@auth/svelte",
 	"version": "0.0.1",
 	"readme": "README.md",
+	"meta": {
+		"author": "Micha Mailänder",
+		"bugs": "https://github.com/mmailaender/auth/issues",
+		"description": "Plug & Play Auth Widgets for your application",
+		"repository": "https://github.com/mmailaender/auth",
+		"tags": ["auth", "svelte", "ui", "convex", "better-auth"]
+	},
 	"dirs": [
 		"./src/convex",
 		"./src/routes",
@@ -17,6 +24,11 @@
 	"listBlocks": [],
 	"listCategories": [],
 	"excludeDeps": ["svelte", "@sveltejs/kit"],
+	"peerDependencies": {
+		"svelte": "5.x.x",
+		"@sveltejs/kit": "2.x.x",
+		"tailwindcss": "4.x.x"
+	},
 	"includeBlocks": [],
 	"includeCategories": [],
 	"excludeBlocks": [],
