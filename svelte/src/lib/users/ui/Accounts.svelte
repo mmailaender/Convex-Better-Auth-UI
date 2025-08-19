@@ -29,6 +29,7 @@
 	// Utils
 	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
 	const mobileState = useMobileState();
+	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
 
 	let { initialData }: { initialData?: any } = $props();
 
@@ -318,6 +319,10 @@
 										newPassword = '';
 										await tick();
 										currentPasswordInputEl?.focus();
+										if (currentPasswordInputEl) {
+											// Ensure visibility after keyboard opens
+											scheduleScrollIntoView(currentPasswordInputEl);
+										}
 									}}
 								>
 									Update
@@ -434,12 +439,12 @@
 	<Dialog.Content class="w-full max-w-md">
 		<div
 			class="max-h-[100dvh] overflow-auto overscroll-contain"
-			onfocusin={(e) =>
-				(e.target as HTMLElement)?.scrollIntoView({
-					behavior: 'smooth',
-					block: 'center',
-					inline: 'nearest'
-				})}
+			onfocusin={(e) => {
+				const el = e.target as HTMLElement | null;
+				if (!el) return;
+				if (!isEditableElement(el)) return;
+				scheduleScrollIntoView(el);
+			}}
 		>
 			<Dialog.Header>
 				<Dialog.Title>Set Password</Dialog.Title>
@@ -482,12 +487,12 @@
 	<Drawer.Content>
 		<div
 			class="max-h-[100dvh] overflow-auto overscroll-contain"
-			onfocusin={(e) =>
-				(e.target as HTMLElement)?.scrollIntoView({
-					behavior: 'smooth',
-					block: 'center',
-					inline: 'nearest'
-				})}
+			onfocusin={(e) => {
+				const el = e.target as HTMLElement | null;
+				if (!el) return;
+				if (!isEditableElement(el)) return;
+				scheduleScrollIntoView(el);
+			}}
 		>
 			<Drawer.Header>
 				<Drawer.Title>Set Password</Drawer.Title>

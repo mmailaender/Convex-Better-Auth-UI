@@ -19,6 +19,7 @@
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
 
 	// Types
 	import type { PopoverRootProps } from '@ark-ui/svelte';
@@ -246,26 +247,8 @@
 						onfocusin={(e) => {
 							const el = e.target as HTMLElement | null;
 							if (!el) return;
-
-							// On iOS, avoid programmatic scrolling to prevent subtle jank during history gestures
-							if (isIOS) return;
-
-							// Only scroll for actual editable controls to avoid jumping the dialog
-							const tag = el.tagName.toLowerCase();
-							const isEditableTag = tag === 'input' || tag === 'textarea' || tag === 'select';
-							const isContentEditable =
-								el.isContentEditable || el.getAttribute('contenteditable') === 'true';
-							const role = el.getAttribute('role');
-							const isTextboxLike =
-								role === 'textbox' || role === 'combobox' || role === 'searchbox';
-
-							// Ignore non-editable interactions (e.g., buttons that open nested dialogs)
-							const isButtonLike =
-								tag === 'button' || tag === 'a' || el.closest('[data-part="trigger"]');
-
-							if ((isEditableTag || isContentEditable || isTextboxLike) && !isButtonLike) {
-								el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-							}
+							if (!isEditableElement(el)) return;
+							scheduleScrollIntoView(el);
 						}}
 					>
 						<UserProfile />
