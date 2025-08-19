@@ -13,15 +13,14 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
-	import { FileUpload } from '@ark-ui/svelte/file-upload';
+	import * as ImageCropper from '$lib/primitives/ui/image-cropper';
+	import { getFileFromUrl } from '$lib/primitives/ui/image-cropper';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { createDragState } from '$lib/primitives/utils/dragState.svelte';
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
-	import { type FileChangeDetails } from '@zag-js/file-upload';
 	import type { FunctionReturnType } from 'convex/server';
 	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
@@ -38,7 +37,7 @@
 	let name: string = $state('');
 	let loadingStatus = $state('loading');
 	let isUploading: boolean = $state(false);
-	const dragState = createDragState();
+	let cropSrc: string = $state('');
 
 	let nameInputEl: HTMLInputElement | null = $state(null);
 
@@ -48,6 +47,13 @@
 	$effect(() => {
 		if (activeUser && !isEditingName) {
 			name = activeUser.name;
+		}
+	});
+
+	// Keep crop preview in sync with current user image
+	$effect(() => {
+		if (activeUser?.image) {
+			cropSrc = activeUser.image;
 		}
 	});
 
@@ -65,17 +71,13 @@
 		}
 	}
 
-	// Handle file upload for avatar
-	async function handleFileChange(details: FileChangeDetails): Promise<void> {
-		const file = details.acceptedFiles.at(0);
-		if (!file) return;
-
+	// Handle cropped image from ImageCropper
+	async function handleCropped(url: string): Promise<void> {
 		try {
-			// Show spinner immediately while uploading
 			isUploading = true;
-
-			// Optimize the image before upload
-			const optimizedFile = await optimizeImage(file, {
+			// Convert cropped URL to File, then optimize and upload
+			const croppedFile = await getFileFromUrl(url, 'avatar.png');
+			const optimizedFile = await optimizeImage(croppedFile, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
@@ -84,38 +86,26 @@
 				forceConvert: true
 			});
 
-			// Get a storage upload URL from Convex
 			const uploadUrl = await client.mutation(api.storage.generateUploadUrl, {});
-
-			// Upload the file to Convex storage
 			const response = await fetch(uploadUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': optimizedFile.type },
 				body: optimizedFile
 			});
+			if (!response.ok) throw new Error('Failed to upload file');
 
-			if (!response.ok) {
-				throw new Error('Failed to upload file');
-			}
-
-			// Get the storage ID from the response
 			const result = await response.json();
 			const storageId = result.storageId as Id<'_storage'>;
-
-			// Update the user's avatar with the storage ID and get the image URL
 			const imageUrl = await client.mutation(api.users.mutations.updateAvatar, { storageId });
-
 			await authClient.updateUser({ image: imageUrl });
 
-			// Reset loading status and force avatar to re-render with new image - this will trigger new loading
 			loadingStatus = 'loading';
 			avatarKey += 1;
-
+			cropSrc = imageUrl;
 			toast.success('Avatar updated successfully');
 		} catch (err: unknown) {
 			const errorMsg = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to upload avatar: ${errorMsg}`);
-			// Reset loading status on error
 			loadingStatus = 'error';
 		} finally {
 			isUploading = false;
@@ -127,21 +117,12 @@
 	{#if !activeUser}
 		<div class="bg-success-200-800 rounded-base h-16 w-full animate-pulse"></div>
 	{:else}
-		<!-- Avatar + Upload -->
+		<!-- Avatar + Upload via ImageCropper (rounded crop) -->
 		<div class="rounded-base flex items-center justify-start pt-6 pl-0.5">
-			<FileUpload.Root accept={{ 'image/*': [] }} maxFiles={1} onFileChange={handleFileChange}>
-				<FileUpload.Dropzone class="group/drop" ondrop={dragState.resetDragState}>
+			<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
+				<ImageCropper.UploadTrigger>
 					<div
-						class={[
-							'rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75 ',
-
-							// gentle GLOBAL hint while dragging files anywhere in the window
-							dragState.isDragging &&
-								'ring-primary-500 ring-offset-surface-50-950 scale-105 ring-1 ring-offset-2',
-
-							// STRONG hint only when Ark sets data-dragging on the dropzone
-							'group-data-[dragging]/drop:ring-primary-500 group-data-[dragging]/drop:ring-offset-surface-50-950 group-data-[dragging]/drop:scale-110 group-data-[dragging]/drop:ring-2 group-data-[dragging]/drop:ring-offset-2'
-						]}
+						class="rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
 					>
 						<div
 							class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
@@ -171,10 +152,16 @@
 								<Pencil class="size-4" />
 							</div>
 						</div>
-					</div></FileUpload.Dropzone
-				>
-				<FileUpload.HiddenInput />
-			</FileUpload.Root>
+					</div>
+				</ImageCropper.UploadTrigger>
+				<ImageCropper.Dialog>
+					<ImageCropper.Cropper cropShape="round" />
+					<ImageCropper.Controls>
+						<ImageCropper.Cancel />
+						<ImageCropper.Crop />
+					</ImageCropper.Controls>
+				</ImageCropper.Dialog>
+			</ImageCropper.Root>
 		</div>
 
 		<!-- Inline editable name -->

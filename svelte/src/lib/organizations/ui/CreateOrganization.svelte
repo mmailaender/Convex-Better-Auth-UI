@@ -9,11 +9,11 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
-	import { FileUpload } from '@ark-ui/svelte/file-upload';
+	import * as ImageCropper from '$lib/primitives/ui/image-cropper';
+	import { getFileFromUrl } from '$lib/primitives/ui/image-cropper';
 
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
-	import { createDragState } from '$lib/primitives/utils/dragState.svelte';
 
 	// API
 	import { useConvexClient, useQuery } from 'convex-svelte';
@@ -23,7 +23,6 @@
 
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
-	import { type FileChangeDetails } from '@zag-js/file-upload';
 
 	// Queries
 	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization, {});
@@ -53,7 +52,7 @@
 	let slug: string = $state('');
 	let logo: string = $state('');
 	let logoFile: File | null = $state(null);
-	const dragState = createDragState();
+	let cropSrc: string = $state('');
 
 	/**
 	 * Generates a URL-friendly slug from the provided input string
@@ -72,31 +71,47 @@
 	}
 
 	/**
-	 * Handles file selection for organization logo but doesn't upload yet
+	 * Handles cropped image from ImageCropper: optimize and store for later upload
 	 */
-	async function handleFileChange(details: FileChangeDetails): Promise<void> {
-		const file = details.acceptedFiles[0];
-		if (!file) return;
-
+	async function handleCropped(url: string): Promise<void> {
 		try {
-			// Optimize the image but don't upload yet
-			const optimizedFile = await optimizeImage(file, {
+			const croppedFile = await getFileFromUrl(url, 'logo.png');
+			const optimizedFile = await optimizeImage(croppedFile, {
 				maxWidth: 512,
 				maxHeight: 512,
 				maxSizeKB: 500,
 				quality: 0.85,
 				format: 'webp',
-				forceConvert: true // Always convert to WebP
+				forceConvert: true
 			});
 
-			// Store the optimized file for later upload
 			logoFile = optimizedFile;
-			logo = URL.createObjectURL(optimizedFile); // For preview
+			logo = URL.createObjectURL(optimizedFile);
+			cropSrc = logo;
 			toast.success('Logo ready for upload!');
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to process logo: ${message}`);
 		}
+	}
+
+	/**
+	 * Resets the form fields and clears any staged logo/crop state.
+	 */
+	function resetForm(): void {
+		// Revoke preview URL if set to avoid memory leaks
+		if (logo && logo.startsWith('blob:')) {
+			try {
+				URL.revokeObjectURL(logo);
+			} catch {
+				// no-op
+			}
+		}
+		name = '';
+		slug = '';
+		logo = '';
+		logoFile = null;
+		cropSrc = '';
 	}
 
 	/**
@@ -141,6 +156,9 @@
 			toast.success('Organization created successfully!');
 			// Call the onSuccessfulCreate callback if provided
 			if (props.onSuccessfulCreate) props.onSuccessfulCreate();
+
+			// Reset form state so the next creation starts blank
+			resetForm();
 
 			// Redirect
 			const redirectUrl = props.redirectTo ?? page.url.searchParams.get('redirectTo');
@@ -197,20 +215,10 @@
 {:else}
 	<form onsubmit={handleSubmit} class="mx-auto w-full">
 		<div class="my-6">
-			<FileUpload.Root accept={{ 'image/*': [] }} maxFiles={1} onFileChange={handleFileChange}>
-				<FileUpload.Dropzone class="group/drop" ondrop={dragState.resetDragState}>
+			<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
+				<ImageCropper.UploadTrigger>
 					<div
-						class={[
-							// base
-							'rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75',
-
-							// gentle GLOBAL hint while dragging files anywhere in the window
-							dragState.isDragging &&
-								'ring-primary-500 ring-offset-surface-50-950 scale-105 ring-1 ring-offset-2',
-
-							// STRONG hint only when Ark sets data-dragging on the dropzone
-							'group-data-[dragging]/drop:ring-primary-500 group-data-[dragging]/drop:ring-offset-surface-50-950 group-data-[dragging]/drop:scale-110 group-data-[dragging]/drop:ring-2 group-data-[dragging]/drop:ring-offset-2'
-						]}
+						class="rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
 					>
 						<Avatar.Root class="rounded-container size-20">
 							<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
@@ -224,9 +232,15 @@
 							<Pencil class="size-4" />
 						</div>
 					</div>
-				</FileUpload.Dropzone>
-				<FileUpload.HiddenInput />
-			</FileUpload.Root>
+				</ImageCropper.UploadTrigger>
+				<ImageCropper.Dialog>
+					<ImageCropper.Cropper cropShape="rect" />
+					<ImageCropper.Controls>
+						<ImageCropper.Cancel />
+						<ImageCropper.Crop />
+					</ImageCropper.Controls>
+				</ImageCropper.Dialog>
+			</ImageCropper.Root>
 		</div>
 
 		<div class="flex flex-col gap-2">
