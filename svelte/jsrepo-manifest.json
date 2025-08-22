@@ -1,6 +1,23 @@
 {
 	"name": "@auth/svelte",
 	"version": "0.0.1",
+	"meta": {
+		"bugs": "https://github.com/mmailaender/auth/issues",
+		"description": "Plug & Play Auth Widgets for your application",
+		"repository": "https://github.com/mmailaender/auth",
+		"tags": [
+			"auth",
+			"svelte",
+			"ui",
+			"convex",
+			"better-auth"
+		]
+	},
+	"peerDependencies": {
+		"svelte": "5.x.x",
+		"@sveltejs/kit": "2.x.x",
+		"tailwindcss": "4.x.x"
+	},
 	"categories": [
 		{
 			"name": "model",
@@ -56,36 +73,6 @@
 						"../../../lib/auth/api/auth": "{{api/auth}}",
 						"../../_generated/server": "{{_generated/server}}",
 						"../../_generated/dataModel": "{{_generated/dataModel}}"
-					}
-				},
-				{
-					"name": "users",
-					"directory": "src/convex/model/users",
-					"category": "model",
-					"tests": false,
-					"docs": false,
-					"subdirectory": true,
-					"list": true,
-					"files": [
-						"index.ts"
-					],
-					"localDependencies": [
-						"_generated/server",
-						"_generated/dataModel",
-						"api/auth",
-						"auth/index",
-						"_generated/api"
-					],
-					"dependencies": [
-						"convex@^1.25.4"
-					],
-					"devDependencies": [],
-					"_imports_": {
-						"../../_generated/server": "{{_generated/server}}",
-						"../../_generated/dataModel": "{{_generated/dataModel}}",
-						"../../../lib/auth/api/auth": "{{api/auth}}",
-						"../../auth": "{{auth/index}}",
-						"../../_generated/api": "{{_generated/api}}"
 					}
 				}
 			]
@@ -251,15 +238,13 @@
 						"_generated/server",
 						"_generated/dataModel",
 						"auth/index",
-						"api/auth",
-						"model/users"
+						"api/auth"
 					],
 					"_imports_": {
 						"../_generated/server": "{{_generated/server}}",
 						"../_generated/dataModel": "{{_generated/dataModel}}",
 						"../auth": "{{auth/index}}",
-						"../../lib/auth/api/auth": "{{api/auth}}",
-						"../model/users": "{{model/users}}"
+						"../../lib/auth/api/auth": "{{api/auth}}"
 					},
 					"dependencies": [
 						"convex@^1.25.4",
@@ -279,16 +264,16 @@
 						"queries.ts"
 					],
 					"localDependencies": [
-						"model/users",
 						"_generated/server",
 						"api/auth",
-						"auth/index"
+						"auth/index",
+						"_generated/api"
 					],
 					"_imports_": {
-						"../model/users": "{{model/users}}",
 						"../_generated/server": "{{_generated/server}}",
 						"../../lib/auth/api/auth": "{{api/auth}}",
-						"../auth": "{{auth/index}}"
+						"../auth": "{{auth/index}}",
+						"../_generated/api": "{{_generated/api}}"
 					},
 					"dependencies": [
 						"convex@^1.25.4",

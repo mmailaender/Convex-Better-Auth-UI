@@ -7,8 +7,6 @@ import { createAuth } from '../../lib/auth/api/auth';
 import { ConvexError, v } from 'convex/values';
 import { APIError } from 'better-auth/api';
 
-import { updateAvatarModel } from '../model/users';
-
 /**
  * Update the authenticated user's avatar storage reference.
  */
@@ -22,7 +20,30 @@ export const updateAvatar = mutation({
 			throw new ConvexError('Not authenticated');
 		}
 
-		return updateAvatarModel(ctx, { userId, storageId: args.storageId });
+		const user = await ctx.db.get(userId);
+		if (!user) {
+			throw new ConvexError('User not found');
+		}
+
+		if (user.imageId && user.imageId !== args.storageId) {
+			await ctx.storage.delete(user.imageId);
+		}
+
+		const imageUrl = await ctx.storage.getUrl(args.storageId);
+
+		if (!imageUrl) {
+			throw new ConvexError('Failed to get image URL');
+		}
+
+		const auth = createAuth(ctx);
+		await auth.api.updateUser({
+			body: { image: imageUrl },
+			headers: await betterAuthComponent.getHeaders(ctx)
+		});
+
+		await ctx.db.patch(userId, { imageId: args.storageId });
+
+		return imageUrl;
 	}
 });
 
