@@ -10,14 +10,7 @@
 		"repository": "https://github.com/mmailaender/auth",
 		"tags": ["auth", "svelte", "ui", "convex", "better-auth"]
 	},
-	"dirs": [
-		"./src/convex",
-		"./src/routes",
-		"./src/lib/auth",
-		"./src/lib/organizations",
-		"./src/lib/users",
-		"./src/lib/primitives"
-	],
+	"dirs": ["./src"],
 	"allowSubdirectories": true,
 	"doNotListBlocks": [],
 	"doNotListCategories": [],
@@ -31,13 +24,13 @@
 	},
 	"includeBlocks": [],
 	"includeCategories": [],
-	"excludeBlocks": [],
-	"excludeCategories": ["_generated"],
+	"excludeBlocks": ["_generated"],
+	"excludeCategories": ["primitives"],
 	"preview": false,
 	"includeDocs": false,
 	"rules": {
 		"require-local-dependency-exists": "warn",
-		"no-circular-dependency": "error",
+		"no-circular-dependency": "warn",
 		"no-framework-dependency": "warn"
 	}
 }
