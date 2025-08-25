@@ -235,14 +235,14 @@
 				<Dialog.Content
 					class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh]
 		       w-full max-w-full translate-x-0 translate-y-0 rounded-none md:top-[50%]
-		       md:left-[50%] md:h-auto md:max-h-[80vh] md:w-auto
-		       md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%] ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
+		       md:left-[50%] md:h-auto md:max-h-[90vh] md:w-auto
+		        md:translate-x-[-50%] md:translate-y-[-50%] ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
 				>
 					<Dialog.Header>
 						<Dialog.Title>Profile</Dialog.Title>
 					</Dialog.Header>
 					<div
-						class="max-h-[100dvh] overflow-auto overscroll-contain p-2"
+						class="w- max-h-[100dvh] w-[560px] overflow-auto overscroll-contain p-6"
 						onfocusin={(e) => {
 							const el = e.target as HTMLElement | null;
 							if (!el) return;

@@ -296,7 +296,7 @@
 	<div>
 		<span class="text-surface-600-400 text-xs">Linked Accounts</span>
 		{#if accountList && accountList.length > 0}
-			<div class="mt-2 space-y-2.5">
+			<div class="flex flex-col gap-3 pt-3">
 				{#each accountList as account}
 					{@const ProviderIcon = getProviderIcon(account.provider)}
 					<div

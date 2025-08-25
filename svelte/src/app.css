@@ -80,6 +80,14 @@
 	@apply h-9 text-sm font-medium;
 }
 
+@utility badge {
+	@apply h-5 px-2;
+}
+
+@utility btn-sm {
+	@apply h-7 text-sm font-medium;
+}
+
 @utility anchor {
 	@apply text-primary-700-300;
 }
