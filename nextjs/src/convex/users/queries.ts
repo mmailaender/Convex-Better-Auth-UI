@@ -1,7 +1,7 @@
 import { isUserExistingModel } from '../model/users';
 import { query } from '../_generated/server';
 import { v } from 'convex/values';
-import { createAuth } from '../../src/components/auth/api/auth';
+import { createAuth } from '../../lib/auth/api/auth';
 import { betterAuthComponent } from '../auth';
 import { APIError } from 'better-auth/api';
 

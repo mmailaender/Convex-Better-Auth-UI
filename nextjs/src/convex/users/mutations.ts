@@ -2,7 +2,7 @@ import { mutation } from '../_generated/server';
 import { type Id } from '../_generated/dataModel';
 
 import { betterAuthComponent } from '../auth';
-import { createAuth } from '../../src/components/auth/api/auth';
+import { createAuth } from '../../lib/auth/api/auth';
 
 import { ConvexError, v } from 'convex/values';
 import { APIError } from 'better-auth/api';
