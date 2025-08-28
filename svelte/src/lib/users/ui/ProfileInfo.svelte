@@ -189,7 +189,7 @@
 						inert={isEditingName}
 					>
 						<div class="overflow-hidden">
-							<span class="base-font-color truncate text-sm">{activeUser.name}</span>
+							<span class=" truncate text-sm">{activeUser.name}</span>
 						</div>
 					</div>
 
@@ -204,7 +204,7 @@
 						inert={!isEditingName}
 					>
 						<div class="overflow-hidden">
-							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-2">
+							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">
 								<input bind:this={nameInputEl} type="text" class="input w-full" bind:value={name} />
 								<div class="mb-1 flex gap-1.5">
 									<button

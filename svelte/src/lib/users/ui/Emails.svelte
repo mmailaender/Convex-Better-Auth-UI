@@ -106,7 +106,7 @@
 					>
 						<div class="overflow-hidden">
 							<div class="flex items-center gap-2">
-								<span class="base-font-color truncate text-sm">{activeUser.email}</span>
+								<span class="truncate text-sm">{activeUser.email}</span>
 								{#if activeUser.emailVerified}
 									<span class="badge preset-filled-success-100-900 text-xs">Verified</span>
 								{:else}
@@ -127,7 +127,7 @@
 						inert={!isEditingEmail}
 					>
 						<div class="overflow-hidden">
-							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-1">
+							<form onsubmit={handleSubmit} class="flex flex-col gap-3">
 								<input
 									bind:this={emailInputEl}
 									type="email"

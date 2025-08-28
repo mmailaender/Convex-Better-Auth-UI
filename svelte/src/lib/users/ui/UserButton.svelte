@@ -242,7 +242,7 @@
 						<Dialog.Title>Profile</Dialog.Title>
 					</Dialog.Header>
 					<div
-						class="w- max-h-[100dvh] w-[560px] overflow-auto overscroll-contain p-6"
+						class=" max-h-[100dvh] w-[560px] overflow-auto overscroll-contain p-6"
 						onfocusin={(e) => {
 							const el = e.target as HTMLElement | null;
 							if (!el) return;
