@@ -215,7 +215,7 @@
 	}
 </script>
 
-<div class={cn('flex h-full w-full flex-col items-center justify-center ', className)}>
+<div class={cn('flex h-full w-full flex-col  ', className)}>
 	<div class="flex h-full w-full max-w-md flex-col p-4 sm:p-0">
 		{#if currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent))}
 			<div class="flex flex-col">
