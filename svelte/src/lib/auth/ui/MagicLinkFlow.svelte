@@ -49,6 +49,15 @@
 				const emailData = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
 					email
 				});
+				if (!emailData.valid) {
+					toast.error(emailData.reason || 'Please enter a valid email address.');
+					onSubmittingChange(false);
+					onAutoSendChange?.(false);
+					// Reset refs so user can go back and correct the email
+					linkSentRef.current = false;
+					emailChecked = false;
+					return;
+				}
 				mode = emailData.exists ? 'login' : 'register';
 				emailChecked = true;
 

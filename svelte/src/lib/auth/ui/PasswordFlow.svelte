@@ -39,6 +39,11 @@
 				const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
 					email
 				});
+				if (!data.valid) {
+					toast.error(data.reason || 'Please enter a valid email address.');
+					onBack();
+					return;
+				}
 				mode = data.exists ? 'login' : 'register';
 				onModeChange?.(mode);
 			} catch (error) {

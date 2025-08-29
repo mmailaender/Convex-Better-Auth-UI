@@ -49,6 +49,14 @@
 				const emailData = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
 					email
 				});
+				if (!emailData.valid) {
+					toast.error(emailData.reason || 'Please enter a valid email address.');
+					onSubmittingChange(false);
+					// Reset the refs so user can go back and correct the email
+					otpSentRef.current = false;
+					emailChecked = false;
+					return;
+				}
 				mode = emailData.exists ? 'login' : 'register';
 				onModeChange?.(mode);
 				emailChecked = true;

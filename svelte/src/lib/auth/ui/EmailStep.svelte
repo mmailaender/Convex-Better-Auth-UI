@@ -50,29 +50,22 @@
 			return;
 		}
 
-		// If only one method is available, go directly to that flow
-		if (availableMethods.length === 1) {
-			onMethodSelect(availableMethods[0]);
-			return;
-		}
-
-		// For password flow, we need to validate email first
-		if (method === 'password') {
-			validatingEmail = true;
-			try {
-				await client.action(api.users.actions.checkEmailAvailabilityAndValidity, { email });
-				// This would typically determine login vs register, but for simplicity
-				// we'll just go to password flow
-				onMethodSelect('password');
-			} catch (error) {
-				toast.error('Failed to validate email. Please try again.');
-				console.error('Email validation error:', error);
-			} finally {
-				validatingEmail = false;
+		// Always validate the email before proceeding to any flow
+		validatingEmail = true;
+		try {
+			const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
+				email
+			});
+			if (!data.valid) {
+				toast.error(data.reason || 'Please enter a valid email address.');
+				return;
 			}
-		} else {
-			// For other methods, go directly to the flow
 			onMethodSelect(method);
+		} catch (error) {
+			toast.error('Failed to validate email. Please try again.');
+			console.error('Email validation error:', error);
+		} finally {
+			validatingEmail = false;
 		}
 	}
 </script>
