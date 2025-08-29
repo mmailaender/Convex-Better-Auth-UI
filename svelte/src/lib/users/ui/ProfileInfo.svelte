@@ -147,7 +147,7 @@
 							{/if}
 
 							<div
-								class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+								class="badge-icon preset-filled-surface-200-800 border-surface-50-950 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-4"
 							>
 								<Pencil class="size-4" />
 							</div>
@@ -167,16 +167,16 @@
 		<!-- Inline editable name -->
 		<div
 			class={[
-				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
+				'border-surface-300-700 rounded-container relative w-full border px-3.5 py-2 transition-all duration-200 ease-in-out',
 				{
 					'cursor-pointer': !isEditingName,
-					'hover:bg-surface-50-950': !isEditingName,
-					'hover:border-surface-50-950': !isEditingName
+					'hover:bg-surface-200-800': !isEditingName,
+					'hover:border-surface-200-800': !isEditingName
 				}
 			]}
 		>
-			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
-				<div class="flex w-full flex-col gap-0">
+			<div class="flex items-center justify-between transition-all duration-200 ease-in-out">
+				<div class="flex w-full flex-col">
 					<span class="text-surface-600-400 text-xs">Name</span>
 					<!-- View mode (collapses when editing) -->
 					<div
@@ -189,7 +189,7 @@
 						inert={isEditingName}
 					>
 						<div class="overflow-hidden">
-							<span class="text-surface-800-200 truncate font-medium">{activeUser.name}</span>
+							<span class=" truncate text-sm">{activeUser.name}</span>
 						</div>
 					</div>
 
@@ -206,10 +206,10 @@
 						<div class="overflow-hidden">
 							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">
 								<input bind:this={nameInputEl} type="text" class="input w-full" bind:value={name} />
-								<div class="flex gap-2">
+								<div class="mb-1 flex gap-1.5">
 									<button
 										type="button"
-										class="btn preset-tonal w-full md:w-fit"
+										class="btn btn-sm preset-tonal w-full"
 										onclick={() => {
 											name = activeUser.name;
 											isEditingName = false;
@@ -219,7 +219,7 @@
 									</button>
 									<button
 										type="submit"
-										class="btn preset-filled-primary-500 w-full md:w-fit"
+										class="btn btn-sm preset-filled-primary-500 w-full"
 										disabled={!name || name.trim() === '' || name.trim() === activeUser.name.trim()}
 									>
 										Save
@@ -231,8 +231,8 @@
 				</div>
 				<!-- Edit affordance and full-area overlay button in view mode -->
 				{#if !isEditingName}
-					<div class="shrink-0">
-						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
+					<div>
+						<span class="btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
 							<Pencil class="size-4" />
 						</span>
 					</div>

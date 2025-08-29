@@ -213,7 +213,7 @@
 
 	<!-- Show the form for authenticated users -->
 {:else}
-	<form onsubmit={handleSubmit} class="mx-auto w-full">
+	<form onsubmit={handleSubmit} class="mx-auto w-full px-6 pb-6">
 		<div class="my-6">
 			<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
 				<ImageCropper.UploadTrigger>

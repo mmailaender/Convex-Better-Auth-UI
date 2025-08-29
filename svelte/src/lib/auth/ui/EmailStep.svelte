@@ -77,16 +77,16 @@
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<div class="flex flex-col gap-2">
-		<label class="text-surface-950-50 text-sm font-medium" for="email">Email</label>
+<div class="flex flex-col gap-8">
+	<div class="flex flex-col">
+		<label class="label" for=" email">Email</label>
 		<input
 			id="email"
 			name="email"
 			type="email"
 			value={email}
 			oninput={(e) => onEmailChange(e.currentTarget.value)}
-			class="input preset-filled-surface-200"
+			class="input preset-filled-surface-200 text-sm"
 			placeholder="Enter your email"
 			required
 			disabled={submitting || validatingEmail}

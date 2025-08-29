@@ -6,14 +6,16 @@
 </script>
 
 <div class="w-full">
-	<ProfileInfo />
-	<div class="pt-10">
+	<div class="flex flex-col gap-3 pb-8">
+		<ProfileInfo />
+
 		<Emails />
 	</div>
-	<div class="flex pt-10">
+
+	<div class="flex h-full flex-col">
 		<Accounts />
 	</div>
-	<div class="flex pt-10">
+	<div>
 		<DeleteUser />
 	</div>
 </div>

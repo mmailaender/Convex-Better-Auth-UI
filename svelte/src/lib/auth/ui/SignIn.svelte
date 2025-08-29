@@ -162,7 +162,7 @@
 			case 'magic-link-flow':
 				return 'Sign in with magic link';
 			default:
-				return 'Self hosted Auth in Minutes';
+				return 'Sign in into self hosted Auth';
 		}
 	}
 
@@ -215,24 +215,27 @@
 	}
 </script>
 
-<div class={cn('flex h-full w-full flex-col items-center justify-center p-8', className)}>
-	<div class="flex h-full w-full max-w-md flex-col">
+<div class={cn('flex h-full w-full flex-col  ', className)}>
+	<div class="flex h-full w-full max-w-md flex-col p-4 sm:p-0">
 		{#if currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent))}
-			<div class="flex flex-col items-center gap-4 py-8 text-center">
-				<div class="mb-2 flex justify-center">
-					<div class="bg-surface-100-900 flex h-16 w-16 items-center justify-center rounded-full">
+			<div class="flex flex-col">
+				<!-- Circle -->
+				<div class="mb-4 flex">
+					<div class="bg-surface-200-800 flex h-16 w-16 items-center justify-center rounded-full">
 						<Mail class="text-surface-600-400 size-8" />
 					</div>
 				</div>
-				<h3 class="text-xl font-semibold">Check your email</h3>
-				<p class="text-surface-600-400 text-sm">
+
+				<!-- Info -->
+				<h3 class="h4 w-full text-left leading-8 font-medium">Check your email</h3>
+				<p class="text-surface-600-400 mt-2 text-sm">
 					{#if verifyContext === 'magicLink'}
 						We've sent a magic link to <strong>{email}</strong>.
 					{:else}
 						We've sent a verification link to <strong>{email}</strong>.
 					{/if}
 				</p>
-				<p class="text-surface-600-400 text-sm">
+				<p class="text-surface-600-400 pb-8 text-sm">
 					{#if verifyContext === 'magicLink'}
 						Click the link in your email to sign in instantly.
 					{:else}
@@ -240,33 +243,35 @@
 						verification.
 					{/if}
 				</p>
-				<button type="button" class="anchor mt-2 text-center text-sm" onclick={resetToEmailStep}>
+
+				<!-- Action -->
+				<button type="button" class="btn preset-filled-surface-300-700" onclick={resetToEmailStep}>
 					Use a different email
 				</button>
 			</div>
 		{:else}
-			<h5 class="h4 max-w-96 text-left leading-9 tracking-tighter">{getStepTitle()}</h5>
-			<p class="text-surface-600-400 mt-3 mb-10 max-w-96 text-left text-sm">
+			<h5 class="h4 w-full text-left leading-8 font-medium">{getStepTitle()}</h5>
+			<p class="text-surface-600-400 mt-2 max-w-96 pb-16 text-left text-sm sm:pb-12">
 				{getStepDescription()}
 			</p>
 
-			<div class="flex h-full w-full flex-col gap-8">
+			<div class="flex h-full w-full flex-col gap-6">
 				<!-- Social Sign In -->
 				{#if AUTH_CONSTANTS.providers.github && currentStep === 'email'}
 					<button
-						class="btn preset-filled hover:border-surface-600-400 w-full shadow-sm"
+						class="btn preset-outlined-surface-400-600 hover:border-surface-600-400 w-full"
 						onclick={() => handleSocialSignIn('github')}
 						disabled={submitting}
 					>
-						<SiGithub size={20} />
+						<SiGithub size={16} />
 						Sign in with GitHub
 					</button>
 
 					{#if availableMethods.length > 0}
-						<div class="relative flex items-center">
-							<div class="border-surface-600-400 flex-1 border-t"></div>
-							<span class="text-surface-600-400 px-4">OR</span>
-							<div class="border-surface-600-400 flex-1 border-t"></div>
+						<div class="relative flex items-center px-1">
+							<div class="border-surface-600-400/30 flex-1 border-t"></div>
+							<span class="text-surface-500 px-2 text-xs">or</span>
+							<div class="border-surface-600-400/30 flex-1 border-t"></div>
 						</div>
 					{/if}
 				{/if}

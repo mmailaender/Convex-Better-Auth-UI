@@ -145,86 +145,92 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="flex flex-col gap-4">
-	<div class="flex flex-col gap-2">
-		<label class="text-surface-950-50 text-sm font-medium" for="email">Email</label>
-		<input
-			type="email"
-			value={email}
-			disabled
-			class="input preset-filled-surface-200 cursor-not-allowed opacity-60"
-		/>
-	</div>
-
-	{#if mode === 'register'}
-		<div class="flex flex-col gap-2">
-			<label class="text-surface-950-50 text-sm font-medium" for="name">Full Name</label>
+<form onsubmit={handleSubmit} class="flex flex-col gap-8">
+	<!-- Inputs -->
+	<div class="flex flex-col gap-5">
+		<div class="flex flex-col">
+			<label class="label" for="email">Email</label>
 			<input
-				name="name"
-				type="text"
+				type="email"
+				value={email}
+				disabled
+				class="input preset-filled-surface-200 cursor-not-allowed opacity-60"
+			/>
+		</div>
+
+		{#if mode === 'register'}
+			<div class="flex flex-col">
+				<label class="label" for="name">Full Name</label>
+				<input
+					name="name"
+					type="text"
+					class="input preset-filled-surface-200"
+					placeholder="Enter your full name"
+					required
+					disabled={submitting}
+				/>
+			</div>
+		{/if}
+
+		<div class="flex flex-col">
+			<div class="flex flex-row items-center justify-between">
+				<label class="label" for="password">Password</label>
+				{#if mode === 'login'}
+					<button
+						type="button"
+						class="anchor mb-1 shrink-0 text-xs"
+						onclick={handleForgotPassword}
+						disabled={submitting || isRequestingReset}
+					>
+						{isRequestingReset ? 'Sending...' : 'Forgot password?'}
+					</button>
+				{/if}
+			</div>
+			<input
+				name="password"
+				type="password"
 				class="input preset-filled-surface-200"
-				placeholder="Enter your full name"
+				placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
 				required
 				disabled={submitting}
 			/>
 		</div>
-	{/if}
-
-	<div class="flex flex-col gap-2">
-		<label class="text-surface-950-50 text-sm font-medium" for="password">Password</label>
-		<input
-			name="password"
-			type="password"
-			class="input preset-filled-surface-200"
-			placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
-			required
-			disabled={submitting}
-		/>
 	</div>
 
-	<button type="submit" class="btn preset-filled w-full" disabled={submitting}>
-		{#if submitting}
-			<div class="flex items-center gap-2">
-				<div
-					class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-				></div>
-				{mode === 'register' ? 'Creating account...' : 'Signing in...'}
-			</div>
-		{:else}
-			{mode === 'register' ? 'Create Account' : 'Sign In'}
-		{/if}
-	</button>
-
-	{#if mode === 'login'}
-		<button
-			type="button"
-			class="anchor text-center text-sm"
-			onclick={handleForgotPassword}
-			disabled={submitting || isRequestingReset}
-		>
-			{isRequestingReset ? 'Sending...' : 'Forgot password?'}
+	<!-- Actions -->
+	<div class="flex flex-col gap-2">
+		<button type="submit" class="btn preset-filled w-full" disabled={submitting}>
+			{#if submitting}
+				<div class="flex items-center gap-2">
+					<div
+						class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+					></div>
+					{mode === 'register' ? 'Creating account...' : 'Signing in...'}
+				</div>
+			{:else}
+				{mode === 'register' ? 'Create Account' : 'Sign In'}
+			{/if}
 		</button>
-	{/if}
 
-	<button type="button" class="anchor text-center text-sm" onclick={onBack} disabled={submitting}>
-		Use a different email
-	</button>
+		<button type="button" class="btn" onclick={onBack} disabled={submitting}>
+			Use a different email
+		</button>
+	</div>
 
 	<!-- Forgot Password Confirmation Dialog -->
 	{#if showForgotPasswordDialog}
-		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+		<div class="fixed inset-0 z-50 flex items-center justify-center gap-4 bg-black/50">
 			<div
-				class="bg-surface-50-950 border-surface-200-800 mx-4 w-full max-w-md rounded-lg border p-6 shadow-lg"
+				class="bg-surface-100-900 border-surface-200-800 rounded-container mx-4 w-full max-w-md overflow-hidden border p-6"
 			>
-				<div class="mb-4">
-					<h3 class="text-surface-950-50 text-lg font-semibold">Check your email</h3>
-					<p class="text-surface-600-400 mt-2 text-sm">
-						We've sent a password reset link to <strong>{email}</strong>.
-						<br />
+				<div class="flex flex-col gap-2">
+					<h3 class="text-surface-950-50 text-lg font-medium">Check your email</h3>
+					<p class="text-surface-600-400 text-sm">
+						We've sent a password reset link to <span class="text-primary-700-300">{email}</span>.
 						Click the link in the email to reset your password.
 					</p>
 				</div>
-				<div class="flex gap-2">
+				<div class="mt-8 flex gap-3">
 					<button
 						type="button"
 						class="btn preset-filled flex-1"

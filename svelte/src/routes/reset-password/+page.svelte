@@ -97,11 +97,13 @@
 <div class="flex h-screen w-full flex-col items-center justify-center">
 	<div class="flex h-full w-full max-w-md flex-col p-8">
 		<div class="mb-10">
-			<h1 class="h4 text-left leading-9 tracking-tighter">
+			<h1 class="h4 w-full text-left leading-8 font-medium">
 				{resetState === 'valid-token' ? 'Reset your password' : 'Password Reset'}
 			</h1>
 			{#if resetState === 'valid-token'}
-				<p class="text-surface-600-400 mt-3 text-left text-sm">Enter your new password below.</p>
+				<p class="text-surface-600-400 mt-2 max-w-96 text-left text-sm">
+					Enter your new password below.
+				</p>
 			{/if}
 		</div>
 
@@ -129,53 +131,54 @@
 					<a href="/signin" class="btn preset-filled">Back to Sign In</a>
 				</div>
 			{:else if resetState === 'valid-token'}
-				<form onsubmit={handleSubmit} class="flex w-full flex-col gap-4">
-					<div class="flex flex-col gap-2">
-						<label for="new-password" class="text-surface-950-50 text-sm font-medium"
-							>New Password</label
-						>
-						<input
-							id="new-password"
-							type="password"
-							bind:value={password}
-							class="input preset-filled-surface-200"
-							placeholder="Enter your new password"
-							required
-							minlength="8"
-							disabled={isSubmitting}
-						/>
+				<form onsubmit={handleSubmit} class="flex w-full flex-col gap-8">
+					<!-- Inputs -->
+					<div class="flex flex-col gap-5">
+						<div class="flex flex-col">
+							<label for="new-password" class="label">New Password</label>
+							<input
+								id="new-password"
+								type="password"
+								bind:value={password}
+								class="input preset-filled-surface-200"
+								placeholder="Enter your new password"
+								required
+								minlength="8"
+								disabled={isSubmitting}
+							/>
+						</div>
+
+						<div class="flex flex-col">
+							<label for="confirm-password" class="label"> Confirm New Password </label>
+							<input
+								id="confirm-password"
+								type="password"
+								bind:value={confirmPassword}
+								class="input preset-filled-surface-200"
+								placeholder="Confirm your new password"
+								required
+								minlength="8"
+								disabled={isSubmitting}
+							/>
+						</div>
 					</div>
 
 					<div class="flex flex-col gap-2">
-						<label for="confirm-password" class="text-surface-950-50 text-sm font-medium">
-							Confirm New Password
-						</label>
-						<input
-							id="confirm-password"
-							type="password"
-							bind:value={confirmPassword}
-							class="input preset-filled-surface-200"
-							placeholder="Confirm your new password"
-							required
-							minlength="8"
-							disabled={isSubmitting}
-						/>
+						<button type="submit" class="btn preset-filled w-full" disabled={isSubmitting}>
+							{#if isSubmitting}
+								<div class="flex items-center gap-2">
+									<div
+										class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+									></div>
+									Resetting password...
+								</div>
+							{:else}
+								Reset Password
+							{/if}
+						</button>
+
+						<a href="/signin" class="btn">Back to Sign In</a>
 					</div>
-
-					<button type="submit" class="btn preset-filled w-full" disabled={isSubmitting}>
-						{#if isSubmitting}
-							<div class="flex items-center gap-2">
-								<div
-									class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-								></div>
-								Resetting password...
-							</div>
-						{:else}
-							Reset Password
-						{/if}
-					</button>
-
-					<a href="/signin" class="anchor text-center text-sm">Back to Sign In</a>
 				</form>
 			{:else}
 				<!-- error state -->
