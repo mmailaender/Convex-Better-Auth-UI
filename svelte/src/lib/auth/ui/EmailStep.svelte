@@ -16,13 +16,8 @@
 		availableMethods: AuthMethod[];
 	}
 
-	let {
-		email,
-		onEmailChange,
-		onMethodSelect,
-		submitting,
-		availableMethods
-	}: EmailStepProps = $props();
+	let { email, onEmailChange, onMethodSelect, submitting, availableMethods }: EmailStepProps =
+		$props();
 
 	const client = useConvexClient();
 	let validatingEmail = $state(false);
