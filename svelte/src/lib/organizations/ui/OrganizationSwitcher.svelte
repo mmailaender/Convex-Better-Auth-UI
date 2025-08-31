@@ -346,7 +346,7 @@
 										<Building2 class="size-4" />
 									</Avatar.Fallback>
 								</Avatar.Root>
-								<span class="text-surface-700-300 truncate">
+								<span class="text-surface-700-300 truncate text-sm">
 									{org.name}
 								</span>
 							</button>
@@ -396,7 +396,7 @@
 					<Dialog.Title></Dialog.Title>
 				</Dialog.Header>
 				<div
-					class="max-h-[100dvh] overflow-auto overscroll-contain"
+					class="h-full w-full overflow-scroll overscroll-contain"
 					onfocusin={(e) => {
 						const el = e.target as HTMLElement | null;
 						if (!el) return;

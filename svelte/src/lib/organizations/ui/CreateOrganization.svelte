@@ -218,16 +218,18 @@
 			<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
 				<ImageCropper.UploadTrigger>
 					<div
-						class="rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
+						class="rounded-container relative size-20 cursor-pointer transition-all duration-200"
 					>
 						<Avatar.Root class="rounded-container size-20">
 							<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
-							<Avatar.Fallback class="bg-surface-400-600 rounded-container">
-								<Building2 class="size-10" />
+							<Avatar.Fallback
+								class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
+							>
+								<Building2 class="text-surface-700-300 size-10" />
 							</Avatar.Fallback>
 						</Avatar.Root>
 						<div
-							class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+							class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 						>
 							<Pencil class="size-4" />
 						</div>
@@ -243,8 +245,8 @@
 			</ImageCropper.Root>
 		</div>
 
-		<div class="flex flex-col gap-2">
-			<div class="mb-4">
+		<div class="flex flex-col gap-5">
+			<div>
 				<label for="name" class="label">Name</label>
 				<input
 					type="text"
@@ -256,7 +258,7 @@
 					placeholder="My Organization..."
 				/>
 			</div>
-			<div class="mb-4">
+			<div>
 				<label for="slug" class="label">Slug URL</label>
 				<input
 					type="text"

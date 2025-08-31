@@ -86,7 +86,7 @@
 			</Dialog.Header>
 
 			<article>
-				<div class="text-surface-700-300 space-y-3 text-sm">
+				<div class="text-surface-700-300 space-y-3 px-6 text-sm">
 					<p>Are you sure you want to delete this organization?</p>
 					<div
 						class="bg-surface-100-900 border-surface-200-800 rounded-container border p-3 text-center"
@@ -99,10 +99,10 @@
 				</div>
 			</article>
 
-			<Dialog.Footer>
+			<Dialog.Footer class="w-full p-6">
 				<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
 				<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
-					Confirm
+					Delete
 				</button>
 			</Dialog.Footer>
 		</Dialog.Content>

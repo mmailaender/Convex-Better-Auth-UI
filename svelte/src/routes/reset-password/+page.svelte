@@ -97,7 +97,7 @@
 <div class="flex h-screen w-full flex-col items-center justify-center">
 	<div class="flex h-full w-full max-w-md flex-col p-8">
 		<div class="mb-10">
-			<h1 class="h4 w-full text-left leading-8 font-medium">
+			<h1 class="h5 w-full text-left leading-8">
 				{resetState === 'valid-token' ? 'Reset your password' : 'Password Reset'}
 			</h1>
 			{#if resetState === 'valid-token'}

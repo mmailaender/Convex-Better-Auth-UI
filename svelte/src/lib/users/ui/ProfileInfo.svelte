@@ -122,15 +122,15 @@
 			<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
 				<ImageCropper.UploadTrigger>
 					<div
-						class="rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
+						class="rounded-container relative size-20 cursor-pointer transition-all duration-200"
 					>
-						<div
-							class="relative cursor-pointer transition-colors hover:brightness-125 hover:dark:brightness-75"
-						>
+						<div class="relative cursor-pointer transition-colors">
 							{#key avatarKey}
 								<Avatar.Root class="size-20" onStatusChange={(e) => (loadingStatus = e.status)}>
 									<Avatar.Image src={activeUser.image} alt={activeUser.name} />
-									<Avatar.Fallback>
+									<Avatar.Fallback
+										class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
+									>
 										<Avatar.Marble name={activeUser.name} />
 									</Avatar.Fallback>
 								</Avatar.Root>
@@ -147,7 +147,7 @@
 							{/if}
 
 							<div
-								class="badge-icon preset-filled-surface-200-800 border-surface-50-950 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-4"
+								class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 hover:bg-surface-400-600 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 							>
 								<Pencil class="size-4" />
 							</div>
@@ -175,7 +175,7 @@
 				}
 			]}
 		>
-			<div class="flex items-center justify-between transition-all duration-200 ease-in-out">
+			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
 				<div class="flex w-full flex-col">
 					<span class="text-surface-600-400 text-xs">Name</span>
 					<!-- View mode (collapses when editing) -->
@@ -189,7 +189,7 @@
 						inert={isEditingName}
 					>
 						<div class="overflow-hidden">
-							<span class=" truncate text-sm">{activeUser.name}</span>
+							<span class="truncate text-sm">{activeUser.name}</span>
 						</div>
 					</div>
 

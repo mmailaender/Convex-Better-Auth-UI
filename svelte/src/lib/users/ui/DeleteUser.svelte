@@ -43,10 +43,10 @@
 				Are you sure you want to delete your account? All of your data will be permanently deleted.
 			</Dialog.Description>
 		</Dialog.Header>
-		<Dialog.Footer class="pr-6 pb-6">
+		<Dialog.Footer class="w-full p-6">
 			<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
 			<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
-				Confirm
+				Delete
 			</button>
 		</Dialog.Footer>
 	</Dialog.Content>

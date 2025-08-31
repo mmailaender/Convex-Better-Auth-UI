@@ -227,7 +227,7 @@
 				</div>
 
 				<!-- Info -->
-				<h3 class="h4 w-full text-left leading-8 font-medium">Check your email</h3>
+				<h3 class="h5 w-full text-left leading-8">Check your email</h3>
 				<p class="text-surface-600-400 mt-2 text-sm">
 					{#if verifyContext === 'magicLink'}
 						We've sent a magic link to <strong>{email}</strong>.
@@ -250,7 +250,7 @@
 				</button>
 			</div>
 		{:else}
-			<h5 class="h4 w-full text-left leading-8 font-medium">{getStepTitle()}</h5>
+			<h5 class="h5 w-full text-left leading-8">{getStepTitle()}</h5>
 			<p class="text-surface-600-400 mt-2 max-w-96 pb-16 text-left text-sm sm:pb-12">
 				{getStepDescription()}
 			</p>

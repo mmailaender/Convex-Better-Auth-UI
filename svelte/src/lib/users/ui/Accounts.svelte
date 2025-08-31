@@ -438,7 +438,7 @@
 <Dialog.Root bind:open={isPasswordDialogOpen}>
 	<Dialog.Content class="w-full max-w-md">
 		<div
-			class="max-h-[100dvh] overflow-auto overscroll-contain"
+			class="max-h-[100dvh] w-full overflow-auto overscroll-contain"
 			onfocusin={(e) => {
 				const el = e.target as HTMLElement | null;
 				if (!el) return;
@@ -449,7 +449,7 @@
 			<Dialog.Header>
 				<Dialog.Title>Set Password</Dialog.Title>
 			</Dialog.Header>
-			<form onsubmit={handlePasswordSubmit} class="w-full px-6 pb-6">
+			<form onsubmit={handlePasswordSubmit} class=" w-full px-6 pb-6">
 				<div class="flex flex-col gap-4">
 					<label class="flex flex-col gap-2">
 						<span class="text-sm font-medium">Password</span>

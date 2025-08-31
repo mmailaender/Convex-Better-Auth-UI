@@ -276,8 +276,8 @@
 	<!-- Desktop Layout -->
 	<div class="hidden h-full w-full md:flex">
 		<!-- Desktop Navigation -->
-		<div class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 h-full w-56 p-2">
-			<div class="px-3 py-4 text-xl font-medium">Organization</div>
+		<div class="bg-surface-50 dark:bg-surface-800 sm:bg-surface-300-700 h-full w-56 p-2">
+			<div class="text-surface-600-400 p-3 pt-2 text-xs font-medium">Organization</div>
 			<Tabs.List class="flex flex-col">
 				{#each visibleTabs as tab (tab.value)}
 					<Tabs.Trigger value={tab.value} class="gap-2 pl-2">
@@ -291,14 +291,10 @@
 		</div>
 
 		<!-- Desktop Content -->
-		<div class="flex-1">
-			<Tabs.Content value="general" class="flex h-full flex-col">
+		<div class="flex w-full">
+			<Tabs.Content value="general" class="w-ful flex h-full flex-col">
 				<div class="h-full">
-					<h6
-						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
-					>
-						General settings
-					</h6>
+					<h6 class=" h6 pb-6 text-left">General settings</h6>
 					<OrganizationInfo
 						initialData={initialData
 							? {

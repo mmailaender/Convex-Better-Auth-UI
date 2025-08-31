@@ -182,7 +182,7 @@
 		>
 			<Popover.Trigger>
 				<Avatar.Root
-					class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4"
+					class="ring-surface-100-900 size-9 ring-0 duration-200 ease-out hover:ring-4"
 					onStatusChange={(details) => (avatarStatus = details.status)}
 				>
 					<Avatar.Image src={user.image} alt={user.name} />
@@ -271,9 +271,6 @@
 	<Dialog.Content
 		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
 	>
-		<Dialog.Header>
-			<Dialog.Title>Sign in</Dialog.Title>
-		</Dialog.Header>
 		<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
 		<Dialog.CloseX />
 	</Dialog.Content>

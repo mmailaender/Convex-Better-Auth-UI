@@ -199,12 +199,10 @@
 </script>
 
 {#if user && activeOrganization}
-	<div class="flex flex-col items-start gap-6">
+	<div class="flex w-full flex-col items-start gap-6">
 		<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
 			<ImageCropper.UploadTrigger>
-				<div
-					class="rounded-container relative cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
-				>
+				<div class="rounded-container relative cursor-pointer transition-all duration-200">
 					{#key logoKey}
 						<Avatar.Root
 							class="rounded-container size-20"
@@ -214,8 +212,10 @@
 								src={activeOrganization.logo}
 								alt={activeOrganization.name || 'Organization'}
 							/>
-							<Avatar.Fallback class="bg-surface-400-600 rounded-container size-20">
-								<Building2 class="size-10" />
+							<Avatar.Fallback
+								class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
+							>
+								<Building2 class="text-surface-700-300 size-10" />
 							</Avatar.Fallback>
 						</Avatar.Root>
 					{/key}
@@ -231,7 +231,7 @@
 					{/if}
 
 					<div
-						class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+						class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 					>
 						<Pencil class="size-4" />
 					</div>
@@ -247,185 +247,197 @@
 		</ImageCropper.Root>
 
 		<!-- Inline editable organization name -->
-		<div
-			class={[
-				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
-				{
-					'cursor-pointer': isOwnerOrAdmin && !isEditingName,
-					'hover:bg-surface-50-950': isOwnerOrAdmin && !isEditingName,
-					'hover:border-surface-50-950': isOwnerOrAdmin && !isEditingName
-				}
-			]}
-		>
-			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
-				<div class="flex w-full flex-col gap-0">
-					<span class="text-surface-600-400 text-xs">Organization name</span>
-					<!-- View mode (collapses when editing) -->
-					<div
-						class={[
-							'grid transition-[grid-template-rows] duration-200 ease-in-out',
-							isEditingName ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
-							{ 'mt-1': !isEditingName }
-						]}
-						aria-hidden={isEditingName}
-						inert={isEditingName}
-					>
-						<div class="overflow-hidden">
-							<span class="text-surface-800-200 truncate font-medium"
-								>{activeOrganization.name}</span
-							>
+		<div class="flex w-full flex-col gap-3">
+			<div
+				class={[
+					'border-surface-300-700 rounded-container relative w-full border px-3.5 py-2 transition-all duration-200 ease-in-out',
+					{
+						'cursor-pointer': isOwnerOrAdmin && !isEditingName,
+						'hover:bg-surface-200-800': isOwnerOrAdmin && !isEditingName,
+						'hover:border-surface-200-800': isOwnerOrAdmin && !isEditingName
+					}
+				]}
+			>
+				<div
+					class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out"
+				>
+					<div class="flex w-full flex-col gap-0">
+						<span class="text-surface-600-400 text-xs">Organization name</span>
+						<!-- View mode (collapses when editing) -->
+						<div
+							class={[
+								'grid transition-[grid-template-rows] duration-200 ease-in-out',
+								isEditingName ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+								{ 'mt-1': !isEditingName }
+							]}
+							aria-hidden={isEditingName}
+							inert={isEditingName}
+						>
+							<div class="overflow-hidden">
+								<span class=" truncate text-sm">{activeOrganization.name}</span>
+							</div>
 						</div>
-					</div>
 
-					<!-- Edit mode (expands when editing) -->
-					<div
-						class={[
-							'grid transition-[grid-template-rows] duration-200 ease-in-out',
-							isEditingName ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-							{ 'mt-1': isEditingName }
-						]}
-						aria-hidden={!isEditingName}
-						inert={!isEditingName}
-					>
-						<div class="overflow-hidden">
-							<form onsubmit={handleNameSubmit} class="flex w-full flex-col gap-3">
-								<input bind:this={nameInputEl} type="text" class="input w-full" bind:value={name} />
-								<div class="flex gap-2">
-									<button
-										type="button"
-										class="btn preset-tonal w-full md:w-fit"
-										onclick={() => {
-											name = activeOrganization.name;
-											isEditingName = false;
-										}}
-									>
-										Cancel
-									</button>
-									<button
-										type="submit"
-										class="btn preset-filled-primary-500 w-full md:w-fit"
-										disabled={!name ||
-											name.trim() === '' ||
-											name.trim() === activeOrganization.name.trim()}
-									>
-										Save
-									</button>
-								</div>
-							</form>
+						<!-- Edit mode (expands when editing) -->
+						<div
+							class={[
+								'grid transition-[grid-template-rows] duration-200 ease-in-out',
+								isEditingName ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+								{ 'mt-1': isEditingName }
+							]}
+							aria-hidden={!isEditingName}
+							inert={!isEditingName}
+						>
+							<div class="overflow-hidden">
+								<form onsubmit={handleNameSubmit} class="flex w-full flex-col gap-3">
+									<input
+										bind:this={nameInputEl}
+										type="text"
+										class="input w-full"
+										bind:value={name}
+									/>
+									<div class="mb-1 flex gap-1.5">
+										<button
+											type="button"
+											class="btn btn-sm preset-tonal w-full"
+											onclick={() => {
+												name = activeOrganization.name;
+												isEditingName = false;
+											}}
+										>
+											Cancel
+										</button>
+										<button
+											type="submit"
+											class="btn btn-sm preset-filled-primary-500 w-full"
+											disabled={!name ||
+												name.trim() === '' ||
+												name.trim() === activeOrganization.name.trim()}
+										>
+											Save
+										</button>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
+					<!-- Edit affordance and full-area overlay button in view mode -->
+					{#if isOwnerOrAdmin && !isEditingName}
+						<div class="shrink-0">
+							<span class="btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
+								<Pencil class="size-4" />
+							</span>
+						</div>
+						<button
+							class="absolute inset-0 h-full w-full"
+							aria-label="Edit organization name"
+							type="button"
+							onclick={async () => {
+								isEditingName = true;
+								name = activeOrganization.name;
+								await tick();
+								nameInputEl?.focus();
+								nameInputEl?.select();
+							}}
+						></button>
+					{/if}
 				</div>
-				<!-- Edit affordance and full-area overlay button in view mode -->
-				{#if isOwnerOrAdmin && !isEditingName}
-					<div class="shrink-0">
-						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
-							<Pencil class="size-4" />
-						</span>
-					</div>
-					<button
-						class="absolute inset-0 h-full w-full"
-						aria-label="Edit organization name"
-						type="button"
-						onclick={async () => {
-							isEditingName = true;
-							name = activeOrganization.name;
-							await tick();
-							nameInputEl?.focus();
-							nameInputEl?.select();
-						}}
-					></button>
-				{/if}
 			</div>
-		</div>
 
-		<!-- Inline editable organization slug -->
-		<div
-			class={[
-				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
-				{
-					'cursor-pointer': isOwnerOrAdmin && !isEditingSlug,
-					'hover:bg-surface-50-950': isOwnerOrAdmin && !isEditingSlug,
-					'hover:border-surface-50-950': isOwnerOrAdmin && !isEditingSlug
-				}
-			]}
-		>
-			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
-				<div class="flex w-full flex-col gap-0">
-					<span class="text-surface-600-400 text-xs">Slug</span>
-					<!-- View mode (collapses when editing) -->
-					<div
-						class={[
-							'grid transition-[grid-template-rows] duration-200 ease-in-out',
-							isEditingSlug ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
-							{ 'mt-1': !isEditingSlug }
-						]}
-						aria-hidden={isEditingSlug}
-						inert={isEditingSlug}
-					>
-						<div class="overflow-hidden">
-							<span class="text-surface-800-200 truncate font-medium"
-								>{activeOrganization.slug}</span
-							>
+			<!-- Inline editable organization slug -->
+			<div
+				class={[
+					'border-surface-300-700 rounded-container relative w-full border px-3.5 py-2 transition-all duration-200 ease-in-out',
+					{
+						'cursor-pointer': isOwnerOrAdmin && !isEditingSlug,
+						'hover:bg-surface-200-800': isOwnerOrAdmin && !isEditingSlug,
+						'hover:border-surface-200-800': isOwnerOrAdmin && !isEditingSlug
+					}
+				]}
+			>
+				<div
+					class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out"
+				>
+					<div class="flex w-full flex-col gap-0">
+						<span class="text-surface-600-400 text-xs">Slug</span>
+						<!-- View mode (collapses when editing) -->
+						<div
+							class={[
+								'grid transition-[grid-template-rows] duration-200 ease-in-out',
+								isEditingSlug ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]',
+								{ 'mt-1': !isEditingSlug }
+							]}
+							aria-hidden={isEditingSlug}
+							inert={isEditingSlug}
+						>
+							<div class="overflow-hidden">
+								<span class=" truncate text-sm">{activeOrganization.slug}</span>
+							</div>
+						</div>
+
+						<!-- Edit mode (expands when editing) -->
+						<div
+							class={[
+								'grid transition-[grid-template-rows] duration-200 ease-in-out',
+								isEditingSlug ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+								{ 'mt-1': isEditingSlug }
+							]}
+							aria-hidden={!isEditingSlug}
+							inert={!isEditingSlug}
+						>
+							<div class="overflow-hidden">
+								<form onsubmit={handleSlugSubmit} class="flex w-full flex-col gap-3">
+									<input
+										bind:this={slugInputEl}
+										type="text"
+										class="input w-full"
+										bind:value={slug}
+									/>
+									<div class="mb-1 flex gap-1.5">
+										<button
+											type="button"
+											class="btn btn-sm preset-tonal w-full"
+											onclick={() => {
+												slug = activeOrganization.slug || '';
+												isEditingSlug = false;
+											}}
+										>
+											Cancel
+										</button>
+										<button
+											type="submit"
+											class="btn btn-sm preset-filled-primary-500 w-full"
+											disabled={!slug ||
+												slug.trim() === '' ||
+												slug.trim() === (activeOrganization.slug || '').trim()}
+										>
+											Save
+										</button>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
-
-					<!-- Edit mode (expands when editing) -->
-					<div
-						class={[
-							'grid transition-[grid-template-rows] duration-200 ease-in-out',
-							isEditingSlug ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-							{ 'mt-1': isEditingSlug }
-						]}
-						aria-hidden={!isEditingSlug}
-						inert={!isEditingSlug}
-					>
-						<div class="overflow-hidden">
-							<form onsubmit={handleSlugSubmit} class="flex w-full flex-col gap-3">
-								<input bind:this={slugInputEl} type="text" class="input w-full" bind:value={slug} />
-								<div class="flex gap-2">
-									<button
-										type="button"
-										class="btn preset-tonal w-full md:w-fit"
-										onclick={() => {
-											slug = activeOrganization.slug || '';
-											isEditingSlug = false;
-										}}
-									>
-										Cancel
-									</button>
-									<button
-										type="submit"
-										class="btn preset-filled-primary-500 w-full md:w-fit"
-										disabled={!slug ||
-											slug.trim() === '' ||
-											slug.trim() === (activeOrganization.slug || '').trim()}
-									>
-										Save
-									</button>
-								</div>
-							</form>
+					{#if isOwnerOrAdmin && !isEditingSlug}
+						<div class="shrink-0">
+							<span class="btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
+								<Pencil class="size-4" />
+							</span>
 						</div>
-					</div>
+						<button
+							class="absolute inset-0 h-full w-full"
+							aria-label="Edit organization slug"
+							type="button"
+							onclick={async () => {
+								isEditingSlug = true;
+								slug = activeOrganization.slug || '';
+								await tick();
+								slugInputEl?.focus();
+								slugInputEl?.select();
+							}}
+						></button>
+					{/if}
 				</div>
-				{#if isOwnerOrAdmin && !isEditingSlug}
-					<div class="shrink-0">
-						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
-							<Pencil class="size-4" />
-						</span>
-					</div>
-					<button
-						class="absolute inset-0 h-full w-full"
-						aria-label="Edit organization slug"
-						type="button"
-						onclick={async () => {
-							isEditingSlug = true;
-							slug = activeOrganization.slug || '';
-							await tick();
-							slugInputEl?.focus();
-							slugInputEl?.select();
-						}}
-					></button>
-				{/if}
 			</div>
 		</div>
 	</div>
