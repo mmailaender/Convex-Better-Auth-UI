@@ -340,10 +340,10 @@
 		>
 			<!-- Mobile Navigation (left half) -->
 			<div
-				class="bg-surface-50 dark:bg-surface-900 sm:bg-surface-300-700 relative h-full w-1/2 p-2"
+				class="bg-surface-100 dark:bg-surface-900 sm:bg-surface-300-700 relative h-full w-1/2 p-2"
 				class:hidden={closingFromContent}
 			>
-				<div class="px-3 py-4 text-2xl font-medium">Organization</div>
+				<div class="h5 px-3 pt-3 pb-8">Organization settings</div>
 				<!-- Close button (close entire modal) shown on list view for ideal fade-out -->
 				<button
 					class="ring-offset-background focus:ring-ring hover:bg-surface-300-700 rounded-base absolute top-5 right-4 z-10 p-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
@@ -353,7 +353,7 @@
 				>
 					<X />
 				</button>
-				<Tabs.List class="flex w-full flex-col pt-8">
+				<Tabs.List class="bg-surface-50-950 rounded-container flex w-full flex-col py-1 pr-2">
 					{#each visibleTabs as tab, index (tab.value)}
 						<Tabs.Trigger
 							value={tab.value}
@@ -361,12 +361,12 @@
 							class="w-full gap-3 aria-selected:bg-transparent aria-selected:text-inherit"
 						>
 							<div
-								class="bg-surface-300-700 rounded-base flex h-7 w-7 shrink-0 items-center justify-center"
+								class="bg-surface-200-800 rounded-base flex size-8 shrink-0 items-center justify-center"
 							>
 								<tab.icon />
 							</div>
 							<span class="w-full">{tab.label}</span>
-							<ChevronRight class="flex" />
+							<ChevronRight class="text-surface-500 flex" />
 						</Tabs.Trigger>
 						{#if index < visibleTabs.length - 1}
 							<div class="flex h-2 w-full items-center justify-center px-3">
