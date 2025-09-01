@@ -12,7 +12,7 @@
 		'text-surface-700-300 rounded-base bg-transparent',
 		'inline-flex items-center justify-center',
 		'data-[orientation=horizontal]:w-fit',
-		'h-full gap-1 data-[orientation=vertical]:w-full data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start data-[orientation=vertical]:justify-start',
+		' gap-1 data-[orientation=vertical]:w-full data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start data-[orientation=vertical]:justify-start',
 		className
 	)}
 	{...restProps}

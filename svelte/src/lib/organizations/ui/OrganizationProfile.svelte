@@ -271,7 +271,7 @@
 <Tabs.Root
 	bind:value={activeDesktopTab}
 	orientation="vertical"
-	class="relative h-full overflow-hidden"
+	class="relative h-full overflow-scroll"
 >
 	<!-- Desktop Layout -->
 	<div class="hidden h-full w-full md:flex">
@@ -304,7 +304,7 @@
 							: undefined}
 					/>
 				</div>
-				<div class="pt-16">
+				<div>
 					<LeaveOrganization
 						initialData={{
 							activeUser: initialData?.activeUser,
@@ -317,11 +317,7 @@
 
 			{#if isOwnerOrAdmin}
 				<Tabs.Content value="members">
-					<h6
-						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
-					>
-						Members
-					</h6>
+					<h6 class="h6 pb-6 text-left">Members</h6>
 					<MembersAndInvitations
 						initialData={{
 							activeOrganization: initialData?.activeOrganization,
@@ -330,11 +326,7 @@
 					/>
 				</Tabs.Content>
 				<Tabs.Content value="billing">
-					<h6
-						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-left text-sm font-medium"
-					>
-						Billing
-					</h6>
+					<h6 class="h6 pb-6 text-left">Billing</h6>
 				</Tabs.Content>
 			{/if}
 		</div>

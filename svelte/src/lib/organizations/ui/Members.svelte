@@ -170,12 +170,12 @@
 		<!-- Search Section - Fixed at top -->
 		<div class="flex flex-shrink-0 items-center gap-3 py-4">
 			<div class="relative flex-1">
-				<div class="pointer-events-none absolute inset-y-0 flex items-center pl-2">
+				<div class="pointer-events-none absolute inset-y-0 flex items-center">
 					<Search class="text-surface-400-600 size-4" />
 				</div>
 				<input
 					type="text"
-					class="input w-hug w-full !border-0 border-transparent pl-8 text-sm"
+					class="input w-hug w-full !border-0 border-transparent pl-6 text-sm"
 					placeholder="Search members..."
 					bind:value={searchQuery}
 				/>
@@ -244,16 +244,16 @@
 			<div>
 				<!-- Table container with controlled height and scroll -->
 				<div
-					class="max-h-[calc(90vh-12rem)] overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
+					class=" max-h-[calc(90vh-12rem)] overflow-hidden overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
 				>
 					<table class="table w-full !table-fixed">
-						<thead
-							class="sm:bg-surface-200-800 bg-surface-100-900 border-surface-300-700 sticky top-0 z-20 border-b"
-						>
+						<thead class="sticky top-0 z-20">
 							<tr>
-								<th class="text-surface-700-300 !w-48 p-2 !pl-0 text-left text-xs">Name</th>
-								<th class="text-surface-700-300 hidden p-2 text-left text-xs sm:flex">Email</th>
-								<th class="text-surface-700-300 !w-32 p-2 text-left text-xs">Role</th>
+								<th class="text-surface-600-400 !w-48 p-2 !pl-3 text-left text-xs font-semibold"
+									>Name</th
+								>
+								<th class="text-surface-600-400 hidden p-2 text-left text-xs sm:flex">Email</th>
+								<th class="text-surface-600-400 !w-32 p-2 text-left text-xs">Role</th>
 								{#if isOwnerOrAdmin}
 									<th class="!w-16 p-2 text-right"></th>
 								{/if}
@@ -263,7 +263,7 @@
 							{#each filteredMembers as member (member.id)}
 								<tr class="!border-surface-300-700 !border-t">
 									<!-- Member Name -->
-									<td class="!w-48 !max-w-48 !truncate !py-3 !pl-0">
+									<td class="!w-48 !max-w-48 !truncate !py-3 !pl-3">
 										<div class="flex items-center space-x-2">
 											<div class="avatar">
 												<div class="size-8 sm:size-5">
@@ -277,7 +277,7 @@
 											</div>
 
 											<div class="flex flex-col truncate">
-												<span class="truncate font-medium">{member.user.name}</span>
+												<span class="truncate text-sm">{member.user.name}</span>
 												<!-- Email visible only on mobile (hidden on sm and above) -->
 												<span class="text-surface-700-300 truncate text-xs sm:hidden">
 													{member.user.email}
@@ -286,7 +286,7 @@
 										</div>
 									</td>
 									<!-- Member Email -->
-									<td class="!text-surface-700-300 hidden !h-fit !w-full !truncate sm:table-cell">
+									<td class="!text-surface-600-400 hidden !h-fit !w-full !truncate sm:table-cell">
 										{member.user.email}
 									</td>
 									<!-- Member Role -->

@@ -105,12 +105,12 @@
 		<!-- Search Section - Fixed at top -->
 		<div class="flex flex-shrink-0 items-center gap-3 py-4">
 			<div class="relative flex-1">
-				<div class="pointer-events-none absolute inset-y-0 flex items-center pl-2">
+				<div class="pointer-events-none absolute inset-y-0 flex items-center">
 					<Search class="text-surface-400-600 size-4" />
 				</div>
 				<input
 					type="text"
-					class="input w-hug w-full !border-0 !border-transparent pl-8 text-sm"
+					class="input w-hug w-full !border-0 !border-transparent pl-6 text-sm"
 					placeholder="Search invitations..."
 					value={searchQuery}
 					onchange={handleSearchChange}
@@ -131,9 +131,7 @@
 						class="max-h-[calc(90vh-12rem)] overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
 					>
 						<table class="table w-full !table-fixed">
-							<thead
-								class="sm:bg-surface-200-800 bg-surface-100-900 border-surface-300-700 sticky top-0 z-20 border-b"
-							>
+							<thead class=" border-surface-300-700 sticky top-0 z-20 border-b">
 								<tr>
 									<th class="text-surface-700-300 w-64 truncate p-2 !pl-0 text-left text-xs">
 										User
@@ -202,13 +200,13 @@
 															<Dialog.Header class="flex-shrink-0">
 																<Dialog.Title>Revoke invitation</Dialog.Title>
 															</Dialog.Header>
-															<article class="flex-shrink-0">
+															<article class="flex-shrink-0 px-6">
 																<p class="opacity-60">
 																	Are you sure you want to revoke the invitation sent to
 																	{invitation.email}?
 																</p>
 															</article>
-															<Dialog.Footer class="flex-shrink-0">
+															<Dialog.Footer class="w-full flex-shrink-0 p-6">
 																<button
 																	type="button"
 																	class="btn preset-tonal"
