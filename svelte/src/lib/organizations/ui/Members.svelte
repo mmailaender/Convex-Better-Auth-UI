@@ -187,7 +187,7 @@
 			<div class="flex max-h-[calc(100vh-12rem)] flex-col gap-2 overflow-y-auto pb-24">
 				{#each filteredMembers as member (member.id)}
 					<div
-						class={`bg-surface-50-950 rounded-container flex items-center justify-between p-4 pr-6 ${
+						class={`border-surface-200-800 rounded-container flex items-center justify-between border-b pr-6 pb-4 ${
 							canEditMember(member) ? 'hover:bg-surface-100-900 cursor-pointer' : ''
 						}`}
 						onclick={() => handleMemberCardClick(member)}

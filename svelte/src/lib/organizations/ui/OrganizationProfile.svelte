@@ -353,15 +353,15 @@
 				>
 					<X />
 				</button>
-				<Tabs.List class="bg-surface-50-950 rounded-container flex w-full flex-col py-1 pr-2">
+				<Tabs.List class=" flex w-full flex-col  pr-2">
 					{#each visibleTabs as tab, index (tab.value)}
 						<Tabs.Trigger
 							value={tab.value}
 							onclick={() => handleMobileTabChange(tab.value)}
-							class="w-full gap-3 aria-selected:bg-transparent aria-selected:text-inherit"
+							class=" flex w-full items-center justify-between gap-3 aria-selected:bg-transparent aria-selected:text-inherit"
 						>
 							<div
-								class="bg-surface-200-800 rounded-base flex size-8 shrink-0 items-center justify-center"
+								class="bg-surface-300-700 rounded-base flex size-8 shrink-0 items-center justify-center"
 							>
 								<tab.icon />
 							</div>
@@ -370,7 +370,7 @@
 						</Tabs.Trigger>
 						{#if index < visibleTabs.length - 1}
 							<div class="flex h-2 w-full items-center justify-center px-3">
-								<hr class="border-0.5 border-surface-200-800 w-full" />
+								<hr class="border-surface-200-800 w-full border" />
 							</div>
 						{/if}
 					{/each}
@@ -379,7 +379,7 @@
 
 			<!-- Mobile Content (right half) -->
 			<div
-				class={`bg-surface-100-900 flex h-full flex-col gap-4 px-4 py-6 ${closingFromContent ? 'absolute inset-0 w-full' : 'relative w-1/2'}`}
+				class={`bg-surface-50 dark:bg-surface-900 flex h-full flex-col gap-4 px-4 py-6 ${closingFromContent ? 'absolute inset-0 w-full' : 'relative w-1/2'}`}
 			>
 				<!-- Back button (go back to tabs list) -->
 				<button
@@ -392,11 +392,7 @@
 
 				{#if activeMobileTab === 'general'}
 					<div class="h-full">
-						<h6
-							class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium"
-						>
-							General settings
-						</h6>
+						<h6 class="h6 pb-12 pl-10">General settings</h6>
 						<OrganizationInfo
 							initialData={{
 								user: initialData?.user,
@@ -412,11 +408,7 @@
 						}}
 					/>
 				{:else if activeMobileTab === 'members'}
-					<h6
-						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium"
-					>
-						Members
-					</h6>
+					<h6 class="h6 pb-6 pl-10">Members</h6>
 					<MembersAndInvitations
 						initialData={{
 							activeOrganization: initialData?.activeOrganization,
@@ -424,11 +416,7 @@
 						}}
 					/>
 				{:else if activeMobileTab === 'billing'}
-					<h6
-						class="border-surface-300-700 text-surface-700-300 mb-6 border-b pb-6 text-center text-sm font-medium"
-					>
-						Billing
-					</h6>
+					<h6 class="h6 pb-6 pl-10">Billing</h6>
 				{/if}
 			</div>
 		</div>
