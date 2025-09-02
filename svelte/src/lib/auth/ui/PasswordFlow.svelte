@@ -6,6 +6,7 @@
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
+	import { Eye, EyeOff } from '@lucide/svelte';
 
 	interface PasswordFlowProps {
 		email: string;
@@ -31,6 +32,7 @@
 	let mode = $state<'login' | 'register'>('login');
 	let showForgotPasswordDialog = $state(false);
 	let isRequestingReset = $state(false);
+	let showPassword = $state(false);
 
 	// Determine if this is login or register based on email
 	$effect(() => {
@@ -52,6 +54,13 @@
 		};
 		validateEmail();
 	});
+
+	/**
+	 * Toggles password visibility
+	 */
+	function togglePasswordVisibility(): void {
+		showPassword = !showPassword;
+	}
 
 	/**
 	 * Handles form submission for login or register
@@ -191,14 +200,29 @@
 					</button>
 				{/if}
 			</div>
-			<input
-				name="password"
-				type="password"
-				class="input preset-filled-surface-200"
-				placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
-				required
-				disabled={submitting}
-			/>
+			<div class="relative">
+				<input
+					name="password"
+					type={showPassword ? 'text' : 'password'}
+					class="input preset-filled-surface-200 pr-10"
+					placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
+					required
+					disabled={submitting}
+				/>
+				<button
+					type="button"
+					onclick={togglePasswordVisibility}
+					class="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 hover:text-gray-700 focus:text-gray-700 focus:outline-none disabled:opacity-50"
+					disabled={submitting}
+					aria-label={showPassword ? 'Hide password' : 'Show password'}
+				>
+					{#if showPassword}
+						<Eye size={16} />
+					{:else}
+						<EyeOff size={16} />
+					{/if}
+				</button>
+			</div>
 		</div>
 	</div>
 

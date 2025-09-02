@@ -7,7 +7,7 @@
 	import { toast } from 'svelte-sonner';
 
 	// Icons
-	import { AlertTriangle } from '@lucide/svelte';
+	import { AlertTriangle, Eye, EyeOff } from '@lucide/svelte';
 
 	// API
 	import { authClient } from '$lib/auth/api/auth-client';
@@ -21,6 +21,8 @@
 	let confirmPassword: string = $state('');
 	let isSubmitting: boolean = $state(false);
 	let token: string | null = $state(null);
+	let showPassword: boolean = $state(false);
+	let showConfirmPassword: boolean = $state(false);
 
 	// Extract token from URL parameters and validate
 	onMount(() => {
@@ -36,6 +38,20 @@
 			resetState = 'invalid-token';
 		}
 	});
+
+	/**
+	 * Toggles password visibility for new password field
+	 */
+	function togglePasswordVisibility(): void {
+		showPassword = !showPassword;
+	}
+
+	/**
+	 * Toggles password visibility for confirm password field
+	 */
+	function toggleConfirmPasswordVisibility(): void {
+		showConfirmPassword = !showConfirmPassword;
+	}
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -91,6 +107,8 @@
 		resetState = 'valid-token';
 		password = '';
 		confirmPassword = '';
+		showPassword = false;
+		showConfirmPassword = false;
 	}
 </script>
 
@@ -136,30 +154,62 @@
 					<div class="flex flex-col gap-5">
 						<div class="flex flex-col">
 							<label for="new-password" class="label">New Password</label>
-							<input
-								id="new-password"
-								type="password"
-								bind:value={password}
-								class="input preset-filled-surface-200"
-								placeholder="Enter your new password"
-								required
-								minlength="8"
-								disabled={isSubmitting}
-							/>
+							<div class="relative">
+								<input
+									id="new-password"
+									type={showPassword ? 'text' : 'password'}
+									bind:value={password}
+									class="input preset-filled-surface-200 pr-10"
+									placeholder="Enter your new password"
+									required
+									minlength="8"
+									disabled={isSubmitting}
+								/>
+								<button
+									type="button"
+									onclick={togglePasswordVisibility}
+									class="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 hover:text-gray-700 focus:text-gray-700 focus:outline-none disabled:opacity-50"
+									disabled={isSubmitting}
+									aria-label={showPassword ? 'Hide password' : 'Show password'}
+								>
+									{#if showPassword}
+										<Eye size={16} />
+									{:else}
+										<EyeOff size={16} />
+									{/if}
+								</button>
+							</div>
 						</div>
 
 						<div class="flex flex-col">
 							<label for="confirm-password" class="label"> Confirm New Password </label>
-							<input
-								id="confirm-password"
-								type="password"
-								bind:value={confirmPassword}
-								class="input preset-filled-surface-200"
-								placeholder="Confirm your new password"
-								required
-								minlength="8"
-								disabled={isSubmitting}
-							/>
+							<div class="relative">
+								<input
+									id="confirm-password"
+									type={showConfirmPassword ? 'text' : 'password'}
+									bind:value={confirmPassword}
+									class="input preset-filled-surface-200 pr-10"
+									placeholder="Confirm your new password"
+									required
+									minlength="8"
+									disabled={isSubmitting}
+								/>
+								<button
+									type="button"
+									onclick={toggleConfirmPasswordVisibility}
+									class="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 hover:text-gray-700 focus:text-gray-700 focus:outline-none disabled:opacity-50"
+									disabled={isSubmitting}
+									aria-label={showConfirmPassword
+										? 'Hide confirm password'
+										: 'Show confirm password'}
+								>
+									{#if showConfirmPassword}
+										<Eye size={16} />
+									{:else}
+										<EyeOff size={16} />
+									{/if}
+								</button>
+							</div>
 						</div>
 					</div>
 
