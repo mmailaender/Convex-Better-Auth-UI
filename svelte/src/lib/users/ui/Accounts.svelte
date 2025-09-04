@@ -412,7 +412,7 @@
 				collection={selectCollection.collection()}
 				onSelect={(e) => linkAccount(e.value)}
 			>
-				<Select.Trigger class=" w-full">Link new account</Select.Trigger>
+				<Select.Trigger class="w-full">Link new account</Select.Trigger>
 				<Select.Positioner>
 					<Select.Content>
 						<Select.Group>
