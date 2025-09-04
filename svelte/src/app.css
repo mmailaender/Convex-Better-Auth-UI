@@ -40,8 +40,8 @@
 	--color-secondary-foreground: var(--color-secondary-contrast-500);
 	--color-muted: var(--color-surface-100-900);
 	--color-muted-foreground: var(--color-surface-contrast-100-900);
-	--color-accent: var(--color-primary-600-400);
-	--color-accent-foreground: var(--color-surface-contrast-600-400);
+	--color-accent: var(--color-primary-200-800);
+	--color-accent-foreground: var(--color-primary-contrast-200-800);
 	--color-destructive: var(--color-error-500);
 	--color-border: var(--color-surface-300-700);
 	--color-input: var(--color-surface-100-900);

@@ -20,6 +20,7 @@
 	import { useListCollection } from '@ark-ui/svelte/select';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Password from '$lib/primitives/ui/password';
 	import { toast } from 'svelte-sonner';
 
 	// Icons
@@ -193,19 +194,24 @@
 
 	const handlePasswordSubmit = async (event: SubmitEvent) => {
 		event.preventDefault();
-		if (!password.trim()) {
-			toast.error('Password cannot be empty');
+		// Use native HTML constraint validation so Password minScore (via setCustomValidity)
+		// and required attribute actually block submission and show messages.
+		const formEl = event.currentTarget as HTMLFormElement | null;
+		if (formEl && !formEl.checkValidity()) {
+			formEl.reportValidity();
 			return;
 		}
 
 		isSettingPassword = true;
 		try {
-			await setPassword(password);
-			isPasswordDialogOpen = false;
-			isPasswordDrawerOpen = false;
-			password = '';
+			const success = await setPassword(password);
+			if (success) {
+				isPasswordDialogOpen = false;
+				isPasswordDrawerOpen = false;
+				password = '';
+			}
 		} catch (error) {
-			// Error handling is already done in setPassword function
+			// No-op, errors are handled in setPassword
 		} finally {
 			isSettingPassword = false;
 		}
@@ -237,10 +243,11 @@
 		unlinkingAccountId = null;
 	};
 
-	const setPassword = async (password: string) => {
+	const setPassword = async (password: string): Promise<boolean> => {
 		try {
 			await client.mutation(api.users.mutations.setPassword, { password });
 			toast.success('Password set successfully');
+			return true;
 		} catch (error) {
 			if (error instanceof ConvexError) {
 				toast.error(error.data);
@@ -249,6 +256,7 @@
 			} else {
 				toast.error('Failed to set password');
 			}
+			return false;
 		}
 	};
 
@@ -363,15 +371,18 @@
 											required
 											disabled={isChangingPassword}
 										/>
-										<input
-											type="password"
-											class="input w-full"
-											bind:value={newPassword}
-											placeholder="Enter your new password"
-											autocomplete="new-password"
-											required
-											disabled={isChangingPassword}
-										/>
+										<Password.Root>
+											<Password.Input
+												bind:value={newPassword}
+												placeholder="Enter your new password"
+												autocomplete="new-password"
+												required
+												disabled={isChangingPassword}
+											>
+												<Password.ToggleVisibility />
+											</Password.Input>
+											<Password.Strength />
+										</Password.Root>
 										<div class="flex gap-1.5">
 											<button
 												type="button"
@@ -453,13 +464,12 @@
 				<div class="flex flex-col gap-4">
 					<label class="flex flex-col gap-2">
 						<span class="text-sm font-medium">Password</span>
-						<input
-							type="password"
-							class="input w-full"
-							bind:value={password}
-							placeholder="Enter your password"
-							required
-						/>
+						<Password.Root>
+							<Password.Input bind:value={password} placeholder="Enter your password" required>
+								<Password.ToggleVisibility />
+							</Password.Input>
+							<Password.Strength />
+						</Password.Root>
 					</label>
 					<Dialog.Footer>
 						<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
@@ -501,13 +511,12 @@
 				<div class="flex flex-col gap-4">
 					<label class="flex flex-col gap-2">
 						<span class="text-sm font-medium">Password</span>
-						<input
-							type="password"
-							class="input w-full"
-							bind:value={password}
-							placeholder="Enter your password"
-							required
-						/>
+						<Password.Root>
+							<Password.Input bind:value={password} placeholder="Enter your password" required>
+								<Password.ToggleVisibility />
+							</Password.Input>
+							<Password.Strength />
+						</Password.Root>
 					</label>
 					<Drawer.Footer>
 						<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>

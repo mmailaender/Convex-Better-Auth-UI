@@ -131,7 +131,7 @@
 						class="max-h-[calc(90vh-12rem)] overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
 					>
 						<table class="table w-full !table-fixed">
-							<thead class=" border-surface-300-700 sticky top-0 z-20 border-b">
+							<thead class="border-surface-300-700 sticky top-0 z-20 border-b">
 								<tr>
 									<th class="text-surface-700-300 w-64 truncate p-2 !pl-0 text-left text-xs">
 										User
