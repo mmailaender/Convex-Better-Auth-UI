@@ -390,13 +390,10 @@
 			}}
 		>
 			<Dialog.Content
-				class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-[50%] md:left-[50%] md:h-[70vh] md:w-2xl md:translate-x-[-50%] md:translate-y-[-50%] lg:w-4xl ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
+				class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-1/2 md:left-1/2 md:h-[70vh] md:w-2xl md:-translate-x-1/2 md:-translate-y-1/2 lg:w-4xl ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
 			>
-				<Dialog.Header class="hidden">
-					<Dialog.Title></Dialog.Title>
-				</Dialog.Header>
 				<div
-					class="h-full w-full overflow-scroll overscroll-contain"
+					class="h-full w-full overflow-auto overscroll-contain"
 					onfocusin={(e) => {
 						const el = e.target as HTMLElement | null;
 						if (!el) return;

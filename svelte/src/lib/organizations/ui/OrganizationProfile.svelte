@@ -271,7 +271,7 @@
 <Tabs.Root
 	bind:value={activeDesktopTab}
 	orientation="vertical"
-	class="relative h-full overflow-scroll"
+	class="relative h-full overflow-auto"
 >
 	<!-- Desktop Layout -->
 	<div class="hidden h-full w-full md:flex">
