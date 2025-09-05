@@ -114,9 +114,9 @@
 
 <div class="flex h-screen w-full flex-col items-center justify-center">
 	<div class="flex h-full w-full max-w-md flex-col p-8">
-		<div class="mb-10">
+		<div class="mb-4">
 			<h1 class="h5 w-full text-left leading-8">
-				{resetState === 'valid-token' ? 'Reset your password' : 'Password Reset'}
+				{resetState === 'valid-token' ? 'Reset your password' : 'Invalid or Expired Link'}
 			</h1>
 			{#if resetState === 'valid-token'}
 				<p class="text-surface-600-400 mt-2 max-w-96 text-left text-sm">
@@ -134,12 +134,8 @@
 					<p class="text-surface-600-400 text-sm">Verifying reset link...</p>
 				</div>
 			{:else if resetState === 'invalid-token'}
-				<div class="flex flex-col items-center gap-6">
-					<div class="bg-error-500/10 text-error-500 rounded-full p-3">
-						<AlertTriangle class="size-6" />
-					</div>
-					<div class="text-center">
-						<h2 class="text-surface-950-50 text-xl font-semibold">Invalid or Expired Link</h2>
+				<div class="flex flex-col gap-6">
+					<div>
 						<p class="text-surface-600-400 mt-2 text-sm">
 							This password reset link is invalid or has expired.
 							<br />
