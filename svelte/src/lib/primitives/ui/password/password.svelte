@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { box } from 'svelte-toolbelt';
-	import { usePassword } from './password.svelte.js';
+	import { usePassword, usePasswordError } from './password.svelte.js';
 	import type { PasswordRootProps } from './types';
 	import { cn } from '$lib/primitives/utils.js';
 
@@ -9,15 +9,32 @@
 		hidden = $bindable(true),
 		minScore = 3,
 		class: className,
-		children
+		children,
+		onerror
 	}: PasswordRootProps = $props();
 
+	// Set up password context
 	usePassword({
 		hidden: box.with(
 			() => hidden,
 			(v) => (hidden = v)
 		),
 		minScore: box.with(() => minScore)
+	});
+
+	// Derive error state and invoke callback when present
+	const errorState = usePasswordError();
+	let lastErrorMsg: string | null = $state(null);
+	$effect(() => {
+		const msg = errorState.message;
+		if (!msg) {
+			lastErrorMsg = null;
+			return;
+		}
+		if (msg !== lastErrorMsg) {
+			onerror?.({ message: msg });
+			lastErrorMsg = msg;
+		}
 	});
 </script>
 

@@ -21,8 +21,8 @@
 			score: {
 				0: 'bg-error-500',
 				1: 'bg-error-500',
-				2: 'bg-warning-500',
-				3: 'bg-warning-500',
+				2: 'bg-warning-700',
+				3: 'bg-warning-300',
 				4: 'bg-success-500'
 			}
 		}

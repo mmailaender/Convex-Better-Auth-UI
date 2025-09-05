@@ -194,11 +194,11 @@
 
 	const handlePasswordSubmit = async (event: SubmitEvent) => {
 		event.preventDefault();
-		// Use native HTML constraint validation so Password minScore (via setCustomValidity)
-		// and required attribute actually block submission and show messages.
-		const formEl = event.currentTarget as HTMLFormElement | null;
-		if (formEl && !formEl.checkValidity()) {
-			formEl.reportValidity();
+
+		const form = event.currentTarget as HTMLFormElement;
+		form.dataset.submitted = 'true';
+		if (!form.checkValidity()) {
+			form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
 			return;
 		}
 
@@ -262,6 +262,12 @@
 
 	const handleChangePasswordSubmit = async (event: SubmitEvent) => {
 		event.preventDefault();
+		const form = event.currentTarget as HTMLFormElement;
+		form.dataset.submitted = 'true';
+		if (!form.checkValidity()) {
+			form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+			return;
+		}
 		if (!currentPassword.trim() || !newPassword.trim()) {
 			toast.error('Please fill in both fields');
 			return;
@@ -381,6 +387,7 @@
 											>
 												<Password.ToggleVisibility />
 											</Password.Input>
+											<Password.Error />
 											<Password.Strength />
 										</Password.Root>
 										<div class="flex gap-1.5">
@@ -468,6 +475,7 @@
 							<Password.Input bind:value={password} placeholder="Enter your password" required>
 								<Password.ToggleVisibility />
 							</Password.Input>
+							<Password.Error />
 							<Password.Strength />
 						</Password.Root>
 					</label>
@@ -515,6 +523,7 @@
 							<Password.Input bind:value={password} placeholder="Enter your password" required>
 								<Password.ToggleVisibility />
 							</Password.Input>
+							<Password.Error />
 							<Password.Strength />
 						</Password.Root>
 					</label>

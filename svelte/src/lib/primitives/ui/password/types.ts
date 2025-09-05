@@ -12,9 +12,11 @@ export type PasswordRootPropsWithoutHTML = WithChildren<{
 	 * @default 3
 	 */
 	minScore?: 0 | 1 | 2 | 3 | 4;
+	/** Callback invoked when the password has a validation error message available. */
+	onerror?: (detail: { message: string }) => void;
 }>;
 
-export type PasswordRootProps = WithoutChildren<HTMLAttributes<HTMLDivElement>> &
+export type PasswordRootProps = Omit<WithoutChildren<HTMLAttributes<HTMLDivElement>>, 'onerror'> &
 	PasswordRootPropsWithoutHTML;
 
 export type PasswordInputPropsWithoutHTML = WithChildren<{

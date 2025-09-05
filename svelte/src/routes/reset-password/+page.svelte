@@ -5,13 +5,14 @@
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
+	import * as Password from '$lib/primitives/ui/password';
 
 	// Icons
-	import { AlertTriangle, Eye, EyeOff } from '@lucide/svelte';
+	import { AlertTriangle } from '@lucide/svelte';
 
 	// API
 	import { authClient } from '$lib/auth/api/auth-client';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	type ResetState = 'loading' | 'valid-token' | 'invalid-token' | 'error';
 
@@ -21,7 +22,6 @@
 	let confirmPassword: string = $state('');
 	let isSubmitting: boolean = $state(false);
 	let token: string | null = $state(null);
-	let showPassword: boolean = $state(false);
 	let showConfirmPassword: boolean = $state(false);
 
 	// Extract token from URL parameters and validate
@@ -39,30 +39,18 @@
 		}
 	});
 
-	/**
-	 * Toggles password visibility for new password field
-	 */
-	function togglePasswordVisibility(): void {
-		showPassword = !showPassword;
-	}
-
-	/**
-	 * Toggles password visibility for confirm password field
-	 */
-	function toggleConfirmPasswordVisibility(): void {
-		showConfirmPassword = !showConfirmPassword;
-	}
-
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 
-		if (password !== confirmPassword) {
-			toast.error('Passwords do not match');
+		const form = event.currentTarget as HTMLFormElement;
+		form.dataset.submitted = 'true';
+		if (!form.checkValidity()) {
+			form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
 			return;
 		}
 
-		if (password.length < 8) {
-			toast.error('Password must be at least 8 characters long');
+		if (password !== confirmPassword) {
+			toast.error('Passwords do not match');
 			return;
 		}
 
@@ -107,8 +95,6 @@
 		resetState = 'valid-token';
 		password = '';
 		confirmPassword = '';
-		showPassword = false;
-		showConfirmPassword = false;
 	}
 </script>
 
@@ -149,68 +135,38 @@
 					<a href="/signin" class="btn preset-filled">Back to Sign In</a>
 				</div>
 			{:else if resetState === 'valid-token'}
-				<form onsubmit={handleSubmit} class="flex w-full flex-col gap-8">
+				<form onsubmit={handleSubmit} novalidate class="flex w-full flex-col gap-8">
 					<!-- Inputs -->
 					<div class="flex flex-col gap-5">
-						<div class="flex flex-col">
-							<label for="new-password" class="label">New Password</label>
-							<div class="relative">
-								<input
-									id="new-password"
-									type={showPassword ? 'text' : 'password'}
+						<label for="new-password" class="label">
+							<span>New Password</span>
+							<Password.Root>
+								<Password.Input
 									bind:value={password}
-									class="input preset-filled-surface-200 pr-10"
 									placeholder="Enter your new password"
 									required
-									minlength="8"
 									disabled={isSubmitting}
-								/>
-								<button
-									type="button"
-									onclick={togglePasswordVisibility}
-									class="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 hover:text-gray-700 focus:text-gray-700 focus:outline-none disabled:opacity-50"
-									disabled={isSubmitting}
-									aria-label={showPassword ? 'Hide password' : 'Show password'}
 								>
-									{#if showPassword}
-										<Eye size={16} />
-									{:else}
-										<EyeOff size={16} />
-									{/if}
-								</button>
-							</div>
-						</div>
+									<Password.ToggleVisibility />
+								</Password.Input>
+								<Password.Error />
+								<Password.Strength />
+							</Password.Root>
+						</label>
 
-						<div class="flex flex-col">
-							<label for="confirm-password" class="label"> Confirm New Password </label>
-							<div class="relative">
-								<input
-									id="confirm-password"
-									type={showConfirmPassword ? 'text' : 'password'}
+						<label for="confirm-password" class="label">
+							<span>Confirm New Password</span>
+							<Password.Root minScore={0}>
+								<Password.Input
 									bind:value={confirmPassword}
-									class="input preset-filled-surface-200 pr-10"
-									placeholder="Confirm your new password"
+									placeholder="Enter your new password"
 									required
-									minlength="8"
 									disabled={isSubmitting}
-								/>
-								<button
-									type="button"
-									onclick={toggleConfirmPasswordVisibility}
-									class="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 hover:text-gray-700 focus:text-gray-700 focus:outline-none disabled:opacity-50"
-									disabled={isSubmitting}
-									aria-label={showConfirmPassword
-										? 'Hide confirm password'
-										: 'Show confirm password'}
 								>
-									{#if showConfirmPassword}
-										<Eye size={16} />
-									{:else}
-										<EyeOff size={16} />
-									{/if}
-								</button>
-							</div>
-						</div>
+									<Password.ToggleVisibility />
+								</Password.Input>
+							</Password.Root>
+						</label>
 					</div>
 
 					<div class="flex flex-col gap-2">
