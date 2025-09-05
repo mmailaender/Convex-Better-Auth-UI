@@ -32,7 +32,11 @@
 	const mobileState = useMobileState();
 	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
 
-	let { initialData }: { initialData?: any } = $props();
+	// Types
+	import type { FunctionReturnType } from 'convex/server';
+
+	let { initialData }: { initialData?: FunctionReturnType<typeof api.users.queries.listAccounts> } =
+		$props();
 
 	let accountListResponse = useQuery(api.users.queries.listAccounts, {}, { initialData });
 	let accountList = $derived(accountListResponse.data);

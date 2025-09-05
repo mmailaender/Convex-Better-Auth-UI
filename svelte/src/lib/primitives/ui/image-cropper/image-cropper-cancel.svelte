@@ -27,6 +27,6 @@
 		cancelState.onclick();
 	}}
 >
-	<Trash2Icon />
+	<Trash2Icon class="size-5" />
 	<span>Cancel</span>
 </button>
