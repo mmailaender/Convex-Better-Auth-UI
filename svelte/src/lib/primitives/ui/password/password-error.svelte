@@ -27,7 +27,10 @@
 			const inp = error.inputEl;
 			if (!inp) return;
 			const cur = inp.getAttribute('aria-describedby') ?? '';
-			const parts = cur.split(/\s+/).filter(Boolean).filter((x) => x !== id);
+			const parts = cur
+				.split(/\s+/)
+				.filter(Boolean)
+				.filter((x) => x !== id);
 			if (parts.length) inp.setAttribute('aria-describedby', parts.join(' '));
 			else inp.removeAttribute('aria-describedby');
 		};
@@ -35,7 +38,12 @@
 </script>
 
 {#if message}
-	<span id={id || undefined} class={cn('text-error-600-400 text-xs mt-1', className)} aria-live="polite" role="status">
+	<span
+		id={id || undefined}
+		class={cn('text-error-600-400 pb-1 text-xs', className)}
+		aria-live="polite"
+		role="status"
+	>
 		{message}
 	</span>
 {/if}

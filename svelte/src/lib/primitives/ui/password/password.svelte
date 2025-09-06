@@ -38,6 +38,6 @@
 	});
 </script>
 
-<div bind:this={ref} class={cn('flex flex-col gap-2', className)}>
+<div bind:this={ref} class={cn('flex flex-col gap-1.5', className)}>
 	{@render children?.()}
 </div>
