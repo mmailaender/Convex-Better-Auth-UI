@@ -263,8 +263,17 @@
 						onclick={() => handleSocialSignIn('github')}
 						disabled={submitting}
 					>
-						<SiGithub size={16} />
-						Sign in with GitHub
+						{#if submitting}
+							<div class="flex items-center gap-2">
+								<div
+									class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+								></div>
+								Signing in...
+							</div>
+						{:else}
+							<SiGithub size={16} />
+							Sign in with GitHub
+						{/if}
 					</button>
 
 					{#if availableMethods.length > 0}

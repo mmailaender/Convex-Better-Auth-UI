@@ -21,6 +21,7 @@
 
 	const client = useConvexClient();
 	let validatingEmail = $state(false);
+	let validatingEmailMethod = $state<AuthMethod | null>(null);
 
 	/**
 	 * Gets the button text for single method scenarios
@@ -52,6 +53,7 @@
 
 		// Always validate the email before proceeding to any flow
 		validatingEmail = true;
+		validatingEmailMethod = method;
 		try {
 			const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
 				email
@@ -66,6 +68,7 @@
 			console.error('Email validation error:', error);
 		} finally {
 			validatingEmail = false;
+			validatingEmailMethod = null;
 		}
 	}
 </script>
@@ -95,7 +98,14 @@
 			class="btn preset-filled w-full"
 			disabled={submitting || validatingEmail || !email}
 		>
-			{validatingEmail ? 'Verifying...' : getSingleMethodButtonText()}
+			{#if validatingEmail}
+				<div class="flex items-center gap-2">
+					<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+					Verifying...
+				</div>
+			{:else}
+				{getSingleMethodButtonText()}
+			{/if}
 		</button>
 	{:else}
 		<!-- Multiple methods available -->
@@ -107,7 +117,14 @@
 					class="btn preset-filled w-full"
 					disabled={submitting || validatingEmail || !email}
 				>
-					{validatingEmail ? 'Verifying...' : 'Continue with Password'}
+					{#if validatingEmail && validatingEmailMethod === 'password'}
+						<div class="flex items-center gap-2">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							Verifying...
+						</div>
+					{:else}
+						Continue with Password
+					{/if}
 				</button>
 			{/if}
 
@@ -116,9 +133,16 @@
 					type="button"
 					onclick={() => handleMethodClick('emailOTP')}
 					class="btn preset-tonal w-full"
-					disabled={submitting || !email}
+					disabled={submitting || validatingEmail || !email}
 				>
-					Continue with Email OTP
+					{#if validatingEmail && validatingEmailMethod === 'emailOTP'}
+						<div class="flex items-center gap-2">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							Verifying...
+						</div>
+					{:else}
+						Continue with Email OTP
+					{/if}
 				</button>
 			{/if}
 
@@ -127,9 +151,16 @@
 					type="button"
 					onclick={() => handleMethodClick('magicLink')}
 					class="btn preset-tonal w-full"
-					disabled={submitting || !email}
+					disabled={submitting || validatingEmail || !email}
 				>
-					Continue with Magic Link
+					{#if validatingEmail && validatingEmailMethod === 'magicLink'}
+						<div class="flex items-center gap-2">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							Verifying...
+						</div>
+					{:else}
+						Continue with Magic Link
+					{/if}
 				</button>
 			{/if}
 		</div>
