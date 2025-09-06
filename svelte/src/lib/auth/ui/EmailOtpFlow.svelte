@@ -169,7 +169,7 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="flex flex-col gap-8">
+<form onsubmit={handleSubmit} autocomplete="off" class="flex flex-col gap-8">
 	<!-- Inputs -->
 	<div class="flex flex-col gap-5">
 		<div class="flex flex-col">
@@ -190,6 +190,7 @@
 					bind:value={name}
 					class="input preset-filled-surface-200"
 					placeholder="Enter your full name"
+					autocomplete="name"
 					required
 					disabled={submitting || !otpSent}
 				/>
@@ -206,6 +207,7 @@
 				pattern="[0-9]*"
 				inputmode="numeric"
 				maxlength="6"
+				autocomplete="one-time-code"
 				required
 				disabled={!otpSent}
 			/>

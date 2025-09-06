@@ -50,6 +50,10 @@
 	let signInDialogOpen = $state(false);
 	let avatarStatus = $state('');
 
+	// Ensure SignIn form resets every time the dialog opens
+	let signInKey = $state(0);
+	let prevSignInDialogOpen = false;
+
 	// iOS back-swipe handling (mirrors OrganizationSwitcher)
 	let isIOS: boolean = $state(false);
 	let suppressDialogTransition: boolean = $state(false);
@@ -166,6 +170,14 @@
 			setTimeout(() => (suppressDialogTransition = false), 100);
 		}
 	});
+
+	// Bump key when dialog transitions from closed -> open to remount SignIn
+	$effect(() => {
+		if (signInDialogOpen && !prevSignInDialogOpen) {
+			signInKey += 1;
+		}
+		prevSignInDialogOpen = signInDialogOpen;
+	});
 </script>
 
 {#if isLoading}
@@ -267,11 +279,21 @@
 {/if}
 
 <!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
-<Dialog.Root bind:open={signInDialogOpen}>
+<Dialog.Root
+  bind:open={signInDialogOpen}
+  onOpenChange={(status) => {
+    // When dialog closes, bump the key so next open is a fresh mount
+    if (!status.open) {
+      signInKey += 1;
+    }
+  }}
+>
 	<Dialog.Content
 		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
 	>
-		<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
+		{#key signInKey}
+			<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
+		{/key}
 		<Dialog.CloseX />
 	</Dialog.Content>
 </Dialog.Root>

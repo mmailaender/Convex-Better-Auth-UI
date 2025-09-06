@@ -153,7 +153,7 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="flex flex-col gap-8">
+<form onsubmit={handleSubmit} autocomplete="off" class="flex flex-col gap-8">
 	<!-- Inputs -->
 	<div class="flex flex-col gap-5">
 		<div class="flex flex-col">
@@ -198,6 +198,7 @@
 				<Password.Input
 					name="password"
 					placeholder={mode === 'register' ? 'Create a password' : 'Enter your password'}
+					autocomplete={mode === 'register' ? 'new-password' : 'current-password'}
 					required
 					disabled={submitting}
 				>

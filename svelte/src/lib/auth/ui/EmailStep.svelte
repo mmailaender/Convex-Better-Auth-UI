@@ -77,6 +77,7 @@
 			id="email"
 			name="email"
 			type="email"
+			autocomplete="email"
 			value={email}
 			oninput={(e) => onEmailChange(e.currentTarget.value)}
 			class="input preset-filled-surface-200 text-sm"

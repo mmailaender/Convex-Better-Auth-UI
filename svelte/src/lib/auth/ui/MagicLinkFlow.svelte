@@ -153,7 +153,7 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+<form onsubmit={handleSubmit} autocomplete="off" class="flex flex-col gap-4">
 	<div class="flex flex-col gap-2">
 		<label class="label" for="email">Email</label>
 		<input
@@ -172,6 +172,7 @@
 				bind:value={name}
 				class="input preset-filled-surface-200"
 				placeholder="Enter your full name"
+				autocomplete="name"
 				required
 				disabled={submitting || linkSent}
 			/>
