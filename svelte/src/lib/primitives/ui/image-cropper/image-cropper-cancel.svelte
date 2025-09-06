@@ -16,7 +16,7 @@
 <button
 	{...rest}
 	bind:this={ref}
-	class={cn('btn preset-outlined-surface-500', className)}
+	class={cn('btn preset-tonal', className)}
 	onclick={(
 		e: MouseEvent & {
 			currentTarget: EventTarget & HTMLButtonElement;
@@ -27,6 +27,5 @@
 		cancelState.onclick();
 	}}
 >
-	<Trash2Icon class="size-5" />
 	<span>Cancel</span>
 </button>
