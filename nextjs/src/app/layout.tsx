@@ -20,7 +20,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" data-theme="authapp">
+		<html lang="en" data-theme="auth">
 			<body className={`grid h-screen grid-rows-[auto_1fr] antialiased`}>
 				<ConvexClientProvider>
 					<div className="flex items-center justify-between gap-5 p-4">

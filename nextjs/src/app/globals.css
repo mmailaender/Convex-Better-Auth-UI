@@ -4,7 +4,7 @@
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
 @import '@skeletonlabs/skeleton/themes/cerberus';
-@import '../../../authapptheme.css';
+@import '../../../themes/auth.css';
 @import 'tw-animate-css';
 
 @source '../../node_modules/@skeletonlabs/skeleton-react/dist';
