@@ -238,7 +238,7 @@
 				</div>
 			</ImageCropper.UploadTrigger>
 			<ImageCropper.Dialog>
-				<ImageCropper.Cropper />
+				<ImageCropper.Cropper cropShape="rect" />
 				<ImageCropper.Controls>
 					<ImageCropper.Cancel />
 					<ImageCropper.Crop />
