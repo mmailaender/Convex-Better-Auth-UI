@@ -59,6 +59,16 @@
 	let currentPasswordInputEl: HTMLInputElement | null = $state(null);
 	let isMobile = $derived(mobileState.isMobile);
 
+	// Auto-scroll inline Update Password form into view on mobile when opened
+	$effect(() => {
+		if (isMobile && isEditingPasswordInline && currentPasswordInputEl) {
+			// Let layout settle then scroll; scheduleScrollIntoView is keyboard-aware
+			requestAnimationFrame(() =>
+				scheduleScrollIntoView(currentPasswordInputEl as HTMLElement, { block: 'center' })
+			);
+		}
+	});
+
 	// Get available providers (only enabled ones, exclude emailOTP and magicLink)
 	const allProviders = Object.keys(AUTH_CONSTANTS.providers).filter(
 		(provider) =>
