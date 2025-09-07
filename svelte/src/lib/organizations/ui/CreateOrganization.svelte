@@ -277,3 +277,9 @@
 		</div>
 	</form>
 {/if}
+
+<style>
+	:global(.svelte-easy-crop-area) {
+		border-radius: var(--radius-container);
+	}
+</style>
