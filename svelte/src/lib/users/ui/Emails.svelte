@@ -83,16 +83,16 @@
 		<!-- Inline editable email (matches ProfileInfo.svelte UX) -->
 		<div
 			class={[
-				'border-surface-300-700 rounded-container relative w-full border py-2 pr-3 pl-4 transition-all duration-200 ease-in-out',
+				'border-surface-300-700 rounded-container relative w-full border px-3.5 py-2 transition-all duration-200 ease-in-out',
 				{
 					'cursor-pointer': !isEditingEmail,
-					'hover:bg-surface-50-950': !isEditingEmail,
-					'hover:border-surface-50-950': !isEditingEmail
+					'hover:bg-surface-200-800': !isEditingEmail,
+					'hover:border-surface-200-800': !isEditingEmail
 				}
 			]}
 		>
 			<div class="flex items-center justify-between gap-3 transition-all duration-200 ease-in-out">
-				<div class="flex w-full flex-col gap-0">
+				<div class="flex w-full flex-col">
 					<span class="text-surface-600-400 text-xs">Email Address</span>
 					<!-- View mode (collapses when editing) -->
 					<div
@@ -106,7 +106,7 @@
 					>
 						<div class="overflow-hidden">
 							<div class="flex items-center gap-2">
-								<span class="text-surface-800-200 truncate font-medium">{activeUser.email}</span>
+								<span class="truncate text-sm">{activeUser.email}</span>
 								{#if activeUser.emailVerified}
 									<span class="badge preset-filled-success-100-900 text-xs">Verified</span>
 								{:else}
@@ -127,7 +127,7 @@
 						inert={!isEditingEmail}
 					>
 						<div class="overflow-hidden">
-							<form onsubmit={handleSubmit} class="flex w-full flex-col gap-3">
+							<form onsubmit={handleSubmit} class="flex flex-col gap-3">
 								<input
 									bind:this={emailInputEl}
 									type="email"
@@ -137,10 +137,10 @@
 									required
 									disabled={isSubmitting}
 								/>
-								<div class="flex gap-2">
+								<div class="mb-1 flex gap-1.5">
 									<button
 										type="button"
-										class="btn preset-tonal w-full md:w-fit"
+										class="btn btn-sm preset-tonal w-full"
 										onclick={() => {
 											newEmail = activeUser.email;
 											isEditingEmail = false;
@@ -151,7 +151,7 @@
 									</button>
 									<button
 										type="submit"
-										class="btn preset-filled-primary-500 w-full md:w-fit"
+										class="btn btn-sm preset-filled-primary-500 w-full"
 										disabled={isSubmitting ||
 											!newEmail ||
 											newEmail.trim() === '' ||
@@ -167,7 +167,7 @@
 				<!-- Edit affordance and full-area overlay button in view mode -->
 				{#if !isEditingEmail}
 					<div class="shrink-0">
-						<span class="btn preset-filled-surface-200-800 pointer-events-none p-2">
+						<span class=" btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
 							<Pencil class="size-4" />
 						</span>
 					</div>

@@ -39,14 +39,14 @@
 	<Dialog.Content class="md:max-w-108">
 		<Dialog.Header>
 			<Dialog.Title>Delete your account</Dialog.Title>
-			<Dialog.Description class="text-surface-700-300">
+			<Dialog.Description class="text-surface-700-300 px-6">
 				Are you sure you want to delete your account? All of your data will be permanently deleted.
 			</Dialog.Description>
 		</Dialog.Header>
-		<Dialog.Footer>
+		<Dialog.Footer class="w-full p-6">
 			<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
 			<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
-				Confirm
+				Delete
 			</button>
 		</Dialog.Footer>
 	</Dialog.Content>

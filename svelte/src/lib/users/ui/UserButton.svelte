@@ -50,6 +50,10 @@
 	let signInDialogOpen = $state(false);
 	let avatarStatus = $state('');
 
+	// Ensure SignIn form resets every time the dialog opens
+	let signInKey = $state(0);
+	let prevSignInDialogOpen = false;
+
 	// iOS back-swipe handling (mirrors OrganizationSwitcher)
 	let isIOS: boolean = $state(false);
 	let suppressDialogTransition: boolean = $state(false);
@@ -166,6 +170,14 @@
 			setTimeout(() => (suppressDialogTransition = false), 100);
 		}
 	});
+
+	// Bump key when dialog transitions from closed -> open to remount SignIn
+	$effect(() => {
+		if (signInDialogOpen && !prevSignInDialogOpen) {
+			signInKey += 1;
+		}
+		prevSignInDialogOpen = signInDialogOpen;
+	});
 </script>
 
 {#if isLoading}
@@ -182,7 +194,7 @@
 		>
 			<Popover.Trigger>
 				<Avatar.Root
-					class="ring-surface-100-900 size-10 ring-0 duration-200 ease-out hover:ring-4"
+					class="ring-surface-100-900 size-9 ring-0 duration-200 ease-out hover:ring-4"
 					onStatusChange={(details) => (avatarStatus = details.status)}
 				>
 					<Avatar.Image src={user.image} alt={user.name} />
@@ -198,7 +210,7 @@
 			<Popover.Content>
 				<div class="flex flex-col gap-1 p-0">
 					<button
-						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-3 p-3 pr-6 duration-200 ease-in-out"
+						class="bg-surface-50-950 hover:bg-surface-100-900 rounded-container flex flex-row items-center gap-4 p-3 pr-6 duration-200 ease-in-out"
 						onclick={openProfileModal}
 					>
 						<Avatar.Root class="size-12">
@@ -208,8 +220,8 @@
 							</Avatar.Fallback>
 						</Avatar.Root>
 						<div class="flex flex-1 flex-col gap-0 overflow-hidden">
-							<p class="truncate text-left text-base font-medium">{user.name}</p>
-							<p class="text-surface-700-300 truncate text-left text-xs">
+							<p class="truncate text-left text-sm font-medium">{user.name}</p>
+							<p class="truncate text-left text-xs opacity-75">
 								{user.email}
 							</p>
 						</div>
@@ -234,16 +246,16 @@
 				}}
 			>
 				<Dialog.Content
-					class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh]
-		       w-full max-w-full translate-x-0 translate-y-0 rounded-none md:top-[50%]
-		       md:left-[50%] md:h-auto md:max-h-[80vh] md:w-auto
-		       md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%] ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
+					class={`md:rounded-container top-0 left-0 flex h-full max-h-[100dvh] w-full max-w-full
+		       translate-x-0 translate-y-0 flex-col items-start rounded-none md:top-[50%]
+		       md:left-[50%] md:h-auto md:max-h-[90vh] md:w-auto
+		        md:translate-x-[-50%] md:translate-y-[-50%] ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
 				>
 					<Dialog.Header>
 						<Dialog.Title>Profile</Dialog.Title>
 					</Dialog.Header>
 					<div
-						class="max-h-[100dvh] overflow-auto overscroll-contain p-2"
+						class=" max-h-[100dvh] w-full overflow-auto overscroll-contain p-6 md:w-[560px]"
 						onfocusin={(e) => {
 							const el = e.target as HTMLElement | null;
 							if (!el) return;
@@ -267,14 +279,21 @@
 {/if}
 
 <!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
-<Dialog.Root bind:open={signInDialogOpen}>
+<Dialog.Root
+  bind:open={signInDialogOpen}
+  onOpenChange={(status) => {
+    // When dialog closes, bump the key so next open is a fresh mount
+    if (!status.open) {
+      signInKey += 1;
+    }
+  }}
+>
 	<Dialog.Content
 		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
 	>
-		<Dialog.Header>
-			<Dialog.Title>Sign in</Dialog.Title>
-		</Dialog.Header>
-		<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
+		{#key signInKey}
+			<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
+		{/key}
 		<Dialog.CloseX />
 	</Dialog.Content>
 </Dialog.Root>

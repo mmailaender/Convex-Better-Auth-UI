@@ -10,8 +10,11 @@
 </script>
 
 <Dialog.Root bind:open={dialogState.rootState.open}>
-	<Dialog.Content {...rest} class={cn('min-h-96 max-w-full sm:max-w-lg', className)}>
-		<div class="flex flex-col gap-4">
+	<Dialog.Content
+		{...rest}
+		class={cn('max-h-[85vh] min-h-96 max-w-full p-4 sm:max-w-md sm:p-5', className)}
+	>
+		<div class="flex min-h-0 w-full flex-1 flex-col gap-4">
 			{@render children?.()}
 		</div>
 	</Dialog.Content>

@@ -49,6 +49,15 @@
 				const emailData = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
 					email
 				});
+				if (!emailData.valid) {
+					toast.error(emailData.reason || 'Please enter a valid email address.');
+					onSubmittingChange(false);
+					onAutoSendChange?.(false);
+					// Reset refs so user can go back and correct the email
+					linkSentRef.current = false;
+					emailChecked = false;
+					return;
+				}
 				mode = emailData.exists ? 'login' : 'register';
 				emailChecked = true;
 
@@ -144,9 +153,9 @@
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="flex flex-col gap-4">
+<form onsubmit={handleSubmit} autocomplete="off" class="flex flex-col gap-4">
 	<div class="flex flex-col gap-2">
-		<label class="text-surface-950-50 text-sm font-medium" for="email">Email</label>
+		<label class="label" for="email">Email</label>
 		<input
 			type="email"
 			value={email}
@@ -156,13 +165,14 @@
 	</div>
 
 	{#if mode === 'register' && emailChecked}
-		<div class="flex flex-col gap-2">
-			<label class="text-surface-950-50 text-sm font-medium" for="name">Full Name</label>
+		<div class="flex flex-col">
+			<label class="label" for="name">Full Name</label>
 			<input
 				type="text"
 				bind:value={name}
 				class="input preset-filled-surface-200"
 				placeholder="Enter your full name"
+				autocomplete="name"
 				required
 				disabled={submitting || linkSent}
 			/>
@@ -195,7 +205,7 @@
 		</div>
 	{/if}
 
-	<button type="button" class="anchor text-center text-sm" onclick={onBack} disabled={submitting}>
+	<button type="button" class="btn" onclick={onBack} disabled={submitting}>
 		Use a different email
 	</button>
 </form>

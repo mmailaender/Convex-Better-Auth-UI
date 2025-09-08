@@ -27,6 +27,6 @@
 		cropState.onclick();
 	}}
 >
-	<CropIcon />
+	<CropIcon class="size-4" />
 	<span>Crop</span>
 </button>

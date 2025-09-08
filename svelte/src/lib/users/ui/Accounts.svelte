@@ -20,6 +20,7 @@
 	import { useListCollection } from '@ark-ui/svelte/select';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Password from '$lib/primitives/ui/password';
 	import { toast } from 'svelte-sonner';
 
 	// Icons
@@ -31,7 +32,11 @@
 	const mobileState = useMobileState();
 	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
 
-	let { initialData }: { initialData?: any } = $props();
+	// Types
+	import type { FunctionReturnType } from 'convex/server';
+
+	let { initialData }: { initialData?: FunctionReturnType<typeof api.users.queries.listAccounts> } =
+		$props();
 
 	let accountListResponse = useQuery(api.users.queries.listAccounts, {}, { initialData });
 	let accountList = $derived(accountListResponse.data);
@@ -53,6 +58,16 @@
 	let isChangingPassword = $state(false);
 	let currentPasswordInputEl: HTMLInputElement | null = $state(null);
 	let isMobile = $derived(mobileState.isMobile);
+
+	// Auto-scroll inline Update Password form into view on mobile when opened
+	$effect(() => {
+		if (isMobile && isEditingPasswordInline && currentPasswordInputEl) {
+			// Let layout settle then scroll; scheduleScrollIntoView is keyboard-aware
+			requestAnimationFrame(() =>
+				scheduleScrollIntoView(currentPasswordInputEl as HTMLElement, { block: 'center' })
+			);
+		}
+	});
 
 	// Get available providers (only enabled ones, exclude emailOTP and magicLink)
 	const allProviders = Object.keys(AUTH_CONSTANTS.providers).filter(
@@ -193,19 +208,24 @@
 
 	const handlePasswordSubmit = async (event: SubmitEvent) => {
 		event.preventDefault();
-		if (!password.trim()) {
-			toast.error('Password cannot be empty');
+
+		const form = event.currentTarget as HTMLFormElement;
+		form.dataset.submitted = 'true';
+		if (!form.checkValidity()) {
+			form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
 			return;
 		}
 
 		isSettingPassword = true;
 		try {
-			await setPassword(password);
-			isPasswordDialogOpen = false;
-			isPasswordDrawerOpen = false;
-			password = '';
+			const success = await setPassword(password);
+			if (success) {
+				isPasswordDialogOpen = false;
+				isPasswordDrawerOpen = false;
+				password = '';
+			}
 		} catch (error) {
-			// Error handling is already done in setPassword function
+			// No-op, errors are handled in setPassword
 		} finally {
 			isSettingPassword = false;
 		}
@@ -237,10 +257,11 @@
 		unlinkingAccountId = null;
 	};
 
-	const setPassword = async (password: string) => {
+	const setPassword = async (password: string): Promise<boolean> => {
 		try {
 			await client.mutation(api.users.mutations.setPassword, { password });
 			toast.success('Password set successfully');
+			return true;
 		} catch (error) {
 			if (error instanceof ConvexError) {
 				toast.error(error.data);
@@ -249,11 +270,18 @@
 			} else {
 				toast.error('Failed to set password');
 			}
+			return false;
 		}
 	};
 
 	const handleChangePasswordSubmit = async (event: SubmitEvent) => {
 		event.preventDefault();
+		const form = event.currentTarget as HTMLFormElement;
+		form.dataset.submitted = 'true';
+		if (!form.checkValidity()) {
+			form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+			return;
+		}
 		if (!currentPassword.trim() || !newPassword.trim()) {
 			toast.error('Please fill in both fields');
 			return;
@@ -292,111 +320,116 @@
 	};
 </script>
 
-<div class="flex w-full flex-col gap-6">
+<div class="flex w-full flex-col gap-3 pb-6">
 	<!-- Current Accounts -->
 	<div>
 		<span class="text-surface-600-400 text-xs">Linked Accounts</span>
 		{#if accountList && accountList.length > 0}
-			<div class="mt-2 space-y-2.5">
+			<div class="flex flex-col gap-3 pt-3">
 				{#each accountList as account}
 					{@const ProviderIcon = getProviderIcon(account.provider)}
-					<div
-						class="border-surface-300-700 rounded-base flex w-full flex-row content-center items-center justify-between border py-2 pr-3 pl-4"
-					>
-						<div class="flex items-center gap-3">
-							<ProviderIcon size={20} class="text-muted-foreground" />
-							<div class="font-medium">
-								{getProviderLabel(account.provider)}
+
+					<div class="border-surface-300-700 rounded-container flex w-full flex-col border p-3">
+						<div class="flex w-full flex-row items-center justify-between">
+							<div class="flex items-center gap-3 pl-1">
+								<ProviderIcon size={16} class="text-muted-foreground" />
+								<div class="text-sm font-medium">
+									{getProviderLabel(account.provider)}
+								</div>
 							</div>
-						</div>
-						<div>
-							{#if account.provider === 'credential'}
-								<button
-									class="btn preset-tonal mr-2"
-									onclick={async () => {
-										isEditingPasswordInline = true;
-										currentPassword = '';
-										newPassword = '';
-										await tick();
-										currentPasswordInputEl?.focus();
-										if (currentPasswordInputEl) {
-											// Ensure visibility after keyboard opens
-											scheduleScrollIntoView(currentPasswordInputEl);
-										}
-									}}
-								>
-									Update
-								</button>
-							{/if}
-							<button
-								class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
-								disabled={accountList.length <= 1 || unlinkingAccountId === account.id}
-								onclick={() => unlinkAccount(account.accountId, account.provider)}
-							>
-								{#if unlinkingAccountId === account.id}
-									Unlinking...
-								{:else}
-									<Trash2 class="size-4" />
+							<div class="flex items-center">
+								{#if account.provider === 'credential'}
+									<button
+										class="btn btn-sm preset-tonal mr-2"
+										onclick={async () => {
+											isEditingPasswordInline = true;
+											currentPassword = '';
+											newPassword = '';
+											await tick();
+											currentPasswordInputEl?.focus();
+										}}
+									>
+										Update
+									</button>
 								{/if}
-							</button>
-						</div>
-					</div>
-					{#if account.provider === 'credential'}
-						<div
-							class={[
-								'grid transition-[grid-template-rows] duration-200 ease-in-out',
-								isEditingPasswordInline ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-								'mt-2'
-							]}
-							aria-hidden={!isEditingPasswordInline}
-							inert={!isEditingPasswordInline}
-						>
-							<div class="overflow-hidden">
-								<form onsubmit={handleChangePasswordSubmit} class="flex w-full flex-col gap-3">
-									<input
-										bind:this={currentPasswordInputEl}
-										type="password"
-										class="input w-full"
-										bind:value={currentPassword}
-										placeholder="Enter your current password"
-										autocomplete="current-password"
-										required
-										disabled={isChangingPassword}
-									/>
-									<input
-										type="password"
-										class="input w-full"
-										bind:value={newPassword}
-										placeholder="Enter your new password"
-										autocomplete="new-password"
-										required
-										disabled={isChangingPassword}
-									/>
-									<div class="flex gap-2">
-										<button
-											type="button"
-											class="btn preset-tonal w-full md:w-fit"
-											onclick={() => {
-												currentPassword = '';
-												newPassword = '';
-												isEditingPasswordInline = false;
-											}}
-											disabled={isChangingPassword}
-										>
-											Cancel
-										</button>
-										<button
-											type="submit"
-											class="btn preset-filled-primary-500 w-full md:w-fit"
-											disabled={isChangingPassword || !currentPassword || !newPassword}
-										>
-											{isChangingPassword ? 'Changing...' : 'Change Password'}
-										</button>
-									</div>
-								</form>
+								<button
+									class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
+									disabled={accountList.length <= 1 || unlinkingAccountId === account.id}
+									onclick={() => unlinkAccount(account.accountId, account.provider)}
+								>
+									{#if unlinkingAccountId === account.id}
+										Unlinking...
+									{:else}
+										<Trash2 class="size-4" />
+									{/if}
+								</button>
 							</div>
 						</div>
-					{/if}
+						{#if account.provider === 'credential'}
+							<div
+								class={[
+									'grid transition-[grid-template-rows] duration-200 ease-in-out',
+									isEditingPasswordInline ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+									''
+								]}
+								aria-hidden={!isEditingPasswordInline}
+								inert={!isEditingPasswordInline}
+							>
+								<!-- Pass inputs and actions -->
+								<div class="overflow-hidden">
+									<form
+										onsubmit={handleChangePasswordSubmit}
+										class="flex w-full flex-col gap-3 pt-4"
+									>
+										<input
+											bind:this={currentPasswordInputEl}
+											type="password"
+											class="input w-full"
+											bind:value={currentPassword}
+											placeholder="Enter your current password"
+											autocomplete="current-password"
+											required
+											disabled={isChangingPassword}
+										/>
+										<Password.Root>
+											<Password.Input
+												bind:value={newPassword}
+												placeholder="Enter your new password"
+												autocomplete="new-password"
+												required
+												disabled={isChangingPassword}
+											>
+												<Password.ToggleVisibility />
+											</Password.Input>
+											<Password.Error />
+											<Password.Strength />
+										</Password.Root>
+										<div class="flex gap-1.5">
+											<button
+												type="button"
+												class="btn btn-sm preset-tonal w-full"
+												onclick={() => {
+													currentPassword = '';
+													newPassword = '';
+													isEditingPasswordInline = false;
+												}}
+												disabled={isChangingPassword}
+											>
+												Cancel
+											</button>
+											<button
+												type="submit"
+												class="btn btn-sm preset-filled-primary-500 w-full"
+												disabled={isChangingPassword || !currentPassword || !newPassword}
+											>
+												{isChangingPassword ? 'Changing...' : 'Change Password'}
+											</button>
+										</div>
+									</form>
+								</div>
+							</div>
+						{/if}
+					</div>
 				{/each}
 			</div>
 		{:else}
@@ -411,8 +444,7 @@
 				collection={selectCollection.collection()}
 				onSelect={(e) => linkAccount(e.value)}
 			>
-				<Select.Label>Link New Account</Select.Label>
-				<Select.Trigger>Select an account</Select.Trigger>
+				<Select.Trigger class="w-full">Link new account</Select.Trigger>
 				<Select.Positioner>
 					<Select.Content>
 						<Select.Group>
@@ -438,7 +470,7 @@
 <Dialog.Root bind:open={isPasswordDialogOpen}>
 	<Dialog.Content class="w-full max-w-md">
 		<div
-			class="max-h-[100dvh] overflow-auto overscroll-contain"
+			class="max-h-[100dvh] w-full overflow-auto overscroll-contain"
 			onfocusin={(e) => {
 				const el = e.target as HTMLElement | null;
 				if (!el) return;
@@ -449,17 +481,17 @@
 			<Dialog.Header>
 				<Dialog.Title>Set Password</Dialog.Title>
 			</Dialog.Header>
-			<form onsubmit={handlePasswordSubmit} class="w-full">
+			<form onsubmit={handlePasswordSubmit} class=" w-full px-6 pb-6">
 				<div class="flex flex-col gap-4">
 					<label class="flex flex-col gap-2">
 						<span class="text-sm font-medium">Password</span>
-						<input
-							type="password"
-							class="input w-full"
-							bind:value={password}
-							placeholder="Enter your password"
-							required
-						/>
+						<Password.Root>
+							<Password.Input bind:value={password} placeholder="Enter your password" required>
+								<Password.ToggleVisibility />
+							</Password.Input>
+							<Password.Error />
+							<Password.Strength />
+						</Password.Root>
 					</label>
 					<Dialog.Footer>
 						<Dialog.Close class="btn preset-tonal w-full md:w-fit">Cancel</Dialog.Close>
@@ -501,13 +533,13 @@
 				<div class="flex flex-col gap-4">
 					<label class="flex flex-col gap-2">
 						<span class="text-sm font-medium">Password</span>
-						<input
-							type="password"
-							class="input w-full"
-							bind:value={password}
-							placeholder="Enter your password"
-							required
-						/>
+						<Password.Root>
+							<Password.Input bind:value={password} placeholder="Enter your password" required>
+								<Password.ToggleVisibility />
+							</Password.Input>
+							<Password.Error />
+							<Password.Strength />
+						</Password.Root>
 					</label>
 					<Drawer.Footer>
 						<Drawer.Close class="btn preset-tonal w-full md:w-fit">Cancel</Drawer.Close>

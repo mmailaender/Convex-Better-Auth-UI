@@ -5,13 +5,14 @@
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
+	import * as Password from '$lib/primitives/ui/password';
 
 	// Icons
 	import { AlertTriangle } from '@lucide/svelte';
 
 	// API
 	import { authClient } from '$lib/auth/api/auth-client';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	type ResetState = 'loading' | 'valid-token' | 'invalid-token' | 'error';
 
@@ -21,6 +22,7 @@
 	let confirmPassword: string = $state('');
 	let isSubmitting: boolean = $state(false);
 	let token: string | null = $state(null);
+	let showConfirmPassword: boolean = $state(false);
 
 	// Extract token from URL parameters and validate
 	onMount(() => {
@@ -40,13 +42,15 @@
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 
-		if (password !== confirmPassword) {
-			toast.error('Passwords do not match');
+		const form = event.currentTarget as HTMLFormElement;
+		form.dataset.submitted = 'true';
+		if (!form.checkValidity()) {
+			form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
 			return;
 		}
 
-		if (password.length < 8) {
-			toast.error('Password must be at least 8 characters long');
+		if (password !== confirmPassword) {
+			toast.error('Passwords do not match');
 			return;
 		}
 
@@ -96,12 +100,14 @@
 
 <div class="flex h-screen w-full flex-col items-center justify-center">
 	<div class="flex h-full w-full max-w-md flex-col p-8">
-		<div class="mb-10">
-			<h1 class="h4 text-left leading-9 tracking-tighter">
-				{resetState === 'valid-token' ? 'Reset your password' : 'Password Reset'}
+		<div class="mb-4">
+			<h1 class="h5 w-full text-left leading-8">
+				{resetState === 'valid-token' ? 'Reset your password' : 'Invalid or Expired Link'}
 			</h1>
 			{#if resetState === 'valid-token'}
-				<p class="text-surface-600-400 mt-3 text-left text-sm">Enter your new password below.</p>
+				<p class="text-surface-600-400 mt-2 max-w-96 text-left text-sm">
+					Enter your new password below.
+				</p>
 			{/if}
 		</div>
 
@@ -114,12 +120,8 @@
 					<p class="text-surface-600-400 text-sm">Verifying reset link...</p>
 				</div>
 			{:else if resetState === 'invalid-token'}
-				<div class="flex flex-col items-center gap-6">
-					<div class="bg-error-500/10 text-error-500 rounded-full p-3">
-						<AlertTriangle class="size-6" />
-					</div>
-					<div class="text-center">
-						<h2 class="text-surface-950-50 text-xl font-semibold">Invalid or Expired Link</h2>
+				<div class="flex flex-col gap-6">
+					<div>
 						<p class="text-surface-600-400 mt-2 text-sm">
 							This password reset link is invalid or has expired.
 							<br />
@@ -129,53 +131,56 @@
 					<a href="/signin" class="btn preset-filled">Back to Sign In</a>
 				</div>
 			{:else if resetState === 'valid-token'}
-				<form onsubmit={handleSubmit} class="flex w-full flex-col gap-4">
-					<div class="flex flex-col gap-2">
-						<label for="new-password" class="text-surface-950-50 text-sm font-medium"
-							>New Password</label
-						>
-						<input
-							id="new-password"
-							type="password"
-							bind:value={password}
-							class="input preset-filled-surface-200"
-							placeholder="Enter your new password"
-							required
-							minlength="8"
-							disabled={isSubmitting}
-						/>
-					</div>
-
-					<div class="flex flex-col gap-2">
-						<label for="confirm-password" class="text-surface-950-50 text-sm font-medium">
-							Confirm New Password
+				<form onsubmit={handleSubmit} novalidate class="flex w-full flex-col gap-8">
+					<!-- Inputs -->
+					<div class="flex flex-col gap-5">
+						<label for="new-password" class="label">
+							<span>New Password</span>
+							<Password.Root>
+								<Password.Input
+									bind:value={password}
+									placeholder="Enter your new password"
+									required
+									disabled={isSubmitting}
+								>
+									<Password.ToggleVisibility />
+								</Password.Input>
+								<Password.Error />
+								<Password.Strength />
+							</Password.Root>
 						</label>
-						<input
-							id="confirm-password"
-							type="password"
-							bind:value={confirmPassword}
-							class="input preset-filled-surface-200"
-							placeholder="Confirm your new password"
-							required
-							minlength="8"
-							disabled={isSubmitting}
-						/>
+
+						<label for="confirm-password" class="label">
+							<span>Confirm New Password</span>
+							<Password.Root minScore={0}>
+								<Password.Input
+									bind:value={confirmPassword}
+									placeholder="Enter your new password"
+									required
+									disabled={isSubmitting}
+								>
+									<Password.ToggleVisibility />
+								</Password.Input>
+							</Password.Root>
+						</label>
 					</div>
 
-					<button type="submit" class="btn preset-filled w-full" disabled={isSubmitting}>
-						{#if isSubmitting}
-							<div class="flex items-center gap-2">
-								<div
-									class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-								></div>
-								Resetting password...
-							</div>
-						{:else}
-							Reset Password
-						{/if}
-					</button>
+					<div class="flex flex-col gap-2">
+						<button type="submit" class="btn preset-filled w-full" disabled={isSubmitting}>
+							{#if isSubmitting}
+								<div class="flex items-center gap-2">
+									<div
+										class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+									></div>
+									Resetting password...
+								</div>
+							{:else}
+								Reset Password
+							{/if}
+						</button>
 
-					<a href="/signin" class="anchor text-center text-sm">Back to Sign In</a>
+						<a href="/signin" class="btn">Back to Sign In</a>
+					</div>
 				</form>
 			{:else}
 				<!-- error state -->
