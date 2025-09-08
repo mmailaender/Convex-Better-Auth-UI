@@ -1,9 +1,9 @@
-import { isUserExistingModel } from '../model/users';
 import { query } from '../_generated/server';
 import { v } from 'convex/values';
 import { createAuth } from '../../lib/auth/api/auth';
 import { betterAuthComponent } from '../auth';
 import { APIError } from 'better-auth/api';
+import { components } from '../_generated/api';
 
 /**
  * Check if a user with the given email exists.
@@ -13,7 +13,11 @@ export const isUserExisting = query({
 		email: v.string()
 	},
 	handler: async (ctx, args) => {
-		return await isUserExistingModel(ctx, args);
+		const user = await ctx.runQuery(components.betterAuth.lib.findOne, {
+			model: 'user',
+			where: [{ field: 'email', operator: 'eq', value: args.email }]
+		});
+		return user !== null;
 	}
 });
 

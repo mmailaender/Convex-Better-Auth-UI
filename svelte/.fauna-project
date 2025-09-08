@@ -1,5 +1,0 @@
-default=dev
-
-[environment.dev]
-endpoint=cloud-eu
-database=PlanCreator/Development_v2

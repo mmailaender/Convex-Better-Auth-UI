@@ -15,7 +15,6 @@ import type * as model_emails_templates_baseEmail from "../model/emails/template
 import type * as model_emails_templates_emailTemplates from "../model/emails/templates/emailTemplates.js";
 import type * as model_emails_validateEmail from "../model/emails/validateEmail.js";
 import type * as model_organizations_index from "../model/organizations/index.js";
-import type * as model_users_index from "../model/users/index.js";
 import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
 import type * as organizations_members_mutations from "../organizations/members/mutations.js";
 import type * as organizations_mutations from "../organizations/mutations.js";
@@ -47,7 +46,6 @@ declare const fullApi: ApiFromModules<{
   "model/emails/templates/emailTemplates": typeof model_emails_templates_emailTemplates;
   "model/emails/validateEmail": typeof model_emails_validateEmail;
   "model/organizations/index": typeof model_organizations_index;
-  "model/users/index": typeof model_users_index;
   "organizations/invitations/queries": typeof organizations_invitations_queries;
   "organizations/members/mutations": typeof organizations_members_mutations;
   "organizations/mutations": typeof organizations_mutations;

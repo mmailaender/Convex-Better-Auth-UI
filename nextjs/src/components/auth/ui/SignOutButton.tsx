@@ -1,5 +1,5 @@
-import { cn } from '@/components/lib/utils';
-import { authClient } from '../api/auth-client';
+import { cn } from '../../../lib/utils';
+import { authClient } from '../../../lib/auth/api/auth-client';
 import { useRouter } from 'next/navigation';
 
 export default function SignOutButton({

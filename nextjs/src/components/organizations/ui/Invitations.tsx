@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
-import { authClient } from '@/components/auth/api/auth-client';
+import { authClient } from '../../../lib/auth/api/auth-client';
 
 // Primitives
 import * as Dialog from '@/components/primitives/ui/dialog';

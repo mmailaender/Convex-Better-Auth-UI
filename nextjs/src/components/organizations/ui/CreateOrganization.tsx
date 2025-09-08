@@ -18,7 +18,7 @@ import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 // API
 import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { authClient } from '@/components/auth/api/auth-client';
+import { authClient } from '../../../lib/auth/api/auth-client';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
