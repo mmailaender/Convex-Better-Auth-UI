@@ -136,12 +136,12 @@ export const createAuth = (ctx: GenericCtx) =>
 					after: async (user) => {
 						if ('runMutation' in ctx) {
 							if (AUTH_CONSTANTS.organizations) {
-								const auth = createAuth(ctx);
+								type AuthInstance = ReturnType<typeof createAuth>;
 								try {
 									const userWithUserId = (await ctx.runQuery(components.betterAuth.lib.findOne, {
 										model: 'user',
 										where: [{ field: 'email', operator: 'eq', value: user.email }]
-									})) as typeof auth.$Infer.Session.user;
+									})) as AuthInstance['$Infer']['Session']['user'];
 
 									await ctx.runMutation(internal.organizations.mutations._createOrganization, {
 										userId: userWithUserId.userId as Id<'users'>,
