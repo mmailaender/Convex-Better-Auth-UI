@@ -1,9 +1,10 @@
 {
 	"name": "@auth/svelte",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"meta": {
 		"bugs": "https://github.com/mmailaender/auth/issues",
 		"description": "Plug & Play Auth Widgets for your application",
+		"homepage": "https://etesie.dev/docs/auth",
 		"repository": "https://github.com/mmailaender/auth",
 		"tags": [
 			"auth",
@@ -20,566 +21,741 @@
 	},
 	"categories": [
 		{
-			"name": "_generated",
+			"name": "convex",
 			"blocks": [
 				{
-					"name": "api",
+					"name": "_generated",
 					"directory": "src/convex/_generated",
-					"category": "_generated",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": false,
+					"files": [
+						"api.d.ts",
+						"api.js",
+						"dataModel.d.ts",
+						"server.d.ts",
+						"server.js"
+					],
+					"localDependencies": [
+						"convex/auth",
+						"convex/email",
+						"convex/http",
+						"convex/model",
+						"convex/organizations",
+						"convex/storage",
+						"convex/users",
+						"convex/schema"
+					],
+					"dependencies": [
+						"convex@^1.26.2"
+					],
+					"devDependencies": [],
+					"_imports_": {
+						"../auth.js": "{{convex/auth}}.js",
+						"../email.js": "{{convex/email}}.js",
+						"../http.js": "{{convex/http}}.js",
+						"../model/emails/templates/baseEmail.js": "{{convex/model}}/emails/templates/baseEmail.js",
+						"../model/emails/templates/emailTemplates.js": "{{convex/model}}/emails/templates/emailTemplates.js",
+						"../model/emails/validateEmail.js": "{{convex/model}}/emails/validateEmail.js",
+						"../model/organizations/index.js": "{{convex/model}}/organizations/index.js",
+						"../organizations/invitations/queries.js": "{{convex/organizations}}/invitations/queries.js",
+						"../organizations/members/mutations.js": "{{convex/organizations}}/members/mutations.js",
+						"../organizations/mutations.js": "{{convex/organizations}}/mutations.js",
+						"../organizations/queries.js": "{{convex/organizations}}/queries.js",
+						"../storage.js": "{{convex/storage}}.js",
+						"../users/actions.js": "{{convex/users}}/actions.js",
+						"../users/mutations.js": "{{convex/users}}/mutations.js",
+						"../users/queries.js": "{{convex/users}}/queries.js",
+						"../schema.js": "{{convex/schema}}.js"
+					}
+				},
+				{
+					"name": "auth.config",
+					"directory": "src/convex",
+					"category": "convex",
 					"tests": false,
 					"docs": false,
 					"subdirectory": false,
-					"list": false,
+					"list": true,
 					"files": [
-						"api.js"
+						"auth.config.ts"
 					],
 					"localDependencies": [],
 					"_imports_": {},
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"name": "auth.constants",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"auth.constants.ts"
+					],
+					"localDependencies": [],
+					"_imports_": {},
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"name": "auth",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"auth.ts"
+					],
+					"localDependencies": [
+						"convex/_generated"
+					],
+					"_imports_": {
+						"./_generated/api": "{{convex/_generated}}/api",
+						"./_generated/server": "{{convex/_generated}}/server",
+						"./_generated/dataModel": "{{convex/_generated}}/dataModel"
+					},
 					"dependencies": [
-						"convex@^1.25.4"
+						"@convex-dev/better-auth@0.8.0-alpha.1"
 					],
 					"devDependencies": []
 				},
 				{
-					"name": "server",
-					"directory": "src/convex/_generated",
-					"category": "_generated",
+					"name": "convex.config",
+					"directory": "src/convex",
+					"category": "convex",
 					"tests": false,
 					"docs": false,
 					"subdirectory": false,
-					"list": false,
+					"list": true,
 					"files": [
-						"server.js"
+						"convex.config.ts"
 					],
 					"localDependencies": [],
 					"_imports_": {},
 					"dependencies": [
-						"convex@^1.25.4"
+						"convex@^1.26.2",
+						"@convex-dev/resend@0.1.12",
+						"@convex-dev/better-auth@0.8.0-alpha.1"
 					],
 					"devDependencies": []
-				}
-			]
-		},
-		{
-			"name": "model",
-			"blocks": [
+				},
 				{
-					"name": "emails",
-					"directory": "src/convex/model/emails",
-					"category": "model",
+					"name": "email",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"email.ts"
+					],
+					"localDependencies": [
+						"convex/polyfills",
+						"convex/model",
+						"convex/_generated"
+					],
+					"_imports_": {
+						"./polyfills": "{{convex/polyfills}}",
+						"./model/emails/templates/emailTemplates": "{{convex/model}}/emails/templates/emailTemplates",
+						"./_generated/api": "{{convex/_generated}}/api"
+					},
+					"dependencies": [
+						"@convex-dev/better-auth@0.8.0-alpha.1",
+						"@convex-dev/resend@0.1.12"
+					],
+					"devDependencies": []
+				},
+				{
+					"name": "http",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"http.ts"
+					],
+					"localDependencies": [
+						"convex/_generated",
+						"convex/auth",
+						"lib/auth",
+						"convex/email"
+					],
+					"_imports_": {
+						"./_generated/server": "{{convex/_generated}}/server",
+						"./auth": "{{convex/auth}}",
+						"../lib/auth/api/auth": "{{lib/auth}}/api/auth",
+						"./email": "{{convex/email}}"
+					},
+					"dependencies": [
+						"convex@^1.26.2"
+					],
+					"devDependencies": []
+				},
+				{
+					"name": "model",
+					"directory": "src/convex/model",
+					"category": "convex",
 					"tests": false,
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
 					"files": [
-						"templates/baseEmail.ts",
-						"templates/emailTemplates.ts",
-						"validateEmail.ts"
+						"emails/templates/baseEmail.ts",
+						"emails/templates/emailTemplates.ts",
+						"emails/validateEmail.ts",
+						"organizations/index.ts"
 					],
 					"localDependencies": [
-						"_generated/api",
-						"_generated/server"
+						"convex/_generated",
+						"convex/auth",
+						"lib/auth"
 					],
-					"dependencies": [],
+					"dependencies": [
+						"convex@^1.26.2",
+						"better-auth@1.3.4"
+					],
 					"devDependencies": [],
 					"_imports_": {
-						"../../_generated/api": "{{_generated/api}}",
-						"../../_generated/server": "{{_generated/server}}"
+						"../../_generated/api": "{{convex/_generated}}/api",
+						"../../_generated/server": "{{convex/_generated}}/server",
+						"../../auth": "{{convex/auth}}",
+						"../../../lib/auth/api/auth": "{{lib/auth}}/api/auth",
+						"../../_generated/dataModel": "{{convex/_generated}}/dataModel"
 					}
 				},
 				{
 					"name": "organizations",
-					"directory": "src/convex/model/organizations",
-					"category": "model",
+					"directory": "src/convex/organizations",
+					"category": "convex",
 					"tests": false,
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
 					"files": [
-						"index.ts"
+						"invitations/queries.ts",
+						"members/mutations.ts",
+						"mutations.ts",
+						"queries.ts"
 					],
 					"localDependencies": [
-						"auth/index",
-						"api/auth",
-						"_generated/server",
-						"_generated/dataModel"
+						"convex/_generated",
+						"convex/auth",
+						"lib/auth",
+						"convex/model"
 					],
 					"dependencies": [
-						"convex@^1.25.4",
+						"convex@^1.26.2",
 						"better-auth@1.3.4"
 					],
 					"devDependencies": [],
 					"_imports_": {
-						"../../auth": "{{auth/index}}",
-						"../../../lib/auth/api/auth": "{{api/auth}}",
-						"../../_generated/server": "{{_generated/server}}",
-						"../../_generated/dataModel": "{{_generated/dataModel}}"
+						"../../_generated/server": "{{convex/_generated}}/server",
+						"../../auth": "{{convex/auth}}",
+						"../../../lib/auth/api/auth": "{{lib/auth}}/api/auth",
+						"../../_generated/dataModel": "{{convex/_generated}}/dataModel",
+						"../_generated/server": "{{convex/_generated}}/server",
+						"../auth": "{{convex/auth}}",
+						"../model/organizations": "{{convex/model}}/organizations",
+						"../_generated/dataModel": "{{convex/_generated}}/dataModel",
+						"../../lib/auth/api/auth": "{{lib/auth}}/api/auth"
 					}
-				}
-			]
-		},
-		{
-			"name": "organizations",
-			"blocks": [
+				},
 				{
-					"name": "invitations",
-					"directory": "src/convex/organizations/invitations",
-					"category": "organizations",
+					"name": "polyfills",
+					"directory": "src/convex",
+					"category": "convex",
 					"tests": false,
 					"docs": false,
-					"subdirectory": true,
+					"subdirectory": false,
 					"list": true,
 					"files": [
-						"queries.ts"
+						"polyfills.ts"
 					],
-					"localDependencies": [
-						"_generated/server",
-						"auth/index",
-						"api/auth"
-					],
+					"localDependencies": [],
+					"_imports_": {},
 					"dependencies": [],
-					"devDependencies": [],
-					"_imports_": {
-						"../../_generated/server": "{{_generated/server}}",
-						"../../auth": "{{auth/index}}",
-						"../../../lib/auth/api/auth": "{{api/auth}}"
-					}
+					"devDependencies": []
 				},
 				{
-					"name": "members",
-					"directory": "src/convex/organizations/members",
-					"category": "organizations",
+					"name": "schema",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"schema.ts"
+					],
+					"localDependencies": [],
+					"_imports_": {},
+					"dependencies": [
+						"convex@^1.26.2"
+					],
+					"devDependencies": []
+				},
+				{
+					"name": "storage",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"storage.ts"
+					],
+					"localDependencies": [
+						"convex/_generated",
+						"convex/auth"
+					],
+					"_imports_": {
+						"./_generated/server": "{{convex/_generated}}/server",
+						"./auth": "{{convex/auth}}"
+					},
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"name": "tsconfig",
+					"directory": "src/convex",
+					"category": "convex",
+					"tests": false,
+					"docs": false,
+					"subdirectory": false,
+					"list": true,
+					"files": [
+						"tsconfig.json"
+					],
+					"localDependencies": [],
+					"_imports_": {},
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"name": "users",
+					"directory": "src/convex/users",
+					"category": "convex",
 					"tests": false,
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
 					"files": [
-						"mutations.ts"
+						"actions.ts",
+						"mutations.ts",
+						"queries.ts"
 					],
 					"localDependencies": [
-						"_generated/server",
-						"auth/index",
-						"api/auth",
-						"_generated/dataModel"
+						"convex/_generated",
+						"convex/model",
+						"convex/auth",
+						"lib/auth"
 					],
 					"dependencies": [
-						"convex@^1.25.4",
+						"convex@^1.26.2",
 						"better-auth@1.3.4"
 					],
 					"devDependencies": [],
 					"_imports_": {
-						"../../_generated/server": "{{_generated/server}}",
-						"../../auth": "{{auth/index}}",
-						"../../../lib/auth/api/auth": "{{api/auth}}",
-						"../../_generated/dataModel": "{{_generated/dataModel}}"
+						"../_generated/server": "{{convex/_generated}}/server",
+						"../_generated/api.js": "{{convex/_generated}}/api.js",
+						"../model/emails/validateEmail.js": "{{convex/model}}/emails/validateEmail.js",
+						"../auth.constants": "{{convex/auth}}.constants",
+						"../_generated/dataModel": "{{convex/_generated}}/dataModel",
+						"../auth": "{{convex/auth}}",
+						"../../lib/auth/api/auth": "{{lib/auth}}/api/auth",
+						"../_generated/api": "{{convex/_generated}}/api"
 					}
-				},
-				{
-					"name": "mutations",
-					"directory": "src/convex/organizations",
-					"category": "organizations",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"mutations.ts"
-					],
-					"localDependencies": [
-						"_generated/server",
-						"auth/index",
-						"model/organizations",
-						"_generated/dataModel",
-						"api/auth"
-					],
-					"_imports_": {
-						"../_generated/server": "{{_generated/server}}",
-						"../auth": "{{auth/index}}",
-						"../model/organizations": "{{model/organizations}}",
-						"../_generated/dataModel": "{{_generated/dataModel}}",
-						"../../lib/auth/api/auth": "{{api/auth}}"
-					},
-					"dependencies": [
-						"convex@^1.25.4",
-						"better-auth@1.3.4"
-					],
-					"devDependencies": []
-				},
-				{
-					"name": "queries",
-					"directory": "src/convex/organizations",
-					"category": "organizations",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"queries.ts"
-					],
-					"localDependencies": [
-						"_generated/server",
-						"api/auth",
-						"auth/index"
-					],
-					"_imports_": {
-						"../_generated/server": "{{_generated/server}}",
-						"../../lib/auth/api/auth": "{{api/auth}}",
-						"../auth": "{{auth/index}}"
-					},
-					"dependencies": [
-						"convex@^1.25.4"
-					],
-					"devDependencies": []
 				}
 			]
 		},
 		{
-			"name": "users",
-			"blocks": [
-				{
-					"name": "actions",
-					"directory": "src/convex/users",
-					"category": "users",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"actions.ts"
-					],
-					"localDependencies": [
-						"_generated/server",
-						"_generated/api",
-						"model/emails",
-						"auth.constants/index"
-					],
-					"_imports_": {
-						"../_generated/server": "{{_generated/server}}",
-						"../_generated/api.js": "{{_generated/api}}.js",
-						"../model/emails/validateEmail.js": "{{model/emails}}/validateEmail.js",
-						"../auth.constants": "{{auth.constants/index}}"
-					},
-					"dependencies": [
-						"convex@^1.25.4"
-					],
-					"devDependencies": []
-				},
-				{
-					"name": "mutations",
-					"directory": "src/convex/users",
-					"category": "users",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"mutations.ts"
-					],
-					"localDependencies": [
-						"_generated/server",
-						"_generated/dataModel",
-						"auth/index",
-						"api/auth"
-					],
-					"_imports_": {
-						"../_generated/server": "{{_generated/server}}",
-						"../_generated/dataModel": "{{_generated/dataModel}}",
-						"../auth": "{{auth/index}}",
-						"../../lib/auth/api/auth": "{{api/auth}}"
-					},
-					"dependencies": [
-						"convex@^1.25.4",
-						"better-auth@1.3.4"
-					],
-					"devDependencies": []
-				},
-				{
-					"name": "queries",
-					"directory": "src/convex/users",
-					"category": "users",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"queries.ts"
-					],
-					"localDependencies": [
-						"_generated/server",
-						"api/auth",
-						"auth/index",
-						"_generated/api"
-					],
-					"_imports_": {
-						"../_generated/server": "{{_generated/server}}",
-						"../../lib/auth/api/auth": "{{api/auth}}",
-						"../auth": "{{auth/index}}",
-						"../_generated/api": "{{_generated/api}}"
-					},
-					"dependencies": [
-						"convex@^1.25.4",
-						"better-auth@1.3.4"
-					],
-					"devDependencies": []
-				}
-			]
-		},
-		{
-			"name": "api",
+			"name": "lib",
 			"blocks": [
 				{
 					"name": "auth",
-					"directory": "src/routes/api/auth",
-					"category": "api",
+					"directory": "src/lib/auth",
+					"category": "lib",
 					"tests": false,
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
 					"files": [
-						"[...all]/+server.ts"
+						"api/auth-client.ts",
+						"api/auth.ts",
+						"ui/EmailOtpFlow.svelte",
+						"ui/EmailStep.svelte",
+						"ui/MagicLinkFlow.svelte",
+						"ui/PasswordFlow.svelte",
+						"ui/SignIn.svelte",
+						"ui/SignOutButton.svelte"
 					],
-					"localDependencies": [],
+					"localDependencies": [
+						"convex/auth",
+						"convex/_generated",
+						"convex/email",
+						"lib/primitives",
+						"convex/auth.constants"
+					],
 					"dependencies": [
-						"@mmailaender/convex-better-auth-svelte@^0.0.4"
-					],
-					"devDependencies": [],
-					"_imports_": {}
-				},
-				{
-					"name": "organization",
-					"directory": "src/routes/api/organization",
-					"category": "api",
-					"tests": false,
-					"docs": false,
-					"subdirectory": true,
-					"list": true,
-					"files": [
-						"accept-invitation/[invitationId]/+page.svelte"
-					],
-					"localDependencies": [
-						"api/auth-client"
-					],
-					"dependencies": [],
-					"devDependencies": [
-						"@lucide/svelte@^0.539.0"
-					],
-					"_imports_": {
-						"$lib/auth/api/auth-client": "{{api/auth-client}}"
-					}
-				}
-			]
-		},
-		{
-			"name": "reset-password",
-			"blocks": [
-				{
-					"name": "+page",
-					"directory": "src/routes/reset-password",
-					"category": "reset-password",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"+page.svelte"
-					],
-					"localDependencies": [
-						"api/auth-client"
-					],
-					"_imports_": {
-						"$lib/auth/api/auth-client": "{{api/auth-client}}"
-					},
-					"dependencies": [],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5",
-						"@lucide/svelte@^0.539.0"
-					]
-				}
-			]
-		},
-		{
-			"name": "signin",
-			"blocks": [
-				{
-					"name": "+page",
-					"directory": "src/routes/signin",
-					"category": "signin",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"+page.svelte"
-					],
-					"localDependencies": [
-						"ui/SignIn"
-					],
-					"_imports_": {
-						"$lib/auth/ui/SignIn.svelte": "{{ui/SignIn}}.svelte"
-					},
-					"dependencies": [],
-					"devDependencies": []
-				}
-			]
-		},
-		{
-			"name": "ui",
-			"blocks": [
-				{
-					"name": "EmailOtpFlow",
-					"directory": "src/lib/auth/ui",
-					"category": "ui",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"EmailOtpFlow.svelte"
-					],
-					"localDependencies": [
-						"_generated/api",
-						"api/auth-client"
-					],
-					"_imports_": {
-						"$convex/_generated/api": "{{_generated/api}}",
-						"$lib/auth/api/auth-client": "{{api/auth-client}}"
-					},
-					"dependencies": [
-						"convex-svelte@^0.0.11"
-					],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5"
-					]
-				},
-				{
-					"name": "EmailStep",
-					"directory": "src/lib/auth/ui",
-					"category": "ui",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"EmailStep.svelte"
-					],
-					"localDependencies": [
-						"_generated/api"
-					],
-					"_imports_": {
-						"$convex/_generated/api": "{{_generated/api}}"
-					},
-					"dependencies": [
-						"convex-svelte@^0.0.11"
-					],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5"
-					]
-				},
-				{
-					"name": "MagicLinkFlow",
-					"directory": "src/lib/auth/ui",
-					"category": "ui",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"MagicLinkFlow.svelte"
-					],
-					"localDependencies": [
-						"_generated/api",
-						"api/auth-client"
-					],
-					"_imports_": {
-						"$convex/_generated/api": "{{_generated/api}}",
-						"$lib/auth/api/auth-client": "{{api/auth-client}}"
-					},
-					"dependencies": [
-						"convex-svelte@^0.0.11"
-					],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5"
-					]
-				},
-				{
-					"name": "PasswordFlow",
-					"directory": "src/lib/auth/ui",
-					"category": "ui",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"PasswordFlow.svelte"
-					],
-					"localDependencies": [
-						"_generated/api",
-						"api/auth-client"
-					],
-					"_imports_": {
-						"$convex/_generated/api": "{{_generated/api}}",
-						"$lib/auth/api/auth-client": "{{api/auth-client}}"
-					},
-					"dependencies": [
-						"convex-svelte@^0.0.11"
-					],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5"
-					]
-				},
-				{
-					"name": "SignIn",
-					"directory": "src/lib/auth/ui",
-					"category": "ui",
-					"tests": false,
-					"docs": false,
-					"subdirectory": false,
-					"list": true,
-					"files": [
-						"SignIn.svelte"
-					],
-					"localDependencies": [
-						"api/auth-client",
-						"ui/EmailStep",
-						"ui/PasswordFlow",
-						"ui/EmailOtpFlow",
-						"ui/MagicLinkFlow",
-						"auth.constants/index"
-					],
-					"_imports_": {
-						"$lib/auth/api/auth-client": "{{api/auth-client}}",
-						"./EmailStep.svelte": "{{ui/EmailStep}}.svelte",
-						"./PasswordFlow.svelte": "{{ui/PasswordFlow}}.svelte",
-						"./EmailOtpFlow.svelte": "{{ui/EmailOtpFlow}}.svelte",
-						"./MagicLinkFlow.svelte": "{{ui/MagicLinkFlow}}.svelte",
-						"$convex/auth.constants": "{{auth.constants/index}}"
-					},
-					"dependencies": [
+						"better-auth@1.3.4",
+						"@convex-dev/better-auth@0.8.0-alpha.1",
+						"convex-svelte@^0.0.11",
 						"@mmailaender/convex-better-auth-svelte@^0.0.4",
 						"@icons-pack/svelte-simple-icons@^6.4.0"
 					],
 					"devDependencies": [
 						"svelte-sonner@^1.0.5",
-						"@lucide/svelte@^0.539.0"
-					]
+						"@lucide/svelte@^0.542.0"
+					],
+					"_imports_": {
+						"../../../convex/auth": "{{convex/auth}}",
+						"../../../convex/_generated/server": "{{convex/_generated}}/server",
+						"../../../convex/_generated/api": "{{convex/_generated}}/api",
+						"../../../convex/email": "{{convex/email}}",
+						"../../../convex/auth.constants": "{{convex/auth}}.constants",
+						"../../../convex/_generated/dataModel": "{{convex/_generated}}/dataModel",
+						"$convex/_generated/api": "{{convex/_generated}}/api",
+						"$lib/primitives/ui/password": "{{lib/primitives}}/ui/password",
+						"$lib/primitives/utils": "{{lib/primitives}}/utils",
+						"$convex/auth.constants": "{{convex/auth.constants}}"
+					}
 				},
 				{
-					"name": "SignOutButton",
-					"directory": "src/lib/auth/ui",
-					"category": "ui",
+					"name": "organizations",
+					"directory": "src/lib/organizations",
+					"category": "lib",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": true,
+					"files": [
+						"api/roles.svelte.ts",
+						"ui/CreateOrganization.svelte",
+						"ui/DeleteOrganization.svelte",
+						"ui/Invitations.svelte",
+						"ui/InviteMembers.svelte",
+						"ui/LeaveOrganization.svelte",
+						"ui/Members.svelte",
+						"ui/MembersAndInvitations.svelte",
+						"ui/OrganizationInfo.svelte",
+						"ui/OrganizationProfile.svelte",
+						"ui/OrganizationSwitcher.svelte"
+					],
+					"localDependencies": [
+						"convex/_generated",
+						"lib/primitives",
+						"lib/auth",
+						"convex/auth.constants"
+					],
+					"dependencies": [
+						"convex-svelte@^0.0.11",
+						"convex@^1.26.2",
+						"@mmailaender/convex-better-auth-svelte@^0.0.4",
+						"@ark-ui/svelte@^5.7.0"
+					],
+					"devDependencies": [
+						"@lucide/svelte@^0.542.0",
+						"svelte-sonner@^1.0.5"
+					],
+					"_imports_": {
+						"$convex/_generated/api": "{{convex/_generated}}/api",
+						"$lib/primitives/ui/avatar": "{{lib/primitives}}/ui/avatar",
+						"$lib/primitives/ui/image-cropper": "{{lib/primitives}}/ui/image-cropper",
+						"$lib/primitives/utils/optimizeImage": "{{lib/primitives}}/utils/optimizeImage",
+						"$lib/primitives/ui/dialog": "{{lib/primitives}}/ui/dialog",
+						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
+						"$lib/primitives/ui/drawer": "{{lib/primitives}}/ui/drawer",
+						"$lib/primitives/ui/tabs": "{{lib/primitives}}/ui/tabs",
+						"$lib/primitives/utils/mobileState.svelte": "{{lib/primitives}}/utils/mobileState.svelte",
+						"$lib/primitives/ui/popover": "{{lib/primitives}}/ui/popover",
+						"$convex/auth.constants": "{{convex/auth.constants}}"
+					}
+				},
+				{
+					"name": "primitives",
+					"directory": "src/lib/primitives",
+					"category": "lib",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": false,
+					"files": [
+						"hooks/use-clipboard.svelte.ts",
+						"ui/FeedbackMessage.svelte",
+						"ui/Sidebar.svelte",
+						"ui/avatar/avatar-fallback.svelte",
+						"ui/avatar/avatar-image.svelte",
+						"ui/avatar/avatar-marble.svelte",
+						"ui/avatar/avatar.svelte",
+						"ui/avatar/index.ts",
+						"ui/combobox/combobox-clear-trigger.svelte",
+						"ui/combobox/combobox-content.svelte",
+						"ui/combobox/combobox-control.svelte",
+						"ui/combobox/combobox-input.svelte",
+						"ui/combobox/combobox-item-group-label.svelte",
+						"ui/combobox/combobox-item-group.svelte",
+						"ui/combobox/combobox-item-indicator.svelte",
+						"ui/combobox/combobox-item-text.svelte",
+						"ui/combobox/combobox-item.svelte",
+						"ui/combobox/combobox-label.svelte",
+						"ui/combobox/combobox-positioner.svelte",
+						"ui/combobox/combobox-root.svelte",
+						"ui/combobox/combobox-trigger.svelte",
+						"ui/combobox/index.ts",
+						"ui/copy-button/copy-button.svelte",
+						"ui/copy-button/index.ts",
+						"ui/copy-button/types.ts",
+						"ui/dialog/dialog-backdrop.svelte",
+						"ui/dialog/dialog-close-x.svelte",
+						"ui/dialog/dialog-close.svelte",
+						"ui/dialog/dialog-content.svelte",
+						"ui/dialog/dialog-description.svelte",
+						"ui/dialog/dialog-footer.svelte",
+						"ui/dialog/dialog-header.svelte",
+						"ui/dialog/dialog-root.svelte",
+						"ui/dialog/dialog-title.svelte",
+						"ui/dialog/dialog-trigger.svelte",
+						"ui/dialog/index.ts",
+						"ui/drawer/drawer-backdrop.svelte",
+						"ui/drawer/drawer-close-x.svelte",
+						"ui/drawer/drawer-close.svelte",
+						"ui/drawer/drawer-content.svelte",
+						"ui/drawer/drawer-description.svelte",
+						"ui/drawer/drawer-footer.svelte",
+						"ui/drawer/drawer-header.svelte",
+						"ui/drawer/drawer-nested.svelte",
+						"ui/drawer/drawer-title.svelte",
+						"ui/drawer/drawer-trigger.svelte",
+						"ui/drawer/drawer.svelte",
+						"ui/drawer/index.ts",
+						"ui/image-cropper/image-cropper-cancel.svelte",
+						"ui/image-cropper/image-cropper-controls.svelte",
+						"ui/image-cropper/image-cropper-crop.svelte",
+						"ui/image-cropper/image-cropper-cropper.svelte",
+						"ui/image-cropper/image-cropper-dialog.svelte",
+						"ui/image-cropper/image-cropper-preview.svelte",
+						"ui/image-cropper/image-cropper-upload-trigger.svelte",
+						"ui/image-cropper/image-cropper.svelte",
+						"ui/image-cropper/image-cropper.svelte.ts",
+						"ui/image-cropper/index.ts",
+						"ui/image-cropper/types.ts",
+						"ui/image-cropper/utils.ts",
+						"ui/password/index.ts",
+						"ui/password/password-copy.svelte",
+						"ui/password/password-error.svelte",
+						"ui/password/password-input.svelte",
+						"ui/password/password-strength.svelte",
+						"ui/password/password-toggle-visibility.svelte",
+						"ui/password/password.svelte",
+						"ui/password/password.svelte.ts",
+						"ui/password/types.ts",
+						"ui/popover/index.ts",
+						"ui/popover/popover-content.svelte",
+						"ui/popover/popover-trigger.svelte",
+						"ui/select/index.ts",
+						"ui/select/select-content.svelte",
+						"ui/select/select-group-heading.svelte",
+						"ui/select/select-group.svelte",
+						"ui/select/select-item.svelte",
+						"ui/select/select-label.svelte",
+						"ui/select/select-scroll-down-button.svelte",
+						"ui/select/select-scroll-up-button.svelte",
+						"ui/select/select-separator.svelte",
+						"ui/select/select-trigger.svelte",
+						"ui/separator/index.ts",
+						"ui/separator/separator.svelte",
+						"ui/sonner/index.ts",
+						"ui/sonner/sonner.svelte",
+						"ui/tabs/index.ts",
+						"ui/tabs/tabs-content.svelte",
+						"ui/tabs/tabs-list.svelte",
+						"ui/tabs/tabs-trigger.svelte",
+						"ui/tabs/tabs.svelte",
+						"ui/toggle/index.ts",
+						"ui/toggle/toggle.svelte",
+						"utils/dragState.svelte.ts",
+						"utils/focusScroll.ts",
+						"utils/mobileState.svelte.ts",
+						"utils/optimizeImage.ts",
+						"utils/routeMatcher.ts",
+						"utils.ts"
+					],
+					"localDependencies": [],
+					"dependencies": [
+						"@ark-ui/svelte@^5.7.0",
+						"svelte-toolbelt@^0.9.3",
+						"svelte-easy-crop@^4.0.1",
+						"runed@^0.31.1",
+						"@zxcvbn-ts/core@^3.0.4",
+						"@zxcvbn-ts/language-common@^3.0.4",
+						"@zxcvbn-ts/language-en@^3.0.2",
+						"path-to-regexp@^8.3.0"
+					],
+					"devDependencies": [
+						"@lucide/svelte@^0.542.0",
+						"tailwind-variants@^3.1.0",
+						"svelte-sonner@^1.0.5",
+						"clsx@^2.1.1",
+						"tailwind-merge@^3.3.1"
+					],
+					"_imports_": {}
+				},
+				{
+					"name": "users",
+					"directory": "src/lib/users",
+					"category": "lib",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": true,
+					"files": [
+						"ui/Accounts.svelte",
+						"ui/DeleteUser.svelte",
+						"ui/Emails.svelte",
+						"ui/ProfileInfo.svelte",
+						"ui/UserButton.svelte",
+						"ui/UserProfile.svelte"
+					],
+					"localDependencies": [
+						"convex/_generated",
+						"lib/auth",
+						"convex/auth.constants",
+						"lib/primitives"
+					],
+					"dependencies": [
+						"convex-svelte@^0.0.11",
+						"convex@^1.26.2",
+						"@ark-ui/svelte@^5.7.0",
+						"@icons-pack/svelte-simple-icons@^6.4.0",
+						"@mmailaender/convex-better-auth-svelte@^0.0.4"
+					],
+					"devDependencies": [
+						"svelte-sonner@^1.0.5",
+						"@lucide/svelte@^0.542.0"
+					],
+					"_imports_": {
+						"$convex/_generated/api": "{{convex/_generated}}/api",
+						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
+						"$convex/auth.constants": "{{convex/auth.constants}}",
+						"$lib/primitives/ui/select": "{{lib/primitives}}/ui/select",
+						"$lib/primitives/ui/dialog": "{{lib/primitives}}/ui/dialog",
+						"$lib/primitives/ui/drawer": "{{lib/primitives}}/ui/drawer",
+						"$lib/primitives/ui/password": "{{lib/primitives}}/ui/password",
+						"$lib/primitives/utils/mobileState.svelte": "{{lib/primitives}}/utils/mobileState.svelte",
+						"$lib/primitives/utils/focusScroll": "{{lib/primitives}}/utils/focusScroll",
+						"$lib/primitives/ui/avatar": "{{lib/primitives}}/ui/avatar",
+						"$lib/primitives/ui/image-cropper": "{{lib/primitives}}/ui/image-cropper",
+						"$lib/primitives/utils/optimizeImage": "{{lib/primitives}}/utils/optimizeImage",
+						"$lib/primitives/ui/popover": "{{lib/primitives}}/ui/popover",
+						"$lib/auth/ui/SignIn.svelte": "{{lib/auth}}/ui/SignIn.svelte",
+						"$lib/auth/ui/SignOutButton.svelte": "{{lib/auth}}/ui/SignOutButton.svelte"
+					}
+				}
+			]
+		},
+		{
+			"name": "routes",
+			"blocks": [
+				{
+					"name": "api",
+					"directory": "src/routes/api",
+					"category": "routes",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": true,
+					"files": [
+						"auth/[...all]/+server.ts",
+						"organization/accept-invitation/[invitationId]/+page.svelte"
+					],
+					"localDependencies": [
+						"lib/auth"
+					],
+					"dependencies": [
+						"@mmailaender/convex-better-auth-svelte@^0.0.4"
+					],
+					"devDependencies": [
+						"@lucide/svelte@^0.542.0"
+					],
+					"_imports_": {
+						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client"
+					}
+				},
+				{
+					"name": "reset-password",
+					"directory": "src/routes/reset-password",
+					"category": "routes",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": true,
+					"files": [
+						"+page.svelte"
+					],
+					"localDependencies": [
+						"lib/primitives",
+						"lib/auth"
+					],
+					"dependencies": [],
+					"devDependencies": [
+						"svelte-sonner@^1.0.5",
+						"@lucide/svelte@^0.542.0"
+					],
+					"_imports_": {
+						"$lib/primitives/ui/password": "{{lib/primitives}}/ui/password",
+						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client"
+					}
+				},
+				{
+					"name": "signin",
+					"directory": "src/routes/signin",
+					"category": "routes",
+					"tests": false,
+					"docs": false,
+					"subdirectory": true,
+					"list": true,
+					"files": [
+						"+page.svelte"
+					],
+					"localDependencies": [
+						"lib/auth"
+					],
+					"dependencies": [],
+					"devDependencies": [],
+					"_imports_": {
+						"$lib/auth/ui/SignIn.svelte": "{{lib/auth}}/ui/SignIn.svelte"
+					}
+				}
+			]
+		},
+		{
+			"name": "themes",
+			"blocks": [
+				{
+					"name": "auth",
+					"directory": "src/themes",
+					"category": "themes",
 					"tests": false,
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
 					"files": [
-						"SignOutButton.svelte"
+						"auth.css"
 					],
-					"localDependencies": [
-						"api/auth-client"
-					],
-					"_imports_": {
-						"../api/auth-client": "{{api/auth-client}}"
-					},
+					"localDependencies": [],
+					"_imports_": {},
 					"dependencies": [],
 					"devDependencies": []
 				}

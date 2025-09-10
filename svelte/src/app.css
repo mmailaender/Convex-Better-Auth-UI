@@ -4,9 +4,8 @@
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
-@import '@skeletonlabs/skeleton/themes/cerberus';
 
-@import '../../themes/auth.css';
+@import './themes/auth.css';
 
 @theme {
 	--animate-fade-in-out: fade-in-out 0.3s ease-in-out;
