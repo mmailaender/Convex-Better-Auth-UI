@@ -44,7 +44,7 @@ export const createAuth = (ctx: GenericCtx) =>
 
 		// Simple non-verified email/password to get started
 		emailAndPassword: {
-			enabled: true,
+			enabled: AUTH_CONSTANTS.providers.password ?? false,
 			requireEmailVerification: true,
 			sendResetPassword: async ({ user, url }) => {
 				await sendResetPassword(requireMutationCtx(ctx), {
@@ -55,7 +55,7 @@ export const createAuth = (ctx: GenericCtx) =>
 		},
 		socialProviders: {
 			github: {
-				enabled: true,
+				enabled: AUTH_CONSTANTS.providers.github ?? false,
 				clientId: process.env.GITHUB_CLIENT_ID as string,
 				clientSecret: process.env.GITHUB_CLIENT_SECRET as string
 			}
