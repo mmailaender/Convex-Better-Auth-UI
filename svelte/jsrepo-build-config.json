@@ -1,7 +1,7 @@
 {
 	"$schema": "https://unpkg.com/jsrepo@2.4.5/schemas/registry-config.json",
 	"name": "@auth/svelte",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"readme": "README.md",
 	"meta": {
 		"author": "Micha Mailänder",
@@ -10,6 +10,12 @@
 		"homepage": "https://etesie.dev/docs/auth",
 		"repository": "https://github.com/mmailaender/auth",
 		"tags": ["auth", "svelte", "ui", "convex", "better-auth"]
+	},
+	"defaultPaths": {
+		"convex": "./src/convex",
+		"lib": "./src/lib",
+		"routes": "./src/routes",
+		"themes": "./src/themes"
 	},
 	"dirs": ["./src"],
 	"allowSubdirectories": true,

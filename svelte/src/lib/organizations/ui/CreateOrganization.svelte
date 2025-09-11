@@ -1,7 +1,8 @@
 <script lang="ts">
-	// SvelteKit
+	// Svelte
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { SvelteURL } from 'svelte/reactivity';
 
 	/** UI **/
 	// Icons
@@ -143,7 +144,7 @@
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
-			const currentUrl = new URL(window.location.href);
+			const currentUrl = new SvelteURL(window.location.href);
 			const pathSegments = currentUrl.pathname.split('/');
 			const activeOrgSlug = activeOrganization?.slug;
 
