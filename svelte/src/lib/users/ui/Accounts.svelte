@@ -80,7 +80,7 @@
 	// Get providers that can be linked (not already linked)
 	let availableProviders = $derived.by(() => {
 		if (!accountList) return [];
-		const linkedProviders = accountList.map((account) => account.provider);
+		const linkedProviders = accountList.map((account) => account.providerId);
 		return allProviders.filter((provider) => {
 			// Handle the special case where 'password' in allProviders matches 'credential' in linkedProviders
 			if (provider === 'password') {
@@ -327,18 +327,18 @@
 		{#if accountList && accountList.length > 0}
 			<div class="flex flex-col gap-3 pt-3">
 				{#each accountList as account}
-					{@const ProviderIcon = getProviderIcon(account.provider)}
+					{@const ProviderIcon = getProviderIcon(account.providerId)}
 
 					<div class="border-surface-300-700 rounded-container flex w-full flex-col border p-3">
 						<div class="flex w-full flex-row items-center justify-between">
 							<div class="flex items-center gap-3 pl-1">
 								<ProviderIcon size={16} class="text-muted-foreground" />
 								<div class="text-sm font-medium">
-									{getProviderLabel(account.provider)}
+									{getProviderLabel(account.providerId)}
 								</div>
 							</div>
 							<div class="flex items-center">
-								{#if account.provider === 'credential'}
+								{#if account.providerId === 'credential'}
 									<button
 										class="btn btn-sm preset-tonal mr-2"
 										onclick={async () => {
@@ -355,7 +355,7 @@
 								<button
 									class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
 									disabled={accountList.length <= 1 || unlinkingAccountId === account.id}
-									onclick={() => unlinkAccount(account.accountId, account.provider)}
+									onclick={() => unlinkAccount(account.accountId, account.providerId)}
 								>
 									{#if unlinkingAccountId === account.id}
 										Unlinking...
@@ -365,7 +365,7 @@
 								</button>
 							</div>
 						</div>
-						{#if account.provider === 'credential'}
+						{#if account.providerId === 'credential'}
 							<div
 								class={[
 									'grid transition-[grid-template-rows] duration-200 ease-in-out',
