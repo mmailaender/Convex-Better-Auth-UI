@@ -1,8 +1,7 @@
 import { mutation } from '../_generated/server';
 import { type Id } from '../_generated/dataModel';
 
-import { betterAuthComponent } from '../auth';
-import { createAuth } from '../../lib/auth/api/auth';
+import { authComponent, createAuth } from '../auth';
 
 import { ConvexError, v } from 'convex/values';
 import { APIError } from 'better-auth/api';
@@ -15,7 +14,7 @@ export const updateAvatar = mutation({
 		storageId: v.id('_storage')
 	},
 	handler: async (ctx, args) => {
-		const userId = (await betterAuthComponent.getAuthUserId(ctx)) as Id<'users'>;
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			throw new ConvexError('Not authenticated');
 		}
@@ -38,7 +37,7 @@ export const updateAvatar = mutation({
 		const auth = createAuth(ctx);
 		await auth.api.updateUser({
 			body: { image: imageUrl },
-			headers: await betterAuthComponent.getHeaders(ctx)
+			headers: await authComponent.getHeaders(ctx)
 		});
 
 		await ctx.db.patch(userId, { imageId: args.storageId });
@@ -80,7 +79,7 @@ export const setPassword = mutation({
 		password: v.string()
 	},
 	handler: async (ctx, args) => {
-		const userId = (await betterAuthComponent.getAuthUserId(ctx)) as Id<'users'>;
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			throw new ConvexError('Not authenticated');
 		}
@@ -89,7 +88,7 @@ export const setPassword = mutation({
 		try {
 			await auth.api.setPassword({
 				body: { newPassword: args.password },
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch (error) {
 			if (error instanceof APIError) {

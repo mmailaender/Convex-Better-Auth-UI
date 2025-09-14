@@ -1,8 +1,8 @@
+import { Id } from '../_generated/dataModel';
 import { internalQuery, query } from '../_generated/server';
 
 // better-auth
-import { createAuth } from '../../lib/auth/api/auth';
-import { betterAuthComponent } from '../auth';
+import { authComponent, createAuth } from '../auth';
 import { v } from 'convex/values';
 
 /**
@@ -10,7 +10,7 @@ import { v } from 'convex/values';
  */
 export const listOrganizations = query({
 	handler: async (ctx) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			return [];
 		}
@@ -18,7 +18,7 @@ export const listOrganizations = query({
 		try {
 			const auth = createAuth(ctx);
 			return await auth.api.listOrganizations({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch {
 			return [];
@@ -37,13 +37,13 @@ export const getOrganizationRole = query({
 	},
 	handler: async (ctx, args) => {
 		const { organizationId } = args;
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			return null;
 		}
 
 		const auth = createAuth(ctx);
-		const headers = await betterAuthComponent.getHeaders(ctx);
+		const headers = await authComponent.getHeaders(ctx);
 
 		try {
 			// Get role from active organization if no specific organizationId provided
@@ -71,7 +71,7 @@ export const getOrganizationRole = query({
  */
 export const getActiveOrganization = query({
 	handler: async (ctx) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			return null;
 		}
@@ -79,7 +79,7 @@ export const getActiveOrganization = query({
 		try {
 			const auth = createAuth(ctx);
 			return await auth.api.getFullOrganization({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch {
 			return null;

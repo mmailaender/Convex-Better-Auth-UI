@@ -1,6 +1,5 @@
 import { ConvexError } from 'convex/values';
-import { betterAuthComponent } from '../../auth';
-import { createAuth } from '../../../lib/auth/api/auth';
+import { authComponent, createAuth } from '../../auth';
 
 // Types
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
@@ -178,7 +177,7 @@ export const createOrganizationModel = async (
 					organizationId: org.id
 				},
 
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch (error) {
 			if (error instanceof APIError) {
@@ -276,7 +275,7 @@ export const updateOrganizationProfileModel = async (
 	if (slug) {
 		// Get current organization data from Better Auth
 		const currentOrganization = await auth.api.getFullOrganization({
-			headers: await betterAuthComponent.getHeaders(ctx)
+			headers: await authComponent.getHeaders(ctx)
 		});
 		if (!currentOrganization) {
 			throw new ConvexError('Organization not found');
@@ -351,7 +350,7 @@ export const updateOrganizationProfileModel = async (
 		try {
 			await auth.api.updateOrganization({
 				body: { data: betterAuthUpdateData, organizationId },
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch (error) {
 			throw new ConvexError(`Failed to update organization in Better Auth: ${error}`);

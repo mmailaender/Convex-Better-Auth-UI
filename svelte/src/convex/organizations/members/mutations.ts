@@ -1,7 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { mutation } from '../../_generated/server';
-import { betterAuthComponent } from '../../auth';
-import { createAuth } from '../../../lib/auth/api/auth';
+import { authComponent, createAuth } from '../../auth';
 import { APIError } from 'better-auth/api';
 import type { Id } from '../../_generated/dataModel';
 
@@ -16,7 +15,7 @@ export const leaveOrganization = mutation({
 		successorMemberId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) throw new ConvexError('Not authenticated');
 
 		const auth = createAuth(ctx);
@@ -24,7 +23,7 @@ export const leaveOrganization = mutation({
 		try {
 			// Get all organizations the user is part of
 			const allOrganizations = await auth.api.listOrganizations({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			// Check if user is part of at least two organizations
@@ -36,7 +35,7 @@ export const leaveOrganization = mutation({
 
 			// Get current active member info
 			const member = await auth.api.getActiveMember({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			if (!member) {
@@ -56,7 +55,7 @@ export const leaveOrganization = mutation({
 						memberId: args.successorMemberId,
 						role: 'owner'
 					},
-					headers: await betterAuthComponent.getHeaders(ctx)
+					headers: await authComponent.getHeaders(ctx)
 				});
 			}
 
@@ -72,13 +71,13 @@ export const leaveOrganization = mutation({
 				body: {
 					organizationId: member.organizationId
 				},
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			// Set the first remaining organization as active
 			await auth.api.setActiveOrganization({
 				body: { organizationId: nextActiveOrg.id },
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			// Update user's active organization in the database

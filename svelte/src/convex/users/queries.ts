@@ -1,9 +1,9 @@
 import { query } from '../_generated/server';
 import { v } from 'convex/values';
-import { createAuth } from '../../lib/auth/api/auth';
-import { betterAuthComponent } from '../auth';
+import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 import { components } from '../_generated/api';
+import { Id } from '../_generated/dataModel';
 
 /**
  * Check if a user with the given email exists.
@@ -26,14 +26,14 @@ export const isUserExisting = query({
  */
 export const getActiveUser = query({
 	handler: async (ctx) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			return null;
 		}
 
 		const auth = createAuth(ctx);
 		const session = await auth.api.getSession({
-			headers: await betterAuthComponent.getHeaders(ctx)
+			headers: await authComponent.getHeaders(ctx)
 		});
 		return session?.user;
 	}
@@ -41,7 +41,7 @@ export const getActiveUser = query({
 
 export const listAccounts = query({
 	handler: async (ctx) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
 		if (!userId) {
 			return null;
 		}
@@ -49,7 +49,7 @@ export const listAccounts = query({
 		try {
 			const auth = createAuth(ctx);
 			const accounts = await auth.api.listUserAccounts({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 			return accounts;
 		} catch (error) {
