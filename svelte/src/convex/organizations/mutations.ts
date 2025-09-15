@@ -180,7 +180,8 @@ export const deleteOrganization = mutation({
 		await auth.api.updateUser({
 			body: {
 				activeOrganizationId: nextActiveOrg.id
-			}
+			},
+			headers: await authComponent.getHeaders(ctx)
 		});
 	}
 });

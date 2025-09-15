@@ -1448,9 +1448,38 @@ export type Mounts = {
       "query",
       "public",
       { email: string },
-      any
+      null | {
+        _creationTime: number;
+        _id: string;
+        activeOrganizationId?: null | string;
+        createdAt: number;
+        email: string;
+        emailVerified: boolean;
+        image?: null | string;
+        imageId?: null | string;
+        name: string;
+        updatedAt: number;
+        userId?: null | string;
+      }
     >;
-    getUserById: FunctionReference<"query", "public", { userId: string }, any>;
+    getUserById: FunctionReference<
+      "query",
+      "public",
+      { userId: string },
+      null | {
+        _creationTime: number;
+        _id: string;
+        activeOrganizationId?: null | string;
+        createdAt: number;
+        email: string;
+        emailVerified: boolean;
+        image?: null | string;
+        imageId?: null | string;
+        name: string;
+        updatedAt: number;
+        userId?: null | string;
+      }
+    >;
     updateUser: FunctionReference<
       "mutation",
       "public",
@@ -1468,7 +1497,7 @@ export type Mounts = {
         };
         userId: string;
       },
-      any
+      null
     >;
   };
 };

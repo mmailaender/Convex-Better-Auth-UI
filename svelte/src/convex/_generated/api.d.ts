@@ -1623,13 +1623,37 @@ export declare const components: {
         "query",
         "internal",
         { email: string },
-        any
+        null | {
+          _creationTime: number;
+          _id: string;
+          activeOrganizationId?: null | string;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageId?: null | string;
+          name: string;
+          updatedAt: number;
+          userId?: null | string;
+        }
       >;
       getUserById: FunctionReference<
         "query",
         "internal",
         { userId: string },
-        any
+        null | {
+          _creationTime: number;
+          _id: string;
+          activeOrganizationId?: null | string;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageId?: null | string;
+          name: string;
+          updatedAt: number;
+          userId?: null | string;
+        }
       >;
       updateUser: FunctionReference<
         "mutation",
@@ -1648,7 +1672,7 @@ export declare const components: {
           };
           userId: string;
         },
-        any
+        null
       >;
     };
   };
