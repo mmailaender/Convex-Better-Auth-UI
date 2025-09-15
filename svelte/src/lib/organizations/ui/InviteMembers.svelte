@@ -100,7 +100,7 @@
 	}
 </script>
 
-<form onsubmit={handleInvite} class="flex flex-col gap-4 sm:p-6">
+<form onsubmit={handleInvite} class="flex flex-col gap-4">
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-col">
 			<label>
