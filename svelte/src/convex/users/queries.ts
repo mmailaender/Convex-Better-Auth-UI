@@ -12,9 +12,8 @@ export const isUserExisting = query({
 		email: v.string()
 	},
 	handler: async (ctx, args) => {
-		const user = await ctx.runQuery(components.betterAuth.adapter.findOne, {
-			model: 'user',
-			where: [{ field: 'email', operator: 'eq', value: args.email }]
+		const user = await ctx.runQuery(components.betterAuth.user.getUserByEmail, {
+			email: args.email
 		});
 		return user !== null;
 	}

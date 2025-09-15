@@ -57,7 +57,7 @@ export const getOrganizationRole = query({
 				headers
 			});
 
-			const member = memberList.members.find((member) => member.userId === user.userId);
+			const member = memberList.members.find((member) => member.userId === user._id);
 			return (member?.role as typeof auth.$Infer.Member.role) || null;
 		} catch {
 			return null;

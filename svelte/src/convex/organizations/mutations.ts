@@ -19,13 +19,13 @@ export const createOrganization = mutation({
 	},
 	// TODO: Change to Id<'organization'> when Convex better-auth supports it
 	handler: async (ctx, args): Promise<string> => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId;
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			throw new ConvexError('Not authenticated');
 		}
 
 		return await createOrganizationModel(ctx, {
-			userId: userId,
+			userId: user._id,
 			name: args.name,
 			slug: args.slug,
 			logoId: args.logoId

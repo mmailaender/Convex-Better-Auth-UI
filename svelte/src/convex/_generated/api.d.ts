@@ -1619,7 +1619,18 @@ export declare const components: {
       >;
     };
     user: {
-      getUser: FunctionReference<"query", "internal", { userId: string }, any>;
+      getUserByEmail: FunctionReference<
+        "query",
+        "internal",
+        { email: string },
+        any
+      >;
+      getUserById: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        any
+      >;
       updateUser: FunctionReference<
         "mutation",
         "internal",

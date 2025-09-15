@@ -1444,7 +1444,13 @@ export type Mounts = {
     >;
   };
   user: {
-    getUser: FunctionReference<"query", "public", { userId: string }, any>;
+    getUserByEmail: FunctionReference<
+      "query",
+      "public",
+      { email: string },
+      any
+    >;
+    getUserById: FunctionReference<"query", "public", { userId: string }, any>;
     updateUser: FunctionReference<
       "mutation",
       "public",
