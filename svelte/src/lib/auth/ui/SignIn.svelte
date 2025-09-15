@@ -303,6 +303,7 @@
 							{submitting}
 							onSubmittingChange={(value) => (submitting = value)}
 							onModeChange={(m) => (passwordMode = m)}
+							callbackURL={getRedirectURL() || '/'}
 							onVerifyEmail={() => {
 								currentStep = 'verify-email';
 								verifyContext = 'emailVerification';

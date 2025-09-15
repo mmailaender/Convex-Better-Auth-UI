@@ -18,6 +18,7 @@
 		onSubmittingChange: (submitting: boolean) => void;
 		onModeChange?: (mode: 'login' | 'register') => void;
 		onVerifyEmail?: () => void;
+		callbackURL?: string;
 	}
 
 	let {
@@ -27,7 +28,8 @@
 		submitting,
 		onSubmittingChange,
 		onModeChange,
-		onVerifyEmail
+		onVerifyEmail,
+		callbackURL = '/'
 	}: PasswordFlowProps = $props();
 
 	const client = useConvexClient();
@@ -96,7 +98,7 @@
 			const name = formData.get('name') as string;
 
 			await authClient.signUp.email(
-				{ email, password, name },
+				{ email, password, name, callbackURL },
 				{
 					onSuccess: () => {
 						onVerifyEmail?.();
