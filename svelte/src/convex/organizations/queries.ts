@@ -1,4 +1,4 @@
-import { Id } from '../_generated/dataModel';
+import { type Id } from '../_generated/dataModel';
 import { internalQuery, query } from '../_generated/server';
 
 // better-auth

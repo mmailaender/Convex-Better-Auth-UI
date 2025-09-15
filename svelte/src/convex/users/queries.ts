@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 import { components } from '../_generated/api';
-import { Id } from '../_generated/dataModel';
+import { type Id } from '../_generated/dataModel';
 
 /**
  * Check if a user with the given email exists.
