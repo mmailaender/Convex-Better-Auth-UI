@@ -1,16 +1,5 @@
-import { defineSchema, defineTable } from 'convex/server';
-import { v } from 'convex/values';
+import { defineSchema } from 'convex/server';
 
-const schema = defineSchema({
-	users: defineTable({
-		imageId: v.optional(v.id('_storage')),
-		activeOrganizationId: v.optional(v.string())
-	}),
-
-	organizations: defineTable({
-		logoId: v.optional(v.id('_storage')),
-		betterAuthId: v.string()
-	}).index('betterAuthId', ['betterAuthId'])
-});
+const schema = defineSchema({});
 
 export default schema;

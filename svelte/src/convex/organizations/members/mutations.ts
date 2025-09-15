@@ -2,7 +2,6 @@ import { ConvexError, v } from 'convex/values';
 import { mutation } from '../../_generated/server';
 import { authComponent, createAuth } from '../../auth';
 import { APIError } from 'better-auth/api';
-import type { Id } from '../../_generated/dataModel';
 
 /**
  * Leave the current active organization
@@ -15,8 +14,8 @@ export const leaveOrganization = mutation({
 		successorMemberId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) throw new ConvexError('Not authenticated');
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) throw new ConvexError('Not authenticated');
 
 		const auth = createAuth(ctx);
 
@@ -81,12 +80,12 @@ export const leaveOrganization = mutation({
 			});
 
 			// Update user's active organization in the database
-			const user = await ctx.db.get(userId as Id<'users'>);
-			if (user) {
-				await ctx.db.patch(user._id, {
+			await auth.api.updateUser({
+				body: {
 					activeOrganizationId: nextActiveOrg.id
-				});
-			}
+				},
+				headers: await authComponent.getHeaders(ctx)
+			});
 
 			return true;
 		} catch (error) {

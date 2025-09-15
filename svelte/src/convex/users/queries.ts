@@ -3,17 +3,16 @@ import { v } from 'convex/values';
 import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 import { components } from '../_generated/api';
-import { type Id } from '../_generated/dataModel';
 
 /**
- * Check if a user with the given email exists.
+ * Check if a user with the given email exists. Works also in a non-authenticated context.
  */
 export const isUserExisting = query({
 	args: {
 		email: v.string()
 	},
 	handler: async (ctx, args) => {
-		const user = await ctx.runQuery(components.betterAuth.lib.findOne, {
+		const user = await ctx.runQuery(components.betterAuth.adapter.findOne, {
 			model: 'user',
 			where: [{ field: 'email', operator: 'eq', value: args.email }]
 		});
@@ -26,8 +25,8 @@ export const isUserExisting = query({
  */
 export const getActiveUser = query({
 	handler: async (ctx) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return null;
 		}
 
@@ -41,8 +40,8 @@ export const getActiveUser = query({
 
 export const listAccounts = query({
 	handler: async (ctx) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return null;
 		}
 

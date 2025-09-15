@@ -3,8 +3,9 @@ import { authComponent, createAuth } from '../../auth';
 
 // Types
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
-import type { Doc, Id } from '../../_generated/dataModel';
+import type { Id } from '../../_generated/dataModel';
 import { APIError } from 'better-auth/api';
+import { components } from '../../_generated/api';
 
 /**
  * Ensure the organization slug is unique by appending an incrementing postfix
@@ -114,7 +115,7 @@ export const getUniqueOrganizationSlug = async (
 export const createOrganizationModel = async (
 	ctx: MutationCtx,
 	args: {
-		userId: Id<'users'>;
+		userId: string;
 		name: string;
 		slug: string;
 		logoId?: Id<'_storage'>;
@@ -142,17 +143,16 @@ export const createOrganizationModel = async (
 				userId: args.userId,
 				name,
 				slug: uniqueSlug,
-				logo: imageUrl ?? undefined
+				logo: imageUrl ?? undefined,
+				logoId
 			}
 		});
 
-		// TODO: Move logoId to better-auth as soon v0.8 launches with organization.additionalFields support
-		await ctx.db.insert('organizations', {
-			betterAuthId: org!.id,
-			logoId
-		});
-		await ctx.db.patch(args.userId, {
-			activeOrganizationId: org!.id
+		await ctx.runMutation(components.betterAuth.user.updateUser, {
+			userId: args.userId,
+			data: {
+				activeOrganizationId: org!.id
+			}
 		});
 	} catch (error) {
 		console.error('Unexpected error creating organization:', error);
@@ -191,7 +191,7 @@ export const createOrganizationModel = async (
 		}
 	}
 
-	return org.id as Id<'organizations'>;
+	return org.id;
 };
 
 // /**
@@ -292,15 +292,18 @@ export const updateOrganizationProfileModel = async (
 	}
 
 	// Handle logo updates
-	let imageUrl: string | undefined;
-	let convexOrgToUpdate: Doc<'organizations'> | null = null;
+	let logoUrl: string | undefined;
+	let convexOrgToUpdate: typeof auth.$Infer.Organization | null = null;
 
+	// Tri-state semantics for `logoId` passed into this model:
+	// - undefined: do not touch the logo fields at all
+	// - null: remove existing logo (delete storage file + clear Better Auth's stored logoId)
+	// - Id<'_storage'>: replace the logo (delete previous storage file, store new logoId)
 	if (logoId !== undefined) {
 		// Get Convex organization record for logo management
-		convexOrgToUpdate = await ctx.db
-			.query('organizations')
-			.withIndex('betterAuthId', (q) => q.eq('betterAuthId', organizationId))
-			.first();
+		convexOrgToUpdate = await auth.api.getFullOrganization({
+			headers: await authComponent.getHeaders(ctx)
+		});
 
 		if (!convexOrgToUpdate) {
 			throw new ConvexError('Organization record not found in database');
@@ -310,16 +313,26 @@ export const updateOrganizationProfileModel = async (
 		if (logoId === null) {
 			if (convexOrgToUpdate.logoId) {
 				await ctx.storage.delete(convexOrgToUpdate.logoId);
-				await ctx.db.patch(convexOrgToUpdate._id, { logoId: undefined });
+
+				await auth.api.updateOrganization({
+					body: {
+						data: {
+							// In a single BA update we clear both the raw storage id and the public URL
+							logoId: undefined,
+							logo: undefined
+						},
+						organizationId: convexOrgToUpdate.id
+					},
+					headers: await authComponent.getHeaders(ctx)
+				});
 			}
-			imageUrl = undefined; // This will remove the logo from Better Auth
 		}
 		// Handle logo addition/update
 		else if (logoId !== null && logoId !== convexOrgToUpdate.logoId) {
 			// Validate new logo exists and get URL before making changes
 			// TypeScript assertion: logoId is guaranteed to be Id<'_storage'> here
-			imageUrl = (await ctx.storage.getUrl(logoId as Id<'_storage'>)) ?? undefined;
-			if (!imageUrl) {
+			logoUrl = (await ctx.storage.getUrl(logoId)) ?? undefined;
+			if (!logoUrl) {
 				throw new ConvexError('Invalid logo file or file not found');
 			}
 
@@ -328,8 +341,18 @@ export const updateOrganizationProfileModel = async (
 				await ctx.storage.delete(convexOrgToUpdate.logoId);
 			}
 
-			// Update Convex record with new logo
-			await ctx.db.patch(convexOrgToUpdate._id, { logoId: logoId as Id<'_storage'> });
+			// Persist both the raw storage id and the public URL in a single BA update.
+			// This avoids a second update later and keeps the two fields in sync.
+			await auth.api.updateOrganization({
+				body: {
+					data: {
+						logoId: logoId,
+						logo: logoUrl
+					},
+					organizationId: convexOrgToUpdate.id
+				},
+				headers: await authComponent.getHeaders(ctx)
+			});
 		}
 	}
 
@@ -338,12 +361,9 @@ export const updateOrganizationProfileModel = async (
 		{};
 	if (name !== undefined) betterAuthUpdateData.name = name.trim();
 	if (slug !== undefined) betterAuthUpdateData.slug = slug.trim();
-	if (logoId !== undefined) {
-		// Better Auth expects undefined to remove logo
-		betterAuthUpdateData.logo = imageUrl;
-		// TODO: Move logoId to better-auth as soon v0.8 launches with organization.additionalFields support
-		// betterAuthUpdateData.logoId = logoId as string;
-	}
+	// Note: `logo` and `logoId` are fully handled above (including storage deletion and BA update),
+	// so we do not include them in the consolidated payload here. This simplifies the flow and
+	// guarantees that the two logo fields are updated atomically per branch.
 
 	// Update Better Auth if there are changes
 	if (Object.keys(betterAuthUpdateData).length > 0) {

@@ -17,14 +17,15 @@ export const createOrganization = mutation({
 		logoId: v.optional(v.id('_storage')),
 		skipActiveOrganization: v.optional(v.boolean())
 	},
-	handler: async (ctx, args): Promise<Id<'organizations'>> => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
+	// TODO: Change to Id<'organization'> when Convex better-auth supports it
+	handler: async (ctx, args): Promise<string> => {
+		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId;
 		if (!userId) {
 			throw new ConvexError('Not authenticated');
 		}
 
 		return await createOrganizationModel(ctx, {
-			userId: userId as Id<'users'>,
+			userId: userId,
 			name: args.name,
 			slug: args.slug,
 			logoId: args.logoId
@@ -34,7 +35,7 @@ export const createOrganization = mutation({
 
 export const _createOrganization = internalMutation({
 	args: {
-		userId: v.id('users'),
+		userId: v.string(),
 		name: v.string(),
 		slug: v.string(),
 		logoId: v.optional(v.id('_storage')),
@@ -53,30 +54,25 @@ export const setActiveOrganization = mutation({
 		organizationId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) throw new ConvexError('Not authenticated');
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) throw new ConvexError('Not authenticated');
 
 		const auth = createAuth(ctx);
 
 		if (args.organizationId) {
 			try {
-				const organizationId = args.organizationId;
 				await auth.api.setActiveOrganization({
 					body: {
 						organizationId: args.organizationId
 					},
 					headers: await authComponent.getHeaders(ctx)
 				});
-				const user = await ctx.db.get(userId as Id<'users'>);
-				const org = await ctx.db
-					.query('organizations')
-					.withIndex('betterAuthId', (q) => q.eq('betterAuthId', organizationId))
-					.first();
-				if (user && org) {
-					await ctx.db.patch(user._id, {
-						activeOrganizationId: org._id
-					});
-				}
+
+				await auth.api.updateUser({
+					body: {
+						activeOrganizationId: args.organizationId
+					}
+				});
 			} catch (error) {
 				if (error instanceof APIError) {
 					throw new ConvexError(error.message);
@@ -89,11 +85,6 @@ export const setActiveOrganization = mutation({
 				});
 				if (organizations.length === 0) {
 					throw new ConvexError('No organizations found');
-				}
-
-				const user = await ctx.db.get(userId as Id<'users'>);
-				if (!user) {
-					throw new ConvexError('User not found');
 				}
 
 				if (user.activeOrganizationId) {
@@ -118,16 +109,11 @@ export const setActiveOrganization = mutation({
 						},
 						headers: await authComponent.getHeaders(ctx)
 					});
-					const org = (
-						await auth.api.listOrganizations({
-							headers: await authComponent.getHeaders(ctx)
-						})
-					).find((org) => org.id === betterAuthOrg.id);
-					if (user && org) {
-						await ctx.db.patch(user._id, {
-							activeOrganizationId: org.id
-						});
-					}
+					await auth.api.updateUser({
+						body: {
+							activeOrganizationId: betterAuthOrg.id
+						}
+					});
 				}
 			} catch (error) {
 				if (error instanceof APIError) {
@@ -143,22 +129,18 @@ export const deleteOrganization = mutation({
 		organizationId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) throw new ConvexError('Not authenticated');
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) throw new ConvexError('Not authenticated');
 
-		let organizationId = args.organizationId;
 		const auth = createAuth(ctx);
+		let organization = await auth.api.getFullOrganization({
+			query: {
+				organizationId: args.organizationId
+			},
+			headers: await authComponent.getHeaders(ctx)
+		});
 
-		// If no organizationId provided, get the current active organization
-		if (!organizationId) {
-			organizationId = (
-				await auth.api.getFullOrganization({
-					headers: await authComponent.getHeaders(ctx)
-				})
-			)?.id;
-		}
-
-		if (!organizationId) {
+		if (!organization) {
 			throw new ConvexError('Organization not found');
 		}
 
@@ -173,29 +155,19 @@ export const deleteOrganization = mutation({
 		}
 
 		// Find the first organization that is not the one being deleted
-		const nextActiveOrg = allOrganizations.find((org) => org.id !== organizationId);
+		const nextActiveOrg = allOrganizations.find((org) => org.id !== organization.id);
 
 		if (!nextActiveOrg) {
 			throw new ConvexError('No alternative organization found to set as active');
 		}
 
-		// Delete the organization
+		// Delete the organization and logo if it exists
 		await auth.api.deleteOrganization({
-			body: { organizationId },
+			body: { organizationId: organization.id },
 			headers: await authComponent.getHeaders(ctx)
 		});
-
-		// Delete organization also from convex app table and storage
-		// TODO: Remove as soon as convex better-auth supports additional organization fields
-		const appOrg = await ctx.db
-			.query('organizations')
-			.withIndex('betterAuthId', (q) => q.eq('betterAuthId', organizationId))
-			.first();
-		if (appOrg) {
-			await ctx.db.delete(appOrg._id);
-			if (appOrg.logoId) {
-				await ctx.storage.delete(appOrg.logoId);
-			}
+		if (organization.logoId) {
+			await ctx.storage.delete(organization.logoId);
 		}
 
 		// Set the first remaining organization as active
@@ -205,12 +177,11 @@ export const deleteOrganization = mutation({
 		});
 
 		// Update user's active organization in the database
-		const user = await ctx.db.get(userId as Id<'users'>);
-		if (user) {
-			await ctx.db.patch(user._id, {
+		await auth.api.updateUser({
+			body: {
 				activeOrganizationId: nextActiveOrg.id
-			});
-		}
+			}
+		});
 	}
 });
 
@@ -224,9 +195,8 @@ export const updateOrganizationProfile = mutation({
 		logoId: v.optional(v.id('_storage'))
 	},
 	handler: async (ctx, args) => {
-		// const userId = await getAuthUserId(ctx);
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) throw new ConvexError('Not authenticated');
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) throw new ConvexError('Not authenticated');
 
 		const auth = createAuth(ctx);
 		const organization = await auth.api.getFullOrganization({

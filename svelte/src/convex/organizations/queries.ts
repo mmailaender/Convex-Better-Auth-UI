@@ -1,5 +1,4 @@
-import { type Id } from '../_generated/dataModel';
-import { internalQuery, query } from '../_generated/server';
+import { query } from '../_generated/server';
 
 // better-auth
 import { authComponent, createAuth } from '../auth';
@@ -10,8 +9,8 @@ import { v } from 'convex/values';
  */
 export const listOrganizations = query({
 	handler: async (ctx) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return [];
 		}
 
@@ -37,8 +36,8 @@ export const getOrganizationRole = query({
 	},
 	handler: async (ctx, args) => {
 		const { organizationId } = args;
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return null;
 		}
 
@@ -58,7 +57,7 @@ export const getOrganizationRole = query({
 				headers
 			});
 
-			const member = memberList.members.find((member) => member.userId === userId);
+			const member = memberList.members.find((member) => member.userId === user.userId);
 			return (member?.role as typeof auth.$Infer.Member.role) || null;
 		} catch {
 			return null;
@@ -71,8 +70,8 @@ export const getOrganizationRole = query({
  */
 export const getActiveOrganization = query({
 	handler: async (ctx) => {
-		const userId = (await authComponent.safeGetAuthUser(ctx))?.userId as Id<'users'>;
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return null;
 		}
 
@@ -84,14 +83,5 @@ export const getActiveOrganization = query({
 		} catch {
 			return null;
 		}
-	}
-});
-
-export const _getActiveOrganizationFromDb = internalQuery({
-	args: { userId: v.id('users') },
-	handler: async (ctx, args) => {
-		const user = await ctx.db.get(args.userId);
-		if (!user || !user.activeOrganizationId) return null;
-		return user.activeOrganizationId;
 	}
 });

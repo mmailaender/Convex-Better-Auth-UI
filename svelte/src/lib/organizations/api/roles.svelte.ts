@@ -4,10 +4,9 @@ import { api } from '$convex/_generated/api';
 
 // Types
 import type { FunctionReturnType } from 'convex/server';
-import type { Id } from '$convex/_generated/dataModel';
 type Role = FunctionReturnType<typeof api.organizations.queries.getOrganizationRole>;
 
-export function useRoles(args: { orgId?: Id<'organizations'>; initialData?: Role } = {}) {
+export function useRoles(args: { orgId?: string; initialData?: Role } = {}) {
 	const role = useQuery(
 		api.organizations.queries.getOrganizationRole,
 		{ organizationId: args.orgId },

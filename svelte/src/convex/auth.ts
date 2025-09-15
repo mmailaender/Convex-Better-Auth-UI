@@ -1,7 +1,8 @@
 import { type AuthFunctions, type GenericCtx, createClient } from '@convex-dev/better-auth';
 import { requireMutationCtx } from '@convex-dev/better-auth/utils';
 import { components, internal } from './_generated/api';
-import type { Id, DataModel } from './_generated/dataModel';
+import type { DataModel } from './_generated/dataModel';
+import authSchema from './betterAuth/schema';
 
 import { betterAuth } from 'better-auth';
 
@@ -27,28 +28,11 @@ const siteUrl = process.env.SITE_URL;
 const authFunctions: AuthFunctions = internal.auth;
 
 // Initialize the component
-export const authComponent = createClient<DataModel>(components.betterAuth, {
-	authFunctions,
-	triggers: {
-		user: {
-			onCreate: async (ctx, authUser) => {
-				// Any `onCreateUser` logic should be moved here
-				const userId = await ctx.db.insert('users', {});
-				// Instead of returning the user id, we set it to the component
-				// user table manually. This is no longer required behavior, but
-				// is necessary when migrating from previous versions to avoid
-				// a required database migration.
-				// This helper method exists solely to facilitate this migration.
-				await authComponent.setUserId(ctx, authUser._id, userId);
-			},
-			onUpdate: async (ctx, oldUser, newUser) => {
-				// Any `onUpdateUser` logic should be moved here
-			},
-			onDelete: async (ctx, authUser) => {
-				await ctx.db.delete(authUser.userId as Id<'users'>);
-			}
-		}
-	}
+export const authComponent = createClient<DataModel, typeof authSchema>(components.betterAuth, {
+	local: {
+		schema: authSchema
+	},
+	authFunctions
 });
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
@@ -96,6 +80,16 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
 		},
 
 		user: {
+			additionalFields: {
+				imageId: {
+					type: 'string',
+					required: false
+				},
+				activeOrganizationId: {
+					type: 'string',
+					required: false
+				}
+			},
 			deleteUser: {
 				enabled: true
 			},
@@ -165,15 +159,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
 					after: async (user) => {
 						if ('runMutation' in ctx) {
 							if (AUTH_CONSTANTS.organizations) {
-								type AuthInstance = ReturnType<typeof createAuth>;
 								try {
-									const userWithUserId = (await ctx.runQuery(components.betterAuth.lib.findOne, {
-										model: 'user',
-										where: [{ field: 'email', operator: 'eq', value: user.email }]
-									})) as AuthInstance['$Infer']['Session']['user'];
-
 									await ctx.runMutation(internal.organizations.mutations._createOrganization, {
-										userId: userWithUserId.userId as Id<'users'>,
+										userId: user.id,
 										name: `Personal Organization`,
 										slug: (() => {
 											const userName: string = (user as { name?: string })?.name ?? '';
@@ -196,30 +184,5 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
 					}
 				}
 			}
-			// 	session: {
-			// 		create: {
-			// 			before: async (session) => {
-			// 				if ('runQuery' in ctx) {
-			// 					try {
-			// 						const activeOrganizationId = await ctx.runQuery(
-			// 							internal.organizations.queries._getActiveOrganizationFromDb,
-			// 							{ userId: session.userId as Id<'users'> }
-			// 						);
-
-			// 						return {
-			// 							data: {
-			// 								...session,
-			// 								activeOrganizationId: activeOrganizationId || null
-			// 							}
-			// 						};
-			// 					} catch (error) {
-			// 						console.error('Error setting active organization:', error);
-			// 						return { data: session };
-			// 					}
-			// 				}
-			// 				return { data: session };
-			// 			}
-			// 		}
-			// }
 		}
 	});
