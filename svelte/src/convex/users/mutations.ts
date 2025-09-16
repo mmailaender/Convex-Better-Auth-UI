@@ -83,7 +83,7 @@ export const setPassword = mutation({
 			});
 		} catch (error) {
 			if (error instanceof APIError) {
-				throw new ConvexError(error.message);
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 			}
 			console.error('Unexpected error setting password:', error);
 			throw new ConvexError('An unexpected error occurred while setting the password');

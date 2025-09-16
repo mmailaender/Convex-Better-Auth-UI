@@ -8,6 +8,7 @@
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { ConvexError } from 'convex/values';
 	const roles = useRoles();
 	const client = useConvexClient();
 
@@ -91,9 +92,13 @@
 			// Navigate to home page after leaving
 			goto('/');
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
-			);
+			if (err instanceof ConvexError) {
+				toast.error(err.data);
+			} else {
+				toast.error(
+					err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
+				);
+			}
 			console.error(err);
 		}
 	}

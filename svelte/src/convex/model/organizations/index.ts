@@ -157,7 +157,7 @@ export const createOrganizationModel = async (
 	} catch (error) {
 		console.error('Unexpected error creating organization:', error);
 		if (error instanceof APIError) {
-			throw new ConvexError(error.message);
+			throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 		}
 		throw new ConvexError('An unexpected error occurred while creating the organization');
 	}
@@ -181,8 +181,7 @@ export const createOrganizationModel = async (
 			});
 		} catch (error) {
 			if (error instanceof APIError) {
-				console.log(error.message, error.status);
-				throw new ConvexError(error.message);
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 			}
 			console.error('Unexpected error setting active organization:', error);
 			throw new ConvexError(

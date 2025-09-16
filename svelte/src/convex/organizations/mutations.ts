@@ -75,7 +75,7 @@ export const setActiveOrganization = mutation({
 				});
 			} catch (error) {
 				if (error instanceof APIError) {
-					throw new ConvexError(error.message);
+					throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 				}
 			}
 		} else {
@@ -117,7 +117,7 @@ export const setActiveOrganization = mutation({
 				}
 			} catch (error) {
 				if (error instanceof APIError) {
-					throw new ConvexError(error.message);
+					throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 				}
 			}
 		}

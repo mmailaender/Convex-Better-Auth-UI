@@ -94,17 +94,7 @@ export const leaveOrganization = mutation({
 			}
 
 			if (error instanceof APIError) {
-				switch (error.status) {
-					case 400:
-						throw new ConvexError('Invalid request data');
-					case 401:
-					case 403:
-						throw new ConvexError('Unauthorized to leave organization');
-					case 404:
-						throw new ConvexError('Organization or member not found');
-					default:
-						throw new ConvexError(error.message || 'Failed to leave organization');
-				}
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 			}
 
 			throw new ConvexError('Failed to leave organization');
