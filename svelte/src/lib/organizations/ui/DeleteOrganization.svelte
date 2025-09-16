@@ -12,6 +12,8 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Dialog from '$lib/primitives/ui/dialog';
+	// Icons
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	const roles = useRoles();
 	const isOwner = $derived(roles.hasOwnerRole);
@@ -37,11 +39,13 @@
 
 	// State
 	let dialogOpen: boolean = $state(false);
+	let isDeleting: boolean = $state(false);
 
 	/**
 	 * Handle confirmation of organization deletion
 	 */
 	async function handleConfirm(): Promise<void> {
+		isDeleting = true;
 		try {
 			if (!activeOrganization) return;
 
@@ -69,6 +73,8 @@
 			} else {
 				toast.error('Unknown error. Please try again. If it persists, contact support.');
 			}
+		} finally {
+			isDeleting = false;
 		}
 	}
 </script>
@@ -98,9 +104,20 @@
 			</article>
 
 			<Dialog.Footer class="w-full">
-				<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
-				<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
-					Delete
+				<Dialog.Close class="btn preset-tonal" disabled={isDeleting}>Cancel</Dialog.Close>
+				<button
+					type="button"
+					class="btn preset-filled-error-500"
+					onclick={handleConfirm}
+					disabled={isDeleting}
+					aria-busy={isDeleting}
+				>
+					{#if isDeleting}
+						<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+						Deleting...
+					{:else}
+						Delete
+					{/if}
 				</button>
 			</Dialog.Footer>
 		</Dialog.Content>

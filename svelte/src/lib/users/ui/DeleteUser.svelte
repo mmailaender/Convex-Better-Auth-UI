@@ -2,6 +2,8 @@
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
+	// Icons
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// API
 	import { ConvexError } from 'convex/values';
@@ -9,11 +11,13 @@
 
 	// State
 	let deleteDialogOpen: boolean = $state(false);
+	let isDeleting: boolean = $state(false);
 
 	/**
 	 * Handle the delete confirmation action
 	 */
 	async function handleConfirm(): Promise<void> {
+		isDeleting = true;
 		try {
 			await authClient.deleteUser();
 			await authClient.signOut();
@@ -27,6 +31,8 @@
 			} else {
 				toast.error('Error deleting user');
 			}
+		} finally {
+			isDeleting = false;
 		}
 	}
 </script>
@@ -44,9 +50,20 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<Dialog.Footer class="w-full">
-			<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
-			<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
-				Delete
+			<Dialog.Close class="btn preset-tonal" disabled={isDeleting}>Cancel</Dialog.Close>
+			<button
+				type="button"
+				class="btn preset-filled-error-500"
+				onclick={handleConfirm}
+				disabled={isDeleting}
+				aria-busy={isDeleting}
+			>
+				{#if isDeleting}
+					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+					Deleting...
+				{:else}
+					Delete
+				{/if}
 			</button>
 		</Dialog.Footer>
 	</Dialog.Content>
