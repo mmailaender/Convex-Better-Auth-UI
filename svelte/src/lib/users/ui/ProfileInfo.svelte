@@ -9,7 +9,7 @@
 	const client = useConvexClient();
 
 	// Icons
-	import { Pencil } from '@lucide/svelte';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
@@ -149,7 +149,7 @@
 							<div
 								class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 hover:bg-surface-400-600 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 							>
-								<Pencil class="size-4" />
+								<PencilIcon class="size-4" />
 							</div>
 						</div>
 					</div>
@@ -233,7 +233,7 @@
 				{#if !isEditingName}
 					<div>
 						<span class="btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
-							<Pencil class="size-4" />
+							<PencilIcon class="size-4" />
 						</span>
 					</div>
 					<button

@@ -5,7 +5,9 @@
 	import * as Avatar from '$lib/primitives/ui/avatar';
 	import { toast } from 'svelte-sonner';
 	// Icons
-	import { Search, Trash, Pencil } from '@lucide/svelte';
+	import SearchIcon from '@lucide/svelte/icons/search';
+	import TrashIcon from '@lucide/svelte/icons/trash';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
 
 	// API
 	import { useQuery } from 'convex-svelte';
@@ -171,7 +173,7 @@
 		<div class="flex flex-shrink-0 items-center gap-3 py-4">
 			<div class="relative flex-1">
 				<div class="pointer-events-none absolute inset-y-0 flex items-center">
-					<Search class="text-surface-400-600 size-4" />
+					<SearchIcon class="text-surface-400-600 size-4" />
 				</div>
 				<input
 					type="text"
@@ -232,7 +234,7 @@
 							</div>
 						</div>
 						{#if canEditMember(member)}
-							<Pencil class="size-4 opacity-60" />
+							<PencilIcon class="size-4 opacity-60" />
 						{/if}
 					</div>
 				{/each}
@@ -338,7 +340,7 @@
 														isDialogOpen = true;
 													}}
 												>
-													<Trash class="size-4 opacity-70" />
+													<TrashIcon class="size-4 opacity-70" />
 												</button>
 											{/if}
 										</div>
@@ -441,7 +443,7 @@
 										isDialogOpen = true;
 									}}
 								>
-									<Trash class="size-4" /> Remove
+									<TrashIcon class="size-4" /> Remove
 								</button>
 							</div>
 						</div>

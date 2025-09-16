@@ -3,7 +3,7 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
 	// Icons
-	import { Search } from '@lucide/svelte';
+	import SearchIcon from '@lucide/svelte/icons/search';
 
 	// API
 	import { useQuery } from 'convex-svelte';
@@ -106,7 +106,7 @@
 		<div class="flex flex-shrink-0 items-center gap-3 py-4">
 			<div class="relative flex-1">
 				<div class="pointer-events-none absolute inset-y-0 flex items-center">
-					<Search class="text-surface-400-600 size-4" />
+					<SearchIcon class="text-surface-400-600 size-4" />
 				</div>
 				<input
 					type="text"

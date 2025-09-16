@@ -4,7 +4,7 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Avatar from '$lib/primitives/ui/avatar';
 	// Icons
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	// Components
 	import UserProfile from '$lib/users/ui/UserProfile.svelte';
 	import SignIn from '$lib/auth/ui/SignIn.svelte';
@@ -225,7 +225,7 @@
 								{user.email}
 							</p>
 						</div>
-						<ChevronRight class="size-4" />
+						<ChevronRightIcon class="size-4" />
 					</button>
 					<SignOutButton
 						onSuccess={() => (userPopoverOpen = false)}
@@ -280,13 +280,13 @@
 
 <!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
 <Dialog.Root
-  bind:open={signInDialogOpen}
-  onOpenChange={(status) => {
-    // When dialog closes, bump the key so next open is a fresh mount
-    if (!status.open) {
-      signInKey += 1;
-    }
-  }}
+	bind:open={signInDialogOpen}
+	onOpenChange={(status) => {
+		// When dialog closes, bump the key so next open is a fresh mount
+		if (!status.open) {
+			signInKey += 1;
+		}
+	}}
 >
 	<Dialog.Content
 		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"

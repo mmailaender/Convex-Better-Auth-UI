@@ -25,7 +25,9 @@
 
 	// Icons
 	import { SiGithub } from '@icons-pack/svelte-simple-icons';
-	import { KeyRound, Lock, Trash2 } from '@lucide/svelte';
+	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
+	import LockIcon from '@lucide/svelte/icons/lock';
+	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
 	// Utils
 	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
@@ -105,9 +107,9 @@
 			case 'github':
 				return SiGithub;
 			case 'credential':
-				return KeyRound;
+				return KeyRoundIcon;
 			default:
-				return Lock;
+				return LockIcon;
 		}
 	};
 
@@ -360,7 +362,7 @@
 									{#if unlinkingAccountId === account.id}
 										Unlinking...
 									{:else}
-										<Trash2 class="size-4" />
+										<Trash2Icon class="size-4" />
 									{/if}
 								</button>
 							</div>

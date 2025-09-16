@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TriangleAlert } from '@lucide/svelte';
+	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 	interface Props {
 		successMessage?: string;
 		errorMessage?: string;
@@ -33,7 +33,7 @@
 	<div
 		class="card preset-outlined-error-500 grid grid-cols-1 items-center gap-4 p-4 lg:grid-cols-[auto_1fr_auto]"
 	>
-		<TriangleAlert />
+		<TriangleAlertIcon />
 		<div>
 			<p class="font-bold">Error</p>
 			<p class="text-xs opacity-60">{errorMessage}</p>

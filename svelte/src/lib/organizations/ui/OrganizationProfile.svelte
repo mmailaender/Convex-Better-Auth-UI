@@ -8,7 +8,12 @@
 	// Primitives
 	import * as Tabs from '$lib/primitives/ui/tabs';
 	// Icons
-	import { Bolt, ChevronLeft, ChevronRight, UserIcon, Wallet, X } from '@lucide/svelte';
+	import BoltIcon from '@lucide/svelte/icons/bolt';
+	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import UserIcon from '@lucide/svelte/icons/user';
+	import WalletIcon from '@lucide/svelte/icons/wallet';
+	import XIcon from '@lucide/svelte/icons/x';
 	// Widgets
 	import OrganizationInfo from '$lib/organizations/ui/OrganizationInfo.svelte';
 	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
@@ -128,7 +133,7 @@
 		{
 			value: 'general',
 			label: 'General',
-			icon: Bolt,
+			icon: BoltIcon,
 			showForAllUsers: true
 		},
 		{
@@ -140,7 +145,7 @@
 		{
 			value: 'billing',
 			label: 'Billing',
-			icon: Wallet,
+			icon: WalletIcon,
 			showForAllUsers: false
 		}
 	];
@@ -351,7 +356,7 @@
 					aria-label="Close organization profile"
 					type="button"
 				>
-					<X />
+					<XIcon />
 				</button>
 				<Tabs.List class=" flex w-full flex-col  pr-2">
 					{#each visibleTabs as tab, index (tab.value)}
@@ -366,7 +371,7 @@
 								<tab.icon />
 							</div>
 							<span class="w-full">{tab.label}</span>
-							<ChevronRight class="text-surface-500 flex" />
+							<ChevronRightIcon class="text-surface-500 flex" />
 						</Tabs.Trigger>
 						{#if index < visibleTabs.length - 1}
 							<div class="flex h-2 w-full items-center justify-center px-3">
@@ -387,7 +392,7 @@
 					onclick={closeMobileTab}
 					aria-label="Go back to organization settings menu"
 				>
-					<ChevronLeft />
+					<ChevronLeftIcon />
 				</button>
 
 				{#if activeMobileTab === 'general'}

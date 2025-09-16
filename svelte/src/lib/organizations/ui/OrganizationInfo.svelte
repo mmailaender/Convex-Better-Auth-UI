@@ -23,7 +23,8 @@
 
 	// UI Components
 	// Icons
-	import { Building2, Pencil } from '@lucide/svelte';
+	import Building2Icon from '@lucide/svelte/icons/building-2';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
@@ -215,7 +216,7 @@
 							<Avatar.Fallback
 								class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
 							>
-								<Building2 class="text-surface-700-300 size-10" />
+								<Building2Icon class="text-surface-700-300 size-10" />
 							</Avatar.Fallback>
 						</Avatar.Root>
 					{/key}
@@ -233,7 +234,7 @@
 					<div
 						class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 					>
-						<Pencil class="size-4" />
+						<PencilIcon class="size-4" />
 					</div>
 				</div>
 			</ImageCropper.UploadTrigger>
@@ -325,7 +326,7 @@
 					{#if isOwnerOrAdmin && !isEditingName}
 						<div class="shrink-0">
 							<span class="btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
-								<Pencil class="size-4" />
+								<PencilIcon class="size-4" />
 							</span>
 						</div>
 						<button
@@ -421,7 +422,7 @@
 					{#if isOwnerOrAdmin && !isEditingSlug}
 						<div class="shrink-0">
 							<span class="btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
-								<Pencil class="size-4" />
+								<PencilIcon class="size-4" />
 							</span>
 						</div>
 						<button

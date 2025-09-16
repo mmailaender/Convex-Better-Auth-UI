@@ -9,7 +9,10 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Avatar from '$lib/primitives/ui/avatar';
 	// Icons
-	import { Building2, ChevronsUpDown, Plus, Settings } from '@lucide/svelte';
+	import Building2Icon from '@lucide/svelte/icons/building-2';
+	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
+	import PlusIcon from '@lucide/svelte/icons/plus';
+	import SettingsIcon from '@lucide/svelte/icons/settings';
 	// Components
 	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
 	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
@@ -270,7 +273,7 @@
 {:else if organizations.length === 0}
 	<Dialog.Root bind:open={createOrganizationDialogOpen}>
 		<Dialog.Trigger class="btn preset-tonal flex items-center gap-2">
-			<Plus class="size-4" />
+			<PlusIcon class="size-4" />
 			<span>Create Organization</span>
 		</Dialog.Trigger>
 		<Dialog.Content class="max-w-md">
@@ -289,14 +292,14 @@
 				<Avatar.Root class="rounded-container size-8 shrink-0">
 					<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
 					<Avatar.Fallback>
-						<Building2 class="size-5" />
+						<Building2Icon class="size-5" />
 					</Avatar.Fallback>
 				</Avatar.Root>
 				<span class="text-surface-700-300 truncate text-sm">
 					{activeOrganization?.name}
 				</span>
 			</div>
-			<ChevronsUpDown class="size-4 opacity-40" />
+			<ChevronsUpDownIcon class="size-4 opacity-40" />
 		</Popover.Trigger>
 		<Popover.Content>
 			<div class="flex flex-col gap-1">
@@ -309,13 +312,13 @@
 							<Avatar.Root class="rounded-container size-8 shrink-0">
 								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
 								<Avatar.Fallback>
-									<Building2 class="size-4" />
+									<Building2Icon class="size-4" />
 								</Avatar.Fallback>
 							</Avatar.Root>
 							<span class="text-surface-700-300 text-medium w-full truncate text-sm">
 								{activeOrganization?.name}
 							</span>
-							<Settings class="size-6" />
+							<SettingsIcon class="size-6" />
 						</button>
 					{:else}
 						<div
@@ -324,7 +327,7 @@
 							<Avatar.Root class="rounded-container size-8 shrink-0">
 								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
 								<Avatar.Fallback>
-									<Building2 class="size-4" />
+									<Building2Icon class="size-4" />
 								</Avatar.Fallback>
 							</Avatar.Root>
 							<span class="text-surface-700-300 text-medium w-full truncate">
@@ -343,7 +346,7 @@
 								<Avatar.Root class="rounded-container size-8 shrink-0">
 									<Avatar.Image src={org.logo} alt={org.name} />
 									<Avatar.Fallback>
-										<Building2 class="size-4" />
+										<Building2Icon class="size-4" />
 									</Avatar.Fallback>
 								</Avatar.Root>
 								<span class="text-surface-700-300 truncate text-sm">
@@ -360,7 +363,7 @@
 					<div
 						class="bg-surface-200-800 border-surface-300-700 rounded-base flex size-8 shrink-0 items-center justify-center border border-dashed"
 					>
-						<Plus class="size-4" />
+						<PlusIcon class="size-4" />
 					</div>
 					<span class="text-surface-700-300 text-sm">Create Organization</span>
 				</button>

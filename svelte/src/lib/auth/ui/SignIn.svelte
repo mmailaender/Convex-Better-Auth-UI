@@ -14,7 +14,7 @@
 
 	// Icons
 	import { SiGithub } from '@icons-pack/svelte-simple-icons';
-	import { Mail } from '@lucide/svelte';
+	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// Utils
 	import { cn } from '$lib/primitives/utils';
@@ -222,7 +222,7 @@
 				<!-- Circle -->
 				<div class="mb-4 flex">
 					<div class="bg-surface-200-800 flex h-16 w-16 items-center justify-center rounded-full">
-						<Mail class="text-surface-600-400 size-8" />
+						<MailIcon class="text-surface-600-400 size-8" />
 					</div>
 				</div>
 

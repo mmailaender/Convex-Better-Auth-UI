@@ -6,7 +6,9 @@
 
 	/** UI **/
 	// Icons
-	import { LogIn, Pencil, Building2 } from '@lucide/svelte';
+	import LogInIcon from '@lucide/svelte/icons/log-in';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
+	import Building2Icon from '@lucide/svelte/icons/building-2';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
@@ -207,7 +209,7 @@
 	<div
 		class="border-surface-200-800 rounded-container mx-auto w-full max-w-md border p-6 text-center"
 	>
-		<LogIn class="text-surface-400-600 mx-auto mb-4 size-10" />
+		<LogInIcon class="text-surface-400-600 mx-auto mb-4 size-10" />
 		<h2 class="mb-2 text-xl font-semibold">Authentication Required</h2>
 		<p class="text-surface-600-400 mb-4">Please sign in to create an organization</p>
 	</div>
@@ -226,13 +228,13 @@
 							<Avatar.Fallback
 								class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
 							>
-								<Building2 class="text-surface-700-300 size-10" />
+								<Building2Icon class="text-surface-700-300 size-10" />
 							</Avatar.Fallback>
 						</Avatar.Root>
 						<div
 							class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 						>
-							<Pencil class="size-4" />
+							<PencilIcon class="size-4" />
 						</div>
 					</div>
 				</ImageCropper.UploadTrigger>

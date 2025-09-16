@@ -1,10 +1,18 @@
 <script lang="ts">
+	// Svelte
+	import { scale } from 'svelte/transition';
+
+	// Hooks
 	import { UseClipboard } from '$lib/primitives/hooks/use-clipboard.svelte';
+	// Utils
 	import { cn } from '$lib/primitives/utils';
+
+	// Icons
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import XIcon from '@lucide/svelte/icons/x';
-	import { scale } from 'svelte/transition';
+
+	// Types
 	import type { CopyButtonProps } from './types';
 
 	let {

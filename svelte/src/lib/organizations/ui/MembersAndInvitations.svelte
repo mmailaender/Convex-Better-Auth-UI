@@ -4,7 +4,7 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	// Icons
-	import { Plus } from '@lucide/svelte';
+	import PlusIcon from '@lucide/svelte/icons/plus';
 	// Components
 	import Members from '$lib/organizations/ui/Members.svelte';
 	import Invitations from '$lib/organizations/ui/Invitations.svelte';
@@ -89,7 +89,7 @@
 				<Dialog.Trigger
 					class="btn preset-filled-primary-500 hidden h-10 items-center gap-2 text-sm md:flex"
 				>
-					<Plus class="size-5" />
+					<PlusIcon class="size-5" />
 					<span>Invite members</span>
 				</Dialog.Trigger>
 				<Dialog.Content class="max-w-100">
@@ -104,7 +104,7 @@
 				<Drawer.Trigger
 					class="btn preset-filled-primary-500 absolute right-4 bottom-4 z-10 h-10 text-sm md:hidden"
 				>
-					<Plus class="size-5" /> Invite members
+					<PlusIcon class="size-5" /> Invite members
 				</Drawer.Trigger>
 				<Drawer.Content>
 					<Drawer.Header>

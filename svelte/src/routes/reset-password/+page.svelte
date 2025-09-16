@@ -8,7 +8,7 @@
 	import * as Password from '$lib/primitives/ui/password';
 
 	// Icons
-	import { AlertTriangle } from '@lucide/svelte';
+	import AlertTriangleIcon from '@lucide/svelte/icons/alert-triangle';
 
 	// API
 	import { authClient } from '$lib/auth/api/auth-client';
@@ -186,7 +186,7 @@
 				<!-- error state -->
 				<div class="flex flex-col items-center gap-6">
 					<div class="bg-error-500/10 text-error-500 rounded-full p-3">
-						<AlertTriangle class="size-6" />
+						<AlertTriangleIcon class="size-6" />
 					</div>
 					<div class="text-center">
 						<h2 class="text-surface-950-50 text-xl font-semibold">Something went wrong</h2>

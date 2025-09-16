@@ -7,7 +7,7 @@
 	import { authClient } from '$lib/auth/api/auth-client';
 
 	// Icons
-	import { Pencil } from '@lucide/svelte';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import { tick } from 'svelte';
@@ -168,7 +168,7 @@
 				{#if !isEditingEmail}
 					<div class="shrink-0">
 						<span class=" btn-icon preset-filled-surface-50-950 pointer-events-none p-2">
-							<Pencil class="size-4" />
+							<PencilIcon class="size-4" />
 						</span>
 					</div>
 					<button
