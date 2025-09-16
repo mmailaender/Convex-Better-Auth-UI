@@ -71,7 +71,8 @@ export const setActiveOrganization = mutation({
 				await auth.api.updateUser({
 					body: {
 						activeOrganizationId: args.organizationId
-					}
+					},
+					headers: await authComponent.getHeaders(ctx)
 				});
 			} catch (error) {
 				if (error instanceof APIError) {

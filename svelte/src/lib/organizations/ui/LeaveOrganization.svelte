@@ -3,6 +3,8 @@
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
+	// Icons
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
@@ -44,6 +46,7 @@
 	// State
 	let isOpen: boolean = $state(false);
 	let selectedSuccessor: string | null = $state(null);
+	let isLeaving: boolean = $state(false);
 
 	// Derived data
 	const activeUser = $derived(activeUserResponse.data);
@@ -81,6 +84,8 @@
 			return;
 		}
 
+		isLeaving = true;
+
 		try {
 			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				// Only send successorMemberId if the user is an owner and a successor is selected
@@ -100,6 +105,8 @@
 				);
 			}
 			console.error(err);
+		} finally {
+			isLeaving = false;
 		}
 	}
 </script>
@@ -135,7 +142,7 @@
 					>
 						<option value="" disabled> Choose a successor </option>
 						<!-- TODO: Filter out the current user by email as the id is inconsistent between Convex and Better Auth. Replace with id once fixed -->
-						{#each organizationMembers.filter((member) => member.user.email !== activeUser?.email) as member (member.id)}
+						{#each organizationMembers.filter((member) => member.userId !== activeUser?.id) as member (member.id)}
 							<option value={member.id}>
 								{member.user.name} ({member.user.email})
 							</option>
@@ -145,14 +152,22 @@
 			{/if}
 
 			<Dialog.Footer>
-				<button class="btn preset-tonal" onclick={() => (isOpen = false)}> Cancel </button>
+				<button class="btn preset-tonal" onclick={() => (isOpen = false)} disabled={isLeaving}>
+					Cancel
+				</button>
 				<button
 					type="button"
 					class="btn bg-error-500 hover:bg-error-600 text-white"
 					onclick={handleLeaveOrganization}
-					disabled={roles.hasOwnerRole && !selectedSuccessor}
+					disabled={isLeaving || (roles.hasOwnerRole && !selectedSuccessor)}
+					aria-busy={isLeaving}
 				>
-					Confirm
+					{#if isLeaving}
+						<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+						Leaving...
+					{:else}
+						Confirm
+					{/if}
 				</button>
 			</Dialog.Footer>
 		</Dialog.Content>
