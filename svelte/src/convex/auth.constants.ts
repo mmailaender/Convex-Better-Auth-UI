@@ -1,6 +1,7 @@
 export const AUTH_CONSTANTS: AuthConstants = {
 	providers: {
-		password: true
+		password: true,
+		github: true
 	},
 	validateEmails: true,
 	organizations: true,

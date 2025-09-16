@@ -4,9 +4,6 @@ import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 import { createOrganizationModel, updateOrganizationProfileModel } from '../model/organizations';
 
-// Types
-import type { Id } from '../_generated/dataModel';
-
 /**
  * Creates a new organization with the given name, slug, and optional logo
  */

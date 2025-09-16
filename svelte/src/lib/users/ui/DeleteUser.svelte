@@ -7,6 +7,10 @@
 
 	// API
 	import { authClient } from '$lib/auth/api/auth-client';
+	import { useConvexClient } from 'convex-svelte';
+	import { api } from '$convex/_generated/api';
+	import { ConvexError } from 'convex/values';
+	const client = useConvexClient();
 
 	// State
 	let deleteDialogOpen: boolean = $state(false);
@@ -17,18 +21,31 @@
 	 */
 	async function handleConfirm(): Promise<void> {
 		isDeleting = true;
-		const { error } = await authClient.deleteUser();
-		if (error) {
-			toast.error(error.message || `${error.status} ${error.statusText}`);
+
+		// Step 1: Delete user via Convex to have transaction safety
+		try {
+			await client.mutation(api.users.mutations.deleteUser, {});
+		} catch (error) {
+			if (error instanceof ConvexError) {
+				toast.error(error.data);
+			} else if (error instanceof Error) {
+				toast.error(error.message);
+			} else {
+				toast.error('Failed to delete user');
+			}
 			isDeleting = false;
 			return;
 		}
+
+		// Step 2: Sign out via Better Auth
 		const { error: signOutError } = await authClient.signOut();
 		if (signOutError) {
 			toast.error(signOutError.message || `${signOutError.status} ${signOutError.statusText}`);
 			isDeleting = false;
 			return;
 		}
+
+		toast.success('User deleted successfully');
 		deleteDialogOpen = false;
 		isDeleting = false;
 	}

@@ -1444,6 +1444,24 @@ export type Mounts = {
     >;
   };
   user: {
+    deleteUser: FunctionReference<
+      "mutation",
+      "public",
+      {
+        _creationTime: number;
+        _id: string;
+        activeOrganizationId?: null | string;
+        createdAt: number;
+        email: string;
+        emailVerified: boolean;
+        image?: null | string;
+        imageId?: null | string;
+        name: string;
+        updatedAt: number;
+        userId?: null | string;
+      },
+      null
+    >;
     getUserByEmail: FunctionReference<
       "query",
       "public",

@@ -1619,6 +1619,24 @@ export declare const components: {
       >;
     };
     user: {
+      deleteUser: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          _creationTime: number;
+          _id: string;
+          activeOrganizationId?: null | string;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageId?: null | string;
+          name: string;
+          updatedAt: number;
+          userId?: null | string;
+        },
+        null
+      >;
       getUserByEmail: FunctionReference<
         "query",
         "internal",

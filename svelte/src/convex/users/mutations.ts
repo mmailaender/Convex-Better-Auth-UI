@@ -37,34 +37,6 @@ export const updateAvatar = mutation({
 	}
 });
 
-// /**
-//  * Internal mutation to patch arbitrary user fields.
-//  */
-// export const _updateUser = internalMutation({
-// 	args: {
-// 		userId: v.id('users'),
-// 		data: v.record(v.string(), v.any())
-// 	},
-// 	handler: async (ctx, args) => {
-// 		const { userId, data } = args;
-
-// 		return await patchUserModel(ctx, { userId, data });
-// 	}
-// });
-
-// /**
-//  * Internal mutation that deletes a user and associated data.
-//  */
-// export const _deleteUser = internalMutation({
-// 	args: {
-// 		userId: v.id('users')
-// 	},
-// 	handler: async (ctx, args) => {
-// 		const { userId } = args;
-// 		return await deleteUserModel(ctx, { userId });
-// 	}
-// });
-
 export const setPassword = mutation({
 	args: {
 		password: v.string()
@@ -88,5 +60,29 @@ export const setPassword = mutation({
 			console.error('Unexpected error setting password:', error);
 			throw new ConvexError('An unexpected error occurred while setting the password');
 		}
+	}
+});
+
+/**
+ * Deletes the authenticated user and all associated data.
+ */
+export const deleteUser = mutation({
+	args: {
+		callbackURL: v.optional(v.string()),
+		password: v.optional(v.string()),
+		token: v.optional(v.string())
+	},
+	handler: async (ctx, args) => {
+		await authComponent.getAuthUser(ctx);
+
+		const auth = createAuth(ctx);
+		return await auth.api.deleteUser({
+			body: {
+				callbackURL: args.callbackURL,
+				password: args.password,
+				token: args.token
+			},
+			headers: await authComponent.getHeaders(ctx)
+		});
 	}
 });

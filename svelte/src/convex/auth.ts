@@ -32,7 +32,14 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 	local: {
 		schema: authSchema
 	},
-	authFunctions
+	authFunctions,
+	triggers: {
+		user: {
+			onDelete: async (ctx, authUser) => {
+				await ctx.runMutation(components.betterAuth.user.deleteUser, authUser);
+			}
+		}
+	}
 });
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();

@@ -60,7 +60,7 @@
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.id !== activeUser?.id
+				member.userId !== activeUser?.id
 		) || []
 	);
 
@@ -109,6 +109,7 @@
 
 			isOpen = false;
 
+			toast.success('Successfully left the organization.');
 			// Navigate to home page after leaving
 			goto('/');
 		} catch (err) {

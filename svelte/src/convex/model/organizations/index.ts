@@ -45,38 +45,6 @@ export const getUniqueOrganizationSlug = async (
 	return candidate;
 };
 
-// /**
-//  * Gets the current user's role in the specified organization
-//  * If organizationId is not provided, it will use the user's active organization
-//  * @returns The user's role in the organization or null if not a member or if no active organization exists when organizationId is not provided
-//  */
-// export const getOrganizationRoleModel = async (
-// 	ctx: QueryCtx,
-// 	args: { organizationId?: Id<'organizations'>; userId: Id<'users'> }
-// ) => {
-// 	let organizationId = args.organizationId;
-// 	if (!organizationId) {
-// 		const activeOrganization = await getActiveOrganizationModel(ctx, { userId: args.userId });
-// 		if (!activeOrganization) {
-// 			return null;
-// 		}
-// 		organizationId = activeOrganization._id;
-// 	}
-
-// 	const membership = await ctx.db
-// 		.query('organizationMembers')
-// 		.withIndex('orgId_and_userId', (q) =>
-// 			q.eq('organizationId', organizationId).eq('userId', args.userId)
-// 		)
-// 		.first();
-
-// 	if (!membership) {
-// 		return null;
-// 	}
-
-// 	return membership.role;
-// };
-
 /**
  * Create a new organization and perform related bookkeeping.
  *
@@ -192,59 +160,6 @@ export const createOrganizationModel = async (
 
 	return org.id;
 };
-
-// /**
-//  * Removes a user from an organization, taking care of role ownership edge
-//  * cases and updating their active organization selection if necessary.
-//  */
-// export const leaveOrganizationModel = async (
-// 	ctx: MutationCtx,
-// 	args: {
-// 		userId: Id<'users'>;
-// 		organizationId: Id<'organizations'>;
-// 		membershipId: Id<'organizationMembers'>;
-// 		role: string;
-// 	}
-// ): Promise<boolean> => {
-// 	const { userId, organizationId, membershipId, role } = args;
-
-// 	// Prevent leaving if sole owner
-// 	if (role === 'role_organization_owner') {
-// 		const otherOwners = await ctx.db
-// 			.query('organizationMembers')
-// 			.filter((q) =>
-// 				q.and(
-// 					q.eq(q.field('organizationId'), organizationId),
-// 					q.eq(q.field('role'), 'role_organization_owner'),
-// 					q.neq(q.field('userId'), userId)
-// 				)
-// 			)
-// 			.collect();
-
-// 		if (otherOwners.length === 0) {
-// 			throw new ConvexError(
-// 				'Cannot leave organization as the only owner. Transfer ownership first or delete the organization.'
-// 			);
-// 		}
-// 	}
-
-// 	// Remove membership record
-// 	await ctx.db.delete(membershipId);
-
-// 	// Update active organization if this was active
-// 	const user = await ctx.db.get(userId);
-// 	if (user && user.activeOrganizationId === organizationId) {
-// 		const otherMemberships = await ctx.db
-// 			.query('organizationMembers')
-// 			.withIndex('userId', (q) => q.eq('userId', userId))
-// 			.collect();
-
-// 		const newActiveId = otherMemberships[0]?.organizationId;
-// 		await ctx.db.patch(userId, { activeOrganizationId: newActiveId });
-// 	}
-
-// 	return true;
-// };
 
 /**
  * Updates an organization's profile (name, slug, logo). The user must have an
@@ -376,58 +291,3 @@ export const updateOrganizationProfileModel = async (
 		}
 	}
 };
-
-// /**
-//  * Deletes an organization and cleans up associated data (memberships,
-//  * invitations, logo storage, and users' active organization field).
-//  */
-// export const deleteOrganizationModel = async (
-// 	ctx: MutationCtx,
-// 	args: { organizationId: Id<'organizations'> }
-// ): Promise<boolean> => {
-// 	const { organizationId } = args;
-
-// 	const organization = await ctx.db.get(organizationId);
-// 	if (!organization) {
-// 		throw new ConvexError('Organization not found');
-// 	}
-
-// 	if (organization.logoId) {
-// 		await ctx.storage.delete(organization.logoId);
-// 	}
-
-// 	const members = await ctx.db
-// 		.query('organizationMembers')
-// 		.withIndex('orgId', (q) => q.eq('organizationId', organizationId))
-// 		.collect();
-
-// 	for (const member of members) {
-// 		const memberUser = await ctx.db.get(member.userId);
-// 		if (memberUser && memberUser.activeOrganizationId === organizationId) {
-// 			const otherMemberships = await ctx.db
-// 				.query('organizationMembers')
-// 				.withIndex('userId', (q) => q.eq('userId', member.userId))
-// 				.filter((q) => q.neq(q.field('organizationId'), organizationId))
-// 				.collect();
-
-// 			await ctx.db.patch(member.userId, {
-// 				activeOrganizationId: otherMemberships[0]?.organizationId
-// 			});
-// 		}
-
-// 		await ctx.db.delete(member._id);
-// 	}
-
-// 	const invitations = await ctx.db
-// 		.query('invitations')
-// 		.withIndex('by_org_and_email', (q) => q.eq('organizationId', organizationId))
-// 		.collect();
-
-// 	for (const invitation of invitations) {
-// 		await ctx.db.delete(invitation._id);
-// 	}
-
-// 	await ctx.db.delete(organizationId);
-
-// 	return true;
-// };
