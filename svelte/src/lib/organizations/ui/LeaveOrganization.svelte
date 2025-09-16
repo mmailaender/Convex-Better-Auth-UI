@@ -3,6 +3,9 @@
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
+	import * as Select from '$lib/primitives/ui/select';
+	import { createListCollection } from '@ark-ui/svelte/select';
+
 	// Icons
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
@@ -45,7 +48,6 @@
 
 	// State
 	let isOpen: boolean = $state(false);
-	let selectedSuccessor: string | null = $state(null);
 	let isLeaving: boolean = $state(false);
 
 	// Derived data
@@ -62,11 +64,22 @@
 		) || []
 	);
 
+	// Successor select
+	let selectedSuccessor = $state<string[]>([]);
+	const successorCollection = $derived(
+		createListCollection({
+			items: organizationMembers.map((member) => ({
+				label: `${member.user.name} (${member.user.email})`,
+				value: member.id
+			}))
+		})
+	);
+
 	/**
 	 * Validates form input before submission
 	 */
 	function validateForm(): boolean {
-		if (roles.hasOwnerRole && !selectedSuccessor) {
+		if (roles.hasOwnerRole && selectedSuccessor.length === 0) {
 			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
@@ -89,7 +102,9 @@
 		try {
 			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				// Only send successorMemberId if the user is an owner and a successor is selected
-				...(roles.hasOwnerRole && selectedSuccessor ? { successorMemberId: selectedSuccessor } : {})
+				...(roles.hasOwnerRole && selectedSuccessor.length > 0
+					? { successorMemberId: selectedSuccessor[0] }
+					: {})
 			});
 
 			isOpen = false;
@@ -132,22 +147,19 @@
 			</Dialog.Description>
 
 			{#if roles.hasOwnerRole}
-				<div class="space-y-2">
+				<div class="w-full space-y-2">
 					<label for="successor" class="label"> New owner: </label>
-					<select
-						id="successor"
-						bind:value={selectedSuccessor}
-						class="select w-full cursor-pointer"
-						required={roles.hasOwnerRole}
-					>
-						<option value="" disabled> Choose a successor </option>
-						<!-- TODO: Filter out the current user by email as the id is inconsistent between Convex and Better Auth. Replace with id once fixed -->
-						{#each organizationMembers.filter((member) => member.userId !== activeUser?.id) as member (member.id)}
-							<option value={member.id}>
-								{member.user.name} ({member.user.email})
-							</option>
-						{/each}
-					</select>
+					<Select.Root collection={successorCollection} bind:value={selectedSuccessor}>
+						<Select.Trigger class="w-full" placeholder="Choose a successor" />
+						<Select.Content>
+							{#each successorCollection.items as item (item.value)}
+								<Select.Item {item}>
+									<Select.ItemText>{item.label}</Select.ItemText>
+									<Select.ItemIndicator>✓</Select.ItemIndicator>
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 			{/if}
 

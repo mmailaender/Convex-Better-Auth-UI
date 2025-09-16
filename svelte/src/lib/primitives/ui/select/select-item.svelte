@@ -1,5 +1,4 @@
 <script lang="ts">
-	import CheckIcon from '@lucide/svelte/icons/check';
 	import { Select, type SelectItemProps } from '@ark-ui/svelte/select';
 	import { cn } from '$lib/primitives/utils.js';
 

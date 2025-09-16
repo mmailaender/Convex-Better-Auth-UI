@@ -3,6 +3,9 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Avatar from '$lib/primitives/ui/avatar';
+	import * as Select from '$lib/primitives/ui/select';
+	import { Portal } from '@ark-ui/svelte/portal';
+	import { createListCollection } from '@ark-ui/svelte/select';
 	import { toast } from 'svelte-sonner';
 	// Icons
 	import SearchIcon from '@lucide/svelte/icons/search';
@@ -59,6 +62,13 @@
 	const members = $derived(activeOrganization?.members);
 	const roles = useRoles();
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+
+	const rolesCollection = createListCollection({
+		items: [
+			{ label: 'Admin', value: 'admin' },
+			{ label: 'Member', value: 'member' }
+		]
+	});
 
 	/**
 	 * Filter and sort members based on search query and role
@@ -295,18 +305,23 @@
 									<td class="!w-32">
 										<div class="flex items-center">
 											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
-												<select
-													value={member.role}
-													onchange={(e) =>
-														handleUpdateRole(
-															member.id,
-															(e.target as HTMLSelectElement).value as Role
-														)}
-													class="select cursor-pointer text-sm"
+												<Select.Root
+													collection={rolesCollection}
+													value={[member.role]}
+													onSelect={(e) => handleUpdateRole(member.id, e.value as Role)}
 												>
-													<option value="admin">Admin</option>
-													<option value="member">Member</option>
-												</select>
+													<Select.Trigger class="w-full text-sm" />
+													<Portal>
+														<Select.Content>
+															{#each rolesCollection.items as item (item.value)}
+																<Select.Item {item}>
+																	<Select.ItemText>{item.label}</Select.ItemText>
+																	<Select.ItemIndicator>✓</Select.ItemIndicator>
+																</Select.Item>
+															{/each}
+														</Select.Content>
+													</Portal>
+												</Select.Root>
 											{:else if member.role === 'owner'}
 												<span
 													class="badge preset-filled-primary-50-950 border-primary-200-800 h-7 border px-2"
@@ -418,18 +433,23 @@
 							<!-- Role Select -->
 							<label class="flex-1">
 								<span class="label">Role</span>
-								<select
-									value={selectedMember.role}
-									onchange={(e) =>
-										handleUpdateRole(
-											selectedMember!.id,
-											(e.target as HTMLSelectElement).value as Role
-										)}
-									class="select w-full"
+								<Select.Root
+									collection={rolesCollection}
+									value={[selectedMember.role]}
+									onSelect={(e) => handleUpdateRole(selectedMember!.id, e.value as Role)}
 								>
-									<option value="admin">Admin</option>
-									<option value="member">Member</option>
-								</select>
+									<Select.Trigger class="w-full" placeholder="Select role" />
+									<Portal>
+										<Select.Content>
+											{#each rolesCollection.items as item (item.value)}
+												<Select.Item {item}>
+													<Select.ItemText>{item.label}</Select.ItemText>
+													<Select.ItemIndicator>✓</Select.ItemIndicator>
+												</Select.Item>
+											{/each}
+										</Select.Content>
+									</Portal>
+								</Select.Root>
 							</label>
 
 							<!-- Remove Button -->

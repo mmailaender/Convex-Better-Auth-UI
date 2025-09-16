@@ -17,7 +17,7 @@
 	// UI Components
 	// Primitives
 	import * as Select from '$lib/primitives/ui/select';
-	import { useListCollection } from '@ark-ui/svelte/select';
+	import { createListCollection } from '@ark-ui/svelte/select';
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Password from '$lib/primitives/ui/password';
@@ -92,15 +92,15 @@
 		});
 	});
 
-	// Combobox setup
-	const selectCollection = useListCollection({
-		initialItems: [] as string[]
-	});
-
-	// Update collection when available providers change
-	$effect(() => {
-		selectCollection.set(availableProviders);
-	});
+	// Providers select collection (derived from available providers)
+	const providersCollection = $derived(
+		createListCollection({
+			items: availableProviders.map((provider) => ({
+				label: getProviderLabel(provider),
+				value: provider
+			}))
+		})
+	);
 
 	const getProviderIcon = (provider: string) => {
 		switch (provider) {
@@ -442,24 +442,17 @@
 	<!-- Link New Account -->
 	{#if availableProviders.length > 0}
 		<div>
-			<Select.Root
-				collection={selectCollection.collection()}
-				onSelect={(e) => linkAccount(e.value)}
-			>
-				<Select.Trigger class="w-full">Link new account</Select.Trigger>
-				<Select.Positioner>
-					<Select.Content>
-						<Select.Group>
-							{#each selectCollection.collection().items as provider (provider)}
-								{@const ProviderIcon = getProviderIcon(provider)}
-								<Select.Item item={provider}>
-									<ProviderIcon size={16} class="mr-2" />
-									<Select.ItemText>{getProviderLabel(provider)}</Select.ItemText>
-								</Select.Item>
-							{/each}
-						</Select.Group>
-					</Select.Content>
-				</Select.Positioner>
+			<Select.Root collection={providersCollection} onSelect={(e) => linkAccount(e.value)}>
+				<Select.Trigger class="w-full" placeholder="Link new account" />
+				<Select.Content>
+					{#each providersCollection.items as item (item.value)}
+						{@const ProviderIcon = getProviderIcon(item.value)}
+						<Select.Item {item}>
+							<ProviderIcon size={16} class="mr-2" />
+							<Select.ItemText>{item.label}</Select.ItemText>
+						</Select.Item>
+					{/each}
+				</Select.Content>
 			</Select.Root>
 			{#if isLinking}
 				<p class="text-surface-600-400 mt-2 text-sm">Linking account...</p>
@@ -472,7 +465,7 @@
 <Dialog.Root bind:open={isPasswordDialogOpen}>
 	<Dialog.Content class="w-full max-w-md">
 		<div
-			class="max-h-[100dvh] w-full overflow-auto overscroll-contain"
+			class="flex max-h-[100dvh] w-full flex-col gap-4 overflow-auto overscroll-contain"
 			onfocusin={(e) => {
 				const el = e.target as HTMLElement | null;
 				if (!el) return;
@@ -483,8 +476,8 @@
 			<Dialog.Header>
 				<Dialog.Title>Set Password</Dialog.Title>
 			</Dialog.Header>
-			<form onsubmit={handlePasswordSubmit} class=" w-full px-6 pb-6">
-				<div class="flex flex-col gap-4">
+			<form onsubmit={handlePasswordSubmit} class="w-full">
+				<div class="flex flex-col">
 					<label class="flex flex-col gap-2">
 						<span class="text-sm font-medium">Password</span>
 						<Password.Root>

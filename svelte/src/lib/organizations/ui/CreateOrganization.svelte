@@ -9,6 +9,7 @@
 	import LogInIcon from '@lucide/svelte/icons/log-in';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Building2Icon from '@lucide/svelte/icons/building-2';
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
@@ -56,6 +57,7 @@
 	let logo: string = $state('');
 	let logoFile: File | null = $state(null);
 	let cropSrc: string = $state('');
+	let isCreating: boolean = $state(false);
 
 	/**
 	 * Generates a URL-friendly slug from the provided input string
@@ -128,6 +130,8 @@
 			return;
 		}
 
+		isCreating = true;
+
 		try {
 			let logoStorageId: Id<'_storage'> | undefined = undefined;
 
@@ -191,6 +195,8 @@
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${message}`);
+		} finally {
+			isCreating = false;
 		}
 	}
 </script>
@@ -276,7 +282,19 @@
 		</div>
 
 		<div class="flex justify-end gap-2 pt-6 md:flex-row">
-			<button type="submit" class="btn preset-filled-primary-500">Create Organization</button>
+			<button
+				type="submit"
+				class="btn preset-filled-primary-500"
+				disabled={isCreating}
+				aria-busy={isCreating}
+			>
+				{#if isCreating}
+					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+					Creating...
+				{:else}
+					Create Organization
+				{/if}
+			</button>
 		</div>
 	</form>
 {/if}

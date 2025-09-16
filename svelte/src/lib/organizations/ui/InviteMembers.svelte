@@ -1,6 +1,8 @@
 <script lang="ts">
 	// Primitives
 	import { toast } from 'svelte-sonner';
+	import * as Select from '$lib/primitives/ui/select';
+	import { createListCollection } from '@ark-ui/svelte/select';
 
 	// API
 	import { useQuery } from 'convex-svelte';
@@ -16,8 +18,16 @@
 
 	// State
 	let emailInput: string = $state('');
-	let selectedRole: Role = $state('member');
 	let isProcessing: boolean = $state(false);
+	let selectedRole: Role = $state('member');
+
+	let value = $state<string[]>(['member']);
+	const collection = createListCollection({
+		items: [
+			{ label: 'Member', value: 'member' },
+			{ label: 'Admin', value: 'admin' }
+		]
+	});
 
 	// Props
 	let {
@@ -105,10 +115,17 @@
 		<div class="flex flex-col">
 			<label>
 				<span class="label">Role</span>
-				<select bind:value={selectedRole} class="select w-full cursor-pointer">
-					<option value="member">Member</option>
-					<option value="admin">Admin</option>
-				</select>
+				<Select.Root {collection} bind:value>
+					<Select.Trigger class="w-full" placeholder="Select a role" />
+					<Select.Content>
+						{#each collection.items as item (item.value)}
+							<Select.Item {item}>
+								<Select.ItemText>{item.label}</Select.ItemText>
+								<Select.ItemIndicator>✓</Select.ItemIndicator>
+							</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
 			</label>
 		</div>
 		<div class="flex flex-col gap-2">

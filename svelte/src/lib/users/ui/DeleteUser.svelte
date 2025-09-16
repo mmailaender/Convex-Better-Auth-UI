@@ -6,7 +6,6 @@
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// API
-	import { ConvexError } from 'convex/values';
 	import { authClient } from '$lib/auth/api/auth-client';
 
 	// State
@@ -18,22 +17,20 @@
 	 */
 	async function handleConfirm(): Promise<void> {
 		isDeleting = true;
-		try {
-			await authClient.deleteUser();
-			await authClient.signOut();
-			deleteDialogOpen = false;
-		} catch (error) {
-			console.error('Error deleting user:', error);
-			if (error instanceof ConvexError) {
-				toast.error(error.data);
-			} else if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error('Error deleting user');
-			}
-		} finally {
+		const { error } = await authClient.deleteUser();
+		if (error) {
+			toast.error(error.message || `${error.status} ${error.statusText}`);
 			isDeleting = false;
+			return;
 		}
+		const { error: signOutError } = await authClient.signOut();
+		if (signOutError) {
+			toast.error(signOutError.message || `${signOutError.status} ${signOutError.statusText}`);
+			isDeleting = false;
+			return;
+		}
+		deleteDialogOpen = false;
+		isDeleting = false;
 	}
 </script>
 

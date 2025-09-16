@@ -8,9 +8,11 @@
 		class: className,
 		children,
 		size = 'default',
+		placeholder,
 		...restProps
 	}: WithoutChild<SelectTriggerProps> & {
 		size?: 'sm' | 'default';
+		placeholder?: string;
 	} = $props();
 </script>
 
@@ -25,7 +27,7 @@
 		)}
 		{...restProps}
 	>
-		{@render children?.()}
+		<Select.ValueText {placeholder} />
 		<Select.Indicator>
 			<ChevronDownIcon class="size-4" />
 		</Select.Indicator>
