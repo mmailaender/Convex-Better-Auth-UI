@@ -62,7 +62,7 @@
 	},
 	"dependencies": {
 		"@ark-ui/svelte": "^5.7.0",
-		"@convex-dev/better-auth": "0.8.1",
+		"@convex-dev/better-auth": "0.8.2",
 		"@convex-dev/resend": "0.1.12",
 		"@icons-pack/svelte-simple-icons": "^6.4.0",
 		"@mmailaender/convex-better-auth-svelte": "^0.0.5",

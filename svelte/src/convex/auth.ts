@@ -37,9 +37,12 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
-export const createAuth = (ctx: GenericCtx<DataModel>) =>
+export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optionsOnly: false }) =>
 	// Configure your Better Auth instance here
 	betterAuth({
+		logger: {
+			disabled: optionsOnly
+		},
 		// All auth requests will be proxied through your next.js server
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
