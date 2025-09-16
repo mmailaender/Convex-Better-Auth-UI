@@ -403,23 +403,12 @@
 						<div class="flex items-center gap-3 pt-1 pb-8">
 							<div class="avatar">
 								<div class="size-12">
-									{#if selectedMember.user.image}
-										<Avatar.Root class="size-12">
-											<Avatar.Image
-												src={selectedMember.user.image}
-												alt={selectedMember.user.name}
-											/>
-											<Avatar.Fallback>
-												<Avatar.Marble name={selectedMember.user.name} />
-											</Avatar.Fallback>
-										</Avatar.Root>
-									{:else}
-										<div
-											class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
-										>
-											{selectedMember.user.name?.charAt(0) || 'U'}
-										</div>
-									{/if}
+									<Avatar.Root class="size-12">
+										<Avatar.Image src={selectedMember.user.image} alt={selectedMember.user.name} />
+										<Avatar.Fallback>
+											<Avatar.Marble name={selectedMember.user.name} />
+										</Avatar.Fallback>
+									</Avatar.Root>
 								</div>
 							</div>
 							<div class="flex flex-col">
