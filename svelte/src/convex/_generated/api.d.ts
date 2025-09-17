@@ -13,6 +13,7 @@ import type * as betterAuth__generated_api from "../betterAuth/_generated/api.js
 import type * as betterAuth__generated_server from "../betterAuth/_generated/server.js";
 import type * as betterAuth_adapter from "../betterAuth/adapter.js";
 import type * as betterAuth_auth from "../betterAuth/auth.js";
+import type * as betterAuth_organization from "../betterAuth/organization.js";
 import type * as betterAuth_user from "../betterAuth/user.js";
 import type * as email from "../email.js";
 import type * as http from "../http.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   "betterAuth/_generated/server": typeof betterAuth__generated_server;
   "betterAuth/adapter": typeof betterAuth_adapter;
   "betterAuth/auth": typeof betterAuth_auth;
+  "betterAuth/organization": typeof betterAuth_organization;
   "betterAuth/user": typeof betterAuth_user;
   email: typeof email;
   http: typeof http;
@@ -1618,7 +1620,7 @@ export declare const components: {
         any
       >;
     };
-    user: {
+    organization: {
       deleteUser: FunctionReference<
         "mutation",
         "internal",
@@ -1637,6 +1639,8 @@ export declare const components: {
         },
         null
       >;
+    };
+    user: {
       getUserByEmail: FunctionReference<
         "query",
         "internal",

@@ -36,7 +36,12 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 	triggers: {
 		user: {
 			onDelete: async (ctx, authUser) => {
-				await ctx.runMutation(components.betterAuth.user.deleteUser, authUser);
+				if (authUser.imageId) {
+					await ctx.storage.delete(authUser.imageId);
+				}
+				if (AUTH_CONSTANTS.organizations) {
+					await ctx.runMutation(components.betterAuth.organization.deleteUser, authUser);
+				}
 			}
 		}
 	}

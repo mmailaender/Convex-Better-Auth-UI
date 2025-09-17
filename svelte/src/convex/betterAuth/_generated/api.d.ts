@@ -10,6 +10,7 @@
 
 import type * as adapter from "../adapter.js";
 import type * as auth from "../auth.js";
+import type * as organization from "../organization.js";
 import type * as user from "../user.js";
 
 import type {
@@ -29,6 +30,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   adapter: typeof adapter;
   auth: typeof auth;
+  organization: typeof organization;
   user: typeof user;
 }>;
 export type Mounts = {
@@ -1443,7 +1445,7 @@ export type Mounts = {
       any
     >;
   };
-  user: {
+  organization: {
     deleteUser: FunctionReference<
       "mutation",
       "public",
@@ -1462,6 +1464,8 @@ export type Mounts = {
       },
       null
     >;
+  };
+  user: {
     getUserByEmail: FunctionReference<
       "query",
       "public",
