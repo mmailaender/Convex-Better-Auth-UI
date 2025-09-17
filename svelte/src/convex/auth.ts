@@ -55,7 +55,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 		logger: {
 			disabled: optionsOnly
 		},
-		// All auth requests will be proxied through your next.js server
+		// All auth requests will be proxied through your sveltekit server
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
 
@@ -172,10 +172,11 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 			user: {
 				create: {
 					after: async (user) => {
-						if ('runMutation' in ctx) {
-							if (AUTH_CONSTANTS.organizations) {
-								try {
-									await ctx.runMutation(internal.organizations.mutations._createOrganization, {
+						if (AUTH_CONSTANTS.organizations) {
+							try {
+								await requireMutationCtx(ctx).runMutation(
+									internal.organizations.mutations._createOrganization,
+									{
 										userId: user.id,
 										name: `Personal Organization`,
 										slug: (() => {
@@ -190,10 +191,10 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 												: 'personal-organization';
 										})(),
 										skipActiveOrganization: true
-									});
-								} catch (error) {
-									console.error('Error creating organization:', error);
-								}
+									}
+								);
+							} catch (error) {
+								console.error('Error creating organization:', error);
 							}
 						}
 					}
