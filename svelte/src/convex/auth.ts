@@ -35,6 +35,30 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 	authFunctions,
 	triggers: {
 		user: {
+			onCreate: async (ctx, authUser) => {
+				if (AUTH_CONSTANTS.organizations) {
+					try {
+						await ctx.runMutation(internal.organizations.mutations._createOrganization, {
+							userId: authUser._id,
+							name: `Personal Organization`,
+							slug: (() => {
+								const userName: string = (authUser as { name?: string })?.name ?? '';
+								const sanitizedName: string = userName
+									.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
+									.trim()
+									.replace(/\s+/g, '-')
+									.toLowerCase();
+								return sanitizedName
+									? `personal-organization-${sanitizedName}`
+									: 'personal-organization';
+							})(),
+							skipActiveOrganization: true
+						});
+					} catch (error) {
+						console.error('Error creating organization:', error);
+					}
+				}
+			},
 			onDelete: async (ctx, authUser) => {
 				if (authUser.imageId) {
 					await ctx.storage.delete(authUser.imageId);
@@ -167,38 +191,5 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 					});
 				}
 			})
-		],
-		databaseHooks: {
-			user: {
-				create: {
-					after: async (user) => {
-						if (AUTH_CONSTANTS.organizations) {
-							try {
-								await requireMutationCtx(ctx).runMutation(
-									internal.organizations.mutations._createOrganization,
-									{
-										userId: user.id,
-										name: `Personal Organization`,
-										slug: (() => {
-											const userName: string = (user as { name?: string })?.name ?? '';
-											const sanitizedName: string = userName
-												.replace(/[^A-Za-z\s]/g, '') // remove non-alphabetical characters
-												.trim()
-												.replace(/\s+/g, '-')
-												.toLowerCase();
-											return sanitizedName
-												? `personal-organization-${sanitizedName}`
-												: 'personal-organization';
-										})(),
-										skipActiveOrganization: true
-									}
-								);
-							} catch (error) {
-								console.error('Error creating organization:', error);
-							}
-						}
-					}
-				}
-			}
-		}
+		]
 	});

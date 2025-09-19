@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { mutation } from './_generated/server';
 import { withSystemFields } from 'convex-helpers/validators';
 import schema from './schema';
-import { Id } from './_generated/dataModel';
+import { type Id } from './_generated/dataModel';
 import { ConvexError } from 'convex/values';
 
 /**
