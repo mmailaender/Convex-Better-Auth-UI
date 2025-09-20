@@ -1,5 +1,5 @@
 import { type AuthFunctions, type GenericCtx, createClient } from '@convex-dev/better-auth';
-import { requireMutationCtx } from '@convex-dev/better-auth/utils';
+import { requireActionCtx } from '@convex-dev/better-auth/utils';
 import { components, internal } from './_generated/api';
 import type { DataModel } from './_generated/dataModel';
 import authSchema from './betterAuth/schema';
@@ -87,7 +87,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 			autoSignInAfterVerification: true,
 			sendOnSignUp: true,
 			sendVerificationEmail: async ({ user, url }) => {
-				await sendEmailVerification(requireMutationCtx(ctx), {
+				await sendEmailVerification(requireActionCtx(ctx), {
 					to: user.email,
 					url
 				});
@@ -99,7 +99,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 			enabled: AUTH_CONSTANTS.providers.password ?? false,
 			requireEmailVerification: true,
 			sendResetPassword: async ({ user, url }) => {
-				await sendResetPassword(requireMutationCtx(ctx), {
+				await sendResetPassword(requireActionCtx(ctx), {
 					to: user.email,
 					url
 				});
@@ -135,7 +135,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 			changeEmail: {
 				enabled: true,
 				sendChangeEmailVerification: async ({ user, newEmail, url }) => {
-					await sendChangeEmailVerification(requireMutationCtx(ctx), {
+					await sendChangeEmailVerification(requireActionCtx(ctx), {
 						to: user.email,
 						url,
 						newEmail,
@@ -150,7 +150,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 			convex(),
 			emailOTP({
 				sendVerificationOTP: async ({ email, otp }) => {
-					await sendOTPVerification(requireMutationCtx(ctx), {
+					await sendOTPVerification(requireActionCtx(ctx), {
 						to: email,
 						code: otp
 					});
@@ -158,7 +158,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 			}),
 			magicLink({
 				sendMagicLink: async ({ email, url }) => {
-					await sendMagicLink(requireMutationCtx(ctx), {
+					await sendMagicLink(requireActionCtx(ctx), {
 						to: email,
 						url
 					});
@@ -176,7 +176,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 					}
 				},
 				sendInvitationEmail: async (data) => {
-					await sendInviteMember(requireMutationCtx(ctx), {
+					await sendInviteMember(requireActionCtx(ctx), {
 						to: data.email,
 						url: `${siteUrl}/api/organization/accept-invitation/${data.id}`,
 						inviter: {
