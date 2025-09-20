@@ -60,7 +60,7 @@
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.userId !== activeUser?.id
+				member.userId !== activeUser?._id
 		) || []
 	);
 

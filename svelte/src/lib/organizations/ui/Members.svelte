@@ -152,12 +152,12 @@
 	 */
 	function canEditMember(member: Member): boolean {
 		if (!isOwnerOrAdmin) return false;
-		if (member.id === activeUser?.id) return false;
+		if (member.id === activeUser?._id) return false;
 		if (member.role === 'owner') return false;
 
 		// If current user is admin, they can't edit other admins
 		if (activeUser && members) {
-			const currentUserMember = members.find((m) => m.id === activeUser.id);
+			const currentUserMember = members.find((m) => m.id === activeUser._id);
 			if (currentUserMember?.role === 'admin' && member.role === 'admin') {
 				return false;
 			}
@@ -304,7 +304,7 @@
 									<!-- Member Role -->
 									<td class="!w-32">
 										<div class="flex items-center">
-											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
+											{#if isOwnerOrAdmin && member.id !== activeUser?._id && member.role !== 'owner'}
 												<Select.Root
 													collection={rolesCollection}
 													value={[member.role]}
@@ -346,7 +346,7 @@
 									<!-- Member Actions -->
 									<td class="!w-16">
 										<div class="flex justify-end space-x-2">
-											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
+											{#if isOwnerOrAdmin && member.id !== activeUser?._id && member.role !== 'owner'}
 												<button
 													type="button"
 													class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"

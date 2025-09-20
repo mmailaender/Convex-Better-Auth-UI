@@ -24,25 +24,7 @@ export const isUserExisting = query({
  */
 export const getActiveUser = query({
 	handler: async (ctx) => {
-		const user = await authComponent.safeGetAuthUser(ctx);
-		if (!user) {
-			return null;
-		}
-
-		try {
-			const auth = createAuth(ctx);
-			const session = await auth.api.getSession({
-				headers: await authComponent.getHeaders(ctx)
-			});
-			return session?.user;
-		} catch (error) {
-			if (error instanceof APIError) {
-				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
-			} else {
-				console.error('Unexpected error getting session:', error);
-				throw new ConvexError('An unexpected error occurred while getting the session');
-			}
-		}
+		return await authComponent.safeGetAuthUser(ctx);
 	}
 });
 
