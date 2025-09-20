@@ -68,6 +68,13 @@
 		availableMethods = methods;
 	});
 
+	// Legal links (handle empty/null/undefined gracefully)
+	const termsUrl = $derived((AUTH_CONSTANTS.terms ?? '').trim());
+	const privacyUrl = $derived((AUTH_CONSTANTS.privacy ?? '').trim());
+	const showTerms = $derived(Boolean(termsUrl));
+	const showPrivacy = $derived(Boolean(privacyUrl));
+	const showLegal = $derived(showTerms || showPrivacy);
+
 	// Monitor authentication state and redirect once Convex auth is synchronized
 	$effect(() => {
 		if (isSigningIn && isAuthenticated && !isLoading) {
@@ -344,14 +351,22 @@
 				{/if}
 			</div>
 
-			<div>
-				<p class="text-surface-600-400 mt-10 text-xs">
-					By continuing, you agree to our
-					<a href={AUTH_CONSTANTS.terms} class="anchor text-surface-950-50">Terms</a>
-					and
-					<a href={AUTH_CONSTANTS.privacy} class="anchor text-surface-950-50">Privacy Policies</a>
-				</p>
-			</div>
+			{#if showLegal}
+				<div>
+					<p class="text-surface-600-400 mt-10 text-xs">
+						By continuing, you agree to our
+						{#if showTerms}
+							<a href={termsUrl} class="anchor text-surface-950-50">Terms</a>
+						{/if}
+						{#if showTerms && showPrivacy}
+							and
+						{/if}
+						{#if showPrivacy}
+							<a href={privacyUrl} class="anchor text-surface-950-50">Privacy Policies</a>
+						{/if}
+					</p>
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>
