@@ -7,7 +7,7 @@ import {
 	renderChangeEmailVerification,
 	renderInviteMember
 } from './model/emails/templates/emailTemplates';
-import { type RunMutationCtx } from '@convex-dev/better-auth';
+import { type ActionCtx } from './_generated/server';
 
 import { Resend } from '@convex-dev/resend';
 import { components } from './_generated/api';
@@ -22,7 +22,7 @@ export const resend: Resend = new Resend(components.resend, {
 });
 
 export const sendEmailVerification = async (
-	ctx: RunMutationCtx,
+	ctx: ActionCtx,
 	{
 		to,
 		url
@@ -48,7 +48,7 @@ export const sendEmailVerification = async (
 };
 
 export const sendOTPVerification = async (
-	ctx: RunMutationCtx,
+	ctx: ActionCtx,
 	{
 		to,
 		code
@@ -74,7 +74,7 @@ export const sendOTPVerification = async (
 };
 
 export const sendMagicLink = async (
-	ctx: RunMutationCtx,
+	ctx: ActionCtx,
 	{
 		to,
 		url
@@ -100,7 +100,7 @@ export const sendMagicLink = async (
 };
 
 export const sendResetPassword = async (
-	ctx: RunMutationCtx,
+	ctx: ActionCtx,
 	{
 		to,
 		url
@@ -126,7 +126,7 @@ export const sendResetPassword = async (
 };
 
 export const sendChangeEmailVerification = async (
-	ctx: RunMutationCtx,
+	ctx: ActionCtx,
 	{
 		to,
 		url,
@@ -158,7 +158,7 @@ export const sendChangeEmailVerification = async (
 };
 
 export const sendInviteMember = async (
-	ctx: RunMutationCtx,
+	ctx: ActionCtx,
 	{
 		to,
 		url,
