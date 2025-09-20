@@ -1,5 +1,11 @@
 # auth
 
+## 0.0.8
+
+### Patch Changes
+
+- Update to @convex-dev/better-auth@8.6.0
+
 ## 0.0.7
 
 ### Patch Changes
