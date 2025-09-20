@@ -1,5 +1,5 @@
 import { query } from '../_generated/server';
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 import { components } from '../_generated/api';
@@ -29,11 +29,20 @@ export const getActiveUser = query({
 			return null;
 		}
 
-		const auth = createAuth(ctx);
-		const session = await auth.api.getSession({
-			headers: await authComponent.getHeaders(ctx)
-		});
-		return session?.user;
+		try {
+			const auth = createAuth(ctx);
+			const session = await auth.api.getSession({
+				headers: await authComponent.getHeaders(ctx)
+			});
+			return session?.user;
+		} catch (error) {
+			if (error instanceof APIError) {
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
+			} else {
+				console.error('Unexpected error getting session:', error);
+				throw new ConvexError('An unexpected error occurred while getting the session');
+			}
+		}
 	}
 });
 
