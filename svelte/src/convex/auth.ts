@@ -110,6 +110,21 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 				enabled: AUTH_CONSTANTS.providers.github ?? false,
 				clientId: process.env.GITHUB_CLIENT_ID as string,
 				clientSecret: process.env.GITHUB_CLIENT_SECRET as string
+			},
+			google: {
+				enabled: AUTH_CONSTANTS.providers.google ?? false,
+				clientId: process.env.GOOGLE_CLIENT_ID as string,
+				clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+			},
+			facebook: {
+				enabled: AUTH_CONSTANTS.providers.facebook ?? false,
+				clientId: process.env.FACEBOOK_CLIENT_ID as string,
+				clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string
+			},
+			apple: {
+				enabled: AUTH_CONSTANTS.providers.apple ?? false,
+				clientId: process.env.APPLE_CLIENT_ID as string,
+				clientSecret: process.env.APPLE_CLIENT_SECRET as string
 			}
 		},
 		account: {

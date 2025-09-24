@@ -1,19 +1,14 @@
 <script lang="ts">
-	// Svelte
-	import { toast } from 'svelte-sonner';
-
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { authClient } from '$lib/auth/api/auth-client';
 
 	// Components
 	import EmailStep from './EmailStep.svelte';
 	import PasswordFlow from './PasswordFlow.svelte';
 	import EmailOtpFlow from './EmailOtpFlow.svelte';
 	import MagicLinkFlow from './MagicLinkFlow.svelte';
-
+	import SocialFlow from './SocialFlow.svelte';
 	// Icons
-	import { SiGithub } from '@icons-pack/svelte-simple-icons';
 	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// Utils
@@ -32,7 +27,7 @@
 		| 'magic-link-flow'
 		| 'verify-email'
 		| 'success';
-	type AuthMethod = 'password' | 'emailOTP' | 'magicLink';
+	type EmailAuthMethod = 'password' | 'emailOTP' | 'magicLink';
 
 	interface SignInProps {
 		onSignIn?: () => void;
@@ -46,7 +41,7 @@
 	let currentStep = $state<AuthStep>('email');
 	let email = $state('');
 	let submitting = $state(false);
-	let availableMethods = $state<AuthMethod[]>([]);
+	let availableEmailMethods = $state<EmailAuthMethod[]>([]);
 	let isSigningIn = $state(false);
 	let passwordMode = $state<'login' | 'register'>('login');
 	let otpMode = $state<'login' | 'register'>('login');
@@ -61,11 +56,11 @@
 
 	// Initialize available methods
 	$effect(() => {
-		const methods: AuthMethod[] = [];
+		const methods: EmailAuthMethod[] = [];
 		if (AUTH_CONSTANTS.providers.password) methods.push('password');
 		if (AUTH_CONSTANTS.providers.emailOTP) methods.push('emailOTP');
 		if (AUTH_CONSTANTS.providers.magicLink) methods.push('magicLink');
-		availableMethods = methods;
+		availableEmailMethods = methods;
 	});
 
 	// Legal links (handle empty/null/undefined gracefully)
@@ -138,7 +133,7 @@
 	/**
 	 * Handles method selection from email step
 	 */
-	function handleMethodSelect(method: AuthMethod): void {
+	function handleMethodSelect(method: EmailAuthMethod): void {
 		// Navigate to the appropriate step based on method
 		switch (method) {
 			case 'password':
@@ -190,36 +185,6 @@
 				return 'Plug & Play Auth Widgets for your application.';
 		}
 	}
-
-	/**
-	 * Handles social sign-in
-	 */
-	async function handleSocialSignIn(provider: 'github'): Promise<void> {
-		submitting = true;
-
-		try {
-			await authClient.signIn.social(
-				{
-					provider,
-					callbackURL: getRedirectURL()
-				},
-				{
-					onSuccess: () => {
-						handleAuthSuccess();
-					},
-					onError: (ctx) => {
-						console.error('Social sign-in error:', ctx.error);
-						toast.error(ctx.error.message || 'Social sign-in failed. Please try again.');
-						submitting = false;
-					}
-				}
-			);
-		} catch (error) {
-			console.error('Social sign-in error:', error);
-			toast.error('Social sign-in failed. Please try again.');
-			submitting = false;
-		}
-	}
 </script>
 
 <div class={cn('flex h-full w-full  flex-col items-center justify-center ', className)}>
@@ -264,43 +229,23 @@
 
 			<div class="flex h-full w-full flex-col gap-6">
 				<!-- Social Sign In -->
-				{#if AUTH_CONSTANTS.providers.github && currentStep === 'email'}
-					<button
-						class="btn preset-outlined-surface-400-600 hover:border-surface-600-400 w-full"
-						onclick={() => handleSocialSignIn('github')}
-						disabled={submitting}
-					>
-						{#if submitting}
-							<div class="flex items-center gap-2">
-								<div
-									class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
-								></div>
-								Signing in...
-							</div>
-						{:else}
-							<SiGithub size={16} />
-							Sign in with GitHub
-						{/if}
-					</button>
-
-					{#if availableMethods.length > 0}
-						<div class="relative flex items-center px-1">
-							<div class="border-surface-600-400/30 flex-1 border-t"></div>
-							<span class="text-surface-500 px-2 text-xs">or</span>
-							<div class="border-surface-600-400/30 flex-1 border-t"></div>
-						</div>
-					{/if}
-				{/if}
+				<SocialFlow
+					show={currentStep === 'email'}
+					onSuccess={handleAuthSuccess}
+					onSubmittingChange={(value) => (submitting = value)}
+					callbackURL={getRedirectURL() || '/'}
+					dividerAfter={availableEmailMethods.length > 0}
+				/>
 
 				<!-- Email-based Auth Methods -->
-				{#if availableMethods.length > 0}
+				{#if availableEmailMethods.length > 0}
 					{#if currentStep === 'email'}
 						<EmailStep
 							{email}
 							onEmailChange={(newEmail) => (email = newEmail)}
 							onMethodSelect={handleMethodSelect}
 							{submitting}
-							{availableMethods}
+							availableMethods={availableEmailMethods}
 						/>
 					{:else if currentStep === 'password-flow'}
 						<PasswordFlow
