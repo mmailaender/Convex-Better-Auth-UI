@@ -15,7 +15,7 @@
 <Toaster position="top-center" />
 <div class="grid min-h-[100dvh] grid-rows-[auto_1fr] overflow-x-hidden">
 	<header class="flex items-center justify-between gap-5 p-4">
-		<div class="mr-auto text-2xl font-bold text-orange-500">Svelte</div>
+		<a href="/" class="mr-auto text-2xl font-bold text-orange-500">Svelte</a>
 		<OrganizationSwitcher />
 		<UserButton />
 	</header>
