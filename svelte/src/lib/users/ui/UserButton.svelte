@@ -289,7 +289,7 @@
 	}}
 >
 	<Dialog.Content
-		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md"
+		class="sm:rounded-container h-full w-full rounded-none sm:h-auto sm:w-4xl sm:max-w-md max-h-[100dvh] sm:max-h-[90vh]"
 	>
 		{#key signInKey}
 			<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
