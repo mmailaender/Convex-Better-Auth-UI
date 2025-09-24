@@ -85,7 +85,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 
 		emailVerification: {
 			autoSignInAfterVerification: true,
-			sendOnSignUp: true,
+			sendOnSignUp: AUTH_CONSTANTS.sendEmails ?? false,
 			sendVerificationEmail: async ({ user, url }) => {
 				await sendEmailVerification(requireActionCtx(ctx), {
 					to: user.email,
@@ -97,7 +97,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 		// Simple non-verified email/password to get started
 		emailAndPassword: {
 			enabled: AUTH_CONSTANTS.providers.password ?? false,
-			requireEmailVerification: true,
+			requireEmailVerification: AUTH_CONSTANTS.sendEmails ?? false,
 			sendResetPassword: async ({ user, url }) => {
 				await sendResetPassword(requireActionCtx(ctx), {
 					to: user.email,

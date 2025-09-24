@@ -58,8 +58,8 @@
 	$effect(() => {
 		const methods: EmailAuthMethod[] = [];
 		if (AUTH_CONSTANTS.providers.password) methods.push('password');
-		if (AUTH_CONSTANTS.providers.emailOTP) methods.push('emailOTP');
-		if (AUTH_CONSTANTS.providers.magicLink) methods.push('magicLink');
+		if (AUTH_CONSTANTS.providers.emailOTP && AUTH_CONSTANTS.sendEmails) methods.push('emailOTP');
+		if (AUTH_CONSTANTS.providers.magicLink && AUTH_CONSTANTS.sendEmails) methods.push('magicLink');
 		availableEmailMethods = methods;
 	});
 

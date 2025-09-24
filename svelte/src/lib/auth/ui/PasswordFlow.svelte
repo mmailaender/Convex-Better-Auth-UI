@@ -10,6 +10,9 @@
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
 
+	// Constants
+	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+
 	interface PasswordFlowProps {
 		email: string;
 		onSuccess: () => void;
@@ -34,7 +37,6 @@
 
 	const client = useConvexClient();
 	let mode = $state<'login' | 'register'>('login');
-	let showForgotPasswordDialog = $state(false);
 	let isRequestingReset = $state(false);
 
 	// Determine if this is login or register based on email
@@ -142,7 +144,6 @@
 				throw new Error(error.message || 'Failed to send reset email');
 			}
 
-			showForgotPasswordDialog = true;
 			toast.success('Password reset email sent!');
 		} catch (error) {
 			console.error('Password reset error:', error);
@@ -183,19 +184,7 @@
 		{/if}
 
 		<div class="flex flex-col">
-			<div class="flex flex-row items-center justify-between">
-				<label class="label" for="password">Password</label>
-				{#if mode === 'login'}
-					<button
-						type="button"
-						class="anchor mb-1 shrink-0 text-xs"
-						onclick={handleForgotPassword}
-						disabled={submitting || isRequestingReset}
-					>
-						{isRequestingReset ? 'Sending...' : 'Forgot password?'}
-					</button>
-				{/if}
-			</div>
+			<label class="label" for="password">Password</label>
 			<Password.Root minScore={mode === 'register' ? 3 : 0}>
 				<Password.Input
 					name="password"
@@ -210,6 +199,18 @@
 					<Password.Strength />
 				{/if}
 			</Password.Root>
+			{#if mode === 'login' && AUTH_CONSTANTS.sendEmails}
+				<div class="flex flex-row items-center justify-end pt-1">
+					<button
+						type="button"
+						class="anchor mb-1 shrink-0 text-xs"
+						onclick={handleForgotPassword}
+						disabled={submitting || isRequestingReset}
+					>
+						{isRequestingReset ? 'Sending...' : 'Forgot password?'}
+					</button>
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -232,38 +233,4 @@
 			Use a different email
 		</button>
 	</div>
-
-	<!-- Forgot Password Confirmation Dialog -->
-	{#if showForgotPasswordDialog}
-		<div class="fixed inset-0 z-50 flex items-center justify-center gap-4 bg-black/50">
-			<div
-				class="bg-surface-100-900 border-surface-200-800 rounded-container mx-4 w-full max-w-md overflow-hidden border p-6"
-			>
-				<div class="flex flex-col gap-2">
-					<h3 class="text-surface-950-50 text-lg font-medium">Check your email</h3>
-					<p class="text-surface-600-400 text-sm">
-						We've sent a password reset link to <span class="text-primary-700-300">{email}</span>.
-						Click the link in the email to reset your password.
-					</p>
-				</div>
-				<div class="mt-8 flex gap-3">
-					<button
-						type="button"
-						class="btn preset-filled flex-1"
-						onclick={() => (showForgotPasswordDialog = false)}
-					>
-						Got it
-					</button>
-					<button
-						type="button"
-						class="btn preset-tonal flex-1"
-						onclick={handleForgotPassword}
-						disabled={isRequestingReset}
-					>
-						{isRequestingReset ? 'Sending...' : 'Resend email'}
-					</button>
-				</div>
-			</div>
-		</div>
-	{/if}
 </form>

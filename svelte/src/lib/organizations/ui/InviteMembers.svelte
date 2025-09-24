@@ -9,6 +9,9 @@
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
 
+	// Constants
+	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+
 	// API Types
 	type Role = typeof authClient.$Infer.Member.role;
 	import type { FunctionReturnType } from 'convex/server';
@@ -144,9 +147,18 @@
 			</p>
 		</div>
 		<div class="flex justify-end gap-2 pt-6 md:flex-row">
-			<button type="submit" class="btn preset-filled-primary-500" disabled={isProcessing}>
+			<button
+				type="submit"
+				class="btn preset-filled-primary-500"
+				disabled={isProcessing || !AUTH_CONSTANTS.sendEmails}
+			>
 				{isProcessing ? 'Sending...' : 'Send Invitations'}
 			</button>
 		</div>
+		{#if !AUTH_CONSTANTS.sendEmails}
+			<div class="text-error-600-400 px-1 text-xs">
+				Sending Emails is not enabled. Please enable to send invitations.
+			</div>
+		{/if}
 	</div>
 </form>
