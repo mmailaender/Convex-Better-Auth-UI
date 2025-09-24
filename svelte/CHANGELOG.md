@@ -1,5 +1,11 @@
 # auth
 
+## 0.0.9
+
+### Patch Changes
+
+- feature: added support for over 20+ social provider from better auth
+
 ## 0.0.8
 
 ### Patch Changes
