@@ -1,5 +1,16 @@
 # auth
 
+## 0.0.10
+
+### Patch Changes
+
+- ## Refactors
+  - Move auth constants types to separate file for better code organization
+
+  ## Chore
+  - Update dependencies
+  - Add readme
+
 ## 0.0.9
 
 ### Patch Changes
