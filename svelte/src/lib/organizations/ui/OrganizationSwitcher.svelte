@@ -52,7 +52,9 @@
 	} = $props();
 
 	if (!AUTH_CONSTANTS.organizations) {
-		console.error('Organizations are disabled. Please turn them on in auth.constants.ts');
+		console.error(
+			'Organizations are disabled, but OrganizationSwitcher is being used. Please turn them on in auth.constants.ts'
+		);
 	}
 
 	// Auth state
@@ -261,8 +263,14 @@
 	});
 </script>
 
-<!-- Not authenticated or organizations disabled - don't show anything -->
-{#if !isAuthenticated || !AUTH_CONSTANTS.organizations}
+{#if !AUTH_CONSTANTS.organizations}
+	<div class="text-error-600-400">
+		Organizations are disabled, but OrganizationSwitcher is being used. Please turn them on in
+		auth.constants.ts
+	</div>
+
+	<!-- Not authenticated - don't show anything -->
+{:else if !isAuthenticated}
 	<!-- Return null by not rendering anything -->
 
 	<!-- Loading state -->
