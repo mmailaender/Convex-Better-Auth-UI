@@ -21,6 +21,7 @@
 
 	const client = useConvexClient();
 	let validatingEmail = $state(false);
+	let validatingEmailMethod = $state<AuthMethod | null>(null);
 
 	/**
 	 * Gets the button text for single method scenarios
@@ -50,43 +51,39 @@
 			return;
 		}
 
-		// If only one method is available, go directly to that flow
-		if (availableMethods.length === 1) {
-			onMethodSelect(availableMethods[0]);
-			return;
-		}
-
-		// For password flow, we need to validate email first
-		if (method === 'password') {
-			validatingEmail = true;
-			try {
-				await client.action(api.users.actions.checkEmailAvailabilityAndValidity, { email });
-				// This would typically determine login vs register, but for simplicity
-				// we'll just go to password flow
-				onMethodSelect('password');
-			} catch (error) {
-				toast.error('Failed to validate email. Please try again.');
-				console.error('Email validation error:', error);
-			} finally {
-				validatingEmail = false;
+		// Always validate the email before proceeding to any flow
+		validatingEmail = true;
+		validatingEmailMethod = method;
+		try {
+			const data = await client.action(api.users.actions.checkEmailAvailabilityAndValidity, {
+				email
+			});
+			if (!data.valid) {
+				toast.error(data.reason || 'Please enter a valid email address.');
+				return;
 			}
-		} else {
-			// For other methods, go directly to the flow
 			onMethodSelect(method);
+		} catch (error) {
+			toast.error('Failed to validate email. Please try again.');
+			console.error('Email validation error:', error);
+		} finally {
+			validatingEmail = false;
+			validatingEmailMethod = null;
 		}
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<div class="flex flex-col gap-2">
-		<label class="text-surface-950-50 text-sm font-medium" for="email">Email</label>
+<div class="flex flex-col gap-8">
+	<div class="flex flex-col">
+		<label class="label" for=" email">Email</label>
 		<input
 			id="email"
 			name="email"
 			type="email"
+			autocomplete="email"
 			value={email}
 			oninput={(e) => onEmailChange(e.currentTarget.value)}
-			class="input preset-filled-surface-200"
+			class="input preset-filled-surface-200 text-sm"
 			placeholder="Enter your email"
 			required
 			disabled={submitting || validatingEmail}
@@ -101,7 +98,14 @@
 			class="btn preset-filled w-full"
 			disabled={submitting || validatingEmail || !email}
 		>
-			{validatingEmail ? 'Verifying...' : getSingleMethodButtonText()}
+			{#if validatingEmail}
+				<div class="flex items-center gap-2">
+					<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+					Verifying...
+				</div>
+			{:else}
+				{getSingleMethodButtonText()}
+			{/if}
 		</button>
 	{:else}
 		<!-- Multiple methods available -->
@@ -113,7 +117,14 @@
 					class="btn preset-filled w-full"
 					disabled={submitting || validatingEmail || !email}
 				>
-					{validatingEmail ? 'Verifying...' : 'Continue with Password'}
+					{#if validatingEmail && validatingEmailMethod === 'password'}
+						<div class="flex items-center gap-2">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							Verifying...
+						</div>
+					{:else}
+						Continue with Password
+					{/if}
 				</button>
 			{/if}
 
@@ -122,9 +133,16 @@
 					type="button"
 					onclick={() => handleMethodClick('emailOTP')}
 					class="btn preset-tonal w-full"
-					disabled={submitting || !email}
+					disabled={submitting || validatingEmail || !email}
 				>
-					Continue with Email OTP
+					{#if validatingEmail && validatingEmailMethod === 'emailOTP'}
+						<div class="flex items-center gap-2">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							Verifying...
+						</div>
+					{:else}
+						Continue with Email OTP
+					{/if}
 				</button>
 			{/if}
 
@@ -133,9 +151,16 @@
 					type="button"
 					onclick={() => handleMethodClick('magicLink')}
 					class="btn preset-tonal w-full"
-					disabled={submitting || !email}
+					disabled={submitting || validatingEmail || !email}
 				>
-					Continue with Magic Link
+					{#if validatingEmail && validatingEmailMethod === 'magicLink'}
+						<div class="flex items-center gap-2">
+							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							Verifying...
+						</div>
+					{:else}
+						Continue with Magic Link
+					{/if}
 				</button>
 			{/if}
 		</div>

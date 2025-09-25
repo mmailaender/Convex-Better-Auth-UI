@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ConvexClientProvider } from './ConvexClientProvider';
 
 import type { Metadata } from 'next';
@@ -20,11 +21,13 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" data-theme="authapp">
+		<html lang="en" data-theme="auth">
 			<body className={`grid h-screen grid-rows-[auto_1fr] antialiased`}>
 				<ConvexClientProvider>
 					<div className="flex items-center justify-between gap-5 p-4">
-						<div className="mr-auto text-2xl font-bold text-white">Next.js</div>
+						<Link href="/" className="mr-auto text-2xl font-bold text-white">
+							Next.js
+						</Link>
 						<OrganizationSwitcher />
 						<UserButton />
 					</div>

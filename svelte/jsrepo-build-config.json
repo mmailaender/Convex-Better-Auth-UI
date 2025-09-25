@@ -1,0 +1,43 @@
+{
+	"$schema": "https://unpkg.com/jsrepo@2.4.5/schemas/registry-config.json",
+	"name": "@auth/svelte",
+	"version": "package",
+	"readme": "README.md",
+	"meta": {
+		"author": "Micha Mailänder",
+		"bugs": "https://github.com/mmailaender/auth/issues",
+		"description": "Plug & Play Auth Widgets for your application",
+		"homepage": "https://etesie.dev/docs/auth",
+		"repository": "https://github.com/mmailaender/auth",
+		"tags": ["auth", "svelte", "ui", "convex", "better-auth"]
+	},
+	"defaultPaths": {
+		"convex": "./src/convex",
+		"lib": "./src/lib",
+		"routes": "./src/routes",
+		"themes": "./src/themes"
+	},
+	"dirs": ["./src"],
+	"allowSubdirectories": true,
+	"doNotListBlocks": ["primitives", "_generated"],
+	"doNotListCategories": [],
+	"listBlocks": [],
+	"listCategories": [],
+	"excludeDeps": ["svelte", "@sveltejs/kit"],
+	"peerDependencies": {
+		"svelte": "5.x.x",
+		"@sveltejs/kit": "2.x.x",
+		"tailwindcss": "4.x.x"
+	},
+	"includeBlocks": [],
+	"includeCategories": [],
+	"excludeBlocks": ["+page", "+error", "+layout"],
+	"excludeCategories": [],
+	"preview": false,
+	"includeDocs": false,
+	"rules": {
+		"require-local-dependency-exists": "warn",
+		"no-circular-dependency": "warn",
+		"no-framework-dependency": "warn"
+	}
+}

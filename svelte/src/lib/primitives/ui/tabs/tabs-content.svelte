@@ -11,7 +11,7 @@
 	class={cn(
 		'outline-none',
 		'data-[orientation=horizontal]:flex-1',
-		'w-full data-[orientation=vertical]:p-6',
+		'w-full data-[orientation=vertical]:p-8 data-[orientation=vertical]:pt-6 ',
 		className
 	)}
 	{...restProps}

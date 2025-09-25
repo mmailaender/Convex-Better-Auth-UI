@@ -4,11 +4,8 @@
 
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
-@import '@skeletonlabs/skeleton/themes/cerberus';
 
-@import '../../authapptheme.css';
-
-@source '../node_modules/@skeletonlabs/skeleton-svelte';
+@import './themes/auth.css';
 
 @theme {
 	--animate-fade-in-out: fade-in-out 0.3s ease-in-out;
@@ -40,8 +37,8 @@
 	--color-secondary-foreground: var(--color-secondary-contrast-500);
 	--color-muted: var(--color-surface-100-900);
 	--color-muted-foreground: var(--color-surface-contrast-100-900);
-	--color-accent: var(--color-primary-600-400);
-	--color-accent-foreground: var(--color-surface-contrast-600-400);
+	--color-accent: var(--color-primary-200-800);
+	--color-accent-foreground: var(--color-primary-contrast-200-800);
 	--color-destructive: var(--color-error-500);
 	--color-border: var(--color-surface-300-700);
 	--color-input: var(--color-surface-100-900);
@@ -62,18 +59,34 @@
 }
 
 @utility input {
-	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border duration-300 ease-in-out;
+	@apply border-surface-400-600 placeholder:text-surface-400-600 hover:border-surface-500 text-surface-950-50 disabled:bg-surface-200-800 disabled:text-surface-600-400 active:border-primary-500 focus:border-primary-500 h-9 w-full border px-2.5 text-sm ring-0 duration-300 ease-in-out;
 }
 @utility textarea {
-	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border duration-300 ease-in-out;
+	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 border px-2.5 text-sm duration-300 ease-in-out;
 }
 
 @utility select {
-	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 w-full border px-2 duration-300 ease-in-out;
+	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 h-9 w-full border px-2.5 text-sm duration-300 ease-in-out;
 }
 
 @utility label {
-	@apply mb-1 text-xs font-medium;
+	@apply text-surface-950-50 mb-1.5 text-xs font-medium;
+}
+
+@utility btn {
+	@apply h-9 text-sm font-medium;
+}
+
+@utility btn-sm {
+	@apply h-7 text-sm font-medium;
+}
+
+@utility badge {
+	@apply h-5 px-2;
+}
+
+@utility anchor {
+	@apply text-primary-700-300;
 }
 
 @layer base {

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { Toaster as Sonner, type ToasterProps as SonnerProps } from 'svelte-sonner';
 	// Icons
-	import { CircleCheck, CircleX, AlertTriangle, Info, Loader2 } from '@lucide/svelte';
+	import CircleCheckIcon from '@lucide/svelte/icons/circle-check';
+	import CircleXIcon from '@lucide/svelte/icons/circle-x';
+	import InfoIcon from '@lucide/svelte/icons/info';
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
+	import AlertTriangleIcon from '@lucide/svelte/icons/alert-triangle';
 
 	let { ...restProps }: SonnerProps = $props();
 </script>
@@ -29,19 +33,19 @@
 	{...restProps}
 >
 	{#snippet loadingIcon()}
-		<Loader2 class="flex-shrink-0 animate-spin" />
+		<Loader2Icon class="flex-shrink-0 animate-spin" />
 	{/snippet}
 	{#snippet successIcon()}
-		<CircleCheck class="text-success-500 flex-shrink-0" />
+		<CircleCheckIcon class="text-success-500 flex-shrink-0" />
 	{/snippet}
 	{#snippet errorIcon()}
-		<CircleX class="text-error-500 flex-shrink-0" />
+		<CircleXIcon class="text-error-500 flex-shrink-0" />
 	{/snippet}
 	{#snippet infoIcon()}
-		<Info class="flex-shrink-0" />
+		<InfoIcon class="flex-shrink-0" />
 	{/snippet}
 	{#snippet warningIcon()}
-		<AlertTriangle class="flex-shrink-0" />
+		<AlertTriangleIcon class="flex-shrink-0" />
 	{/snippet}
 </Sonner>
 

@@ -3,11 +3,17 @@
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
+	import * as Select from '$lib/primitives/ui/select';
+	import { createListCollection } from '@ark-ui/svelte/select';
+
+	// Icons
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { ConvexError } from 'convex/values';
 	const roles = useRoles();
 	const client = useConvexClient();
 
@@ -42,7 +48,7 @@
 
 	// State
 	let isOpen: boolean = $state(false);
-	let selectedSuccessor: string | null = $state(null);
+	let isLeaving: boolean = $state(false);
 
 	// Derived data
 	const activeUser = $derived(activeUserResponse.data);
@@ -54,15 +60,26 @@
 		members?.filter(
 			(member) =>
 				// Don't include the current user
-				member.id !== activeUser?.id
+				member.userId !== activeUser?._id
 		) || []
+	);
+
+	// Successor select
+	let selectedSuccessor = $state<string[]>([]);
+	const successorCollection = $derived(
+		createListCollection({
+			items: organizationMembers.map((member) => ({
+				label: `${member.user.name} (${member.user.email})`,
+				value: member.id
+			}))
+		})
 	);
 
 	/**
 	 * Validates form input before submission
 	 */
 	function validateForm(): boolean {
-		if (roles.hasOwnerRole && !selectedSuccessor) {
+		if (roles.hasOwnerRole && selectedSuccessor.length === 0) {
 			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
@@ -80,21 +97,32 @@
 			return;
 		}
 
+		isLeaving = true;
+
 		try {
 			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				// Only send successorMemberId if the user is an owner and a successor is selected
-				...(roles.hasOwnerRole && selectedSuccessor ? { successorMemberId: selectedSuccessor } : {})
+				...(roles.hasOwnerRole && selectedSuccessor.length > 0
+					? { successorMemberId: selectedSuccessor[0] }
+					: {})
 			});
 
 			isOpen = false;
 
+			toast.success('Successfully left the organization.');
 			// Navigate to home page after leaving
 			goto('/');
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
-			);
+			if (err instanceof ConvexError) {
+				toast.error(err.data);
+			} else {
+				toast.error(
+					err instanceof Error ? err.message : 'Failed to leave organization. Please try again.'
+				);
+			}
 			console.error(err);
+		} finally {
+			isLeaving = false;
 		}
 	}
 </script>
@@ -120,34 +148,39 @@
 			</Dialog.Description>
 
 			{#if roles.hasOwnerRole}
-				<div class="space-y-2">
+				<div class="w-full space-y-2">
 					<label for="successor" class="label"> New owner: </label>
-					<select
-						id="successor"
-						bind:value={selectedSuccessor}
-						class="select w-full cursor-pointer"
-						required={roles.hasOwnerRole}
-					>
-						<option value="" disabled> Choose a successor </option>
-						<!-- TODO: Filter out the current user by email as the id is inconsistent between Convex and Better Auth. Replace with id once fixed -->
-						{#each organizationMembers.filter((member) => member.user.email !== activeUser?.email) as member (member.id)}
-							<option value={member.id}>
-								{member.user.name} ({member.user.email})
-							</option>
-						{/each}
-					</select>
+					<Select.Root collection={successorCollection} bind:value={selectedSuccessor}>
+						<Select.Trigger class="w-full" placeholder="Choose a successor" />
+						<Select.Content>
+							{#each successorCollection.items as item (item.value)}
+								<Select.Item {item}>
+									<Select.ItemText>{item.label}</Select.ItemText>
+									<Select.ItemIndicator>✓</Select.ItemIndicator>
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 			{/if}
 
 			<Dialog.Footer>
-				<button class="btn preset-tonal" onclick={() => (isOpen = false)}> Cancel </button>
+				<button class="btn preset-tonal" onclick={() => (isOpen = false)} disabled={isLeaving}>
+					Cancel
+				</button>
 				<button
 					type="button"
 					class="btn bg-error-500 hover:bg-error-600 text-white"
 					onclick={handleLeaveOrganization}
-					disabled={roles.hasOwnerRole && !selectedSuccessor}
+					disabled={isLeaving || (roles.hasOwnerRole && !selectedSuccessor)}
+					aria-busy={isLeaving}
 				>
-					Confirm
+					{#if isLeaving}
+						<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+						Leaving...
+					{:else}
+						Confirm
+					{/if}
 				</button>
 			</Dialog.Footer>
 		</Dialog.Content>

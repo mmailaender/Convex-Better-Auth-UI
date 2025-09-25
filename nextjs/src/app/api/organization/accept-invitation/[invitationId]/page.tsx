@@ -1,6 +1,6 @@
 'use client';
 
-import { authClient } from '@/components/auth/api/auth-client';
+import { authClient } from '../../../../../lib/auth/api/auth-client';
 import { CheckCircle2, Loader2, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';

@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 // API
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { authClient } from '../api/auth-client';
+import { authClient } from '../../../lib/auth/api/auth-client';
 
 // Icons
 import { Mail } from 'lucide-react';

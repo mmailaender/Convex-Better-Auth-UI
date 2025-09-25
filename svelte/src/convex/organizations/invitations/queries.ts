@@ -1,6 +1,6 @@
 import { query } from '../../_generated/server';
-import { betterAuthComponent } from '../../auth';
-import { createAuth } from '../../../lib/auth/api/auth';
+import { authComponent } from '../../auth';
+import { createAuth } from '../../auth';
 
 /**
  * Get pending invitations for the current active organization
@@ -10,7 +10,7 @@ export const listInvitations = query({
 		const auth = createAuth(ctx);
 		try {
 			return await auth.api.listInvitations({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch {
 			return [];

@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 // API
-import { authClient } from '@/components/auth/api/auth-client';
+import { authClient } from '../../lib/auth/api/auth-client';
 import { AlertTriangle } from 'lucide-react';
 
 type ResetState = 'loading' | 'valid-token' | 'invalid-token' | 'error';

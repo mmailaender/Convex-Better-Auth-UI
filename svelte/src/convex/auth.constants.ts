@@ -1,15 +1,7 @@
-export const AUTH_CONSTANTS = {
+import { AuthConstants } from './auth.constants.types';
+
+export const AUTH_CONSTANTS: AuthConstants = {
 	providers: {
-		github: true,
-		google: false,
-		facebook: false,
-		keypass: false,
-		password: true,
-		emailOTP: true,
-		magicLink: true
-	},
-	validateEmails: true,
-	organizations: true,
-	terms: '#',
-	privacy: '#'
+		password: true
+	}
 };

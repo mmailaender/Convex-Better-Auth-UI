@@ -1,8 +1,7 @@
-import { internalQuery, query } from '../_generated/server';
+import { query } from '../_generated/server';
 
 // better-auth
-import { createAuth } from '../../lib/auth/api/auth';
-import { betterAuthComponent } from '../auth';
+import { authComponent, createAuth } from '../auth';
 import { v } from 'convex/values';
 
 /**
@@ -10,15 +9,15 @@ import { v } from 'convex/values';
  */
 export const listOrganizations = query({
 	handler: async (ctx) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return [];
 		}
 
 		try {
 			const auth = createAuth(ctx);
 			return await auth.api.listOrganizations({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch {
 			return [];
@@ -37,13 +36,13 @@ export const getOrganizationRole = query({
 	},
 	handler: async (ctx, args) => {
 		const { organizationId } = args;
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return null;
 		}
 
 		const auth = createAuth(ctx);
-		const headers = await betterAuthComponent.getHeaders(ctx);
+		const headers = await authComponent.getHeaders(ctx);
 
 		try {
 			// Get role from active organization if no specific organizationId provided
@@ -58,7 +57,7 @@ export const getOrganizationRole = query({
 				headers
 			});
 
-			const member = memberList.members.find((member) => member.userId === userId);
+			const member = memberList.members.find((member) => member.userId === user._id);
 			return (member?.role as typeof auth.$Infer.Member.role) || null;
 		} catch {
 			return null;
@@ -71,27 +70,18 @@ export const getOrganizationRole = query({
  */
 export const getActiveOrganization = query({
 	handler: async (ctx) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
-		if (!userId) {
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
 			return null;
 		}
 
 		try {
 			const auth = createAuth(ctx);
 			return await auth.api.getFullOrganization({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 		} catch {
 			return null;
 		}
-	}
-});
-
-export const _getActiveOrganizationFromDb = internalQuery({
-	args: { userId: v.id('users') },
-	handler: async (ctx, args) => {
-		const user = await ctx.db.get(args.userId);
-		if (!user || !user.activeOrganizationId) return null;
-		return user.activeOrganizationId;
 	}
 });

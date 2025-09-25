@@ -1,9 +1,7 @@
 import { ConvexError, v } from 'convex/values';
 import { mutation } from '../../_generated/server';
-import { betterAuthComponent } from '../../auth';
-import { createAuth } from '../../../lib/auth/api/auth';
+import { authComponent, createAuth } from '../../auth';
 import { APIError } from 'better-auth/api';
-import type { Id } from '../../_generated/dataModel';
 
 /**
  * Leave the current active organization
@@ -16,15 +14,15 @@ export const leaveOrganization = mutation({
 		successorMemberId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const userId = await betterAuthComponent.getAuthUserId(ctx);
-		if (!userId) throw new ConvexError('Not authenticated');
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) throw new ConvexError('Not authenticated');
 
 		const auth = createAuth(ctx);
 
 		try {
 			// Get all organizations the user is part of
 			const allOrganizations = await auth.api.listOrganizations({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			// Check if user is part of at least two organizations
@@ -36,7 +34,7 @@ export const leaveOrganization = mutation({
 
 			// Get current active member info
 			const member = await auth.api.getActiveMember({
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			if (!member) {
@@ -56,7 +54,7 @@ export const leaveOrganization = mutation({
 						memberId: args.successorMemberId,
 						role: 'owner'
 					},
-					headers: await betterAuthComponent.getHeaders(ctx)
+					headers: await authComponent.getHeaders(ctx)
 				});
 			}
 
@@ -72,22 +70,22 @@ export const leaveOrganization = mutation({
 				body: {
 					organizationId: member.organizationId
 				},
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			// Set the first remaining organization as active
 			await auth.api.setActiveOrganization({
 				body: { organizationId: nextActiveOrg.id },
-				headers: await betterAuthComponent.getHeaders(ctx)
+				headers: await authComponent.getHeaders(ctx)
 			});
 
 			// Update user's active organization in the database
-			const user = await ctx.db.get(userId as Id<'users'>);
-			if (user) {
-				await ctx.db.patch(user._id, {
+			await auth.api.updateUser({
+				body: {
 					activeOrganizationId: nextActiveOrg.id
-				});
-			}
+				},
+				headers: await authComponent.getHeaders(ctx)
+			});
 
 			return true;
 		} catch (error) {
@@ -96,17 +94,7 @@ export const leaveOrganization = mutation({
 			}
 
 			if (error instanceof APIError) {
-				switch (error.status) {
-					case 400:
-						throw new ConvexError('Invalid request data');
-					case 401:
-					case 403:
-						throw new ConvexError('Unauthorized to leave organization');
-					case 404:
-						throw new ConvexError('Organization or member not found');
-					default:
-						throw new ConvexError(error.message || 'Failed to leave organization');
-				}
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 			}
 
 			throw new ConvexError('Failed to leave organization');

@@ -11,12 +11,12 @@ import { toast } from 'sonner';
 import { SiGithub } from '@icons-pack/react-simple-icons';
 
 // Utils
-import { cn } from '@/components/lib/utils';
+import { cn } from '../../../lib/utils';
 
 // Constants
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 // API
-import { authClient } from '../api/auth-client';
+import { authClient } from '../../../lib/auth/api/auth-client';
 import { useConvexAuth } from 'convex/react';
 
 // Components

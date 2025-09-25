@@ -12,6 +12,8 @@
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Dialog from '$lib/primitives/ui/dialog';
+	// Icons
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	const roles = useRoles();
 	const isOwner = $derived(roles.hasOwnerRole);
@@ -37,11 +39,13 @@
 
 	// State
 	let dialogOpen: boolean = $state(false);
+	let isDeleting: boolean = $state(false);
 
 	/**
 	 * Handle confirmation of organization deletion
 	 */
 	async function handleConfirm(): Promise<void> {
+		isDeleting = true;
 		try {
 			if (!activeOrganization) return;
 
@@ -69,6 +73,8 @@
 			} else {
 				toast.error('Unknown error. Please try again. If it persists, contact support.');
 			}
+		} finally {
+			isDeleting = false;
 		}
 	}
 </script>
@@ -89,20 +95,29 @@
 				<div class="text-surface-700-300 space-y-3 text-sm">
 					<p>Are you sure you want to delete this organization?</p>
 					<div
-						class="bg-surface-100-900 border-surface-200-800 rounded-container border p-3 text-center"
+						class="bg-surface-200-800 border-surface-200-800 rounded-container border p-3 text-center"
 					>
-						<span class="text-surface-800-200 text-base font-semibold"
-							>{activeOrganization.name}</span
-						>
+						<span class="text-surface-800-200 font-semibold">{activeOrganization.name}</span>
 					</div>
 					<p>All organization data will be permanently deleted and cannot be recovered.</p>
 				</div>
 			</article>
 
-			<Dialog.Footer>
-				<Dialog.Close class="btn preset-tonal">Cancel</Dialog.Close>
-				<button type="button" class="btn preset-filled-error-500" onclick={handleConfirm}>
-					Confirm
+			<Dialog.Footer class="w-full">
+				<Dialog.Close class="btn preset-tonal" disabled={isDeleting}>Cancel</Dialog.Close>
+				<button
+					type="button"
+					class="btn preset-filled-error-500"
+					onclick={handleConfirm}
+					disabled={isDeleting}
+					aria-busy={isDeleting}
+				>
+					{#if isDeleting}
+						<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+						Deleting...
+					{:else}
+						Delete
+					{/if}
 				</button>
 			</Dialog.Footer>
 		</Dialog.Content>

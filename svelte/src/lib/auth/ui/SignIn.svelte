@@ -1,20 +1,15 @@
 <script lang="ts">
-	// Svelte
-	import { toast } from 'svelte-sonner';
-
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { authClient } from '$lib/auth/api/auth-client';
 
 	// Components
 	import EmailStep from './EmailStep.svelte';
 	import PasswordFlow from './PasswordFlow.svelte';
 	import EmailOtpFlow from './EmailOtpFlow.svelte';
 	import MagicLinkFlow from './MagicLinkFlow.svelte';
-
+	import SocialFlow from './SocialFlow.svelte';
 	// Icons
-	import { SiGithub } from '@icons-pack/svelte-simple-icons';
-	import { Mail } from '@lucide/svelte';
+	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// Utils
 	import { cn } from '$lib/primitives/utils';
@@ -32,7 +27,7 @@
 		| 'magic-link-flow'
 		| 'verify-email'
 		| 'success';
-	type AuthMethod = 'password' | 'emailOTP' | 'magicLink';
+	type EmailAuthMethod = 'password' | 'emailOTP' | 'magicLink';
 
 	interface SignInProps {
 		onSignIn?: () => void;
@@ -46,7 +41,7 @@
 	let currentStep = $state<AuthStep>('email');
 	let email = $state('');
 	let submitting = $state(false);
-	let availableMethods = $state<AuthMethod[]>([]);
+	let availableEmailMethods = $state<EmailAuthMethod[]>([]);
 	let isSigningIn = $state(false);
 	let passwordMode = $state<'login' | 'register'>('login');
 	let otpMode = $state<'login' | 'register'>('login');
@@ -61,12 +56,19 @@
 
 	// Initialize available methods
 	$effect(() => {
-		const methods: AuthMethod[] = [];
+		const methods: EmailAuthMethod[] = [];
 		if (AUTH_CONSTANTS.providers.password) methods.push('password');
-		if (AUTH_CONSTANTS.providers.emailOTP) methods.push('emailOTP');
-		if (AUTH_CONSTANTS.providers.magicLink) methods.push('magicLink');
-		availableMethods = methods;
+		if (AUTH_CONSTANTS.providers.emailOTP && AUTH_CONSTANTS.sendEmails) methods.push('emailOTP');
+		if (AUTH_CONSTANTS.providers.magicLink && AUTH_CONSTANTS.sendEmails) methods.push('magicLink');
+		availableEmailMethods = methods;
 	});
+
+	// Legal links (handle empty/null/undefined gracefully)
+	const termsUrl = $derived((AUTH_CONSTANTS.terms ?? '').trim());
+	const privacyUrl = $derived((AUTH_CONSTANTS.privacy ?? '').trim());
+	const showTerms = $derived(Boolean(termsUrl));
+	const showPrivacy = $derived(Boolean(privacyUrl));
+	const showLegal = $derived(showTerms || showPrivacy);
 
 	// Monitor authentication state and redirect once Convex auth is synchronized
 	$effect(() => {
@@ -131,7 +133,7 @@
 	/**
 	 * Handles method selection from email step
 	 */
-	function handleMethodSelect(method: AuthMethod): void {
+	function handleMethodSelect(method: EmailAuthMethod): void {
 		// Navigate to the appropriate step based on method
 		switch (method) {
 			case 'password':
@@ -162,7 +164,7 @@
 			case 'magic-link-flow':
 				return 'Sign in with magic link';
 			default:
-				return 'Self hosted Auth in Minutes';
+				return 'Sign in into self hosted Auth';
 		}
 	}
 
@@ -183,160 +185,130 @@
 				return 'Plug & Play Auth Widgets for your application.';
 		}
 	}
-
-	/**
-	 * Handles social sign-in
-	 */
-	async function handleSocialSignIn(provider: 'github'): Promise<void> {
-		submitting = true;
-
-		try {
-			await authClient.signIn.social(
-				{
-					provider,
-					callbackURL: getRedirectURL()
-				},
-				{
-					onSuccess: () => {
-						handleAuthSuccess();
-					},
-					onError: (ctx) => {
-						console.error('Social sign-in error:', ctx.error);
-						toast.error(ctx.error.message || 'Social sign-in failed. Please try again.');
-						submitting = false;
-					}
-				}
-			);
-		} catch (error) {
-			console.error('Social sign-in error:', error);
-			toast.error('Social sign-in failed. Please try again.');
-			submitting = false;
-		}
-	}
 </script>
 
-<div class={cn('flex h-full w-full flex-col items-center justify-center p-8', className)}>
-	<div class="flex h-full w-full max-w-md flex-col">
-		{#if currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent))}
-			<div class="flex flex-col items-center gap-4 py-8 text-center">
-				<div class="mb-2 flex justify-center">
-					<div class="bg-surface-100-900 flex h-16 w-16 items-center justify-center rounded-full">
-						<Mail class="text-surface-600-400 size-8" />
-					</div>
+<div class={cn('mx-auto flex h-full w-full max-w-md flex-col justify-center p-4 pb-8', className)}>
+	{#if currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent))}
+		<div class="flex flex-col">
+			<!-- Circle -->
+			<div class="mb-4 flex">
+				<div class="bg-surface-200-800 flex h-16 w-16 items-center justify-center rounded-full">
+					<MailIcon class="text-surface-600-400 size-8" />
 				</div>
-				<h3 class="text-xl font-semibold">Check your email</h3>
-				<p class="text-surface-600-400 text-sm">
-					{#if verifyContext === 'magicLink'}
-						We've sent a magic link to <strong>{email}</strong>.
-					{:else}
-						We've sent a verification link to <strong>{email}</strong>.
-					{/if}
-				</p>
-				<p class="text-surface-600-400 text-sm">
-					{#if verifyContext === 'magicLink'}
-						Click the link in your email to sign in instantly.
-					{:else}
-						Click the link to verify your email. You'll be signed in automatically after
-						verification.
-					{/if}
-				</p>
-				<button type="button" class="anchor mt-2 text-center text-sm" onclick={resetToEmailStep}>
-					Use a different email
-				</button>
 			</div>
-		{:else}
-			<h5 class="h4 max-w-96 text-left leading-9 tracking-tighter">{getStepTitle()}</h5>
-			<p class="text-surface-600-400 mt-3 mb-10 max-w-96 text-left text-sm">
-				{getStepDescription()}
+
+			<!-- Info -->
+			<h3 class="h5 w-full text-left leading-8">Check your email</h3>
+			<p class="text-surface-600-400 mt-2 text-sm">
+				{#if verifyContext === 'magicLink'}
+					We've sent a magic link to <strong>{email}</strong>.
+				{:else}
+					We've sent a verification link to <strong>{email}</strong>.
+				{/if}
+			</p>
+			<p class="text-surface-600-400 pb-8 text-sm">
+				{#if verifyContext === 'magicLink'}
+					Click the link in your email to sign in instantly.
+				{:else}
+					Click the link to verify your email. You'll be signed in automatically after verification.
+				{/if}
 			</p>
 
-			<div class="flex h-full w-full flex-col gap-8">
-				<!-- Social Sign In -->
-				{#if AUTH_CONSTANTS.providers.github && currentStep === 'email'}
-					<button
-						class="btn preset-filled hover:border-surface-600-400 w-full shadow-sm"
-						onclick={() => handleSocialSignIn('github')}
-						disabled={submitting}
-					>
-						<SiGithub size={20} />
-						Sign in with GitHub
-					</button>
+			<!-- Action -->
+			<button type="button" class="btn preset-filled-surface-300-700" onclick={resetToEmailStep}>
+				Use a different email
+			</button>
+		</div>
+	{:else}
+		<h5 class="h5 w-full text-left leading-8">{getStepTitle()}</h5>
+		<p class="text-surface-600-400 mt-2 max-w-96 pb-16 text-left text-sm sm:pb-12">
+			{getStepDescription()}
+		</p>
 
-					{#if availableMethods.length > 0}
-						<div class="relative flex items-center">
-							<div class="border-surface-600-400 flex-1 border-t"></div>
-							<span class="text-surface-600-400 px-4">OR</span>
-							<div class="border-surface-600-400 flex-1 border-t"></div>
-						</div>
-					{/if}
-				{/if}
+		<div class="flex h-full w-full flex-col gap-6">
+			<!-- Social Sign In -->
+			<SocialFlow
+				show={currentStep === 'email'}
+				onSuccess={handleAuthSuccess}
+				onSubmittingChange={(value) => (submitting = value)}
+				callbackURL={getRedirectURL() || '/'}
+				dividerAfter={availableEmailMethods.length > 0}
+			/>
 
-				<!-- Email-based Auth Methods -->
-				{#if availableMethods.length > 0}
-					{#if currentStep === 'email'}
-						<EmailStep
-							{email}
-							onEmailChange={(newEmail) => (email = newEmail)}
-							onMethodSelect={handleMethodSelect}
-							{submitting}
-							{availableMethods}
-						/>
-					{:else if currentStep === 'password-flow'}
-						<PasswordFlow
-							{email}
-							onSuccess={handleAuthSuccess}
-							onBack={resetToEmailStep}
-							{submitting}
-							onSubmittingChange={(value) => (submitting = value)}
-							onModeChange={(m) => (passwordMode = m)}
-							onVerifyEmail={() => {
-								currentStep = 'verify-email';
-								verifyContext = 'emailVerification';
-								isSigningIn = true;
-							}}
-						/>
-					{:else if currentStep === 'email-otp-flow'}
-						<EmailOtpFlow
-							{email}
-							onSuccess={handleAuthSuccess}
-							onBack={resetToEmailStep}
-							{submitting}
-							onSubmittingChange={(value) => (submitting = value)}
-							onModeChange={(m) => (otpMode = m)}
-						/>
-					{:else if currentStep === 'magic-link-flow'}
-						<MagicLinkFlow
-							{email}
-							onBack={resetToEmailStep}
-							{submitting}
-							onSubmittingChange={(value) => (submitting = value)}
-							callbackURL={getRedirectURL() || '/'}
-							onLinkSent={() => {
+			<!-- Email-based Auth Methods -->
+			{#if availableEmailMethods.length > 0}
+				{#if currentStep === 'email'}
+					<EmailStep
+						{email}
+						onEmailChange={(newEmail) => (email = newEmail)}
+						onMethodSelect={handleMethodSelect}
+						{submitting}
+						availableMethods={availableEmailMethods}
+					/>
+				{:else if currentStep === 'password-flow'}
+					<PasswordFlow
+						{email}
+						onSuccess={handleAuthSuccess}
+						onBack={resetToEmailStep}
+						{submitting}
+						onSubmittingChange={(value) => (submitting = value)}
+						onModeChange={(m) => (passwordMode = m)}
+						callbackURL={getRedirectURL() || '/'}
+						onVerifyEmail={() => {
+							currentStep = 'verify-email';
+							verifyContext = 'emailVerification';
+							isSigningIn = true;
+						}}
+					/>
+				{:else if currentStep === 'email-otp-flow'}
+					<EmailOtpFlow
+						{email}
+						onSuccess={handleAuthSuccess}
+						onBack={resetToEmailStep}
+						{submitting}
+						onSubmittingChange={(value) => (submitting = value)}
+						onModeChange={(m) => (otpMode = m)}
+					/>
+				{:else if currentStep === 'magic-link-flow'}
+					<MagicLinkFlow
+						{email}
+						onBack={resetToEmailStep}
+						{submitting}
+						onSubmittingChange={(value) => (submitting = value)}
+						callbackURL={getRedirectURL() || '/'}
+						onLinkSent={() => {
+							verifyContext = 'magicLink';
+							magicLinkSent = true;
+							isSigningIn = true;
+						}}
+						onAutoSendChange={(pending) => {
+							if (pending) {
 								verifyContext = 'magicLink';
-								magicLinkSent = true;
-								isSigningIn = true;
-							}}
-							onAutoSendChange={(pending) => {
-								if (pending) {
-									verifyContext = 'magicLink';
-									magicAutoSendPending = true;
-								} else {
-									magicAutoSendPending = false;
-								}
-							}}
-						/>
-					{/if}
+								magicAutoSendPending = true;
+							} else {
+								magicAutoSendPending = false;
+							}
+						}}
+					/>
 				{/if}
-			</div>
+			{/if}
+		</div>
 
+		{#if showLegal}
 			<div>
 				<p class="text-surface-600-400 mt-10 text-xs">
 					By continuing, you agree to our
-					<a href={AUTH_CONSTANTS.terms} class="anchor text-surface-950-50">Terms</a>
-					and
-					<a href={AUTH_CONSTANTS.privacy} class="anchor text-surface-950-50">Privacy Policies</a>
+					{#if showTerms}
+						<a href={termsUrl} class="anchor text-surface-950-50">Terms</a>
+					{/if}
+					{#if showTerms && showPrivacy}
+						and
+					{/if}
+					{#if showPrivacy}
+						<a href={privacyUrl} class="anchor text-surface-950-50">Privacy Policies</a>
+					{/if}
 				</p>
 			</div>
 		{/if}
-	</div>
+	{/if}
 </div>

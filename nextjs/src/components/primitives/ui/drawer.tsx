@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
 
-import { cn } from '@/components/lib/utils';
+import { cn } from '../../../lib/utils';
 import { XIcon } from 'lucide-react';
 
 function Root({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {

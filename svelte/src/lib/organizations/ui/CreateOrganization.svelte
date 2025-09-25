@@ -1,11 +1,15 @@
 <script lang="ts">
-	// SvelteKit
+	// Svelte
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { SvelteURL } from 'svelte/reactivity';
 
 	/** UI **/
 	// Icons
-	import { LogIn, Pencil, Building2 } from '@lucide/svelte';
+	import LogInIcon from '@lucide/svelte/icons/log-in';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
+	import Building2Icon from '@lucide/svelte/icons/building-2';
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/primitives/ui/avatar';
@@ -53,6 +57,7 @@
 	let logo: string = $state('');
 	let logoFile: File | null = $state(null);
 	let cropSrc: string = $state('');
+	let isCreating: boolean = $state(false);
 
 	/**
 	 * Generates a URL-friendly slug from the provided input string
@@ -125,6 +130,8 @@
 			return;
 		}
 
+		isCreating = true;
+
 		try {
 			let logoStorageId: Id<'_storage'> | undefined = undefined;
 
@@ -143,7 +150,7 @@
 				logoStorageId = result.storageId as Id<'_storage'>;
 			}
 
-			const currentUrl = new URL(window.location.href);
+			const currentUrl = new SvelteURL(window.location.href);
 			const pathSegments = currentUrl.pathname.split('/');
 			const activeOrgSlug = activeOrganization?.slug;
 
@@ -188,6 +195,8 @@
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to create organization: ${message}`);
+		} finally {
+			isCreating = false;
 		}
 	}
 </script>
@@ -206,30 +215,32 @@
 	<div
 		class="border-surface-200-800 rounded-container mx-auto w-full max-w-md border p-6 text-center"
 	>
-		<LogIn class="text-surface-400-600 mx-auto mb-4 size-10" />
+		<LogInIcon class="text-surface-400-600 mx-auto mb-4 size-10" />
 		<h2 class="mb-2 text-xl font-semibold">Authentication Required</h2>
 		<p class="text-surface-600-400 mb-4">Please sign in to create an organization</p>
 	</div>
 
 	<!-- Show the form for authenticated users -->
 {:else}
-	<form onsubmit={handleSubmit} class="mx-auto w-full">
+	<form onsubmit={handleSubmit} class="mx-auto w-full px-6 pb-6">
 		<div class="my-6">
 			<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
 				<ImageCropper.UploadTrigger>
 					<div
-						class="rounded-container relative size-20 cursor-pointer transition-all duration-200 hover:brightness-125 hover:dark:brightness-75"
+						class="rounded-container relative size-20 cursor-pointer transition-all duration-200"
 					>
 						<Avatar.Root class="rounded-container size-20">
 							<Avatar.Image src={logo} alt={name.length > 0 ? name : 'My Organization'} />
-							<Avatar.Fallback class="bg-surface-400-600 rounded-container">
-								<Building2 class="size-10" />
+							<Avatar.Fallback
+								class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
+							>
+								<Building2Icon class="text-surface-700-300 size-10" />
 							</Avatar.Fallback>
 						</Avatar.Root>
 						<div
-							class="badge-icon preset-filled-surface-300-700 border-surface-200-800 absolute -right-1.5 -bottom-1.5 size-3 rounded-full border-2"
+							class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
 						>
-							<Pencil class="size-4" />
+							<PencilIcon class="size-4" />
 						</div>
 					</div>
 				</ImageCropper.UploadTrigger>
@@ -243,8 +254,8 @@
 			</ImageCropper.Root>
 		</div>
 
-		<div class="flex flex-col gap-2">
-			<div class="mb-4">
+		<div class="flex flex-col gap-5">
+			<div>
 				<label for="name" class="label">Name</label>
 				<input
 					type="text"
@@ -256,7 +267,7 @@
 					placeholder="My Organization..."
 				/>
 			</div>
-			<div class="mb-4">
+			<div>
 				<label for="slug" class="label">Slug URL</label>
 				<input
 					type="text"
@@ -271,7 +282,25 @@
 		</div>
 
 		<div class="flex justify-end gap-2 pt-6 md:flex-row">
-			<button type="submit" class="btn preset-filled-primary-500">Create Organization</button>
+			<button
+				type="submit"
+				class="btn preset-filled-primary-500"
+				disabled={isCreating}
+				aria-busy={isCreating}
+			>
+				{#if isCreating}
+					<Loader2Icon class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+					Creating...
+				{:else}
+					Create Organization
+				{/if}
+			</button>
 		</div>
 	</form>
 {/if}
+
+<style>
+	:global(.svelte-easy-crop-area) {
+		border-radius: var(--radius-container);
+	}
+</style>

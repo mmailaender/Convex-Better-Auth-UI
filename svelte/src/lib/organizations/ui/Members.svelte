@@ -3,9 +3,14 @@
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import * as Drawer from '$lib/primitives/ui/drawer';
 	import * as Avatar from '$lib/primitives/ui/avatar';
+	import * as Select from '$lib/primitives/ui/select';
+	import { Portal } from '@ark-ui/svelte/portal';
+	import { createListCollection } from '@ark-ui/svelte/select';
 	import { toast } from 'svelte-sonner';
 	// Icons
-	import { Search, Trash, Pencil } from '@lucide/svelte';
+	import SearchIcon from '@lucide/svelte/icons/search';
+	import TrashIcon from '@lucide/svelte/icons/trash';
+	import PencilIcon from '@lucide/svelte/icons/pencil';
 
 	// API
 	import { useQuery } from 'convex-svelte';
@@ -57,6 +62,13 @@
 	const members = $derived(activeOrganization?.members);
 	const roles = useRoles();
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+
+	const rolesCollection = createListCollection({
+		items: [
+			{ label: 'Admin', value: 'admin' },
+			{ label: 'Member', value: 'member' }
+		]
+	});
 
 	/**
 	 * Filter and sort members based on search query and role
@@ -140,12 +152,12 @@
 	 */
 	function canEditMember(member: Member): boolean {
 		if (!isOwnerOrAdmin) return false;
-		if (member.id === activeUser?.id) return false;
+		if (member.id === activeUser?._id) return false;
 		if (member.role === 'owner') return false;
 
 		// If current user is admin, they can't edit other admins
 		if (activeUser && members) {
-			const currentUserMember = members.find((m) => m.id === activeUser.id);
+			const currentUserMember = members.find((m) => m.id === activeUser._id);
 			if (currentUserMember?.role === 'admin' && member.role === 'admin') {
 				return false;
 			}
@@ -170,12 +182,12 @@
 		<!-- Search Section - Fixed at top -->
 		<div class="flex flex-shrink-0 items-center gap-3 py-4">
 			<div class="relative flex-1">
-				<div class="pointer-events-none absolute inset-y-0 flex items-center pl-2">
-					<Search class="text-surface-400-600 size-4" />
+				<div class="pointer-events-none absolute inset-y-0 flex items-center">
+					<SearchIcon class="text-surface-400-600 size-4" />
 				</div>
 				<input
 					type="text"
-					class="input w-hug w-full !border-0 border-transparent pl-8 text-sm"
+					class="input w-hug w-full !border-0 border-transparent pl-6 text-sm"
 					placeholder="Search members..."
 					bind:value={searchQuery}
 				/>
@@ -187,7 +199,7 @@
 			<div class="flex max-h-[calc(100vh-12rem)] flex-col gap-2 overflow-y-auto pb-24">
 				{#each filteredMembers as member (member.id)}
 					<div
-						class={`bg-surface-50-950 rounded-container flex items-center justify-between p-4 pr-6 ${
+						class={`border-surface-200-800 rounded-container flex items-center justify-between border-b pr-6 pb-4 ${
 							canEditMember(member) ? 'hover:bg-surface-100-900 cursor-pointer' : ''
 						}`}
 						onclick={() => handleMemberCardClick(member)}
@@ -232,7 +244,7 @@
 							</div>
 						</div>
 						{#if canEditMember(member)}
-							<Pencil class="size-4 opacity-60" />
+							<PencilIcon class="size-4 opacity-60" />
 						{/if}
 					</div>
 				{/each}
@@ -244,16 +256,16 @@
 			<div>
 				<!-- Table container with controlled height and scroll -->
 				<div
-					class="max-h-[calc(90vh-12rem)] overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
+					class=" max-h-[calc(90vh-12rem)] overflow-hidden overflow-y-auto pb-12 sm:max-h-[calc(80vh-12rem)] md:max-h-[calc(70vh-12rem)]"
 				>
 					<table class="table w-full !table-fixed">
-						<thead
-							class="sm:bg-surface-200-800 bg-surface-100-900 border-surface-300-700 sticky top-0 z-20 border-b"
-						>
+						<thead class="sticky top-0 z-20">
 							<tr>
-								<th class="text-surface-700-300 !w-48 p-2 !pl-0 text-left text-xs">Name</th>
-								<th class="text-surface-700-300 hidden p-2 text-left text-xs sm:flex">Email</th>
-								<th class="text-surface-700-300 !w-32 p-2 text-left text-xs">Role</th>
+								<th class="text-surface-600-400 !w-48 p-2 !pl-3 text-left text-xs font-semibold"
+									>Name</th
+								>
+								<th class="text-surface-600-400 hidden p-2 text-left text-xs sm:flex">Email</th>
+								<th class="text-surface-600-400 !w-32 p-2 text-left text-xs">Role</th>
 								{#if isOwnerOrAdmin}
 									<th class="!w-16 p-2 text-right"></th>
 								{/if}
@@ -263,7 +275,7 @@
 							{#each filteredMembers as member (member.id)}
 								<tr class="!border-surface-300-700 !border-t">
 									<!-- Member Name -->
-									<td class="!w-48 !max-w-48 !truncate !py-3 !pl-0">
+									<td class="!w-48 !max-w-48 !truncate !py-3 !pl-3">
 										<div class="flex items-center space-x-2">
 											<div class="avatar">
 												<div class="size-8 sm:size-5">
@@ -277,7 +289,7 @@
 											</div>
 
 											<div class="flex flex-col truncate">
-												<span class="truncate font-medium">{member.user.name}</span>
+												<span class="truncate text-sm">{member.user.name}</span>
 												<!-- Email visible only on mobile (hidden on sm and above) -->
 												<span class="text-surface-700-300 truncate text-xs sm:hidden">
 													{member.user.email}
@@ -286,25 +298,30 @@
 										</div>
 									</td>
 									<!-- Member Email -->
-									<td class="!text-surface-700-300 hidden !h-fit !w-full !truncate sm:table-cell">
+									<td class="!text-surface-600-400 hidden !h-fit !w-full !truncate sm:table-cell">
 										{member.user.email}
 									</td>
 									<!-- Member Role -->
 									<td class="!w-32">
 										<div class="flex items-center">
-											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
-												<select
-													value={member.role}
-													onchange={(e) =>
-														handleUpdateRole(
-															member.id,
-															(e.target as HTMLSelectElement).value as Role
-														)}
-													class="select cursor-pointer text-sm"
+											{#if isOwnerOrAdmin && member.id !== activeUser?._id && member.role !== 'owner'}
+												<Select.Root
+													collection={rolesCollection}
+													value={[member.role]}
+													onSelect={(e) => handleUpdateRole(member.id, e.value as Role)}
 												>
-													<option value="admin">Admin</option>
-													<option value="member">Member</option>
-												</select>
+													<Select.Trigger class="w-full text-sm" />
+													<Portal>
+														<Select.Content>
+															{#each rolesCollection.items as item (item.value)}
+																<Select.Item {item}>
+																	<Select.ItemText>{item.label}</Select.ItemText>
+																	<Select.ItemIndicator>✓</Select.ItemIndicator>
+																</Select.Item>
+															{/each}
+														</Select.Content>
+													</Portal>
+												</Select.Root>
 											{:else if member.role === 'owner'}
 												<span
 													class="badge preset-filled-primary-50-950 border-primary-200-800 h-7 border px-2"
@@ -329,7 +346,7 @@
 									<!-- Member Actions -->
 									<td class="!w-16">
 										<div class="flex justify-end space-x-2">
-											{#if isOwnerOrAdmin && member.id !== activeUser?.id && member.role !== 'owner'}
+											{#if isOwnerOrAdmin && member.id !== activeUser?._id && member.role !== 'owner'}
 												<button
 													type="button"
 													class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
@@ -338,7 +355,7 @@
 														isDialogOpen = true;
 													}}
 												>
-													<Trash class="size-4 opacity-70" />
+													<TrashIcon class="size-4 opacity-70" />
 												</button>
 											{/if}
 										</div>
@@ -386,23 +403,12 @@
 						<div class="flex items-center gap-3 pt-1 pb-8">
 							<div class="avatar">
 								<div class="size-12">
-									{#if selectedMember.user.image}
-										<Avatar.Root class="size-12">
-											<Avatar.Image
-												src={selectedMember.user.image}
-												alt={selectedMember.user.name}
-											/>
-											<Avatar.Fallback>
-												<Avatar.Marble name={selectedMember.user.name} />
-											</Avatar.Fallback>
-										</Avatar.Root>
-									{:else}
-										<div
-											class="text-primary-700 bg-primary-100 flex h-full w-full items-center justify-center rounded-full"
-										>
-											{selectedMember.user.name?.charAt(0) || 'U'}
-										</div>
-									{/if}
+									<Avatar.Root class="size-12">
+										<Avatar.Image src={selectedMember.user.image} alt={selectedMember.user.name} />
+										<Avatar.Fallback>
+											<Avatar.Marble name={selectedMember.user.name} />
+										</Avatar.Fallback>
+									</Avatar.Root>
 								</div>
 							</div>
 							<div class="flex flex-col">
@@ -416,18 +422,23 @@
 							<!-- Role Select -->
 							<label class="flex-1">
 								<span class="label">Role</span>
-								<select
-									value={selectedMember.role}
-									onchange={(e) =>
-										handleUpdateRole(
-											selectedMember!.id,
-											(e.target as HTMLSelectElement).value as Role
-										)}
-									class="select w-full"
+								<Select.Root
+									collection={rolesCollection}
+									value={[selectedMember.role]}
+									onSelect={(e) => handleUpdateRole(selectedMember!.id, e.value as Role)}
 								>
-									<option value="admin">Admin</option>
-									<option value="member">Member</option>
-								</select>
+									<Select.Trigger class="w-full" placeholder="Select role" />
+									<Portal>
+										<Select.Content>
+											{#each rolesCollection.items as item (item.value)}
+												<Select.Item {item}>
+													<Select.ItemText>{item.label}</Select.ItemText>
+													<Select.ItemIndicator>✓</Select.ItemIndicator>
+												</Select.Item>
+											{/each}
+										</Select.Content>
+									</Portal>
+								</Select.Root>
 							</label>
 
 							<!-- Remove Button -->
@@ -441,7 +452,7 @@
 										isDialogOpen = true;
 									}}
 								>
-									<Trash class="size-4" /> Remove
+									<TrashIcon class="size-4" /> Remove
 								</button>
 							</div>
 						</div>
