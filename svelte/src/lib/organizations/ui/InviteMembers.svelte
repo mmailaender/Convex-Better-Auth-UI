@@ -22,9 +22,8 @@
 	// State
 	let emailInput: string = $state('');
 	let isProcessing: boolean = $state(false);
-	let selectedRole: Role = $state('member');
+	let selectedRole = $state<Role[]>(['member']);
 
-	let value = $state<string[]>(['member']);
 	const collection = createListCollection({
 		items: [
 			{ label: 'Member', value: 'member' },
@@ -118,7 +117,7 @@
 		<div class="flex flex-col">
 			<label>
 				<span class="label">Role</span>
-				<Select.Root {collection} bind:value>
+				<Select.Root {collection} bind:value={selectedRole}>
 					<Select.Trigger class="w-full" placeholder="Select a role" />
 					<Select.Content>
 						{#each collection.items as item (item.value)}
