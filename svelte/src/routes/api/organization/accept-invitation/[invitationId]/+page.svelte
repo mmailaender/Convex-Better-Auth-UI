@@ -23,10 +23,12 @@
 	// Function to accept invitation
 	async function acceptInvitation(id: string) {
 		try {
-			const { data } = await authClient.organization.acceptInvitation({
+			const { data, error } = await authClient.organization.acceptInvitation({
 				invitationId: id
 			});
-			console.log('data', data);
+			if (error) {
+				throw new Error(error.message || 'An unknown error occurred');
+			}
 
 			const orgId = data?.invitation?.organizationId;
 			if (!orgId) {
