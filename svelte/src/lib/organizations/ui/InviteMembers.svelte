@@ -104,8 +104,24 @@
 		}
 
 		if (failed.length > 0) {
-			const msg = `Failed to send invitation(s) to: ${failed.map((r) => r.email).join(', ')}`;
-			toast.error(msg);
+			// Group failures by error.code so we can show one toast per error type
+			const groups = new Map<string, { message: string; emails: string[] }>();
+
+			for (const r of failed) {
+				// Defensive defaults in case the shape changes
+				const code = r.error?.code ?? 'UNKNOWN_ERROR';
+				const message = r.error?.message ?? 'Unknown error';
+
+				if (!groups.has(code)) {
+					groups.set(code, { message, emails: [] });
+				}
+				groups.get(code)!.emails.push(r.email);
+			}
+
+			// Emit a toast per error code with its human message and all affected emails
+			for (const [code, { message, emails }] of groups.entries()) {
+				toast.error(`${message}: ${emails.join(', ')}`);
+			}
 		}
 
 		isProcessing = false;
