@@ -1,15 +1,32 @@
 # auth
 
+## 0.0.11
+
+### Patch Changes
+
+## Features
+
+- Add `setActiveOrganization` mutation to handle session organization assignment
+- Add error handling to organization invitation acceptance
+- Group invitation failures by error code and display separate toasts per error type
+
+## Fixes
+
+- Resolve overlapping dialogs when revoking invitations
+- Consolidate role selection into a single `selectedRole` state variable to prevent desync
+
 ## 0.0.10
 
 ### Patch Changes
 
-- ## Refactors
-  - Move auth constants types to separate file for better code organization
+## Refactors
 
-  ## Chore
-  - Update dependencies
-  - Add readme
+- Move auth constants types to separate file for better code organization
+
+## Chore
+
+- Update dependencies
+- Add readme
 
 ## 0.0.9
 
