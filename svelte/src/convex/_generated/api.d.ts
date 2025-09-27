@@ -1639,6 +1639,12 @@ export declare const components: {
         },
         null
       >;
+      setActiveOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        { sessionId: string; userId: string },
+        null
+      >;
     };
     user: {
       getUserByEmail: FunctionReference<
