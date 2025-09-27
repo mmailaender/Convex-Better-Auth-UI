@@ -1464,6 +1464,12 @@ export type Mounts = {
       },
       null
     >;
+    setActiveOrganization: FunctionReference<
+      "mutation",
+      "public",
+      { sessionId: string; userId: string },
+      null
+    >;
   };
   user: {
     getUserByEmail: FunctionReference<

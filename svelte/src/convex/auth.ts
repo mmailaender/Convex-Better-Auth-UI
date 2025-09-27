@@ -67,6 +67,16 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 					await ctx.runMutation(components.betterAuth.organization.deleteUser, authUser);
 				}
 			}
+		},
+		session: {
+			onCreate: async (ctx, session) => {
+				if (!session.activeOrganizationId && AUTH_CONSTANTS.organizations) {
+					await ctx.runMutation(components.betterAuth.organization.setActiveOrganization, {
+						userId: session.userId,
+						sessionId: session._id
+					});
+				}
+			}
 		}
 	}
 });

@@ -22,9 +22,8 @@
 	// State
 	let emailInput: string = $state('');
 	let isProcessing: boolean = $state(false);
-	let selectedRole: Role = $state('member');
+	let selectedRole = $state<Role[]>(['member']);
 
-	let value = $state<string[]>(['member']);
 	const collection = createListCollection({
 		items: [
 			{ label: 'Member', value: 'member' },
@@ -105,8 +104,24 @@
 		}
 
 		if (failed.length > 0) {
-			const msg = `Failed to send invitation(s) to: ${failed.map((r) => r.email).join(', ')}`;
-			toast.error(msg);
+			// Group failures by error.code so we can show one toast per error type
+			const groups = new Map<string, { message: string; emails: string[] }>();
+
+			for (const r of failed) {
+				// Defensive defaults in case the shape changes
+				const code = r.error?.code ?? 'UNKNOWN_ERROR';
+				const message = r.error?.message ?? 'Unknown error';
+
+				if (!groups.has(code)) {
+					groups.set(code, { message, emails: [] });
+				}
+				groups.get(code)!.emails.push(r.email);
+			}
+
+			// Emit a toast per error code with its human message and all affected emails
+			for (const [code, { message, emails }] of groups.entries()) {
+				toast.error(`${message}: ${emails.join(', ')}`);
+			}
 		}
 
 		isProcessing = false;
@@ -118,7 +133,7 @@
 		<div class="flex flex-col">
 			<label>
 				<span class="label">Role</span>
-				<Select.Root {collection} bind:value>
+				<Select.Root {collection} bind:value={selectedRole}>
 					<Select.Trigger class="w-full" placeholder="Select a role" />
 					<Select.Content>
 						{#each collection.items as item (item.value)}

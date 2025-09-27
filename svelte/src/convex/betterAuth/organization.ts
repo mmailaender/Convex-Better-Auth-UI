@@ -73,3 +73,38 @@ export const deleteUser = mutation({
 		return null;
 	}
 });
+
+/**
+ * Sets the active organization for a user in a session.
+ * If the user has no active organization, it will set the first organization they are a member of.
+ */
+export const setActiveOrganization = mutation({
+	args: { userId: v.id('user'), sessionId: v.id('session') },
+	returns: v.null(),
+	handler: async (ctx, { userId, sessionId }) => {
+		const user = await ctx.db.get(userId);
+		if (!user) return null;
+
+		// 2) Decide the activeOrgId: prefer the user's current one; otherwise first membership.
+		let activeOrgId = user.activeOrganizationId;
+
+		if (!activeOrgId) {
+			const membership = await ctx.db
+				.query('member')
+				.withIndex('userId', (q) => q.eq('userId', userId))
+				.first(); // Note: no guaranteed ordering; see note below.
+			if (!membership) return null;
+			activeOrgId = membership.organizationId;
+		}
+
+		// 3) Only patch the session if needed and if the session belongs to this user.
+		const session = await ctx.db.get(sessionId);
+		if (!session || session.userId !== userId) return null;
+
+		if (session.activeOrganizationId !== activeOrgId) {
+			await ctx.db.patch(sessionId, { activeOrganizationId: activeOrgId });
+		}
+
+		return null;
+	}
+});
