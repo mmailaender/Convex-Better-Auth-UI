@@ -15,7 +15,7 @@
 	import WalletIcon from '@lucide/svelte/icons/wallet';
 	import XIcon from '@lucide/svelte/icons/x';
 	// Widgets
-	import OrganizationInfo from '$lib/organizations/ui/OrganizationInfo.svelte';
+	import GeneralSettings from '$lib/organizations/ui/GeneralSettings.svelte';
 	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
 	import MembersAndInvitations from '$lib/organizations/ui/MembersAndInvitations.svelte';
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
@@ -300,7 +300,7 @@
 			<Tabs.Content value="general" class="w-ful flex h-full flex-col">
 				<div class="h-full">
 					<h6 class=" h6 pb-6 text-left">General settings</h6>
-					<OrganizationInfo
+					<GeneralSettings
 						initialData={initialData
 							? {
 									user: initialData.user,
@@ -398,7 +398,7 @@
 				{#if activeMobileTab === 'general'}
 					<div class="h-full">
 						<h6 class="h6 pb-12 pl-10">General settings</h6>
-						<OrganizationInfo
+						<GeneralSettings
 							initialData={{
 								user: initialData?.user,
 								activeOrganization: initialData?.activeOrganization
