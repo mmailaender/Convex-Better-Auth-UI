@@ -295,7 +295,7 @@
 {:else if !isAuthenticated && !initialData?.organizationList && !initialData?.activeOrganization}
 	<!-- Gate 2: Not authenticated and no SSR data - don't show anything -->
 	<!-- Return null by not rendering anything -->
-{:else if (isLoading || (organizationListResponse?.isLoading ?? false) || (activeOrganizationResponse?.isLoading ?? false)) && !organizationList && !activeOrganization}
+{:else if isLoading || (organizationListResponse?.isLoading ?? false) || (activeOrganizationResponse?.isLoading ?? false)}
 	<!-- Gate 3: Loading state - only show if queries are loading AND no data is available yet -->
 	<div class="placeholder h-8 w-40 animate-pulse"></div>
 {:else if organizationList && organizationList.length === 0}

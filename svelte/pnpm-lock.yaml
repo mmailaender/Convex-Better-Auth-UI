@@ -801,7 +801,7 @@ packages:
       svelte: ^5.0.0
 
   '@mmailaender/convex-better-auth-svelte@file:node_modules_local/mmailaender-convex-better-auth-svelte-0.0.6.tgz':
-    resolution: {integrity: sha512-J2+pqCuY6KbXxXBoTOi68r40swDKR5HFoA+nnQjyw5ZzMfLFO2uSIk/072KiuLfD9qoaNmTba9jWZzSJPThBtw==, tarball: file:node_modules_local/mmailaender-convex-better-auth-svelte-0.0.6.tgz}
+    resolution: {integrity: sha512-fvwlRaRBfpCg5pYG6tt7SN2hoJAws5VVNST9YcCNkg3Uq/BDmH6sUx5Tc7jGCVsrhRW0PJIkU52K/qNSLeA8vQ==, tarball: file:node_modules_local/mmailaender-convex-better-auth-svelte-0.0.6.tgz}
     version: 0.0.6
     peerDependencies:
       '@convex-dev/better-auth': ^0.8.6
