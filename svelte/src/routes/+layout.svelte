@@ -7,7 +7,7 @@
 	import OrganizationSwitcher from '$lib/organizations/ui/OrganizationSwitcher.svelte';
 	import UserButton from '$lib/users/ui/UserButton.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	createSvelteAuthClient({ authClient });
 </script>
@@ -16,8 +16,16 @@
 <div class="grid min-h-[100dvh] grid-rows-[auto_1fr] overflow-x-hidden">
 	<header class="flex items-center justify-between gap-5 p-4">
 		<a href="/" class="mr-auto text-2xl font-bold text-orange-500">Svelte</a>
-		<OrganizationSwitcher />
-		<UserButton />
+		<OrganizationSwitcher
+			initialData={{
+				activeUser: data.activeUser,
+				activeOrganization: data.activeOrganization,
+				organizationList: data.organizationList,
+				invitationList: data.invitationList,
+				role: data.role
+			}}
+		/>
+		<UserButton initialData={{ activeUser: data.activeUser, accountList: data.accountList }} />
 	</header>
 	<main>
 		{@render children()}

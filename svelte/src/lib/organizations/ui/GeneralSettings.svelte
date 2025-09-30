@@ -4,23 +4,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
-	// API
-	import { useQuery, useConvexClient } from 'convex-svelte';
-	import { api } from '$convex/_generated/api';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
-
-	// API Types
-	import type { FunctionReturnType } from 'convex/server';
-
-	type ActiveOrganizationResponse = FunctionReturnType<
-		typeof api.organizations.queries.getActiveOrganization
-	>;
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
-
-	const client = useConvexClient();
-	const roles = useRoles();
-	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
-
 	// UI Components
 	// Icons
 	import Building2Icon from '@lucide/svelte/icons/building-2';
@@ -35,26 +18,61 @@
 	// Utils
 	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
 
+	// API
+	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { api } from '$convex/_generated/api';
+	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+
+	// API Types
+	import type { FunctionReturnType } from 'convex/server';
+	import type { authClient } from '$lib/auth/api/auth-client';
+	type GetActiveOrganizationType = FunctionReturnType<
+		typeof api.organizations.queries.getActiveOrganization
+	>;
+	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type Role = typeof authClient.$Infer.Member.role;
+
 	// Props
 	let {
 		initialData
 	}: {
 		initialData?: {
-			user?: UserResponse;
-			activeOrganization?: ActiveOrganizationResponse;
+			activeUser?: GetActiveUserType;
+			activeOrganization?: GetActiveOrganizationType;
+			role?: Role;
 		};
 	} = $props();
 
-	// Queries
-	const userResponse = useQuery(
-		api.users.queries.getActiveUser,
-		{},
-		{ initialData: initialData?.user }
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
+	const client = useConvexClient();
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
 	);
-	const organizationResponse = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData: initialData?.activeOrganization }
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+
+	// Queries
+	const userResponse = $derived(
+		isAuthenticated
+			? useQuery(api.users.queries.getActiveUser, {}, { initialData: initialData?.activeUser })
+			: undefined
+	);
+	const organizationResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.getActiveOrganization,
+					{},
+					{ initialData: initialData?.activeOrganization }
+				)
+			: undefined
+	);
+	// Derived data
+	const user = $derived(userResponse?.data ?? initialData?.activeUser);
+	const activeOrganization = $derived(
+		organizationResponse?.data ?? initialData?.activeOrganization
 	);
 
 	// Avatar State
@@ -72,10 +90,6 @@
 	let isEditingSlug: boolean = $state(false);
 	let slug: string = $state('');
 	let slugInputEl: HTMLInputElement | null = $state(null);
-
-	// Derived data
-	const user = $derived(userResponse.data);
-	const activeOrganization = $derived(organizationResponse.data);
 
 	// Initialize state when organization data is available
 	$effect(() => {

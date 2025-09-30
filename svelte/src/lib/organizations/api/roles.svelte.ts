@@ -1,16 +1,22 @@
 // API
 import { useQuery } from 'convex-svelte';
 import { api } from '$convex/_generated/api';
+import { authClient } from '$lib/auth/api/auth-client';
 
 // Types
-import type { FunctionReturnType } from 'convex/server';
-type Role = FunctionReturnType<typeof api.organizations.queries.getOrganizationRole>;
+type Role = typeof authClient.$Infer.Member.role;
 
-export function useRoles(args: { orgId?: string; initialData?: Role } = {}) {
-	const role = useQuery(
-		api.organizations.queries.getOrganizationRole,
-		{ organizationId: args.orgId },
-		{ initialData: args.initialData }
+export function useRoles(
+	args: { orgId?: string; initialData?: Role; isAuthenticated?: boolean } = {}
+) {
+	const role = $derived(
+		args.isAuthenticated
+			? useQuery(
+					api.organizations.queries.getOrganizationRole,
+					{ organizationId: args.orgId },
+					{ initialData: args.initialData }
+				)
+			: { data: args.initialData }
 	);
 
 	return {
@@ -25,6 +31,9 @@ export function useRoles(args: { orgId?: string; initialData?: Role } = {}) {
 		},
 		get isMember() {
 			return role.data != null;
+		},
+		get role() {
+			return role.data;
 		}
 	};
 }

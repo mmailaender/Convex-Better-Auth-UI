@@ -15,7 +15,7 @@
 	import WalletIcon from '@lucide/svelte/icons/wallet';
 	import XIcon from '@lucide/svelte/icons/x';
 	// Widgets
-	import OrganizationInfo from '$lib/organizations/ui/OrganizationInfo.svelte';
+	import GeneralSettings from '$lib/organizations/ui/GeneralSettings.svelte';
 	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
 	import MembersAndInvitations from '$lib/organizations/ui/MembersAndInvitations.svelte';
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
@@ -26,19 +26,19 @@
 	// API
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { api } from '$convex/_generated/api';
-	const roles = useRoles();
-	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// API Types
+	import type { authClient } from '$lib/auth/api/auth-client';
 	import type { FunctionReturnType } from 'convex/server';
-
-	type ActiveOrganizationResponse = FunctionReturnType<
+	type GetActiveOrganizationType = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
-	type InvitationListResponse = FunctionReturnType<
+	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type ListInvitationType = FunctionReturnType<
 		typeof api.organizations.invitations.queries.listInvitations
 	>;
+	type Role = typeof authClient.$Infer.Member.role;
 
 	// Types
 	type OrganizationProfileProps = {
@@ -54,17 +54,25 @@
 		 * Optional initial data to pass to child components for faster initialization
 		 */
 		initialData?: {
-			// For OrganizationInfo component
-			user?: UserResponse;
-			activeOrganization?: ActiveOrganizationResponse;
+			// For GeneralSettings & LeaveOrganization component
+			activeUser?: GetActiveUserType;
+			activeOrganization?: GetActiveOrganizationType;
 			// For MembersAndInvitations component
-			invitationList?: InvitationListResponse;
-			// For LeaveOrganization component
-			activeUser?: UserResponse;
+			invitationList?: ListInvitationType;
+			role?: Role;
 		};
 	};
 
 	const { open = false, onSuccessfulDelete, initialData }: OrganizationProfileProps = $props();
+
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
+	);
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// State
 	let activeMobileTab: string = $state('');
@@ -141,13 +149,13 @@
 			label: 'Members',
 			icon: UserIcon,
 			showForAllUsers: false
-		},
-		{
-			value: 'billing',
-			label: 'Billing',
-			icon: WalletIcon,
-			showForAllUsers: false
 		}
+		// {
+		// 	value: 'billing',
+		// 	label: 'Billing',
+		// 	icon: WalletIcon,
+		// 	showForAllUsers: false
+		// }
 	];
 
 	const visibleTabs = $derived(tabs.filter((tab) => tab.showForAllUsers || isOwnerOrAdmin));
@@ -300,35 +308,18 @@
 			<Tabs.Content value="general" class="w-ful flex h-full flex-col">
 				<div class="h-full">
 					<h6 class=" h6 pb-6 text-left">General settings</h6>
-					<OrganizationInfo
-						initialData={initialData
-							? {
-									user: initialData.user,
-									activeOrganization: initialData.activeOrganization
-								}
-							: undefined}
-					/>
+					<GeneralSettings {initialData} />
 				</div>
 				<div>
-					<LeaveOrganization
-						initialData={{
-							activeUser: initialData?.activeUser,
-							activeOrganization: initialData?.activeOrganization
-						}}
-					/>
-					<DeleteOrganization {onSuccessfulDelete} />
+					<LeaveOrganization {initialData} />
+					<DeleteOrganization {onSuccessfulDelete} {initialData} />
 				</div>
 			</Tabs.Content>
 
 			{#if isOwnerOrAdmin}
 				<Tabs.Content value="members">
 					<h6 class="h6 pb-6 text-left">Members</h6>
-					<MembersAndInvitations
-						initialData={{
-							activeOrganization: initialData?.activeOrganization,
-							invitationList: initialData?.invitationList
-						}}
-					/>
+					<MembersAndInvitations {initialData} />
 				</Tabs.Content>
 				<Tabs.Content value="billing">
 					<h6 class="h6 pb-6 text-left">Billing</h6>
@@ -398,28 +389,13 @@
 				{#if activeMobileTab === 'general'}
 					<div class="h-full">
 						<h6 class="h6 pb-12 pl-10">General settings</h6>
-						<OrganizationInfo
-							initialData={{
-								user: initialData?.user,
-								activeOrganization: initialData?.activeOrganization
-							}}
-						/>
+						<GeneralSettings {initialData} />
 					</div>
-					<DeleteOrganization {onSuccessfulDelete} />
-					<LeaveOrganization
-						initialData={{
-							activeUser: initialData?.activeUser,
-							activeOrganization: initialData?.activeOrganization
-						}}
-					/>
+					<DeleteOrganization {onSuccessfulDelete} {initialData} />
+					<LeaveOrganization {initialData} />
 				{:else if activeMobileTab === 'members'}
 					<h6 class="h6 pb-6 pl-10">Members</h6>
-					<MembersAndInvitations
-						initialData={{
-							activeOrganization: initialData?.activeOrganization,
-							invitationList: initialData?.invitationList
-						}}
-					/>
+					<MembersAndInvitations {initialData} />
 				{:else if activeMobileTab === 'billing'}
 					<h6 class="h6 pb-6 pl-10">Billing</h6>
 				{/if}

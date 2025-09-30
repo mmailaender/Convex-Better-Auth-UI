@@ -8,6 +8,7 @@
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { authClient } from '$lib/auth/api/auth-client';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Constants
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
@@ -15,9 +16,39 @@
 	// API Types
 	type Role = typeof authClient.$Infer.Member.role;
 	import type { FunctionReturnType } from 'convex/server';
-	type ActiveOrganizationResponse = FunctionReturnType<
+	type GetActiveOrganizationType = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
+
+	// Props
+	let {
+		onSuccess,
+		initialData
+	}: {
+		onSuccess?: () => void;
+		initialData?: {
+			activeOrganization?: GetActiveOrganizationType;
+			role?: Role;
+		};
+	} = $props();
+
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
+	// Queries
+	const activeOrganizationResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.getActiveOrganization,
+					{},
+					{ initialData: initialData?.activeOrganization }
+				)
+			: undefined
+	);
+	const activeOrganization = $derived(
+		activeOrganizationResponse?.data ?? initialData?.activeOrganization
+	);
 
 	// State
 	let emailInput: string = $state('');
@@ -30,21 +61,6 @@
 			{ label: 'Admin', value: 'admin' }
 		]
 	});
-
-	// Props
-	let {
-		onSuccess,
-		initialData
-	}: { onSuccess?: () => void; initialData?: { activeOrganization?: ActiveOrganizationResponse } } =
-		$props();
-
-	// Queries
-	const activeOrganizationResponse = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData: initialData?.activeOrganization }
-	);
-	const activeOrganization = $derived(activeOrganizationResponse.data);
 
 	/**
 	 * Handles the submission of the invitation form
