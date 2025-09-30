@@ -511,14 +511,14 @@
 					],
 					"localDependencies": [
 						"convex/_generated",
-						"lib/primitives",
 						"lib/auth",
+						"lib/primitives",
 						"convex/auth.constants"
 					],
 					"dependencies": [
 						"convex-svelte@^0.0.11",
-						"convex@^1.27.3",
 						"@mmailaender/convex-better-auth-svelte@^0.0.6",
+						"convex@^1.27.3",
 						"@ark-ui/svelte@^5.10.0"
 					],
 					"devDependencies": [
@@ -527,11 +527,11 @@
 					],
 					"_imports_": {
 						"$convex/_generated/api": "{{convex/_generated}}/api",
+						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
 						"$lib/primitives/ui/avatar": "{{lib/primitives}}/ui/avatar",
 						"$lib/primitives/ui/image-cropper": "{{lib/primitives}}/ui/image-cropper",
 						"$lib/primitives/utils/optimizeImage": "{{lib/primitives}}/utils/optimizeImage",
 						"$lib/primitives/ui/dialog": "{{lib/primitives}}/ui/dialog",
-						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
 						"$lib/primitives/ui/select": "{{lib/primitives}}/ui/select",
 						"$convex/auth.constants": "{{convex/auth.constants}}",
 						"$lib/primitives/ui/drawer": "{{lib/primitives}}/ui/drawer",
@@ -686,25 +686,23 @@
 						"ui/UserProfile.svelte"
 					],
 					"localDependencies": [
-						"convex/_generated",
-						"lib/auth",
 						"convex/auth.constants",
-						"lib/primitives"
+						"lib/primitives",
+						"convex/_generated",
+						"lib/auth"
 					],
 					"dependencies": [
-						"convex-svelte@^0.0.11",
-						"convex@^1.27.3",
 						"@ark-ui/svelte@^5.10.0",
 						"@icons-pack/svelte-simple-icons@^6.4.0",
-						"@mmailaender/convex-better-auth-svelte@^0.0.6"
+						"@mmailaender/convex-better-auth-svelte@^0.0.6",
+						"convex-svelte@^0.0.11",
+						"convex@^1.27.3"
 					],
 					"devDependencies": [
 						"svelte-sonner@^1.0.5",
 						"@lucide/svelte@^0.544.0"
 					],
 					"_imports_": {
-						"$convex/_generated/api": "{{convex/_generated}}/api",
-						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
 						"$convex/auth.constants": "{{convex/auth.constants}}",
 						"$lib/primitives/ui/select": "{{lib/primitives}}/ui/select",
 						"$lib/primitives/ui/dialog": "{{lib/primitives}}/ui/dialog",
@@ -712,6 +710,8 @@
 						"$lib/primitives/ui/password": "{{lib/primitives}}/ui/password",
 						"$lib/primitives/utils/mobileState.svelte": "{{lib/primitives}}/utils/mobileState.svelte",
 						"$lib/primitives/utils/focusScroll": "{{lib/primitives}}/utils/focusScroll",
+						"$convex/_generated/api": "{{convex/_generated}}/api",
+						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
 						"$lib/primitives/ui/avatar": "{{lib/primitives}}/ui/avatar",
 						"$lib/primitives/ui/image-cropper": "{{lib/primitives}}/ui/image-cropper",
 						"$lib/primitives/utils/optimizeImage": "{{lib/primitives}}/utils/optimizeImage",

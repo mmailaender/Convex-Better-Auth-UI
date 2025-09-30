@@ -31,7 +31,7 @@
 	},
 	"includeBlocks": [],
 	"includeCategories": [],
-	"excludeBlocks": ["+page", "+error", "+layout"],
+	"excludeBlocks": ["+page", "+error", "+layout", "+layout.server"],
 	"excludeCategories": [],
 	"preview": false,
 	"includeDocs": false,
