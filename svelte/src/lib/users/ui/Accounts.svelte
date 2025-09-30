@@ -17,7 +17,35 @@
 	import { toast } from 'svelte-sonner';
 
 	// Icons
-	import { SiGithub } from '@icons-pack/svelte-simple-icons';
+	import {
+		SiGithub,
+		SiGoogle,
+		SiFacebook,
+		SiApple,
+		SiAtlassian,
+		SiDiscord,
+		SiFigma,
+		SiLine,
+		SiHuggingface,
+		SiKakao,
+		SiKick,
+		SiPaypal,
+		SiSalesforce,
+		SiSlack,
+		SiNotion,
+		SiNaver,
+		SiTiktok,
+		SiTwitch,
+		SiX,
+		SiDropbox,
+		SiLinear,
+		SiGitlab,
+		SiReddit,
+		SiRoblox,
+		SiSpotify,
+		SiVk,
+		SiZoom
+	} from '@icons-pack/svelte-simple-icons';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
 	import LockIcon from '@lucide/svelte/icons/lock';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
@@ -101,6 +129,44 @@
 		});
 	});
 
+	// Build a map of provider IDs to icons for enabled providers
+	// NOTE: We reference AUTH_CONSTANTS directly so bundlers can tree-shake
+	// branches and drop unused icon imports at build time.
+	const providerIconMap: Record<string, any> = {
+		credential: KeyRoundIcon
+	};
+	if (AUTH_CONSTANTS.providers.github) providerIconMap.github = SiGithub;
+	if (AUTH_CONSTANTS.providers.google) providerIconMap.google = SiGoogle;
+	if (AUTH_CONSTANTS.providers.facebook) providerIconMap.facebook = SiFacebook;
+	if (AUTH_CONSTANTS.providers.apple) providerIconMap.apple = SiApple;
+	if (AUTH_CONSTANTS.providers.atlassian) providerIconMap.atlassian = SiAtlassian;
+	if (AUTH_CONSTANTS.providers.discord) providerIconMap.discord = SiDiscord;
+	if (AUTH_CONSTANTS.providers.figma) providerIconMap.figma = SiFigma;
+	if (AUTH_CONSTANTS.providers.line) providerIconMap.line = SiLine;
+	if (AUTH_CONSTANTS.providers.huggingface) providerIconMap.huggingface = SiHuggingface;
+	if (AUTH_CONSTANTS.providers.kakao) providerIconMap.kakao = SiKakao;
+	if (AUTH_CONSTANTS.providers.kick) providerIconMap.kick = SiKick;
+	if (AUTH_CONSTANTS.providers.paypal) providerIconMap.paypal = SiPaypal;
+	if (AUTH_CONSTANTS.providers.salesforce) providerIconMap.salesforce = SiSalesforce;
+	if (AUTH_CONSTANTS.providers.slack) providerIconMap.slack = SiSlack;
+	if (AUTH_CONSTANTS.providers.notion) providerIconMap.notion = SiNotion;
+	if (AUTH_CONSTANTS.providers.naver) providerIconMap.naver = SiNaver;
+	if (AUTH_CONSTANTS.providers.tiktok) providerIconMap.tiktok = SiTiktok;
+	if (AUTH_CONSTANTS.providers.twitch) providerIconMap.twitch = SiTwitch;
+	if (AUTH_CONSTANTS.providers.x) providerIconMap.x = SiX;
+	if (AUTH_CONSTANTS.providers.dropbox) providerIconMap.dropbox = SiDropbox;
+	if (AUTH_CONSTANTS.providers.linear) providerIconMap.linear = SiLinear;
+	if (AUTH_CONSTANTS.providers.gitlab) providerIconMap.gitlab = SiGitlab;
+	if (AUTH_CONSTANTS.providers.reddit) providerIconMap.reddit = SiReddit;
+	if (AUTH_CONSTANTS.providers.roblox) providerIconMap.roblox = SiRoblox;
+	if (AUTH_CONSTANTS.providers.spotify) providerIconMap.spotify = SiSpotify;
+	if (AUTH_CONSTANTS.providers.vk) providerIconMap.vk = SiVk;
+	if (AUTH_CONSTANTS.providers.zoom) providerIconMap.zoom = SiZoom;
+
+	const getProviderIcon = (provider: string) => {
+		return providerIconMap[provider] ?? LockIcon;
+	};
+
 	// Providers select collection (derived from available providers)
 	const providersCollection = $derived(
 		createListCollection({
@@ -111,20 +177,25 @@
 		})
 	);
 
-	const getProviderIcon = (provider: string) => {
-		switch (provider) {
-			case 'github':
-				return SiGithub;
-			case 'credential':
-				return KeyRoundIcon;
-			default:
-				return LockIcon;
-		}
-	};
-
 	const getProviderLabel = (provider: string) => {
-		if (provider === 'credential') return 'Password';
-		return provider.charAt(0).toUpperCase() + provider.slice(1);
+		switch (provider) {
+			case 'credential':
+				return 'Password';
+			case 'huggingface':
+				return 'Hugging Face';
+			case 'x':
+				return 'X';
+			case 'github':
+				return 'GitHub';
+			case 'gitlab':
+				return 'GitLab';
+			case 'tiktok':
+				return 'TikTok';
+			case 'paypal':
+				return 'PayPal';
+			default:
+				return provider.charAt(0).toUpperCase() + provider.slice(1);
+		}
 	};
 
 	// OAuth callback handling guard (prevents duplicate toasts)
@@ -343,7 +414,7 @@
 					<div class="border-surface-300-700 rounded-container flex w-full flex-col border p-3">
 						<div class="flex w-full flex-row items-center justify-between">
 							<div class="flex items-center gap-3 pl-1">
-								<ProviderIcon size={16} class="text-muted-foreground" />
+								<ProviderIcon size={16} />
 								<div class="text-sm font-medium">
 									{getProviderLabel(account.providerId)}
 								</div>
@@ -457,7 +528,7 @@
 					{#each providersCollection.items as item (item.value)}
 						{@const ProviderIcon = getProviderIcon(item.value)}
 						<Select.Item {item}>
-							<ProviderIcon size={16} class="mr-2" />
+							<ProviderIcon size={16} />
 							<Select.ItemText>{item.label}</Select.ItemText>
 						</Select.Item>
 					{/each}
