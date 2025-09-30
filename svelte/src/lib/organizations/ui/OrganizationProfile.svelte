@@ -149,13 +149,13 @@
 			label: 'Members',
 			icon: UserIcon,
 			showForAllUsers: false
-		},
-		{
-			value: 'billing',
-			label: 'Billing',
-			icon: WalletIcon,
-			showForAllUsers: false
 		}
+		// {
+		// 	value: 'billing',
+		// 	label: 'Billing',
+		// 	icon: WalletIcon,
+		// 	showForAllUsers: false
+		// }
 	];
 
 	const visibleTabs = $derived(tabs.filter((tab) => tab.showForAllUsers || isOwnerOrAdmin));
