@@ -17,37 +17,57 @@
 	import { api } from '$convex/_generated/api';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { authClient } from '$lib/auth/api/auth-client';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// API Types
 	type Member = typeof authClient.$Infer.Member;
 	type Role = Member['role'];
 	import type { FunctionReturnType } from 'convex/server';
-	type ActiveOrganizationResponse = FunctionReturnType<
+	type GetActiveOrganizationType = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
 	let {
 		initialData
 	}: {
 		initialData?: {
-			activeOrganization: ActiveOrganizationResponse;
-			user: UserResponse;
+			activeUser?: GetActiveUserType;
+			activeOrganization?: GetActiveOrganizationType;
+			role?: Role;
 		};
 	} = $props();
 
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
+	);
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+
 	// Queries
-	const activeUserResponse = useQuery(
-		api.users.queries.getActiveUser,
-		{},
-		{ initialData: initialData?.user }
+	const activeUserResponse = $derived(
+		isAuthenticated
+			? useQuery(api.users.queries.getActiveUser, {}, { initialData: initialData?.activeUser })
+			: undefined
 	);
-	const activeOrganizationResponse = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData: initialData?.activeOrganization }
+	const activeOrganizationResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.getActiveOrganization,
+					{},
+					{ initialData: initialData?.activeOrganization }
+				)
+			: undefined
 	);
+	// Derived data
+	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
+	const activeOrganization = $derived(
+		activeOrganizationResponse?.data ?? initialData?.activeOrganization
+	);
+	const members = $derived(activeOrganization?.members);
 
 	// State
 	let selectedUserId: string | null = $state(null);
@@ -55,13 +75,6 @@
 	let isDialogOpen: boolean = $state(false);
 	let isDrawerOpen: boolean = $state(false);
 	let selectedMember: Member | null = $state(null);
-
-	// Derived data
-	const activeUser = $derived(activeUserResponse.data);
-	const activeOrganization = $derived(activeOrganizationResponse.data);
-	const members = $derived(activeOrganization?.members);
-	const roles = useRoles();
-	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	const rolesCollection = createListCollection({
 		items: [

@@ -5,6 +5,7 @@
 	import { api } from '$convex/_generated/api';
 	import { useQuery } from 'convex-svelte';
 	import { authClient } from '$lib/auth/api/auth-client';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Icons
 	import PencilIcon from '@lucide/svelte/icons/pencil';
@@ -14,15 +15,23 @@
 
 	// Types
 	import type { FunctionReturnType } from 'convex/server';
-	type UserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 
 	// Props
-	let { initialData }: { initialData?: UserResponse } = $props();
+	let { initialData }: { initialData?: { activeUser?: GetActiveUserType } } = $props();
+
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Query
-	const activeUserResponse = useQuery(api.users.queries.getActiveUser, {}, { initialData });
+	const activeUserResponse = $derived(
+		isAuthenticated
+			? useQuery(api.users.queries.getActiveUser, {}, { initialData: initialData?.activeUser })
+			: undefined
+	);
 	// Derived state
-	const activeUser = $derived(activeUserResponse.data);
+	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
 
 	// State
 	let isEditingEmail: boolean = $state(false);
@@ -78,7 +87,7 @@
 
 <div class="flex flex-col gap-6">
 	{#if !activeUser}
-		<div class="bg-success-200-800 rounded-base h-16 w-full animate-pulse"></div>
+		<div class="placeholder h-16 w-full animate-pulse"></div>
 	{:else}
 		<!-- Inline editable email (matches ProfileInfo.svelte UX) -->
 		<div

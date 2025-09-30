@@ -4,13 +4,6 @@
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
 
-	// API
-	import { api } from '$convex/_generated/api';
-	import { authClient } from '$lib/auth/api/auth-client';
-	import { useConvexClient, useQuery } from 'convex-svelte';
-	import { ConvexError } from 'convex/values';
-	const client = useConvexClient();
-
 	// Constants
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
 
@@ -34,14 +27,30 @@
 	const mobileState = useMobileState();
 	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
 
+	// API
+	import { api } from '$convex/_generated/api';
+	import { authClient } from '$lib/auth/api/auth-client';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { ConvexError } from 'convex/values';
+	const client = useConvexClient();
+
 	// Types
 	import type { FunctionReturnType } from 'convex/server';
+	type ListAccountsType = FunctionReturnType<typeof api.users.queries.listAccounts>;
 
-	let { initialData }: { initialData?: FunctionReturnType<typeof api.users.queries.listAccounts> } =
-		$props();
+	let { initialData }: { initialData?: { accountList?: ListAccountsType } } = $props();
 
-	let accountListResponse = useQuery(api.users.queries.listAccounts, {}, { initialData });
-	let accountList = $derived(accountListResponse.data);
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
+	let accountListResponse = $derived(
+		isAuthenticated
+			? useQuery(api.users.queries.listAccounts, {}, { initialData: initialData?.accountList })
+			: undefined
+	);
+	let accountList = $derived(accountListResponse?.data ?? initialData?.accountList);
 
 	// State for linking accounts
 	let isLinking = $state(false);

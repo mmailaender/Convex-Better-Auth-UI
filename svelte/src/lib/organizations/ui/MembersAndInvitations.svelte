@@ -14,44 +14,63 @@
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// API Types
+	import type { authClient } from '$lib/auth/api/auth-client';
 	import type { FunctionReturnType } from 'convex/server';
-	type ActiveOrganizationResponse = FunctionReturnType<
+	type GetActiveOrganizationType = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type InvitationListResponse = FunctionReturnType<
+	type ListInvitationType = FunctionReturnType<
 		typeof api.organizations.invitations.queries.listInvitations
 	>;
+	type Role = typeof authClient.$Infer.Member.role;
 
 	// Props
 	let {
 		initialData
 	}: {
 		initialData?: {
-			activeOrganization?: ActiveOrganizationResponse;
-			invitationList?: InvitationListResponse;
+			activeOrganization?: GetActiveOrganizationType;
+			invitationList?: ListInvitationType;
+			role?: Role;
 		};
 	} = $props();
 
-	// Queries
-	const activeOrganizationResponse = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData: initialData?.activeOrganization }
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
 	);
-	const invitationListResponse = useQuery(
-		api.organizations.invitations.queries.listInvitations,
-		{},
-		{ initialData: initialData?.invitationList }
-	);
-
-	// Derived data
-	const activeOrganization = $derived(activeOrganizationResponse.data);
-	const members = $derived(activeOrganization?.members);
-	const invitationList = $derived(invitationListResponse.data);
-	const roles = useRoles();
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
+
+	// Queries
+	const activeOrganizationResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.getActiveOrganization,
+					{},
+					{ initialData: initialData?.activeOrganization }
+				)
+			: undefined
+	);
+	const invitationListResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.invitations.queries.listInvitations,
+					{},
+					{ initialData: initialData?.invitationList }
+				)
+			: undefined
+	);
+	// Derived data
+	const activeOrganization = $derived(
+		activeOrganizationResponse?.data ?? initialData?.activeOrganization
+	);
+	const members = $derived(activeOrganization?.members);
+	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
 
 	// State
 	let inviteMembersDialogOpen = $state(false);
@@ -96,7 +115,7 @@
 					<Dialog.Header>
 						<Dialog.Title>Invite new members</Dialog.Title>
 					</Dialog.Header>
-					<InviteMembers onSuccess={handleInviteMembersSuccess} />
+					<InviteMembers onSuccess={handleInviteMembersSuccess} {initialData} />
 					<Dialog.CloseX />
 				</Dialog.Content>
 			</Dialog.Root>
@@ -110,7 +129,7 @@
 					<Drawer.Header>
 						<Drawer.Title>Invite new members</Drawer.Title>
 					</Drawer.Header>
-					<InviteMembers onSuccess={handleInviteMembersSuccess} />
+					<InviteMembers onSuccess={handleInviteMembersSuccess} {initialData} />
 					<Drawer.CloseX />
 				</Drawer.Content>
 			</Drawer.Root>
@@ -118,12 +137,12 @@
 	</div>
 
 	<Tabs.Content value="members">
-		<Members />
+		<Members {initialData} />
 	</Tabs.Content>
 
 	{#if isOwnerOrAdmin}
 		<Tabs.Content value="invitations">
-			<Invitations />
+			<Invitations {initialData} />
 		</Tabs.Content>
 	{/if}
 </Tabs.Root>

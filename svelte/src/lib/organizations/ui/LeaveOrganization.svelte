@@ -12,48 +12,64 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { ConvexError } from 'convex/values';
-	const roles = useRoles();
 	const client = useConvexClient();
 
 	// Types
+	import type { authClient } from '$lib/auth/api/auth-client';
 	import type { FunctionReturnType } from 'convex/server';
-	type ActiveOrganizationResponse = FunctionReturnType<
+	type GetActiveOrganizationType = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type ActiveUserResponse = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type Role = typeof authClient.$Infer.Member.role;
 
 	// Props
 	let {
 		initialData
 	}: {
 		initialData?: {
-			activeOrganization?: ActiveOrganizationResponse;
-			activeUser?: ActiveUserResponse;
+			activeUser?: GetActiveUserType;
+			activeOrganization?: GetActiveOrganizationType;
+			role?: Role;
 		};
 	} = $props();
 
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
+	);
+	const isOwner = $derived(roles.hasOwnerRole);
+
 	// Queries
-	const activeUserResponse = useQuery(
-		api.users.queries.getActiveUser,
-		{},
-		{ initialData: initialData?.activeUser }
+	const activeUserResponse = $derived(
+		isAuthenticated
+			? useQuery(api.users.queries.getActiveUser, {}, { initialData: initialData?.activeUser })
+			: undefined
 	);
-	const activeOrganizationResponse = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData: initialData?.activeOrganization }
+	const activeOrganizationResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.getActiveOrganization,
+					{},
+					{ initialData: initialData?.activeOrganization }
+				)
+			: undefined
 	);
+	// Derived data
+	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
+	const activeOrganization = $derived(
+		activeOrganizationResponse?.data ?? initialData?.activeOrganization
+	);
+	const members = $derived(activeOrganization?.members);
 
 	// State
 	let isOpen: boolean = $state(false);
 	let isLeaving: boolean = $state(false);
-
-	// Derived data
-	const activeUser = $derived(activeUserResponse.data);
-	const activeOrganization = $derived(activeOrganizationResponse.data);
-	const members = $derived(activeOrganization?.members);
 
 	// Organization members excluding current user for successor selection
 	const organizationMembers = $derived(
@@ -79,7 +95,7 @@
 	 * Validates form input before submission
 	 */
 	function validateForm(): boolean {
-		if (roles.hasOwnerRole && selectedSuccessor.length === 0) {
+		if (isOwner && selectedSuccessor.length === 0) {
 			toast.error('As the organization owner, you must select a successor before leaving.');
 			return false;
 		}
@@ -102,7 +118,7 @@
 		try {
 			await client.mutation(api.organizations.members.mutations.leaveOrganization, {
 				// Only send successorMemberId if the user is an owner and a successor is selected
-				...(roles.hasOwnerRole && selectedSuccessor.length > 0
+				...(isOwner && selectedSuccessor.length > 0
 					? { successorMemberId: selectedSuccessor[0] }
 					: {})
 			});
@@ -142,12 +158,12 @@
 
 			<Dialog.Description class="flex flex-col gap-2">
 				<span> If you leave organization you'll lose access to all projects and resources. </span>
-				{#if roles.hasOwnerRole}
+				{#if isOwner}
 					<span class="my-2">As the owner, you must assign a new owner before leaving.</span>
 				{/if}
 			</Dialog.Description>
 
-			{#if roles.hasOwnerRole}
+			{#if isOwner}
 				<div class="w-full space-y-2">
 					<label for="successor" class="label"> New owner: </label>
 					<Select.Root collection={successorCollection} bind:value={selectedSuccessor}>
@@ -172,7 +188,7 @@
 					type="button"
 					class="btn bg-error-500 hover:bg-error-600 text-white"
 					onclick={handleLeaveOrganization}
-					disabled={isLeaving || (roles.hasOwnerRole && !selectedSuccessor)}
+					disabled={isLeaving || (isOwner && !selectedSuccessor)}
 					aria-busy={isLeaving}
 				>
 					{#if isLeaving}

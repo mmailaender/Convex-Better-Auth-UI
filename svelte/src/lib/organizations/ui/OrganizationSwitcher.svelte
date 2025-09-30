@@ -26,14 +26,20 @@
 	const client = useConvexClient();
 
 	// Types
+	import type { authClient } from '$lib/auth/api/auth-client';
 	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { FunctionReturnType } from 'convex/server';
-	type ActiveOrganizationResponse = FunctionReturnType<
+	type GetActiveOrganizationType = FunctionReturnType<
 		typeof api.organizations.queries.getActiveOrganization
 	>;
-	type ListOrganizationsResponse = FunctionReturnType<
+	type ListOrganizationsType = FunctionReturnType<
 		typeof api.organizations.queries.listOrganizations
 	>;
+	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
+	type ListInvitationType = FunctionReturnType<
+		typeof api.organizations.invitations.queries.listInvitations
+	>;
+	type Role = typeof authClient.$Infer.Member.role;
 
 	// Constants
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
@@ -46,8 +52,11 @@
 		/** Placement of the popover relative to the trigger */
 		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: {
-			listOrganizations: ListOrganizationsResponse;
-			activeOrganization: ActiveOrganizationResponse;
+			activeUser?: GetActiveUserType;
+			organizationList?: ListOrganizationsType;
+			activeOrganization?: GetActiveOrganizationType;
+			invitationList?: ListInvitationType;
+			role?: Role;
 		};
 	} = $props();
 
@@ -57,26 +66,40 @@
 		);
 	}
 
-	// Auth state
+	// Auth
 	const auth = useAuth();
 	const isLoading = $derived(auth.isLoading);
 	const isAuthenticated = $derived(auth.isAuthenticated);
 
-	// Queries
-	const organizationsResponse = useQuery(
-		api.organizations.queries.listOrganizations,
-		{},
-		{ initialData: initialData?.listOrganizations }
+	// Queries - backend handles authentication, initialData prevents empty state during auth sync
+	const organizationListResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.listOrganizations,
+					{},
+					{ initialData: initialData?.organizationList }
+				)
+			: undefined
 	);
-	const activeOrganizationResponse = useQuery(
-		api.organizations.queries.getActiveOrganization,
-		{},
-		{ initialData: initialData?.activeOrganization }
+	const activeOrganizationResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.queries.getActiveOrganization,
+					{},
+					{ initialData: initialData?.activeOrganization }
+				)
+			: undefined
 	);
-	// Derived state
-	const organizations = $derived(organizationsResponse.data);
-	const activeOrganization = $derived(activeOrganizationResponse.data);
-	const roles = useRoles();
+	// Derived state - fallback to initialData during auth sync
+	const organizationList = $derived(
+		organizationListResponse?.data ?? initialData?.organizationList
+	);
+	const activeOrganization = $derived(
+		activeOrganizationResponse?.data ?? initialData?.activeOrganization
+	);
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
+	);
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Component state
@@ -257,28 +280,26 @@
 
 	// Check on mount if there is an active organization and if not, use the first organization from listOrganizations and call setActiveOrg (We use effect instead of useMount as organizations and activeOrganization are loaded async)
 	$effect(() => {
-		if (organizations && organizations.length > 0 && !activeOrganization) {
+		if (organizationList && organizationList.length > 0 && !activeOrganization) {
 			updateActiveOrg();
 		}
 	});
 </script>
 
 {#if !AUTH_CONSTANTS.organizations}
+	<!-- Gate 1: Organizations feature is disabled -->
 	<div class="text-error-600-400">
 		Organizations are disabled, but OrganizationSwitcher is being used. Please turn them on in
 		auth.constants.ts
 	</div>
-
-	<!-- Not authenticated - don't show anything -->
-{:else if !isAuthenticated}
+{:else if !isAuthenticated && !initialData?.organizationList && !initialData?.activeOrganization}
+	<!-- Gate 2: Not authenticated and no SSR data - don't show anything -->
 	<!-- Return null by not rendering anything -->
-
-	<!-- Loading state -->
-{:else if isLoading || !organizations || organizationsResponse.isLoading}
+{:else if (isLoading || (organizationListResponse?.isLoading ?? false) || (activeOrganizationResponse?.isLoading ?? false)) && !organizationList && !activeOrganization}
+	<!-- Gate 3: Loading state - only show if queries are loading AND no data is available yet -->
 	<div class="placeholder h-8 w-40 animate-pulse"></div>
-
-	<!-- No organizations - show create organization modal -->
-{:else if organizations.length === 0}
+{:else if organizationList && organizationList.length === 0}
+	<!-- Gate 4: No organizations - show create organization modal -->
 	<Dialog.Root bind:open={createOrganizationDialogOpen}>
 		<Dialog.Trigger class="btn preset-tonal flex items-center gap-2">
 			<PlusIcon class="size-4" />
@@ -289,9 +310,8 @@
 			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
-
-	<!-- Has organizations - show the switcher -->
-{:else}
+{:else if organizationList}
+	<!-- Gate 5: Has organizations - show the switcher -->
 	<Popover.Root bind:open={switcherPopoverOpen} positioning={{ placement: popoverPlacement }}>
 		<Popover.Trigger
 			class=" border-surface-200-800 rounded-container flex w-40 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out"
@@ -345,7 +365,7 @@
 						</div>
 					{/if}
 
-					{#each organizations.filter((org) => org && org.id !== activeOrganization?.id) as org (org?.id)}
+					{#each organizationList.filter((org) => org && org.id !== activeOrganization?.id) as org (org?.id)}
 						<div>
 							<button
 								onclick={() => updateActiveOrg(org.id)}
@@ -432,6 +452,7 @@
 					<OrganizationProfile
 						open={organizationProfileDialogOpen}
 						onSuccessfulDelete={closeOrganizationProfile}
+						{initialData}
 					/>
 				</div>
 				<Dialog.CloseX />

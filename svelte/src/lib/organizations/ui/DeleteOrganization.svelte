@@ -5,6 +5,7 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
 
@@ -15,14 +16,18 @@
 	// Icons
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
-	const roles = useRoles();
-	const isOwner = $derived(roles.hasOwnerRole);
+	import type { FunctionReturnType } from 'convex/server';
+	import type { authClient } from '$lib/auth/api/auth-client';
+	type GetActiveOrganizationType = FunctionReturnType<
+		typeof api.organizations.queries.getActiveOrganization
+	>;
+	type Role = typeof authClient.$Infer.Member.role;
 
 	/**
 	 * Component for deleting an organization
 	 * Only available to organization owners
 	 */
-	const { onSuccessfulDelete, redirectTo } = $props<{
+	const { onSuccessfulDelete, redirectTo, initialData } = $props<{
 		/**
 		 * Optional callback that will be called when an organization is successfully deleted
 		 */
@@ -31,11 +36,27 @@
 		 * Optional redirect URL after successful deletion
 		 */
 		redirectTo?: string;
+		initialData?: {
+			activeOrganization?: GetActiveOrganizationType;
+			role?: Role;
+		};
 	}>();
 
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
 	// Queries
-	const activeOrganizationResponse = useQuery(api.organizations.queries.getActiveOrganization, {});
-	const activeOrganization = $derived(activeOrganizationResponse.data);
+	const activeOrganizationResponse = $derived(
+		isAuthenticated ? useQuery(api.organizations.queries.getActiveOrganization, {}) : undefined
+	);
+	const activeOrganization = $derived(
+		activeOrganizationResponse?.data ?? initialData?.activeOrganization
+	);
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
+	);
+	const isOwner = $derived(roles.hasOwnerRole);
 
 	// State
 	let dialogOpen: boolean = $state(false);

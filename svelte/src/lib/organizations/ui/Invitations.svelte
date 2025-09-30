@@ -10,26 +10,45 @@
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
-	const roles = useRoles();
 	import { authClient } from '$lib/auth/api/auth-client';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Types
 	type Role = typeof authClient.$Infer.Member.role;
 	import type { FunctionReturnType } from 'convex/server';
-	type InvitationListResponse = FunctionReturnType<
+	type ListInvitationsType = FunctionReturnType<
 		typeof api.organizations.invitations.queries.listInvitations
 	>;
 
 	// Props
-	let { initialData }: { initialData?: InvitationListResponse } = $props();
+	let {
+		initialData
+	}: {
+		initialData?: {
+			invitationList?: ListInvitationsType;
+			role?: Role;
+		};
+	} = $props();
+
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
+	const roles = $derived(
+		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
+	);
+	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries
-	const invitationListResponse = useQuery(
-		api.organizations.invitations.queries.listInvitations,
-		{},
-		{ initialData }
+	const invitationListResponse = $derived(
+		isAuthenticated
+			? useQuery(
+					api.organizations.invitations.queries.listInvitations,
+					{},
+					{ initialData: initialData?.invitationList }
+				)
+			: undefined
 	);
-	const invitationList = $derived(invitationListResponse.data);
+	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
 
 	// State
 	let selectedInvitationId: string | null = $state(null);
@@ -153,7 +172,7 @@
 									<th class="text-surface-700-300 hidden w-32 p-2 text-left text-xs sm:table-cell">
 										Role
 									</th>
-									{#if roles.hasOwnerOrAdminRole}
+									{#if isOwnerOrAdmin}
 										<th class="w-20 p-2 text-right"></th>
 									{/if}
 								</tr>
@@ -198,7 +217,7 @@
 										<!-- Actions -->
 										<td class="!w-20">
 											<div class="flex justify-end">
-												{#if roles.hasOwnerOrAdminRole}
+												{#if isOwnerOrAdmin}
 													<button
 														type="button"
 														class="btn btn-sm preset-filled-surface-300-700"
