@@ -68,7 +68,7 @@
 		"@convex-dev/better-auth": "0.8.6",
 		"@convex-dev/resend": "0.1.13",
 		"@icons-pack/svelte-simple-icons": "^6.4.0",
-		"@mmailaender/convex-better-auth-svelte": "^0.0.6",
+		"@mmailaender/convex-better-auth-svelte": "file:node_modules_local/mmailaender-convex-better-auth-svelte-0.0.6.tgz",
 		"@tailwindcss/vite": "^4.1.13",
 		"@zxcvbn-ts/core": "^3.0.4",
 		"@zxcvbn-ts/language-common": "^3.0.4",
