@@ -1,5 +1,18 @@
 # auth
 
+## 0.0.12
+
+### Patch Changes
+
+- ## Features
+  - Add SSR (Server-Side Rendering) support for fast initial component load
+  - Improve social authentication flow with per-provider submitting state tracking
+  - add icons and labels for 27 OAuth providers with tree-shaking support for Account linking
+
+  ## Refactors
+  - Rename OrganizationInfo component to GeneralSettings for better clarity
+  - Track submitting state per provider in social auth flow to prevent race conditions
+
 ## 0.0.11
 
 ### Patch Changes
