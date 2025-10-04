@@ -5,27 +5,25 @@ import { api } from '$convex/_generated/api';
 export const load = (async ({ locals }) => {
 	const token = locals.token;
 	if (!token) return {};
-
 	const client = createConvexHttpClient({ token });
 
-	// Execute all queries in parallel for faster load times
 	const [
 		activeUser,
+		accountList,
 		activeOrganization,
 		organizationList,
 		invitationList,
-		roleResult,
-		accountList
+		roleResult
 	] = await Promise.all([
 		client.query(api.users.queries.getActiveUser),
+		client.query(api.users.queries.listAccounts),
 		client.query(api.organizations.queries.getActiveOrganization),
 		client.query(api.organizations.queries.listOrganizations),
 		client.query(api.organizations.invitations.queries.listInvitations),
-		client.query(api.organizations.queries.getOrganizationRole, {}),
-		client.query(api.users.queries.listAccounts)
+		client.query(api.organizations.queries.getOrganizationRole, {})
 	]);
 
 	const role = roleResult ?? undefined;
 
-	return { activeUser, activeOrganization, organizationList, invitationList, role, accountList };
+	return { activeUser, accountList, activeOrganization, organizationList, invitationList, role };
 }) satisfies LayoutServerLoad;
