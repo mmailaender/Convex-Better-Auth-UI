@@ -2,6 +2,8 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { getSessionCookie } from 'better-auth/cookies';
 import { createRouteMatcher } from '$lib/primitives/utils/routeMatcher';
+import { getToken } from '@mmailaender/convex-better-auth-svelte/sveltekit';
+import { createAuth } from '$convex/auth';
 
 /* --------------------------------------------------------- */
 /* -------------------- route match helpers ---------------- */
@@ -53,9 +55,15 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+export const setTokenFromCookies: Handle = async ({ event, resolve }) => {
+	event.locals.token = await getToken(createAuth, event.cookies);
+
+	return resolve(event);
+};
+
 /* --------------------------------------------------------- */
 /* ---------------------- exported hook -------------------- */
 /* --------------------------------------------------------- */
 
-export const handle = sequence(/* 1 */ requireAuth);
+export const handle = sequence(/* 1 */ requireAuth, /* 2 */ setTokenFromCookies);
 export type { Handle };
