@@ -1,4 +1,9 @@
 <p align="center">
+  <picture>
+    <source srcset="../bannerDark.webp" media="(prefers-color-scheme: dark)">
+    <source srcset="../banner.webp" media="(prefers-color-scheme: light)">
+    <img src="../banner.webp" alt="Auth Logo">
+  </picture>
   <h2 align="center">
     Auth
   </h2>
