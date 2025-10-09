@@ -11,7 +11,7 @@
   <p align="center">
     Self-owned Plug & Play Auth widgets for your application
     <br />
-    <a href="https://etesie.dev/docs/auth"><strong>Learn more »</strong></a>
+    <a href="https://etesie.dev/docs/auth/01-getting-started"><strong>Learn more »</strong></a>
     <br />
     <br />
     <a href="https://etesie.dev">Website</a>

@@ -1,4 +1,9 @@
 <p align="center">
+  <picture>
+    <source srcset="../bannerDark.webp" media="(prefers-color-scheme: dark)">
+    <source srcset="../banner.webp" media="(prefers-color-scheme: light)">
+    <img src="../banner.webp" alt="Auth Logo">
+  </picture>
   <h2 align="center">
     Auth
   </h2>
@@ -6,7 +11,7 @@
   <p align="center">
     Self-owned Plug & Play Auth widgets for your application
     <br />
-    <a href="https://etesie.dev/docs/auth"><strong>Learn more »</strong></a>
+    <a href="https://etesie.dev/docs/auth/01-getting-started"><strong>Learn more »</strong></a>
     <br />
     <br />
     <a href="https://etesie.dev">Website</a>
