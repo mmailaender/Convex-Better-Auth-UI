@@ -1,5 +1,21 @@
 # auth
 
+## 0.0.13
+
+### Patch Changes
+
+- ## Features
+  - Add token to locals and improve organization switcher loading state
+
+  ## Refactors
+  - Reorder parallel API queries for consistency with return object
+
+  ## Chore
+  - Update dependencies
+  - Upgrade @convex-dev/better-auth from 0.8.6 to 0.8.8
+  - Upgrade convex-better-auth-svelte to 0.1.1
+  - Add dark/light mode banner images to README files
+
 ## 0.0.12
 
 ### Patch Changes
