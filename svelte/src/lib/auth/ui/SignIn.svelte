@@ -72,13 +72,16 @@
 
 	// Monitor authentication state and redirect once Convex auth is synchronized
 	$effect(() => {
-		if (isSigningIn && isAuthenticated && !isLoading) {
-			// User has been signed in and Convex auth state has synchronized
-			console.log('Convex auth synchronized, redirecting...');
+		if (isAuthenticated && !isLoading) {
+			// Always close the dialog when authenticated
 			onSignIn?.();
-			handleRedirect();
-			submitting = false;
-			isSigningIn = false;
+			if (isSigningIn) {
+				// Only redirect when the sign-in originated from this component
+				console.log('Convex auth synchronized, redirecting...');
+				handleRedirect();
+				submitting = false;
+				isSigningIn = false;
+			}
 		}
 	});
 
@@ -188,7 +191,7 @@
 </script>
 
 <div class={cn('mx-auto flex h-full w-full max-w-md flex-col justify-center p-4 pb-8', className)}>
-	{#if currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent))}
+	{#if AUTH_CONSTANTS.sendEmails && (currentStep === 'verify-email' || (verifyContext === 'magicLink' && (magicAutoSendPending || magicLinkSent)))}
 		<div class="flex flex-col">
 			<!-- Circle -->
 			<div class="mb-4 flex">
