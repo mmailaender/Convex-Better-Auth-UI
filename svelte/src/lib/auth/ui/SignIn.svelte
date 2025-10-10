@@ -188,6 +188,33 @@
 				return 'Plug & Play Auth Widgets for your application.';
 		}
 	}
+
+	// Reset function that an external component can call
+	export function reset() {
+		resetToEmailStep();
+	}
+
+	// If the current step is no longer valid for the current config,
+	// snap back to the email step so the UI always has something to render
+	$effect(() => {
+		const set = new Set(availableEmailMethods);
+
+		const isPassword = currentStep === 'password-flow';
+		const isOtp = currentStep === 'email-otp-flow';
+		const isMagic = currentStep === 'magic-link-flow';
+		const isVerifyEmail = currentStep === 'verify-email';
+
+		// no email sending → no verify/magic/otp screens
+		if (!AUTH_CONSTANTS.sendEmails && (isVerifyEmail || isMagic || isOtp)) {
+			resetToEmailStep();
+			return;
+		}
+
+		// step-specific availability checks
+		if (isPassword && !set.has('password')) resetToEmailStep();
+		if (isOtp && !set.has('emailOTP')) resetToEmailStep();
+		if (isMagic && !set.has('magicLink')) resetToEmailStep();
+	});
 </script>
 
 <div class={cn('mx-auto flex h-full w-full max-w-md flex-col justify-center p-4 pb-8', className)}>
