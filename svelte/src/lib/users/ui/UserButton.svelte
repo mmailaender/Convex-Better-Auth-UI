@@ -6,20 +6,20 @@
 	// Icons
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	// Components
-	import UserProfile from '$lib/users/ui/UserProfile.svelte';
 	import SignIn from '$lib/auth/ui/SignIn.svelte';
 	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
 
 	// SvelteKit navigation/state
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
-	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
+
+	// Constants
+	import { DIALOG_KEY } from '$lib/users/utils/user.constants';
 
 	// Types
 	import type { PopoverRootProps } from '@ark-ui/svelte';
@@ -55,7 +55,6 @@
 
 	// State
 	let userPopoverOpen = $state(false);
-	let profileDialogOpen = $state(false);
 	let signInDialogOpen = $state(false);
 	let avatarStatus = $state('');
 
@@ -63,122 +62,21 @@
 	let signInKey = $state(0);
 	let prevSignInDialogOpen = false;
 
-	// iOS back-swipe handling (mirrors OrganizationSwitcher)
-	let isIOS: boolean = $state(false);
-	let suppressDialogTransition: boolean = $state(false);
-
-	// Back-swipe guard
-	let backSwipeGuard: boolean = $state(false);
-	let guardTimer: ReturnType<typeof setTimeout> | null = null;
-	let prevShouldBeOpen = false;
-	let suppressDialogRender: boolean = $state(false);
-	let internalCloseGuard: boolean = $state(false);
-	let internalCloseTimer: ReturnType<typeof setTimeout> | null = null;
-
-	const DIALOG_KEY = 'user-profile';
-
-	// Opening is driven explicitly via openProfileModal() pushing the URL param.
-
-	// 1 + 2: Keep dialog state in sync with the URL only.
-	// During iOS interactive back, block a brief re-open only when closing-from-URL.
-	// If popstate doesn't fire on iOS Chrome, arm the guard when we detect URL-driven close.
-	$effect(() => {
-		const shouldBeOpen = page.url.searchParams.get('dialog') === DIALOG_KEY;
-		const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
-
-		if (isIOS && closingCandidate && !backSwipeGuard && !internalCloseGuard) {
-			backSwipeGuard = true;
-			if (guardTimer) clearTimeout(guardTimer);
-			guardTimer = setTimeout(() => {
-				backSwipeGuard = false;
-				guardTimer = null;
-			}, 650);
-		}
-
-		const closingFromUrl = closingCandidate && backSwipeGuard;
-		suppressDialogRender = !!closingFromUrl;
-		profileDialogOpen = closingFromUrl ? false : shouldBeOpen;
-		prevShouldBeOpen = shouldBeOpen;
-	});
-
-	// URL is the single source of truth; no state->URL/URL->state effects are needed.
-
 	/**
 	 * Open profile modal and close popover (via shallow routing)
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		const has = page.url.searchParams.get('dialog') === DIALOG_KEY;
-		if (!has) {
-			const url = new URL(page.url);
+		const url = new URL(page.url);
+		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
-			const path = `${url.pathname}${url.search}${url.hash}`;
-			void goto(path, {
+			goto(`${url.pathname}${url.search}${url.hash}`, {
 				replaceState: false,
 				noScroll: true,
-				keepFocus: true,
-				invalidateAll: false
+				keepFocus: true
 			});
 		}
 	}
-
-	// 4: If user closes via backdrop / X, remove the param with replaceState
-	function closeProfileModal() {
-		// Mark programmatic close so we don't arm back-swipe guard from URL-driven close
-		internalCloseGuard = true;
-		if (internalCloseTimer) clearTimeout(internalCloseTimer);
-		internalCloseTimer = setTimeout(() => {
-			internalCloseGuard = false;
-			internalCloseTimer = null;
-		}, 500);
-		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
-		if (hasDialog) {
-			const url = new URL(page.url);
-			url.searchParams.delete('dialog');
-			const path = `${url.pathname}${url.search}${url.hash}`;
-			void goto(path, {
-				replaceState: true, // no extra history entry
-				noScroll: true,
-				keepFocus: true,
-				invalidateAll: false
-			});
-		}
-	}
-
-	// iOS Safari back-swipe guard only: do not mutate state here, only arm guard
-	onMount(() => {
-		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
-		const ua = navigator.userAgent;
-		isIOS =
-			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
-
-		const onPopState = () => {
-			if (!isIOS) return;
-			// Only arm guard when the dialog is actually closing via history
-			const url = new URL(window.location.href);
-			const shouldBeOpen = url.searchParams.get('dialog') === DIALOG_KEY;
-			const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
-			if (closingCandidate) {
-				backSwipeGuard = true;
-				if (guardTimer) clearTimeout(guardTimer);
-				guardTimer = setTimeout(() => {
-					backSwipeGuard = false;
-					guardTimer = null;
-				}, 650);
-			}
-		};
-		window.addEventListener('popstate', onPopState);
-		return () => window.removeEventListener('popstate', onPopState);
-	});
-
-	// While guard is active, suppress transitions; release slightly after.
-	$effect(() => {
-		if (backSwipeGuard) {
-			suppressDialogTransition = true;
-		} else if (suppressDialogTransition) {
-			setTimeout(() => (suppressDialogTransition = false), 100);
-		}
-	});
 
 	// Bump key when dialog transitions from closed -> open to remount SignIn
 	$effect(() => {
@@ -240,41 +138,6 @@
 			</div>
 		</Popover.Content>
 	</Popover.Root>
-
-	<!-- Profile Dialog -->
-	{#if !suppressDialogRender}
-		<Dialog.Root
-			bind:open={profileDialogOpen}
-			onOpenChange={(status) => {
-				if (!status.open) {
-					closeProfileModal();
-				}
-			}}
-		>
-			<Dialog.Content
-				class={`md:rounded-container top-0 left-0 flex h-full max-h-[100dvh] w-full max-w-full
-		       translate-x-0 translate-y-0 flex-col items-start rounded-none md:top-[50%]
-		       md:left-[50%] md:h-auto md:max-h-[90vh] md:w-auto
-		        md:translate-x-[-50%] md:translate-y-[-50%] ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
-			>
-				<Dialog.Header>
-					<Dialog.Title>Profile</Dialog.Title>
-				</Dialog.Header>
-				<div
-					class=" max-h-[100dvh] w-full overflow-auto overscroll-contain p-6 md:w-[560px]"
-					onfocusin={(e) => {
-						const el = e.target as HTMLElement | null;
-						if (!el) return;
-						if (!isEditableElement(el)) return;
-						scheduleScrollIntoView(el);
-					}}
-				>
-					<UserProfile {initialData} />
-				</div>
-				<Dialog.CloseX />
-			</Dialog.Content>
-		</Dialog.Root>
-	{/if}
 {:else if isLoading}
 	<div class="placeholder-circle size-10 animate-pulse"></div>
 {:else}
