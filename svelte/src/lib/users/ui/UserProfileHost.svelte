@@ -16,6 +16,7 @@
 
 	// API
 	import { api } from '$convex/_generated/api';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// API Types
 	import type { FunctionReturnType } from 'convex/server';
@@ -30,6 +31,10 @@
 	};
 
 	let { initialData }: UserProfileHostProps = $props();
+
+	// Auth
+	const auth = useAuth();
+	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Local dialog state (formerly from singleton)
 	let userProfile = $state({
@@ -73,6 +78,12 @@
 		};
 		window.addEventListener('popstate', onPopState);
 		return () => window.removeEventListener('popstate', onPopState);
+	});
+
+	onMount(() => {
+		const handleClose = () => closeProfileModal();
+		window.addEventListener('user-profile:close', handleClose);
+		return () => window.removeEventListener('user-profile:close', handleClose);
 	});
 
 	// URL → state sync
@@ -128,7 +139,7 @@
 	}
 </script>
 
-{#if !suppressDialogRender}
+{#if isAuthenticated && !suppressDialogRender}
 	<Dialog.Root
 		bind:open={userProfile.open}
 		onOpenChange={(status) => {

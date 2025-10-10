@@ -12,6 +12,9 @@
 	import { ConvexError } from 'convex/values';
 	const client = useConvexClient();
 
+	// Utils
+	import { requestCloseUserProfile } from '$lib/users/utils/userProfile';
+
 	// State
 	let deleteDialogOpen: boolean = $state(false);
 	let isDeleting: boolean = $state(false);
@@ -45,6 +48,9 @@
 			return;
 		}
 
+		// Request closing the profile dialog (handled by UserProfileHost)
+		requestCloseUserProfile();
+
 		toast.success('User deleted successfully');
 		deleteDialogOpen = false;
 		isDeleting = false;
@@ -53,7 +59,7 @@
 
 <Dialog.Root bind:open={deleteDialogOpen}>
 	<Dialog.Trigger
-		class="btn btn-sm preset-faded-surface-50-950 text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 rounded-base justify-between gap-1 text-sm"
+		class="preset-faded-surface-50-950 btn rounded-base btn-sm text-surface-600-400 hover:bg-error-300-700 hover:text-error-950-50 justify-between gap-1 text-sm"
 		>Delete account</Dialog.Trigger
 	>
 	<Dialog.Content class="md:max-w-108">
