@@ -1,5 +1,13 @@
 # auth
 
+## 0.0.15
+
+### Patch Changes
+
+- ## Fixes
+  - fix: close user profile dialog after account deletion
+  - fix: add reset functionality and step validation to SignIn component
+
 ## 0.0.14
 
 ### Patch Changes
