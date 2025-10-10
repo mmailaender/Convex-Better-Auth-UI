@@ -1,5 +1,11 @@
 # auth
 
+## 0.0.14
+
+### Patch Changes
+
+- fix: move profile dialogs to AuthDialogProvider to support multiple OrganizationSwitcher and UserButton instances
+
 ## 0.0.13
 
 ### Patch Changes
