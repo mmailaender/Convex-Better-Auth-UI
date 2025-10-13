@@ -103,9 +103,11 @@
 				{ email, password, name, callbackURL },
 				{
 					onSuccess: () => {
-						onVerifyEmail?.();
+						if (AUTH_CONSTANTS.sendEmails) {
+							onVerifyEmail?.();
+							toast.success('Verification email sent!');
+						}
 						onSubmittingChange(false);
-						toast.success('Verification email sent!');
 					},
 					onError: (ctx) => {
 						console.error('Sign up error:', ctx.error);

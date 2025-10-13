@@ -25,5 +25,14 @@ export const load = (async ({ locals }) => {
 
 	const role = roleResult ?? undefined;
 
-	return { activeUser, accountList, activeOrganization, organizationList, invitationList, role };
+	return {
+		initialData: {
+			activeUser,
+			accountList,
+			activeOrganization,
+			organizationList,
+			invitationList,
+			role
+		}
+	};
 }) satisfies LayoutServerLoad;

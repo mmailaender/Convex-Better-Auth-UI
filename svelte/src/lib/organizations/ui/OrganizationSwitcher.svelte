@@ -15,7 +15,7 @@
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	// Components
 	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
-	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
+
 	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
 
 	// API
@@ -24,6 +24,9 @@
 	import { api } from '$convex/_generated/api';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	const client = useConvexClient();
+
+	// Constants
+	import { DIALOG_KEY } from '$lib/organizations/utils/organization.constants';
 
 	// Types
 	import type { authClient } from '$lib/auth/api/auth-client';
@@ -42,7 +45,7 @@
 	type Role = typeof authClient.$Infer.Member.role;
 
 	// Constants
-	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+	import { AUTH_CONSTANTS } from '../../../convex/auth.constants';
 
 	// Props
 	const {
@@ -105,19 +108,14 @@
 	// Component state
 	let switcherPopoverOpen: boolean = $state(false);
 	let createOrganizationDialogOpen: boolean = $state(false);
-	let organizationProfileDialogOpen: boolean = $state(false);
 
 	// iOS back-swipe handling
 	let isIOS: boolean = $state(false);
-	let suppressDialogTransition: boolean = $state(false);
 
 	// Back-swipe guard
 	let backSwipeGuard: boolean = $state(false);
 	let guardTimer: ReturnType<typeof setTimeout> | null = null;
 	let prevShouldBeOpen = false;
-	let suppressDialogRender: boolean = $state(false);
-	let internalCloseGuard: boolean = $state(false);
-	let internalCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
 	// Handler functions
 
@@ -129,66 +127,14 @@
 		switcherPopoverOpen = false;
 	}
 
-	function closeOrganizationProfile(): void {
-		organizationProfileDialogOpen = false;
-	}
-
-	const DIALOG_KEY = 'organization-profile';
-
-	// 1 + 2: Keep dialog state in sync with the URL only.
-	// During iOS interactive back, block a brief re-open only when closing-from-URL.
-	// If popstate doesn't fire on iOS Chrome, arm the guard when we detect URL-driven close.
-	$effect(() => {
-		const shouldBeOpen = page.url.searchParams.get('dialog') === DIALOG_KEY;
-		const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
-
-		if (isIOS && closingCandidate && !backSwipeGuard && !internalCloseGuard) {
-			backSwipeGuard = true;
-			if (guardTimer) clearTimeout(guardTimer);
-			guardTimer = setTimeout(() => {
-				backSwipeGuard = false;
-				guardTimer = null;
-			}, 650);
-		}
-
-		const closingFromUrl = closingCandidate && backSwipeGuard;
-		suppressDialogRender = !!closingFromUrl;
-		organizationProfileDialogOpen = closingFromUrl ? false : shouldBeOpen;
-		prevShouldBeOpen = shouldBeOpen;
-	});
-
 	// 3: Open via button — push history entry + open immediately for snappy UX
 	function openProfileModal() {
 		switcherPopoverOpen = false;
-
 		const url = new URL(page.url);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
-			// IMPORTANT: use goto so $page.url updates and back works properly
 			goto(`${url.pathname}${url.search}${url.hash}`, {
-				replaceState: false, // create a back entry
-				noScroll: true,
-				keepFocus: true
-			});
-		}
-	}
-
-	// 4: If user closes via backdrop / X, remove the param with replaceState
-	function closeProfileModal() {
-		// Mark programmatic close so we don't arm back-swipe guard from URL-driven close
-		internalCloseGuard = true;
-		if (internalCloseTimer) clearTimeout(internalCloseTimer);
-		internalCloseTimer = setTimeout(() => {
-			internalCloseGuard = false;
-			internalCloseTimer = null;
-		}, 500);
-		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
-		if (hasDialog) {
-			const url = new URL(page.url);
-			url.searchParams.delete('dialog');
-			url.searchParams.delete('tab');
-			goto(`${url.pathname}${url.search}${url.hash}`, {
-				replaceState: true, // no extra history entry
+				replaceState: false,
 				noScroll: true,
 				keepFocus: true
 			});
@@ -219,15 +165,6 @@
 		};
 		window.addEventListener('popstate', onPopState);
 		return () => window.removeEventListener('popstate', onPopState);
-	});
-
-	// While guard is active, suppress transitions; release slightly after.
-	$effect(() => {
-		if (backSwipeGuard) {
-			suppressDialogTransition = true;
-		} else if (suppressDialogTransition) {
-			setTimeout(() => (suppressDialogTransition = false), 100);
-		}
 	});
 
 	/**
@@ -409,54 +346,4 @@
 			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
-
-	{#if !suppressDialogRender}
-		<!-- Organization Profile Modal -->
-		<Dialog.Root
-			bind:open={organizationProfileDialogOpen}
-			onOpenChange={(status) => {
-				if (!status.open) {
-					closeProfileModal();
-				}
-			}}
-		>
-			<Dialog.Content
-				class={`md:rounded-container top-0 left-0 h-full max-h-[100dvh] w-full max-w-full translate-x-0 translate-y-0 rounded-none p-0 md:top-1/2 md:left-1/2 md:h-[70vh] md:w-2xl md:-translate-x-1/2 md:-translate-y-1/2 lg:w-4xl ${suppressDialogTransition ? 'animate-none transition-none duration-0 data-[state=closed]:duration-0 data-[state=open]:duration-0' : ''}`}
-			>
-				<div
-					class="h-full w-full overflow-auto overscroll-contain"
-					onfocusin={(e) => {
-						const el = e.target as HTMLElement | null;
-						if (!el) return;
-
-						// On iOS, avoid programmatic scrolling to prevent subtle jank during history gestures
-						if (isIOS) return;
-
-						// Only scroll for actual editable controls to avoid jumping the dialog
-						const tag = el.tagName.toLowerCase();
-						const isEditableTag = tag === 'input' || tag === 'textarea' || tag === 'select';
-						const isContentEditable =
-							el.isContentEditable || el.getAttribute('contenteditable') === 'true';
-						const role = el.getAttribute('role');
-						const isTextboxLike = role === 'textbox' || role === 'combobox' || role === 'searchbox';
-
-						// Ignore non-editable interactions (e.g., buttons that open nested dialogs)
-						const isButtonLike =
-							tag === 'button' || tag === 'a' || el.closest('[data-part="trigger"]');
-
-						if ((isEditableTag || isContentEditable || isTextboxLike) && !isButtonLike) {
-							el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-						}
-					}}
-				>
-					<OrganizationProfile
-						open={organizationProfileDialogOpen}
-						onSuccessfulDelete={closeOrganizationProfile}
-						{initialData}
-					/>
-				</div>
-				<Dialog.CloseX />
-			</Dialog.Content>
-		</Dialog.Root>
-	{/if}
 {/if}
