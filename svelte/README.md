@@ -60,7 +60,7 @@ Auth gives you hosted-provider convenience **without losing control**:
 Start building now with pre-built Svelte or React components —  
 fully functional, fully editable, and ready for production.
 
-📘 **[Read the Getting Started Guide →](https://etesie.dev/docs/auth/01-getting-started)**
+📘 **[Read the Getting Started Guide →](https://etesie.dev/docs/auth/02-getting-started)**
 
 ---
 
