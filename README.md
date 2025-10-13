@@ -11,7 +11,7 @@
   <p align="center">
     Self-owned, plug-and-play authentication widgets for your application
     <br />
-    <a href="https://etesie.dev/docs/auth/01-getting-started/01-sveltekit"><strong>→ Get started in 15 minutes</strong></a>
+    <a href="https://etesie.dev/docs/auth/02-getting-started/01-sveltekit"><strong>→ Get started in 15 minutes</strong></a>
     <br />
     <br />
     <a href="https://etesie.dev">Website</a>
@@ -60,7 +60,7 @@ Auth gives you hosted-provider convenience **without losing control**:
 Start building now with pre-built Svelte or React components —  
 fully functional, fully editable, and ready for production.
 
-📘 **[Read the Getting Started Guide →](https://etesie.dev/docs/auth/01-getting-started)**
+📘 **[Read the Getting Started Guide →](https://etesie.dev/docs/auth/02-getting-started)**
 
 ---
 
