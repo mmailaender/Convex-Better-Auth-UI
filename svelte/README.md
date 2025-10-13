@@ -11,7 +11,7 @@
   <p align="center">
     Self-owned, plug-and-play authentication widgets for your application
     <br />
-    <a href="https://etesie.dev/docs/auth/01-getting-started/01-sveltekit"><strong>→ Get started in 15 minutes</strong></a>
+    <a href="https://etesie.dev/docs/auth/02-getting-started/01-sveltekit"><strong>→ Get started in 15 minutes</strong></a>
     <br />
     <br />
     <a href="https://etesie.dev">Website</a>
