@@ -3,7 +3,6 @@
 @import 'tw-animate-css';
 
 @import '@skeletonlabs/skeleton';
-@import '@skeletonlabs/skeleton/optional/presets';
 
 @import './themes/auth.css';
 
