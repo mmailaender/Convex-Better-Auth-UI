@@ -6,17 +6,21 @@ import { authClient } from '$lib/auth/api/auth-client';
 // Types
 type Role = typeof authClient.$Infer.Member.role;
 
-export function useRoles(
-	args: { orgId?: string; initialData?: Role; isAuthenticated?: boolean } = {}
-) {
+type UseRolesArgs = {
+	orgId?: string;
+	initialData?: Role;
+	isAuthenticated?: boolean;
+};
+
+export function useRoles(args: UseRolesArgs = {}) {
 	const role = $derived(
-		args.isAuthenticated
-			? useQuery(
+		args.isAuthenticated === false
+			? { data: args.initialData }
+			: useQuery(
 					api.organizations.queries.getOrganizationRole,
 					{ organizationId: args.orgId },
 					{ initialData: args.initialData }
 				)
-			: { data: args.initialData }
 	);
 
 	return {
