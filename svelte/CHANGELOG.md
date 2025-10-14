@@ -1,5 +1,11 @@
 # auth
 
+## 0.0.17
+
+### Patch Changes
+
+- refactor: invert role query condition and extract UseRolesArgs type definition
+
 ## 0.0.16
 
 ### Patch Changes
