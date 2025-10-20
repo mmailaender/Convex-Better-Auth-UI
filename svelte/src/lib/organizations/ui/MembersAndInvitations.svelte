@@ -48,22 +48,14 @@
 
 	// Queries
 	const activeOrganizationResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.getActiveOrganization,
-					{},
-					{ initialData: initialData?.activeOrganization }
-				)
-			: undefined
+		useQuery(api.organizations.queries.getActiveOrganization, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.activeOrganization
+		})
 	);
 	const invitationListResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.invitations.queries.listInvitations,
-					{},
-					{ initialData: initialData?.invitationList }
-				)
-			: undefined
+		useQuery(api.organizations.invitations.queries.listInvitations, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.invitationList
+		})
 	);
 	// Derived data
 	const activeOrganization = $derived(

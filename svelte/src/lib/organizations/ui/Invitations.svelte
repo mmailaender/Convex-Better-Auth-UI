@@ -40,13 +40,9 @@
 
 	// Queries
 	const invitationListResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.invitations.queries.listInvitations,
-					{},
-					{ initialData: initialData?.invitationList }
-				)
-			: undefined
+		useQuery(api.organizations.invitations.queries.listInvitations, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.invitationList
+		})
 	);
 	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
 

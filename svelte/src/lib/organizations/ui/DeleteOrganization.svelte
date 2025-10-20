@@ -48,7 +48,7 @@
 
 	// Queries
 	const activeOrganizationResponse = $derived(
-		isAuthenticated ? useQuery(api.organizations.queries.getActiveOrganization, {}) : undefined
+		useQuery(api.organizations.queries.getActiveOrganization, isAuthenticated ? {} : 'skip')
 	);
 	const activeOrganization = $derived(
 		activeOrganizationResponse?.data ?? initialData?.activeOrganization

@@ -14,13 +14,11 @@ type UseRolesArgs = {
 
 export function useRoles(args: UseRolesArgs = {}) {
 	const role = $derived(
-		args.isAuthenticated === false
-			? { data: args.initialData }
-			: useQuery(
-					api.organizations.queries.getOrganizationRole,
-					{ organizationId: args.orgId },
-					{ initialData: args.initialData }
-				)
+		useQuery(
+			api.organizations.queries.getOrganizationRole,
+			args.isAuthenticated ? { organizationId: args.orgId } : 'skip',
+			{ initialData: args.initialData }
+		)
 	);
 
 	return {

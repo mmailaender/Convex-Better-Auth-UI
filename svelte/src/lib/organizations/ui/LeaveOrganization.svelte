@@ -47,18 +47,14 @@
 
 	// Queries
 	const activeUserResponse = $derived(
-		isAuthenticated
-			? useQuery(api.users.queries.getActiveUser, {}, { initialData: initialData?.activeUser })
-			: undefined
+		useQuery(api.users.queries.getActiveUser, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.activeUser
+		})
 	);
 	const activeOrganizationResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.getActiveOrganization,
-					{},
-					{ initialData: initialData?.activeOrganization }
-				)
-			: undefined
+		useQuery(api.organizations.queries.getActiveOrganization, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.activeOrganization
+		})
 	);
 	// Derived data
 	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);

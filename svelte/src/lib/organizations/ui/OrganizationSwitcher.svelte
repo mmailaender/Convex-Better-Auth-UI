@@ -76,22 +76,14 @@
 
 	// Queries - backend handles authentication, initialData prevents empty state during auth sync
 	const organizationListResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.listOrganizations,
-					{},
-					{ initialData: initialData?.organizationList }
-				)
-			: undefined
+		useQuery(api.organizations.queries.listOrganizations, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.organizationList
+		})
 	);
 	const activeOrganizationResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.getActiveOrganization,
-					{},
-					{ initialData: initialData?.activeOrganization }
-				)
-			: undefined
+		useQuery(api.organizations.queries.getActiveOrganization, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.activeOrganization
+		})
 	);
 	// Derived state - fallback to initialData during auth sync
 	const organizationList = $derived(
@@ -221,6 +213,12 @@
 			updateActiveOrg();
 		}
 	});
+
+	$inspect(activeOrganizationResponse, 'activeOrganizationResponse OrganizationSwitcher.svelte');
+	$inspect(activeOrganization, 'activeOrganization OrganizationSwitcher.svelte');
+	$inspect(organizationListResponse, 'organizationListResponse OrganizationSwitcher.svelte');
+	$inspect(organizationList, 'organizationList OrganizationSwitcher.svelte');
+	$inspect(isAuthenticated, 'isAuthenticated OrganizationSwitcher.svelte');
 </script>
 
 {#if !AUTH_CONSTANTS.organizations}

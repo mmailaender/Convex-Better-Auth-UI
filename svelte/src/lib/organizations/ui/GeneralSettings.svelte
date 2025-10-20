@@ -56,18 +56,14 @@
 
 	// Queries
 	const userResponse = $derived(
-		isAuthenticated
-			? useQuery(api.users.queries.getActiveUser, {}, { initialData: initialData?.activeUser })
-			: undefined
+		useQuery(api.users.queries.getActiveUser, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.activeUser
+		})
 	);
 	const organizationResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.getActiveOrganization,
-					{},
-					{ initialData: initialData?.activeOrganization }
-				)
-			: undefined
+		useQuery(api.organizations.queries.getActiveOrganization, isAuthenticated ? {} : 'skip', {
+			initialData: initialData?.activeOrganization
+		})
 	);
 	// Derived data
 	const user = $derived(userResponse?.data ?? initialData?.activeUser);
@@ -211,6 +207,9 @@
 			toast.error(`Failed to update organization: ${message}`);
 		}
 	}
+
+	$inspect(activeOrganization, 'activeOrganization GeneralSettings.svelte');
+	$inspect(user, 'user GeneralSettings.svelte');
 </script>
 
 {#if user && activeOrganization}
