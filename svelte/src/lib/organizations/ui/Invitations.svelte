@@ -32,17 +32,16 @@
 
 	// Auth
 	const auth = useAuth();
-	const isAuthenticated = $derived(auth.isAuthenticated);
-	const roles = $derived(
-		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
-	);
+	const roles = useRoles({ initialData: initialData?.role });
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries
-	const invitationListResponse = $derived(
-		useQuery(api.organizations.invitations.queries.listInvitations, isAuthenticated ? {} : 'skip', {
+	const invitationListResponse = useQuery(
+		api.organizations.invitations.queries.listInvitations,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
 			initialData: initialData?.invitationList
-		})
+		}
 	);
 	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
 

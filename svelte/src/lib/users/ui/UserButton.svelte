@@ -45,10 +45,12 @@
 	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Queries
-	const activeUserResponse = $derived(
-		useQuery(api.users.queries.getActiveUser, isAuthenticated ? {} : 'skip', {
+	const activeUserResponse = useQuery(
+		api.users.queries.getActiveUser,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
 			initialData: initialData?.activeUser
-		})
+		}
 	);
 	// Derived state - prefer initialData over empty query results during auth sync
 	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);

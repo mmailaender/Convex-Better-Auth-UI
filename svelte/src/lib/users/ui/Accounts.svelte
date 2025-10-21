@@ -71,12 +71,13 @@
 
 	// Auth
 	const auth = useAuth();
-	const isAuthenticated = $derived(auth.isAuthenticated);
 
-	let accountListResponse = $derived(
-		useQuery(api.users.queries.listAccounts, isAuthenticated ? {} : 'skip', {
+	let accountListResponse = useQuery(
+		api.users.queries.listAccounts,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
 			initialData: initialData?.accountList
-		})
+		}
 	);
 	let accountList = $derived(accountListResponse?.data ?? initialData?.accountList);
 

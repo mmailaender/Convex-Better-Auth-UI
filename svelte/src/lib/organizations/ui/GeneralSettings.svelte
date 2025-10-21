@@ -46,24 +46,25 @@
 
 	// Auth
 	const auth = useAuth();
-	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	const client = useConvexClient();
-	const roles = $derived(
-		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
-	);
+	const roles = useRoles({ initialData: initialData?.role });
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries
-	const userResponse = $derived(
-		useQuery(api.users.queries.getActiveUser, isAuthenticated ? {} : 'skip', {
+	const userResponse = useQuery(
+		api.users.queries.getActiveUser,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
 			initialData: initialData?.activeUser
-		})
+		}
 	);
-	const organizationResponse = $derived(
-		useQuery(api.organizations.queries.getActiveOrganization, isAuthenticated ? {} : 'skip', {
+	const organizationResponse = useQuery(
+		api.organizations.queries.getActiveOrganization,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
 			initialData: initialData?.activeOrganization
-		})
+		}
 	);
 	// Derived data
 	const user = $derived(userResponse?.data ?? initialData?.activeUser);
