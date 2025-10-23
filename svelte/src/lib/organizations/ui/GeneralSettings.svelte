@@ -208,9 +208,6 @@
 			toast.error(`Failed to update organization: ${message}`);
 		}
 	}
-
-	$inspect(activeOrganization, 'activeOrganization GeneralSettings.svelte');
-	$inspect(user, 'user GeneralSettings.svelte');
 </script>
 
 {#if user && activeOrganization}

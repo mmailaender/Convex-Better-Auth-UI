@@ -215,12 +215,6 @@
 			updateActiveOrg();
 		}
 	});
-
-	$inspect(activeOrganizationResponse, 'activeOrganizationResponse OrganizationSwitcher.svelte');
-	$inspect(activeOrganization, 'activeOrganization OrganizationSwitcher.svelte');
-	$inspect(organizationListResponse, 'organizationListResponse OrganizationSwitcher.svelte');
-	$inspect(organizationList, 'organizationList OrganizationSwitcher.svelte');
-	$inspect(isAuthenticated, 'isAuthenticated OrganizationSwitcher.svelte');
 </script>
 
 {#if !AUTH_CONSTANTS.organizations}
