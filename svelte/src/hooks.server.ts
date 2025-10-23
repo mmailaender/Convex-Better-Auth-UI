@@ -1,4 +1,5 @@
 import { sequence } from '@sveltejs/kit/hooks';
+import { building } from '$app/environment';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { getSessionCookie } from 'better-auth/cookies';
 import { createRouteMatcher } from '$lib/primitives/utils/routeMatcher';
@@ -35,6 +36,12 @@ const withRedirect = (to: string, event: Parameters<Handle>[0]['event']) =>
 /* --------------------------------------------------------- */
 
 const requireAuth: Handle = async ({ event, resolve }) => {
+	// ⛑️ During build/prerender, skip all auth logic.
+	// This prevents "Cannot access url.search on a page with prerendering enabled".
+	if (building) {
+		return resolve(event);
+	}
+
 	const { pathname } = event.url;
 	const sessionCookie = getSessionCookie(event.request);
 
