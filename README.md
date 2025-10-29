@@ -14,8 +14,6 @@
     <a href="https://etesie.dev/docs/auth/02-getting-started/01-sveltekit"><strong>→ Get started in 15 minutes</strong></a>
     <br />
     <br />
-    <a href="https://etesie.dev">Website</a>
-    ·
     <a href="https://github.com/mmailaender/auth/issues">Issues</a>
   </p>
 </p>
