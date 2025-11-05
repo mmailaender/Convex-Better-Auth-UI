@@ -75,23 +75,19 @@
 	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Queries - backend handles authentication, initialData prevents empty state during auth sync
-	const organizationListResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.listOrganizations,
-					{},
-					{ initialData: initialData?.organizationList }
-				)
-			: undefined
+	const organizationListResponse = useQuery(
+		api.organizations.queries.listOrganizations,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
+			initialData: initialData?.organizationList
+		}
 	);
-	const activeOrganizationResponse = $derived(
-		isAuthenticated
-			? useQuery(
-					api.organizations.queries.getActiveOrganization,
-					{},
-					{ initialData: initialData?.activeOrganization }
-				)
-			: undefined
+	const activeOrganizationResponse = useQuery(
+		api.organizations.queries.getActiveOrganization,
+		() => (auth.isAuthenticated ? {} : 'skip'),
+		{
+			initialData: initialData?.activeOrganization
+		}
 	);
 	// Derived state - fallback to initialData during auth sync
 	const organizationList = $derived(
@@ -100,9 +96,7 @@
 	const activeOrganization = $derived(
 		activeOrganizationResponse?.data ?? initialData?.activeOrganization
 	);
-	const roles = $derived(
-		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
-	);
+	const roles = useRoles({ initialData: initialData?.role });
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Component state

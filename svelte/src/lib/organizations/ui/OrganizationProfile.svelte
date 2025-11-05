@@ -12,7 +12,7 @@
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import UserIcon from '@lucide/svelte/icons/user';
-	import WalletIcon from '@lucide/svelte/icons/wallet';
+	// import WalletIcon from '@lucide/svelte/icons/wallet';
 	import XIcon from '@lucide/svelte/icons/x';
 	// Widgets
 	import GeneralSettings from '$lib/organizations/ui/GeneralSettings.svelte';
@@ -26,7 +26,6 @@
 	// API
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { api } from '$convex/_generated/api';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// API Types
 	import type { authClient } from '$lib/auth/api/auth-client';
@@ -65,13 +64,7 @@
 
 	const { open = false, onSuccessfulDelete, initialData }: OrganizationProfileProps = $props();
 
-	// Auth
-	const auth = useAuth();
-	const isAuthenticated = $derived(auth.isAuthenticated);
-
-	const roles = $derived(
-		useRoles({ initialData: initialData?.role, isAuthenticated: isAuthenticated })
-	);
+	const roles = useRoles({ initialData: initialData?.role });
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// State

@@ -1,5 +1,11 @@
 # auth
 
+## 0.1.0
+
+### Minor Changes
+
+- fix: Upgrade to convex-svelte skip-query to fix effect in teardown errors
+
 ## 0.0.17
 
 ### Patch Changes
