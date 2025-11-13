@@ -1,5 +1,11 @@
 # auth
 
+## 0.2.1
+
+### Patch Changes
+
+- fix: resolved lint errors
+
 ## 0.2.0
 
 ### Minor Changes
