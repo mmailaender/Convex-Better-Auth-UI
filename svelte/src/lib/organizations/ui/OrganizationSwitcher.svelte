@@ -110,6 +110,7 @@
 	let backSwipeGuard: boolean = $state(false);
 	let guardTimer: ReturnType<typeof setTimeout> | null = null;
 	let prevShouldBeOpen = false;
+	let didReplaceActiveOrgPlaceholder: boolean = $state(false);
 
 	// Handler functions
 
@@ -141,6 +142,23 @@
 		const ua = navigator.userAgent;
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+
+		const initialSlug = activeOrganization?.slug ?? initialData?.activeOrganization?.slug;
+		if (initialSlug) {
+			const pathname = page.url.pathname;
+			if (/(?:^|\/)\b(active-organization|active-org)\b(?=\/|$)/.test(pathname)) {
+				const newPathname = pathname.replace(
+					/\/(active-organization|active-org)(?=\/|$)/g,
+					`/${initialSlug}`
+				);
+				goto(`${newPathname}${page.url.search}${page.url.hash}`, {
+					replaceState: true,
+					noScroll: true,
+					keepFocus: true
+				});
+				didReplaceActiveOrgPlaceholder = true;
+			}
+		}
 
 		const onPopState = () => {
 			if (!isIOS) return;
