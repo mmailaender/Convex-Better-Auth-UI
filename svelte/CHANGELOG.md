@@ -1,5 +1,11 @@
 # auth
 
+## 0.1.2
+
+### Patch Changes
+
+- feat: added api-keys plugin
+
 ## 0.1.1
 
 ### Patch Changes

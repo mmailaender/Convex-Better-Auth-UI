@@ -39,6 +39,7 @@ export type AuthConstants =
 			sendEmails?: false; // if false, no email features allowed
 			validateEmails?: boolean;
 			organizations?: false;
+			apiKeys?: boolean;
 			terms?: string;
 			privacy?: string;
 	  }
@@ -50,6 +51,7 @@ export type AuthConstants =
 			sendEmails: true; // required if using emailOTP, magicLink or organizations
 			validateEmails?: boolean;
 			organizations?: boolean;
+			apiKeys?: boolean;
 			terms?: string;
 			privacy?: string;
 	  };

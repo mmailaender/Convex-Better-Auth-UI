@@ -1,6 +1,6 @@
 /* eslint-disable */
 /**
- * Generated `api` utility.
+ * Generated `ComponentApi` utility.
  *
  * THIS CODE IS AUTOMATICALLY GENERATED.
  *
@@ -8,203 +8,21 @@
  * @module
  */
 
-import type * as auth from "../auth.js";
-import type * as email from "../email.js";
-import type * as http from "../http.js";
-import type * as model_emails_templates_baseEmail from "../model/emails/templates/baseEmail.js";
-import type * as model_emails_templates_emailTemplates from "../model/emails/templates/emailTemplates.js";
-import type * as model_emails_validateEmail from "../model/emails/validateEmail.js";
-import type * as model_organizations_index from "../model/organizations/index.js";
-import type * as organizations_invitations_queries from "../organizations/invitations/queries.js";
-import type * as organizations_members_mutations from "../organizations/members/mutations.js";
-import type * as organizations_mutations from "../organizations/mutations.js";
-import type * as organizations_queries from "../organizations/queries.js";
-import type * as storage from "../storage.js";
-import type * as users_actions from "../users/actions.js";
-import type * as users_mutations from "../users/mutations.js";
-import type * as users_queries from "../users/queries.js";
-
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-
-declare const fullApi: ApiFromModules<{
-  auth: typeof auth;
-  email: typeof email;
-  http: typeof http;
-  "model/emails/templates/baseEmail": typeof model_emails_templates_baseEmail;
-  "model/emails/templates/emailTemplates": typeof model_emails_templates_emailTemplates;
-  "model/emails/validateEmail": typeof model_emails_validateEmail;
-  "model/organizations/index": typeof model_organizations_index;
-  "organizations/invitations/queries": typeof organizations_invitations_queries;
-  "organizations/members/mutations": typeof organizations_members_mutations;
-  "organizations/mutations": typeof organizations_mutations;
-  "organizations/queries": typeof organizations_queries;
-  storage: typeof storage;
-  "users/actions": typeof users_actions;
-  "users/mutations": typeof users_mutations;
-  "users/queries": typeof users_queries;
-}>;
+import type { FunctionReference } from "convex/server";
 
 /**
- * A utility for referencing Convex functions in your app's public API.
+ * A utility for referencing a Convex component's exposed API.
  *
+ * Useful when expecting a parameter like `components.myComponent`.
  * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
+ * ```ts
+ * async function myFunction(ctx: QueryCtx, component: ComponentApi) {
+ *   return ctx.runQuery(component.someFile.someQuery, { ...args });
+ * }
  * ```
  */
-export declare const api: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "public">
->;
-
-/**
- * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
- */
-export declare const internal: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "internal">
->;
-
-export declare const components: {
-  resend: {
-    lib: {
-      cancelEmail: FunctionReference<
-        "mutation",
-        "internal",
-        { emailId: string },
-        null
-      >;
-      cleanupAbandonedEmails: FunctionReference<
-        "mutation",
-        "internal",
-        { olderThan?: number },
-        null
-      >;
-      cleanupOldEmails: FunctionReference<
-        "mutation",
-        "internal",
-        { olderThan?: number },
-        null
-      >;
-      createManualEmail: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          from: string;
-          headers?: Array<{ name: string; value: string }>;
-          replyTo?: Array<string>;
-          subject: string;
-          to: string;
-        },
-        string
-      >;
-      get: FunctionReference<
-        "query",
-        "internal",
-        { emailId: string },
-        {
-          complained: boolean;
-          createdAt: number;
-          errorMessage?: string;
-          finalizedAt: number;
-          from: string;
-          headers?: Array<{ name: string; value: string }>;
-          html?: string;
-          opened: boolean;
-          replyTo: Array<string>;
-          resendId?: string;
-          segment: number;
-          status:
-            | "waiting"
-            | "queued"
-            | "cancelled"
-            | "sent"
-            | "delivered"
-            | "delivery_delayed"
-            | "bounced"
-            | "failed";
-          subject: string;
-          text?: string;
-          to: string;
-        } | null
-      >;
-      getStatus: FunctionReference<
-        "query",
-        "internal",
-        { emailId: string },
-        {
-          complained: boolean;
-          errorMessage: string | null;
-          opened: boolean;
-          status:
-            | "waiting"
-            | "queued"
-            | "cancelled"
-            | "sent"
-            | "delivered"
-            | "delivery_delayed"
-            | "bounced"
-            | "failed";
-        } | null
-      >;
-      handleEmailEvent: FunctionReference<
-        "mutation",
-        "internal",
-        { event: any },
-        null
-      >;
-      sendEmail: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          from: string;
-          headers?: Array<{ name: string; value: string }>;
-          html?: string;
-          options: {
-            apiKey: string;
-            initialBackoffMs: number;
-            onEmailEvent?: { fnHandle: string };
-            retryAttempts: number;
-            testMode: boolean;
-          };
-          replyTo?: Array<string>;
-          subject: string;
-          text?: string;
-          to: string;
-        },
-        string
-      >;
-      updateManualEmail: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          emailId: string;
-          errorMessage?: string;
-          resendId?: string;
-          status:
-            | "waiting"
-            | "queued"
-            | "cancelled"
-            | "sent"
-            | "delivered"
-            | "delivery_delayed"
-            | "bounced"
-            | "failed";
-        },
-        null
-      >;
-    };
-  };
-  betterAuth: {
+export type ComponentApi<Name extends string | undefined = string | undefined> =
+  {
     adapter: {
       create: FunctionReference<
         "mutation",
@@ -333,7 +151,8 @@ export declare const components: {
           onCreateHandle?: string;
           select?: Array<string>;
         },
-        any
+        any,
+        Name
       >;
       deleteMany: FunctionReference<
         "mutation",
@@ -663,7 +482,8 @@ export declare const components: {
             numItems: number;
           };
         },
-        any
+        any,
+        Name
       >;
       deleteOne: FunctionReference<
         "mutation",
@@ -985,7 +805,8 @@ export declare const components: {
               };
           onDeleteHandle?: string;
         },
-        any
+        any,
+        Name
       >;
       findMany: FunctionReference<
         "query",
@@ -1036,7 +857,8 @@ export declare const components: {
               | null;
           }>;
         },
-        any
+        any,
+        Name
       >;
       findOne: FunctionReference<
         "query",
@@ -1077,7 +899,8 @@ export declare const components: {
               | null;
           }>;
         },
-        any
+        any,
+        Name
       >;
       updateMany: FunctionReference<
         "mutation",
@@ -1499,7 +1322,8 @@ export declare const components: {
             numItems: number;
           };
         },
-        any
+        any,
+        Name
       >;
       updateOne: FunctionReference<
         "mutation",
@@ -1913,7 +1737,8 @@ export declare const components: {
               };
           onUpdateHandle?: string;
         },
-        any
+        any,
+        Name
       >;
     };
     organization: {
@@ -1933,13 +1758,15 @@ export declare const components: {
           updatedAt: number;
           userId?: null | string;
         },
-        null
+        null,
+        Name
       >;
       setActiveOrganization: FunctionReference<
         "mutation",
         "internal",
         { sessionId: string; userId: string },
-        null
+        null,
+        Name
       >;
     };
     user: {
@@ -1959,7 +1786,8 @@ export declare const components: {
           name: string;
           updatedAt: number;
           userId?: null | string;
-        }
+        },
+        Name
       >;
       getUserById: FunctionReference<
         "query",
@@ -1977,7 +1805,8 @@ export declare const components: {
           name: string;
           updatedAt: number;
           userId?: null | string;
-        }
+        },
+        Name
       >;
       updateUser: FunctionReference<
         "mutation",
@@ -1996,8 +1825,8 @@ export declare const components: {
           };
           userId: string;
         },
-        null
+        null,
+        Name
       >;
     };
   };
-};
