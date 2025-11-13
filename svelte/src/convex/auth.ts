@@ -8,7 +8,13 @@ import { betterAuth } from 'better-auth';
 
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
-import { emailOTP, magicLink, organization, apiKey } from 'better-auth/plugins';
+import {
+	emailOTP,
+	magicLink,
+	organization,
+	apiKey,
+	deviceAuthorization
+} from 'better-auth/plugins';
 
 // Emails
 import {
@@ -343,6 +349,13 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 						})
 					]
 				: []),
-			...(AUTH_CONSTANTS.apiKeys ? [apiKey()] : [])
+			...(AUTH_CONSTANTS.apiKeys ? [apiKey()] : []),
+			...(AUTH_CONSTANTS.deviceAuthorization
+				? [
+						deviceAuthorization({
+							expiresIn: '7d' // Device code expiration time
+						})
+					]
+				: [])
 		]
 	});

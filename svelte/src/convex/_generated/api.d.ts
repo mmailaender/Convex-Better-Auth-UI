@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as deviceAuthorization from "../deviceAuthorization.js";
 import type * as email from "../email.js";
 import type * as http from "../http.js";
 import type * as model_emails_templates_baseEmail from "../model/emails/templates/baseEmail.js";
@@ -32,6 +33,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  deviceAuthorization: typeof deviceAuthorization;
   email: typeof email;
   http: typeof http;
   "model/emails/templates/baseEmail": typeof model_emails_templates_baseEmail;
@@ -329,6 +331,20 @@ export declare const components: {
                   userId: string;
                 };
                 model: "apikey";
+              }
+            | {
+                data: {
+                  clientId?: null | string;
+                  deviceCode: string;
+                  expiresAt: number;
+                  lastPolledAt?: null | number;
+                  pollingInterval?: null | number;
+                  scope?: null | string;
+                  status: string;
+                  userCode: string;
+                  userId?: null | string;
+                };
+                model: "deviceCode";
               };
           onCreateHandle?: string;
           select?: Array<string>;
@@ -631,6 +647,42 @@ export declare const components: {
                     | "updatedAt"
                     | "permissions"
                     | "metadata"
+                    | "_id";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "deviceCode";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "deviceCode"
+                    | "userCode"
+                    | "userId"
+                    | "expiresAt"
+                    | "status"
+                    | "lastPolledAt"
+                    | "pollingInterval"
+                    | "clientId"
+                    | "scope"
                     | "_id";
                   operator?:
                     | "lt"
@@ -982,6 +1034,42 @@ export declare const components: {
                     | Array<number>
                     | null;
                 }>;
+              }
+            | {
+                model: "deviceCode";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "deviceCode"
+                    | "userCode"
+                    | "userId"
+                    | "expiresAt"
+                    | "status"
+                    | "lastPolledAt"
+                    | "pollingInterval"
+                    | "clientId"
+                    | "scope"
+                    | "_id";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
               };
           onDeleteHandle?: string;
         },
@@ -1001,7 +1089,8 @@ export declare const components: {
             | "organization"
             | "member"
             | "invitation"
-            | "apikey";
+            | "apikey"
+            | "deviceCode";
           offset?: number;
           paginationOpts: {
             cursor: string | null;
@@ -1051,7 +1140,8 @@ export declare const components: {
             | "organization"
             | "member"
             | "invitation"
-            | "apikey";
+            | "apikey"
+            | "deviceCode";
           select?: Array<string>;
           where?: Array<{
             connector?: "AND" | "OR";
@@ -1467,6 +1557,53 @@ export declare const components: {
                     | "updatedAt"
                     | "permissions"
                     | "metadata"
+                    | "_id";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "deviceCode";
+                update: {
+                  clientId?: null | string;
+                  deviceCode?: string;
+                  expiresAt?: number;
+                  lastPolledAt?: null | number;
+                  pollingInterval?: null | number;
+                  scope?: null | string;
+                  status?: string;
+                  userCode?: string;
+                  userId?: null | string;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "deviceCode"
+                    | "userCode"
+                    | "userId"
+                    | "expiresAt"
+                    | "status"
+                    | "lastPolledAt"
+                    | "pollingInterval"
+                    | "clientId"
+                    | "scope"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1910,10 +2047,77 @@ export declare const components: {
                     | Array<number>
                     | null;
                 }>;
+              }
+            | {
+                model: "deviceCode";
+                update: {
+                  clientId?: null | string;
+                  deviceCode?: string;
+                  expiresAt?: number;
+                  lastPolledAt?: null | number;
+                  pollingInterval?: null | number;
+                  scope?: null | string;
+                  status?: string;
+                  userCode?: string;
+                  userId?: null | string;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "deviceCode"
+                    | "userCode"
+                    | "userId"
+                    | "expiresAt"
+                    | "status"
+                    | "lastPolledAt"
+                    | "pollingInterval"
+                    | "clientId"
+                    | "scope"
+                    | "_id";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
               };
           onUpdateHandle?: string;
         },
         any
+      >;
+    };
+    auth: {
+      deviceCode: FunctionReference<
+        "query",
+        "internal",
+        { deviceCode: string },
+        {
+          _creationTime: number;
+          _id: string;
+          clientId?: null | string;
+          deviceCode: string;
+          expiresAt: number;
+          lastPolledAt?: null | number;
+          pollingInterval?: null | number;
+          scope?: null | string;
+          status: string;
+          userCode: string;
+          userId?: null | string;
+        } | null
       >;
     };
     organization: {
