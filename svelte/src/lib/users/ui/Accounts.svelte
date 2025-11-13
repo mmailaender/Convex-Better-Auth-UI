@@ -435,17 +435,19 @@
 										Update
 									</button>
 								{/if}
-								<button
-									class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
-									disabled={accountList.length <= 1 || unlinkingAccountId === account.id}
-									onclick={() => unlinkAccount(account.accountId, account.providerId)}
-								>
-									{#if unlinkingAccountId === account.id}
-										Unlinking...
-									{:else}
-										<Trash2Icon class="size-4" />
-									{/if}
-								</button>
+								{#if accountList.length > 1}
+									<button
+										class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
+										disabled={unlinkingAccountId === account.id}
+										onclick={() => unlinkAccount(account.accountId, account.providerId)}
+									>
+										{#if unlinkingAccountId === account.id}
+											Unlinking...
+										{:else}
+											<Trash2Icon class="size-4" />
+										{/if}
+									</button>
+								{/if}
 							</div>
 						</div>
 						{#if account.providerId === 'credential'}

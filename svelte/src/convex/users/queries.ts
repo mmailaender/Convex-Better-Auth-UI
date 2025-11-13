@@ -51,3 +51,22 @@ export const listAccounts = query({
 		}
 	}
 });
+
+export const listApiKeys = query({
+	handler: async (ctx) => {
+		await authComponent.getAuthUser(ctx);
+
+		try {
+			const auth = createAuth(ctx);
+			const apiKeys = await auth.api.listApiKeys({
+				headers: await authComponent.getHeaders(ctx)
+			});
+			return apiKeys;
+		} catch (error) {
+			if (error instanceof APIError) {
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
+			}
+			throw error;
+		}
+	}
+});

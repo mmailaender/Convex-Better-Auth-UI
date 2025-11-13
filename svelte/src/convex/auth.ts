@@ -8,7 +8,7 @@ import { betterAuth } from 'better-auth';
 
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
-import { emailOTP, magicLink, organization } from 'better-auth/plugins';
+import { emailOTP, magicLink, organization, apiKey } from 'better-auth/plugins';
 
 // Emails
 import {
@@ -288,48 +288,61 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 		plugins: [
 			// The Convex plugin is required
 			convex(),
-			emailOTP({
-				sendVerificationOTP: async ({ email, otp }) => {
-					await sendOTPVerification(requireActionCtx(ctx), {
-						to: email,
-						code: otp
-					});
-				}
-			}),
-			magicLink({
-				sendMagicLink: async ({ email, url }) => {
-					await sendMagicLink(requireActionCtx(ctx), {
-						to: email,
-						url
-					});
-				}
-			}),
-			organization({
-				schema: {
-					organization: {
-						additionalFields: {
-							logoId: {
-								type: 'string',
-								required: false
+			...(AUTH_CONSTANTS.providers.emailOTP
+				? [
+						emailOTP({
+							sendVerificationOTP: async ({ email, otp }) => {
+								await sendOTPVerification(requireActionCtx(ctx), {
+									to: email,
+									code: otp
+								});
 							}
-						}
-					}
-				},
-				sendInvitationEmail: async (data) => {
-					await sendInviteMember(requireActionCtx(ctx), {
-						to: data.email,
-						url: `${siteUrl}/api/organization/accept-invitation/${data.id}`,
-						inviter: {
-							name: data.inviter.user.name,
-							email: data.inviter.user.email,
-							image: data.inviter.user.image ?? undefined
-						},
-						organization: {
-							name: data.organization.name,
-							logo: data.organization.logo ?? undefined
-						}
-					});
-				}
-			})
+						})
+					]
+				: []),
+			...(AUTH_CONSTANTS.providers.magicLink
+				? [
+						magicLink({
+							sendMagicLink: async ({ email, url }) => {
+								await sendMagicLink(requireActionCtx(ctx), {
+									to: email,
+									url
+								});
+							}
+						})
+					]
+				: []),
+			...(AUTH_CONSTANTS.organizations
+				? [
+						organization({
+							schema: {
+								organization: {
+									additionalFields: {
+										logoId: {
+											type: 'string',
+											required: false
+										}
+									}
+								}
+							},
+							sendInvitationEmail: async (data) => {
+								await sendInviteMember(requireActionCtx(ctx), {
+									to: data.email,
+									url: `${siteUrl}/api/organization/accept-invitation/${data.id}`,
+									inviter: {
+										name: data.inviter.user.name,
+										email: data.inviter.user.email,
+										image: data.inviter.user.image ?? undefined
+									},
+									organization: {
+										name: data.organization.name,
+										logo: data.organization.logo ?? undefined
+									}
+								});
+							}
+						})
+					]
+				: []),
+			...(AUTH_CONSTANTS.apiKeys ? [apiKey()] : [])
 		]
 	});

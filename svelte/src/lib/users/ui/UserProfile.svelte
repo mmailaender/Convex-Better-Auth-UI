@@ -3,11 +3,16 @@
 	import Emails from '$lib/users/ui/Emails.svelte';
 	import DeleteUser from '$lib/users/ui/DeleteUser.svelte';
 	import Accounts from './Accounts.svelte';
+	import ApiKeys from './ApiKeys.svelte';
 
 	import type { FunctionReturnType } from 'convex/server';
 	import type { api } from '$convex/_generated/api';
 	type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;
 	type ListAccountsType = FunctionReturnType<typeof api.users.queries.listAccounts>;
+
+	// Constants
+	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+
 	let {
 		initialData
 	}: {
@@ -24,10 +29,9 @@
 		<Emails {initialData} />
 	</div>
 
-	<div class="flex h-full flex-col">
-		<Accounts {initialData} />
-	</div>
-	<div>
-		<DeleteUser />
-	</div>
+	<Accounts {initialData} />
+	{#if AUTH_CONSTANTS.apiKeys}
+		<ApiKeys />
+	{/if}
+	<DeleteUser />
 </div>

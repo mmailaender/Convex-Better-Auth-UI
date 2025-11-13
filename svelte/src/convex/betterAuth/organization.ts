@@ -34,9 +34,7 @@ export const deleteUser = mutation({
 				// Count members in this organization.
 				const orgMembers = await ctx.db
 					.query('member')
-					.withIndex('organizationId_userId', (q) =>
-						q.eq('organizationId', membership.organizationId)
-					)
+					.withIndex('organizationId', (q) => q.eq('organizationId', membership.organizationId))
 					.collect();
 
 				if (orgMembers.length > 1) {
@@ -63,7 +61,7 @@ export const deleteUser = mutation({
 		// 3) Delete invitations where the user is the invitee (by email).
 		const invitations = await ctx.db
 			.query('invitation')
-			.withIndex('email_organizationId_status', (q) => q.eq('email', args.email))
+			.withIndex('email', (q) => q.eq('email', args.email))
 			.collect();
 
 		for (const invitation of invitations) {
