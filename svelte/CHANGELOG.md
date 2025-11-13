@@ -1,5 +1,11 @@
 # auth
 
+## 0.1.1
+
+### Patch Changes
+
+- feat: replace active-org placeholder with actual organization slug in URL
+
 ## 0.1.0
 
 ### Minor Changes
