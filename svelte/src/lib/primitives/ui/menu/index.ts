@@ -1,4 +1,3 @@
-// import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
 import { Menu as MenuPrimitive } from '@ark-ui/svelte/menu';
 
 import Trigger from './menu-trigger.svelte';
