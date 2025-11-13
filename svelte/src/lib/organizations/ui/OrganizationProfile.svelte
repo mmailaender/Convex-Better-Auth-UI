@@ -200,7 +200,7 @@
 	// Sync tabs with URL params
 	$effect(() => {
 		// Anchor to SvelteKit navigations, but read from window for instant shallow history updates
-		const _ = page.url;
+		void page.url;
 		const sp = new URLSearchParams(window.location.search);
 		const dialogOpen = sp.get('dialog') === 'organization-profile';
 		const tabParam = sp.get('tab') ?? '';

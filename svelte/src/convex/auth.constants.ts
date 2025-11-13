@@ -1,4 +1,4 @@
-import { AuthConstants } from './auth.constants.types';
+import type { AuthConstants } from './auth.constants.types';
 
 export const AUTH_CONSTANTS: AuthConstants = {
 	providers: {

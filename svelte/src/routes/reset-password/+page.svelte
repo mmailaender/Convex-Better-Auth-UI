@@ -12,7 +12,7 @@
 
 	// API
 	import { authClient } from '$lib/auth/api/auth-client';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 
 	type ResetState = 'loading' | 'valid-token' | 'invalid-token' | 'error';
 
@@ -22,7 +22,6 @@
 	let confirmPassword: string = $state('');
 	let isSubmitting: boolean = $state(false);
 	let token: string | null = $state(null);
-	let showConfirmPassword: boolean = $state(false);
 
 	// Extract token from URL parameters and validate
 	onMount(() => {

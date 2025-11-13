@@ -39,7 +39,7 @@
 	async function handleApprove() {
 		actionError = null;
 		actionLoading = 'approve';
-		const { data, error } = await authClient.device.approve({ userCode });
+		const { error } = await authClient.device.approve({ userCode });
 		if (error) {
 			actionError = error.error_description;
 			return;
@@ -52,7 +52,7 @@
 	async function handleDeny() {
 		actionError = null;
 		actionLoading = 'deny';
-		const { data, error } = await authClient.device.deny({ userCode });
+		const { error } = await authClient.device.deny({ userCode });
 		if (error) {
 			actionError = error.error_description;
 			return;

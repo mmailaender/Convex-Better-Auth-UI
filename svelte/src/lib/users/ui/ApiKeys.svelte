@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { api } from '$convex/_generated/api';
-	import { useQuery } from 'convex-svelte';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { authClient } from '$lib/auth/api/auth-client';
+	// Svelte
+	import { SvelteDate } from 'svelte/reactivity';
 
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
@@ -20,6 +18,12 @@
 	import { Portal } from '@ark-ui/svelte';
 	type ListApiKeysType = FunctionReturnType<typeof api.users.queries.listApiKeys>;
 	type ApiKeyType = ListApiKeysType[number];
+
+	// API
+	import { api } from '$convex/_generated/api';
+	import { useQuery } from 'convex-svelte';
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { authClient } from '$lib/auth/api/auth-client';
 
 	let { initialData }: { initialData?: { apiKeys?: ListApiKeysType } } = $props();
 
@@ -69,7 +73,7 @@
 
 	// Calculate expiration dates
 	const getExpirationDate = (days: number): Date => {
-		const date = new Date();
+		const date = new SvelteDate();
 		date.setDate(date.getDate() + days);
 		return date;
 	};
@@ -243,7 +247,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each apiKeys as apiKey}
+						{#each apiKeys as apiKey (apiKey.id)}
 							<tr>
 								<td>{apiKey.name}</td>
 								<td>{new Date(apiKey.createdAt).toLocaleDateString()}</td>

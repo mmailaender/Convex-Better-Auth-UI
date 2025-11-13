@@ -66,6 +66,9 @@ importers:
       '@eslint/compat':
         specifier: ^1.4.1
         version: 1.4.1(eslint@9.39.1(jiti@2.6.1))
+      '@eslint/js':
+        specifier: ^9.39.1
+        version: 9.39.1
       '@internationalized/date':
         specifier: ^3.10.0
         version: 3.10.0

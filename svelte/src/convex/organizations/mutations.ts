@@ -131,7 +131,7 @@ export const deleteOrganization = mutation({
 		if (!user) throw new ConvexError('Not authenticated');
 
 		const auth = createAuth(ctx);
-		let organization = await auth.api.getFullOrganization({
+		const organization = await auth.api.getFullOrganization({
 			query: {
 				organizationId: args.organizationId
 			},

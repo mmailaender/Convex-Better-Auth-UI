@@ -41,7 +41,7 @@
 	></div>
 	<!-- This creates the gaps between the bars -->
 	<div class="absolute top-0 left-0 z-10 flex h-1 w-full place-items-center gap-1 px-0.5">
-		{#each Array.from({ length: 4 }) as _, i (i)}
+		{#each Array.from({ length: 4 }).keys() as i (i)}
 			<div class="ring-surface-100-900 h-1 w-1/4 rounded-full ring-3"></div>
 		{/each}
 	</div>

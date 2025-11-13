@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Menu as MenuPrimitive } from '@ark-ui/svelte';
-	import CircleIcon from '@lucide/svelte/icons/circle';
 	import { cn, type WithoutChild } from '$lib/primitives/utils.js';
 	let {
 		ref = $bindable(null),

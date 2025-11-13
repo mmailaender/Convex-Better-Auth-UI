@@ -275,7 +275,7 @@
 					const cleaned = `${preUrl.pathname}${preUrl.search}${preUrl.hash}`;
 					window.history.replaceState(window.history.state, '', cleaned);
 				}
-			} catch (e) {
+			} catch {
 				// no-op
 			}
 
@@ -307,7 +307,7 @@
 				isPasswordDrawerOpen = false;
 				password = '';
 			}
-		} catch (error) {
+		} catch {
 			// No-op, errors are handled in setPassword
 		} finally {
 			isSettingPassword = false;
@@ -409,7 +409,7 @@
 		<span class="text-surface-600-400 text-xs">Linked Accounts</span>
 		{#if accountList && accountList.length > 0}
 			<div class="flex flex-col gap-3 pt-3">
-				{#each accountList as account}
+				{#each accountList as account (account.id)}
 					{@const ProviderIcon = getProviderIcon(account.providerId)}
 
 					<div class="border-surface-300-700 rounded-container flex w-full flex-col border p-3">

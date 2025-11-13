@@ -107,10 +107,8 @@
 	let isIOS: boolean = $state(false);
 
 	// Back-swipe guard
-	let backSwipeGuard: boolean = $state(false);
 	let guardTimer: ReturnType<typeof setTimeout> | null = null;
 	let prevShouldBeOpen = false;
-	let didReplaceActiveOrgPlaceholder: boolean = $state(false);
 
 	// Handler functions
 
@@ -156,7 +154,6 @@
 					noScroll: true,
 					keepFocus: true
 				});
-				didReplaceActiveOrgPlaceholder = true;
 			}
 		}
 
@@ -167,10 +164,8 @@
 			const shouldBeOpen = url.searchParams.get('dialog') === DIALOG_KEY;
 			const closingCandidate = prevShouldBeOpen && !shouldBeOpen;
 			if (closingCandidate) {
-				backSwipeGuard = true;
 				if (guardTimer) clearTimeout(guardTimer);
 				guardTimer = setTimeout(() => {
-					backSwipeGuard = false;
 					guardTimer = null;
 				}, 650);
 			}

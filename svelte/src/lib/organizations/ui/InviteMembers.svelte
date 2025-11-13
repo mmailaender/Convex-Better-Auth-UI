@@ -1,4 +1,6 @@
 <script lang="ts">
+	// Svelte
+	import { SvelteMap } from 'svelte/reactivity';
 	// Primitives
 	import { toast } from 'svelte-sonner';
 	import * as Select from '$lib/primitives/ui/select';
@@ -118,7 +120,7 @@
 
 		if (failed.length > 0) {
 			// Group failures by error.code so we can show one toast per error type
-			const groups = new Map<string, { message: string; emails: string[] }>();
+			const groups = new SvelteMap<string, { message: string; emails: string[] }>();
 
 			for (const r of failed) {
 				// Defensive defaults in case the shape changes
@@ -132,7 +134,7 @@
 			}
 
 			// Emit a toast per error code with its human message and all affected emails
-			for (const [code, { message, emails }] of groups.entries()) {
+			for (const [_code, { message, emails }] of groups.entries()) {
 				toast.error(`${message}: ${emails.join(', ')}`);
 			}
 		}
