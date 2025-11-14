@@ -7,7 +7,7 @@ import { components } from './_generated/api';
 export const requestDeviceCode = mutation({
 	args: { clientId: v.string() },
 	async handler(ctx, { clientId }) {
-		if (clientId != process.env.FIGMA_PLUGIN_CLIENT_ID) {
+		if (clientId != process.env.DEVICE_AUTHORIZATION_CLIENT_ID) {
 			throw new ConvexError('Invalid client_id');
 		}
 		const auth = createAuth(ctx);
@@ -24,7 +24,7 @@ export const requestDeviceCode = mutation({
 export const getDeviceCodeStatus = query({
 	args: { deviceCode: v.string(), clientId: v.string() },
 	async handler(ctx, { deviceCode, clientId }) {
-		if (clientId != process.env.FIGMA_PLUGIN_CLIENT_ID) {
+		if (clientId != process.env.DEVICE_AUTHORIZATION_CLIENT_ID) {
 			throw new ConvexError('Invalid client_id');
 		}
 		try {
@@ -41,7 +41,7 @@ export const getDeviceCodeStatus = query({
 export const createDeviceToken = mutation({
 	args: { deviceCode: v.string(), clientId: v.string() },
 	async handler(ctx, { deviceCode, clientId }) {
-		if (clientId != process.env.FIGMA_PLUGIN_CLIENT_ID) {
+		if (clientId != process.env.DEVICE_AUTHORIZATION_CLIENT_ID) {
 			throw new ConvexError('Invalid client_id');
 		}
 		const auth = createAuth(ctx);
