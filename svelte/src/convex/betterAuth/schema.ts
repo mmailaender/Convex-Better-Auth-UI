@@ -132,7 +132,9 @@ export const tables = {
 		pollingInterval: v.optional(v.union(v.null(), v.number())),
 		clientId: v.optional(v.union(v.null(), v.string())),
 		scope: v.optional(v.union(v.null(), v.string()))
-	}).index('deviceCode', ['deviceCode'])
+	})
+		.index('deviceCode', ['deviceCode'])
+		.index('userCode', ['userCode'])
 };
 
 const schema = defineSchema(tables);
