@@ -1,5 +1,11 @@
 # auth
 
+## 0.3.0
+
+### Minor Changes
+
+- feat: add api-key and device-authorization
+
 ## 0.2.1
 
 ### Patch Changes
