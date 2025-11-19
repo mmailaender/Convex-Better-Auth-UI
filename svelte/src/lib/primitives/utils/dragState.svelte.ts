@@ -21,7 +21,7 @@ const handleDragOver = (e: DragEvent) => {
 	e.preventDefault();
 };
 
-const handleDrop = (e: DragEvent) => {
+const handleDrop = () => {
 	dragCounter = 0;
 	isDraggingFile = false;
 };

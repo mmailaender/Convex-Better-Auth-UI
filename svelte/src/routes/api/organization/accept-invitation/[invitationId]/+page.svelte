@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	// Auth
 	import { authClient } from '$lib/auth/api/auth-client';
@@ -36,7 +37,7 @@
 			}
 
 			accepted = true;
-			goto('/');
+			goto(resolve('/'));
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'An unknown error occurred';
 		} finally {
@@ -73,14 +74,14 @@
 				<TriangleAlertIcon class="size-10" />
 				<h1 class="text-lg font-semibold">Couldn't accept invitation</h1>
 				<p class="text-sm opacity-80">{error}</p>
-				<a class="btn preset-tonal hover:preset-filled" href="/">Go to Home</a>
+				<a class="btn preset-tonal hover:preset-filled" href={resolve('/')}>Go to Home</a>
 			</div>
 		{:else if !invitationId}
 			<div class="flex flex-col items-center gap-4">
 				<TriangleAlertIcon class="size-10" />
 				<h1 class="text-lg font-semibold">Invalid invite link</h1>
 				<p class="text-sm opacity-60">Please use a valid invite link.</p>
-				<a class="btn preset-tonal hover:preset-filled" href="/">Go to Home</a>
+				<a class="btn preset-tonal hover:preset-filled" href={resolve('/')}>Go to Home</a>
 			</div>
 		{/if}
 	</div>

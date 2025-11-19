@@ -6,13 +6,7 @@
 		"description": "Plug & Play Auth Widgets for your application",
 		"homepage": "https://etesie.dev/docs/auth",
 		"repository": "https://github.com/mmailaender/auth",
-		"tags": [
-			"auth",
-			"svelte",
-			"ui",
-			"convex",
-			"better-auth"
-		]
+		"tags": ["auth", "svelte", "ui", "convex", "better-auth"]
 	},
 	"defaultPaths": {
 		"convex": "./src/convex",
@@ -37,13 +31,7 @@
 					"docs": false,
 					"subdirectory": true,
 					"list": false,
-					"files": [
-						"api.d.ts",
-						"api.js",
-						"dataModel.d.ts",
-						"server.d.ts",
-						"server.js"
-					],
+					"files": ["api.d.ts", "api.js", "dataModel.d.ts", "server.d.ts", "server.js"],
 					"localDependencies": [
 						"convex/auth",
 						"convex/betterAuth",
@@ -55,9 +43,7 @@
 						"convex/users",
 						"convex/schema"
 					],
-					"dependencies": [
-						"convex@^1.27.3"
-					],
+					"dependencies": ["convex@^1.27.3"],
 					"devDependencies": [],
 					"_imports_": {
 						"../auth.js": "{{convex/auth}}.js",
@@ -92,9 +78,7 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"auth.config.ts"
-					],
+					"files": ["auth.config.ts"],
 					"localDependencies": [],
 					"_imports_": {},
 					"dependencies": [],
@@ -108,12 +92,8 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"auth.constants.ts"
-					],
-					"localDependencies": [
-						"convex/auth.constants"
-					],
+					"files": ["auth.constants.ts"],
+					"localDependencies": ["convex/auth.constants"],
 					"_imports_": {
 						"./auth.constants.types": "{{convex/auth.constants}}.types"
 					},
@@ -128,9 +108,7 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"auth.constants.types.ts"
-					],
+					"files": ["auth.constants.types.ts"],
 					"localDependencies": [],
 					"_imports_": {},
 					"dependencies": [],
@@ -144,9 +122,7 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"auth.ts"
-					],
+					"files": ["auth.ts"],
 					"localDependencies": [
 						"convex/_generated",
 						"convex/betterAuth",
@@ -160,10 +136,7 @@
 						"./email": "{{convex/email}}",
 						"./auth.constants": "{{convex/auth}}.constants"
 					},
-					"dependencies": [
-						"@convex-dev/better-auth@0.8.6",
-						"better-auth@1.3.16"
-					],
+					"dependencies": ["@convex-dev/better-auth@0.8.6", "better-auth@1.3.16"],
 					"devDependencies": []
 				},
 				{
@@ -187,9 +160,7 @@
 						"schema.ts",
 						"user.ts"
 					],
-					"localDependencies": [
-						"convex/auth"
-					],
+					"localDependencies": ["convex/auth"],
 					"dependencies": [
 						"convex@^1.27.3",
 						"@convex-dev/better-auth@0.8.6",
@@ -208,19 +179,12 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"convex.config.ts"
-					],
-					"localDependencies": [
-						"convex/betterAuth"
-					],
+					"files": ["convex.config.ts"],
+					"localDependencies": ["convex/betterAuth"],
 					"_imports_": {
 						"./betterAuth/convex.config": "{{convex/betterAuth}}/convex.config"
 					},
-					"dependencies": [
-						"convex@^1.27.3",
-						"@convex-dev/resend@0.1.13"
-					],
+					"dependencies": ["convex@^1.27.3", "@convex-dev/resend@0.1.13"],
 					"devDependencies": []
 				},
 				{
@@ -231,23 +195,15 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"email.ts"
-					],
-					"localDependencies": [
-						"convex/polyfills",
-						"convex/model",
-						"convex/_generated"
-					],
+					"files": ["email.ts"],
+					"localDependencies": ["convex/polyfills", "convex/model", "convex/_generated"],
 					"_imports_": {
 						"./polyfills": "{{convex/polyfills}}",
 						"./model/emails/templates/emailTemplates": "{{convex/model}}/emails/templates/emailTemplates",
 						"./_generated/server": "{{convex/_generated}}/server",
 						"./_generated/api": "{{convex/_generated}}/api"
 					},
-					"dependencies": [
-						"@convex-dev/resend@0.1.13"
-					],
+					"dependencies": ["@convex-dev/resend@0.1.13"],
 					"devDependencies": []
 				},
 				{
@@ -258,22 +214,14 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"http.ts"
-					],
-					"localDependencies": [
-						"convex/_generated",
-						"convex/auth",
-						"convex/email"
-					],
+					"files": ["http.ts"],
+					"localDependencies": ["convex/_generated", "convex/auth", "convex/email"],
 					"_imports_": {
 						"./_generated/server": "{{convex/_generated}}/server",
 						"./auth": "{{convex/auth}}",
 						"./email": "{{convex/email}}"
 					},
-					"dependencies": [
-						"convex@^1.27.3"
-					],
+					"dependencies": ["convex@^1.27.3"],
 					"devDependencies": []
 				},
 				{
@@ -290,14 +238,8 @@
 						"emails/validateEmail.ts",
 						"organizations/index.ts"
 					],
-					"localDependencies": [
-						"convex/_generated",
-						"convex/auth"
-					],
-					"dependencies": [
-						"convex@^1.27.3",
-						"better-auth@1.3.16"
-					],
+					"localDependencies": ["convex/_generated", "convex/auth"],
+					"dependencies": ["convex@^1.27.3", "better-auth@1.3.16"],
 					"devDependencies": [],
 					"_imports_": {
 						"../../_generated/api": "{{convex/_generated}}/api",
@@ -314,21 +256,9 @@
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
-					"files": [
-						"invitations/queries.ts",
-						"members/mutations.ts",
-						"mutations.ts",
-						"queries.ts"
-					],
-					"localDependencies": [
-						"convex/_generated",
-						"convex/auth",
-						"convex/model"
-					],
-					"dependencies": [
-						"convex@^1.27.3",
-						"better-auth@1.3.16"
-					],
+					"files": ["invitations/queries.ts", "members/mutations.ts", "mutations.ts", "queries.ts"],
+					"localDependencies": ["convex/_generated", "convex/auth", "convex/model"],
+					"dependencies": ["convex@^1.27.3", "better-auth@1.3.16"],
 					"devDependencies": [],
 					"_imports_": {
 						"../../_generated/server": "{{convex/_generated}}/server",
@@ -346,9 +276,7 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"polyfills.ts"
-					],
+					"files": ["polyfills.ts"],
 					"localDependencies": [],
 					"_imports_": {},
 					"dependencies": [],
@@ -362,14 +290,10 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"schema.ts"
-					],
+					"files": ["schema.ts"],
 					"localDependencies": [],
 					"_imports_": {},
-					"dependencies": [
-						"convex@^1.27.3"
-					],
+					"dependencies": ["convex@^1.27.3"],
 					"devDependencies": []
 				},
 				{
@@ -380,13 +304,8 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"storage.ts"
-					],
-					"localDependencies": [
-						"convex/_generated",
-						"convex/auth"
-					],
+					"files": ["storage.ts"],
+					"localDependencies": ["convex/_generated", "convex/auth"],
 					"_imports_": {
 						"./_generated/server": "{{convex/_generated}}/server",
 						"./auth": "{{convex/auth}}"
@@ -402,9 +321,7 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"tsconfig.json"
-					],
+					"files": ["tsconfig.json"],
 					"localDependencies": [],
 					"_imports_": {},
 					"dependencies": [],
@@ -418,20 +335,9 @@
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
-					"files": [
-						"actions.ts",
-						"mutations.ts",
-						"queries.ts"
-					],
-					"localDependencies": [
-						"convex/_generated",
-						"convex/model",
-						"convex/auth"
-					],
-					"dependencies": [
-						"convex@^1.27.3",
-						"better-auth@1.3.16"
-					],
+					"files": ["actions.ts", "mutations.ts", "queries.ts"],
+					"localDependencies": ["convex/_generated", "convex/model", "convex/auth"],
+					"dependencies": ["convex@^1.27.3", "better-auth@1.3.16"],
 					"devDependencies": [],
 					"_imports_": {
 						"../_generated/server": "{{convex/_generated}}/server",
@@ -465,11 +371,7 @@
 						"ui/SignOutButton.svelte",
 						"ui/SocialFlow.svelte"
 					],
-					"localDependencies": [
-						"convex/_generated",
-						"lib/primitives",
-						"convex/auth.constants"
-					],
+					"localDependencies": ["convex/_generated", "lib/primitives", "convex/auth.constants"],
 					"dependencies": [
 						"better-auth@1.3.16",
 						"@convex-dev/better-auth@0.8.6",
@@ -477,10 +379,7 @@
 						"@mmailaender/convex-better-auth-svelte@^0.0.6",
 						"@icons-pack/svelte-simple-icons@^6.4.0"
 					],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5",
-						"@lucide/svelte@^0.544.0"
-					],
+					"devDependencies": ["svelte-sonner@^1.0.5", "@lucide/svelte@^0.544.0"],
 					"_imports_": {
 						"$convex/_generated/api": "{{convex/_generated}}/api",
 						"$lib/primitives/ui/password": "{{lib/primitives}}/ui/password",
@@ -521,10 +420,7 @@
 						"convex@^1.27.3",
 						"@ark-ui/svelte@^5.10.0"
 					],
-					"devDependencies": [
-						"@lucide/svelte@^0.544.0",
-						"svelte-sonner@^1.0.5"
-					],
+					"devDependencies": ["@lucide/svelte@^0.544.0", "svelte-sonner@^1.0.5"],
 					"_imports_": {
 						"$convex/_generated/api": "{{convex/_generated}}/api",
 						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client",
@@ -698,10 +594,7 @@
 						"convex-svelte@^0.0.11",
 						"convex@^1.27.3"
 					],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5",
-						"@lucide/svelte@^0.544.0"
-					],
+					"devDependencies": ["svelte-sonner@^1.0.5", "@lucide/svelte@^0.544.0"],
 					"_imports_": {
 						"$convex/auth.constants": "{{convex/auth.constants}}",
 						"$lib/primitives/ui/select": "{{lib/primitives}}/ui/select",
@@ -737,15 +630,9 @@
 						"auth/[...all]/+server.ts",
 						"organization/accept-invitation/[invitationId]/+page.svelte"
 					],
-					"localDependencies": [
-						"lib/auth"
-					],
-					"dependencies": [
-						"@mmailaender/convex-better-auth-svelte@^0.0.6"
-					],
-					"devDependencies": [
-						"@lucide/svelte@^0.544.0"
-					],
+					"localDependencies": ["lib/auth"],
+					"dependencies": ["@mmailaender/convex-better-auth-svelte@^0.0.6"],
+					"devDependencies": ["@lucide/svelte@^0.544.0"],
 					"_imports_": {
 						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client"
 					}
@@ -758,18 +645,10 @@
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
-					"files": [
-						"+page.svelte"
-					],
-					"localDependencies": [
-						"lib/primitives",
-						"lib/auth"
-					],
+					"files": ["+page.svelte"],
+					"localDependencies": ["lib/primitives", "lib/auth"],
 					"dependencies": [],
-					"devDependencies": [
-						"svelte-sonner@^1.0.5",
-						"@lucide/svelte@^0.544.0"
-					],
+					"devDependencies": ["svelte-sonner@^1.0.5", "@lucide/svelte@^0.544.0"],
 					"_imports_": {
 						"$lib/primitives/ui/password": "{{lib/primitives}}/ui/password",
 						"$lib/auth/api/auth-client": "{{lib/auth}}/api/auth-client"
@@ -783,12 +662,8 @@
 					"docs": false,
 					"subdirectory": true,
 					"list": true,
-					"files": [
-						"+page.svelte"
-					],
-					"localDependencies": [
-						"lib/auth"
-					],
+					"files": ["+page.svelte"],
+					"localDependencies": ["lib/auth"],
 					"dependencies": [],
 					"devDependencies": [],
 					"_imports_": {
@@ -808,9 +683,7 @@
 					"docs": false,
 					"subdirectory": false,
 					"list": true,
-					"files": [
-						"auth.css"
-					],
+					"files": ["auth.css"],
 					"localDependencies": [],
 					"_imports_": {},
 					"dependencies": [],

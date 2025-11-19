@@ -1,4 +1,7 @@
 <script lang="ts">
+	// Svelte
+	import { SvelteSet } from 'svelte/reactivity';
+
 	import { cn } from '$lib/primitives/utils';
 	import { usePasswordError } from './password.svelte.js';
 
@@ -16,7 +19,7 @@
 
 		if (!id) id = `password-error-${Math.random().toString(36).slice(2, 9)}`;
 		const current = input.getAttribute('aria-describedby') ?? '';
-		const tokens = new Set(current.split(/\s+/).filter(Boolean));
+		const tokens = new SvelteSet(current.split(/\s+/).filter(Boolean));
 		if (message) tokens.add(id);
 		else tokens.delete(id);
 		const next = Array.from(tokens).join(' ');

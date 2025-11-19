@@ -105,7 +105,7 @@
 			toast.success('Invitation revoked successfully');
 			isRevokeDialogOpen = false;
 			selectedInvitationId = null;
-		} catch (e) {
+		} catch {
 			toast.error('Failed to revoke the invitation');
 		} finally {
 			isRevoking = false;

@@ -28,8 +28,6 @@
 	type Role = typeof authClient.$Infer.Member.role;
 
 	type OrganizationProfileHostProps = {
-		open?: boolean;
-		onSuccessfulDelete?: (() => void) | undefined;
 		initialData?: {
 			activeUser?: GetActiveUserType;
 			activeOrganization?: GetActiveOrganizationType;
@@ -38,7 +36,7 @@
 		};
 	};
 
-	let { open = false, onSuccessfulDelete, initialData }: OrganizationProfileHostProps = $props();
+	let { initialData }: OrganizationProfileHostProps = $props();
 
 	// Local dialog state (formerly from singleton)
 	let orgProfile = $state({

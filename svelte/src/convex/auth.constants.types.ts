@@ -40,6 +40,7 @@ export type AuthConstants =
 			validateEmails?: boolean;
 			organizations?: false;
 			apiKeys?: boolean;
+			deviceAuthorization?: boolean;
 			terms?: string;
 			privacy?: string;
 	  }
@@ -52,6 +53,7 @@ export type AuthConstants =
 			validateEmails?: boolean;
 			organizations?: boolean;
 			apiKeys?: boolean;
+			deviceAuthorization?: boolean;
 			terms?: string;
 			privacy?: string;
 	  };

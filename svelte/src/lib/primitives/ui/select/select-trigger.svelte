@@ -6,7 +6,6 @@
 	let {
 		ref = $bindable(null),
 		class: className,
-		children,
 		size = 'default',
 		placeholder,
 		...restProps

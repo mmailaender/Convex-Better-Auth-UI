@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { useImageCropperCancel } from './image-cropper.svelte.js';
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import { cn } from '$lib/primitives/utils.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 

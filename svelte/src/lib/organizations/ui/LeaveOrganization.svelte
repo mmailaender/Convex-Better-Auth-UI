@@ -1,11 +1,14 @@
 <script lang="ts">
+	// Svelte
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+
+	/** UI */
 	// Primitives
 	import * as Dialog from '$lib/primitives/ui/dialog';
 	import { toast } from 'svelte-sonner';
 	import * as Select from '$lib/primitives/ui/select';
 	import { createListCollection } from '@ark-ui/svelte/select';
-
 	// Icons
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
@@ -124,7 +127,7 @@
 
 			toast.success('Successfully left the organization.');
 			// Navigate to home page after leaving
-			goto('/');
+			goto(resolve('/'));
 		} catch (err) {
 			if (err instanceof ConvexError) {
 				toast.error(err.data);

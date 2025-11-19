@@ -30,7 +30,6 @@
 
 	// Auth
 	const auth = useAuth();
-	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Query
 	const activeUserResponse = useQuery(

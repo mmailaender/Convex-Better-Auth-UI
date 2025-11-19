@@ -4,7 +4,8 @@ import {
 	emailOTPClient,
 	organizationClient,
 	magicLinkClient,
-	apiKeyClient
+	apiKeyClient,
+	deviceAuthorizationClient
 } from 'better-auth/client/plugins';
 
 import { AUTH_CONSTANTS } from '$convex/auth.constants';
@@ -15,6 +16,7 @@ export const authClient = createAuthClient({
 		...(AUTH_CONSTANTS.organizations ? [organizationClient()] : []),
 		...(AUTH_CONSTANTS.providers.emailOTP ? [emailOTPClient()] : []),
 		...(AUTH_CONSTANTS.providers.magicLink ? [magicLinkClient()] : []),
-		...(AUTH_CONSTANTS.apiKeys ? [apiKeyClient()] : [])
+		...(AUTH_CONSTANTS.apiKeys ? [apiKeyClient()] : []),
+		...(AUTH_CONSTANTS.deviceAuthorization ? [deviceAuthorizationClient()] : [])
 	]
 });

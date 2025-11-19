@@ -100,7 +100,9 @@
 		>
 			{#if validatingEmail}
 				<div class="flex items-center gap-2">
-					<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+					<div
+						class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+					></div>
 					Verifying...
 				</div>
 			{:else}
@@ -119,7 +121,9 @@
 				>
 					{#if validatingEmail && validatingEmailMethod === 'password'}
 						<div class="flex items-center gap-2">
-							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							<div
+								class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+							></div>
 							Verifying...
 						</div>
 					{:else}
@@ -137,7 +141,9 @@
 				>
 					{#if validatingEmail && validatingEmailMethod === 'emailOTP'}
 						<div class="flex items-center gap-2">
-							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							<div
+								class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+							></div>
 							Verifying...
 						</div>
 					{:else}
@@ -155,7 +161,9 @@
 				>
 					{#if validatingEmail && validatingEmailMethod === 'magicLink'}
 						<div class="flex items-center gap-2">
-							<div class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+							<div
+								class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+							></div>
 							Verifying...
 						</div>
 					{:else}
