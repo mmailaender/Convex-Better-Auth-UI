@@ -4,7 +4,7 @@
 
 	let {
 		ref = $bindable(null),
-		value = $bindable(''),
+		value = $bindable<string | undefined>(),
 		class: className,
 		...restProps
 	}: TabsRootProps = $props();
