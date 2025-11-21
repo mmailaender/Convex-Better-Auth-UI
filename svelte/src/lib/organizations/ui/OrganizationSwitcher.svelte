@@ -174,6 +174,22 @@
 		return () => window.removeEventListener('popstate', onPopState);
 	});
 
+	$effect(() => {
+		const slug = activeOrganization?.slug ?? initialData?.activeOrganization?.slug;
+		const { pathname, search, hash } = page.url;
+		if (slug && /(?:^|\/)(active-organization|active-org)(?=\/|$)/.test(pathname)) {
+			const newPathname = pathname.replace(
+				/\/(active-organization|active-org)(?=\/|$)/g,
+				`/${slug}`
+			);
+			goto(`${newPathname}${search}${hash}`, {
+				replaceState: true,
+				noScroll: true,
+				keepFocus: true
+			});
+		}
+	});
+
 	/**
 	 * Updates the active organization and replaces URL slug if needed
 	 */
