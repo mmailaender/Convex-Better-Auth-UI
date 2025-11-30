@@ -28,8 +28,15 @@
 	// Types
 	import type { Id } from '$convex/_generated/dataModel';
 
+	// Auth state
+	const auth = useAuth();
+	const isLoading = $derived(auth.isLoading);
+	const isAuthenticated = $derived(auth.isAuthenticated);
+
 	// Queries
-	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization, {});
+	const activeOrgResponse = useQuery(api.organizations.queries.getActiveOrganization, () =>
+		auth.isAuthenticated ? {} : 'skip'
+	);
 	const activeOrganization = $derived(activeOrgResponse.data);
 
 	// Props
@@ -45,11 +52,6 @@
 	};
 
 	const props: CreateOrganizationProps = $props();
-
-	// Auth state
-	const auth = useAuth();
-	const isLoading = $derived(auth.isLoading);
-	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Component state
 	let name: string = $state('');
