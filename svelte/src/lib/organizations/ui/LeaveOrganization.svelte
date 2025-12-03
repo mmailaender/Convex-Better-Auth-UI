@@ -42,10 +42,9 @@
 
 	// Auth
 	const auth = useAuth();
-	const roles = useRoles({
-		// svelte-ignore state_referenced_locally
+	const roles = useRoles({}, () => ({
 		initialData: initialData?.role
-	});
+	}));
 	const isOwner = $derived(roles.hasOwnerRole);
 
 	// Queries

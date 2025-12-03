@@ -32,10 +32,9 @@
 
 	// Auth
 	const auth = useAuth();
-	const roles = useRoles({
-		// svelte-ignore state_referenced_locally
+	const roles = useRoles({}, () => ({
 		initialData: initialData?.role
-	});
+	}));
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries

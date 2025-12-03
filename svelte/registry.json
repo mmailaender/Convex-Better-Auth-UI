@@ -45,29 +45,29 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.1.13"
+					"version": "0.2.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.9.7"
+					"version": "0.9.11"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.104"
+					"version": "^0.1.106"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
-					"name": "@sveltejs/adapter-vercel",
-					"version": "^6.1.1"
+					"name": "@sveltejs/adapter-auto",
+					"version": "^7.0.0"
 				},
 				{
 					"ecosystem": "js",
@@ -92,7 +92,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@skeletonlabs/skeleton",
-					"version": "4.3.2"
+					"version": "4.7.1"
 				}
 			],
 			"files": [
@@ -696,7 +696,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.9.7"
+					"version": "0.9.11"
 				},
 				{
 					"ecosystem": "js",
@@ -801,7 +801,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.553.0"
+					"version": "^0.555.0"
 				}
 			],
 			"files": [
@@ -851,12 +851,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.9.7"
+					"version": "0.9.11"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				},
 				{
 					"ecosystem": "js",
@@ -883,7 +883,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.553.0"
+					"version": "^0.555.0"
 				}
 			],
 			"files": [
@@ -1183,7 +1183,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.553.0"
+					"version": "^0.555.0"
 				}
 			],
 			"files": [
@@ -1257,7 +1257,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				},
 				{
 					"ecosystem": "js",
@@ -1267,7 +1267,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.104"
+					"version": "^0.1.106"
 				}
 			],
 			"devDependencies": [],
@@ -1426,7 +1426,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.12.1"
+					"version": "^5.14.1"
 				},
 				{
 					"ecosystem": "js",
@@ -1446,7 +1446,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				}
 			],
 			"devDependencies": [
@@ -1458,7 +1458,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.553.0"
+					"version": "^0.555.0"
 				}
 			],
 			"files": [
@@ -1968,7 +1968,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.1.13"
+					"version": "0.2.0"
 				}
 			],
 			"devDependencies": [],
@@ -2071,7 +2071,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				},
 				{
 					"ecosystem": "js",
@@ -2081,7 +2081,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.104"
+					"version": "^0.1.106"
 				}
 			],
 			"devDependencies": [],
@@ -2308,19 +2308,19 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.12.1"
+					"version": "^5.14.1"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.553.0"
+					"version": "^0.555.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3121,7 +3121,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.29.0"
+					"version": "^1.30.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3219,7 +3219,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.12.1"
+					"version": "^5.14.1"
 				},
 				{
 					"ecosystem": "js",
@@ -3234,7 +3234,7 @@
 				{
 					"ecosystem": "js",
 					"name": "runed",
-					"version": "^0.36.0"
+					"version": "^0.37.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3261,12 +3261,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.553.0"
+					"version": "^0.555.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "tailwind-variants",
-					"version": "^3.1.1"
+					"version": "^3.2.2"
 				},
 				{
 					"ecosystem": "js",

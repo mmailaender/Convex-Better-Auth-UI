@@ -9,14 +9,19 @@ type Role = typeof authClient.$Infer.Member.role;
 
 type UseRolesArgs = {
 	orgId?: string;
-	initialData?: Role;
 };
 
-export function useRoles(args: UseRolesArgs = {}) {
+type UseRolesOptions =
+	| {
+			initialData?: Role;
+	  }
+	| (() => { initialData?: Role });
+
+export function useRoles(args: UseRolesArgs = {}, options?: UseRolesOptions) {
 	const auth = useAuth();
 
-	// Extract initialData once to avoid state_referenced_locally warning
-	const initialRole = args.initialData;
+	const getOptions = typeof options === 'function' ? options : () => options;
+	const initialRole = getOptions()?.initialData;
 
 	const roleResponse = useQuery(
 		api.organizations.queries.getOrganizationRole,

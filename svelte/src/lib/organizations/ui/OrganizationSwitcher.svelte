@@ -96,10 +96,9 @@
 	const activeOrganization = $derived(
 		activeOrganizationResponse?.data ?? initialData?.activeOrganization
 	);
-	const roles = useRoles({
-		// svelte-ignore state_referenced_locally
+	const roles = useRoles({}, () => ({
 		initialData: initialData?.role
-	});
+	}));
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Component state
