@@ -243,6 +243,15 @@
 								"path": "auth/ui/AuthDialogProvider.svelte"
 							},
 							"meta": {}
+						},
+						{
+							"import": "$convex/auth.constants",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.constants.ts"
+							},
+							"meta": {}
 						}
 					],
 					"registryDependencies": [],
