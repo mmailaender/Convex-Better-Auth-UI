@@ -34,7 +34,11 @@ export default defineConfig({
 					{
 						path: 'src',
 						files: [
-							{ path: 'app.css' },
+							{
+								path: 'app.css',
+								dependencyResolution: 'manual',
+								devDependencies: ['@skeletonlabs/skeleton', 'tw-animate-css', '@types/node']
+							},
 							{ path: 'app.html' },
 							{ path: 'app.d.ts' },
 							{ path: 'hooks.server.ts' },
