@@ -1,11 +1,14 @@
 import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import type { LayoutServerLoad } from './$types';
 import { api } from '$convex/_generated/api';
+import { AUTH_CONSTANTS } from '$convex/auth.constants';
 
 export const load = (async ({ locals }) => {
 	const token = locals.token;
 	if (!token) return {};
 	const client = createConvexHttpClient({ token });
+
+	const orgs = AUTH_CONSTANTS.organizations;
 
 	const [
 		activeUser,
@@ -17,13 +20,17 @@ export const load = (async ({ locals }) => {
 	] = await Promise.all([
 		client.query(api.users.queries.getActiveUser),
 		client.query(api.users.queries.listAccounts),
-		client.query(api.organizations.queries.getActiveOrganization),
-		client.query(api.organizations.queries.listOrganizations),
-		client.query(api.organizations.invitations.queries.listInvitations),
-		client.query(api.organizations.queries.getOrganizationRole, {})
+		orgs
+			? client.query(api.organizations.queries.getActiveOrganization)
+			: Promise.resolve(undefined),
+		orgs ? client.query(api.organizations.queries.listOrganizations) : Promise.resolve(undefined),
+		orgs
+			? client.query(api.organizations.invitations.queries.listInvitations)
+			: Promise.resolve(undefined),
+		orgs
+			? client.query(api.organizations.queries.getOrganizationRole, {})
+			: Promise.resolve(undefined)
 	]);
-
-	const role = roleResult ?? undefined;
 
 	return {
 		initialData: {
@@ -32,7 +39,7 @@ export const load = (async ({ locals }) => {
 			activeOrganization,
 			organizationList,
 			invitationList,
-			role
+			role: roleResult ?? undefined
 		}
 	};
 }) satisfies LayoutServerLoad;
