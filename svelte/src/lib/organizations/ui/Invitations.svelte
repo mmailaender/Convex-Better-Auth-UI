@@ -32,7 +32,10 @@
 
 	// Auth
 	const auth = useAuth();
-	const roles = useRoles({ initialData: initialData?.role });
+	const roles = useRoles({
+		// svelte-ignore state_referenced_locally
+		initialData: initialData?.role
+	});
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries
@@ -40,6 +43,7 @@
 		api.organizations.invitations.queries.listInvitations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
 		{
+			// svelte-ignore state_referenced_locally
 			initialData: initialData?.invitationList
 		}
 	);

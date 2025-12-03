@@ -43,10 +43,10 @@
 	const SIZE = 80;
 
 	// Use fallback name for pattern generation if no name provided
-	const nameForPattern = name || 'Anonymous';
+	const nameForPattern = $derived(name || 'Anonymous');
 
 	// Generate properties based on name
-	const numFromName = getNumber(nameForPattern);
+	const numFromName = $derived(getNumber(nameForPattern));
 
 	const properties = Array.from({ length: ELEMENTS }, (_, i) => ({
 		colorIndex: (numFromName + i) % colors.length,
@@ -57,16 +57,15 @@
 	}));
 
 	// Generate initials only if name is provided
-	const getInitials = (name: string) => {
+	const initials = $derived.by(() => {
+		if (!name) return '';
 		return name
 			.split(' ')
 			.map((word) => word.charAt(0))
 			.join('')
 			.toUpperCase()
 			.slice(0, 2); // Limit to 2 characters
-	};
-
-	const initials = name ? getInitials(name) : '';
+	});
 
 	// Generate unique IDs
 	const maskId = getRandId('mask__marble');

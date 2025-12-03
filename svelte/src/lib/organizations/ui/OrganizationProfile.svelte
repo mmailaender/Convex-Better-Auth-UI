@@ -64,7 +64,10 @@
 
 	const { open = false, onSuccessfulDelete, initialData }: OrganizationProfileProps = $props();
 
-	const roles = useRoles({ initialData: initialData?.role });
+	const roles = useRoles({
+		// svelte-ignore state_referenced_locally
+		initialData: initialData?.role
+	});
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// State

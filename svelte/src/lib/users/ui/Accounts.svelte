@@ -76,6 +76,7 @@
 		api.users.queries.listAccounts,
 		() => (auth.isAuthenticated ? {} : 'skip'),
 		{
+			// svelte-ignore state_referenced_locally
 			initialData: initialData?.accountList
 		}
 	);

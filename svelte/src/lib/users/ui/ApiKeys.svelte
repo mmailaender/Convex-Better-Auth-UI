@@ -32,6 +32,7 @@
 		api.users.queries.listApiKeys,
 		() => (auth.isAuthenticated ? {} : 'skip'),
 		{
+			// svelte-ignore state_referenced_locally
 			initialData: initialData?.apiKeys
 		}
 	);

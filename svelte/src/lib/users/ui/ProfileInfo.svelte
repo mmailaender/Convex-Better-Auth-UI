@@ -36,6 +36,7 @@
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
 		{
+			// svelte-ignore state_referenced_locally
 			initialData: initialData?.activeUser
 		}
 	);

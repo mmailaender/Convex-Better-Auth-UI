@@ -18,6 +18,7 @@ export function useRoles(args: UseRolesArgs = {}) {
 	const roleResponse = useQuery(
 		api.organizations.queries.getOrganizationRole,
 		() => (auth.isAuthenticated ? { organizationId: args.orgId } : 'skip'),
+		// svelte-ignore state_referenced_locally
 		{ initialData: args.initialData }
 	);
 

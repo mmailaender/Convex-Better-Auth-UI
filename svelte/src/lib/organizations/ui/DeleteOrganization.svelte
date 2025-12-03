@@ -50,13 +50,17 @@
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
 		{
+			// svelte-ignore state_referenced_locally
 			initialData: initialData?.activeOrganization
 		}
 	);
 	const activeOrganization = $derived(
 		activeOrganizationResponse?.data ?? initialData?.activeOrganization
 	);
-	const roles = useRoles({ initialData: initialData?.role });
+	const roles = useRoles({
+		// svelte-ignore state_referenced_locally
+		initialData: initialData?.role
+	});
 	const isOwner = $derived(roles.hasOwnerRole);
 
 	// State
