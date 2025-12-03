@@ -42,10 +42,9 @@
 	const invitationListResponse = useQuery(
 		api.organizations.invitations.queries.listInvitations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.invitationList
-		}
+		})
 	);
 	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
 

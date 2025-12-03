@@ -31,10 +31,9 @@
 	const apiKeysResponse = useQuery(
 		api.users.queries.listApiKeys,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.apiKeys
-		}
+		})
 	);
 
 	const apiKeys = $derived(apiKeysResponse?.data ?? initialData?.apiKeys);

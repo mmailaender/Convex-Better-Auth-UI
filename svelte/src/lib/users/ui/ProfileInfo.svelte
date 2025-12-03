@@ -35,10 +35,9 @@
 	const activeUserResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.activeUser
-		}
+		})
 	);
 	// Derived state
 	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);

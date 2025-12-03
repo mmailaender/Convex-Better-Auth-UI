@@ -78,18 +78,16 @@
 	const organizationListResponse = useQuery(
 		api.organizations.queries.listOrganizations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.organizationList
-		}
+		})
 	);
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
 	// Derived state - fallback to initialData during auth sync
 	const organizationList = $derived(

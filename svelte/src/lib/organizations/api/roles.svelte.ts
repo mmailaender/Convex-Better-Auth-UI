@@ -15,14 +15,18 @@ type UseRolesArgs = {
 export function useRoles(args: UseRolesArgs = {}) {
 	const auth = useAuth();
 
+	// Extract initialData once to avoid state_referenced_locally warning
+	const initialRole = args.initialData;
+
 	const roleResponse = useQuery(
 		api.organizations.queries.getOrganizationRole,
 		() => (auth.isAuthenticated ? { organizationId: args.orgId } : 'skip'),
-		// svelte-ignore state_referenced_locally
-		{ initialData: args.initialData }
+		() => ({
+			initialData: initialRole
+		})
 	);
 
-	const role = $derived(roleResponse?.data ?? args.initialData);
+	const role = $derived(roleResponse?.data ?? initialRole);
 
 	return {
 		get hasOwnerRole() {

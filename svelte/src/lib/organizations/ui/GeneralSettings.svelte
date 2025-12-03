@@ -58,18 +58,16 @@
 	const userResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.activeUser
-		}
+		})
 	);
 	const organizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
 	// Derived data
 	const user = $derived(userResponse?.data ?? initialData?.activeUser);

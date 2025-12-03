@@ -50,18 +50,16 @@
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
 	const invitationListResponse = useQuery(
 		api.organizations.invitations.queries.listInvitations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.invitationList
-		}
+		})
 	);
 	// Derived data
 	const activeOrganization = $derived(

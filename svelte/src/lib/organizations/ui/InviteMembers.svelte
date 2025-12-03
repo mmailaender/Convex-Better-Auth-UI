@@ -41,10 +41,9 @@
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
 	const activeOrganization = $derived(
 		activeOrganizationResponse?.data ?? initialData?.activeOrganization

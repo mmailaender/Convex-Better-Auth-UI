@@ -75,10 +75,9 @@
 	let accountListResponse = useQuery(
 		api.users.queries.listAccounts,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
-			// svelte-ignore state_referenced_locally
+		() => ({
 			initialData: initialData?.accountList
-		}
+		})
 	);
 	let accountList = $derived(accountListResponse?.data ?? initialData?.accountList);
 
