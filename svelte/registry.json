@@ -4,13 +4,7 @@
 	"description": "Plug & Play Auth Widgets for your application",
 	"homepage": "https://etesie.dev/docs/auth",
 	"repository": "https://github.com/mmailaender/auth",
-	"tags": [
-		"auth",
-		"svelte",
-		"ui",
-		"convex",
-		"better-auth"
-	],
+	"tags": ["auth", "svelte", "ui", "convex", "better-auth"],
 	"version": "package",
 	"type": "repository",
 	"defaultPaths": {
@@ -697,10 +691,7 @@
 			"name": "config",
 			"type": "base",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"convex/email"
-			],
+			"registryDependencies": ["base", "convex/email"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -798,9 +789,7 @@
 			"name": "routes/api",
 			"type": "routes",
 			"add": "when-added",
-			"registryDependencies": [
-				"lib/auth"
-			],
+			"registryDependencies": ["lib/auth"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -852,12 +841,7 @@
 			"name": "lib/auth",
 			"type": "lib",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"lib/users",
-				"lib/organizations",
-				"primitives"
-			],
+			"registryDependencies": ["base", "lib/users", "lib/organizations", "primitives"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -1188,10 +1172,7 @@
 			"name": "routes/reset-password",
 			"type": "routes",
 			"add": "when-added",
-			"registryDependencies": [
-				"primitives",
-				"lib/auth"
-			],
+			"registryDependencies": ["primitives", "lib/auth"],
 			"dependencies": [],
 			"devDependencies": [
 				{
@@ -1241,9 +1222,7 @@
 			"name": "routes/signin",
 			"type": "routes",
 			"add": "when-added",
-			"registryDependencies": [
-				"lib/auth"
-			],
+			"registryDependencies": ["lib/auth"],
 			"dependencies": [],
 			"devDependencies": [],
 			"files": [
@@ -1273,11 +1252,7 @@
 			"name": "convex/users",
 			"type": "convex",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"convex/email",
-				"config"
-			],
+			"registryDependencies": ["base", "convex/email", "config"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -1446,11 +1421,7 @@
 			"name": "lib/users",
 			"type": "lib",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"primitives",
-				"lib/auth"
-			],
+			"registryDependencies": ["base", "primitives", "lib/auth"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -1992,9 +1963,7 @@
 			"name": "convex/email",
 			"type": "convex",
 			"add": "when-added",
-			"registryDependencies": [
-				"base"
-			],
+			"registryDependencies": ["base"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -2097,10 +2066,7 @@
 			"name": "convex/organizations",
 			"type": "convex",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"config"
-			],
+			"registryDependencies": ["base", "config"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -2327,11 +2293,7 @@
 			"name": "lib/organizations",
 			"type": "lib",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"lib/auth",
-				"primitives"
-			],
+			"registryDependencies": ["base", "lib/auth", "primitives"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -3154,10 +3116,7 @@
 			"name": "convex/deviceAuthorization",
 			"type": "convex",
 			"add": "when-added",
-			"registryDependencies": [
-				"base",
-				"config"
-			],
+			"registryDependencies": ["base", "config"],
 			"dependencies": [
 				{
 					"ecosystem": "js",
@@ -3216,10 +3175,7 @@
 			"name": "routes/device-authorization",
 			"type": "routes",
 			"add": "when-added",
-			"registryDependencies": [
-				"lib/auth",
-				"base"
-			],
+			"registryDependencies": ["lib/auth", "base"],
 			"dependencies": [],
 			"devDependencies": [],
 			"files": [
