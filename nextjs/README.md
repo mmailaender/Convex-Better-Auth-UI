@@ -9,24 +9,23 @@
   </h2>
 
   <p align="center">
-    Self-owned, plug-and-play authentication widgets for your application
+    Self-owned auth UI for Convex + Better Auth — copy the code, own the flow.
     <br />
-    <a href="https://etesie.dev/docs/auth/02-getting-started/02-nextjs"><strong>→ Get started in 15 minutes</strong></a>
-    <br />
-    <br />
+    <a href="https://etesie.dev/docs/auth/02-getting-started/01-sveltekit"><strong>→ Get Started</strong></a>
+    <br /><br />
     <a href="https://github.com/mmailaender/auth/issues">Issues</a>
   </p>
 </p>
 
 ---
 
-## 🧩 What is Auth?
+## 🧩 What is Auth UI?
 
-**Auth** gives you full-ownership authentication and organization management for **React** or **SvelteKit** apps — built on top of  
-**Better Auth + Convex**, wrapped in a polished, extensible design system.
+**Auth** gives you full-ownership authentication and organization management for **SvelteKit** or **React** — built on  
+**Better Auth + Convex**, wrapped in an extensible UI layer you completely control.
 
 You don’t integrate a service.  
-You **own the components** — shadcn-style — and can extend or rebrand them as you like.
+You **copy the components into your repo** — shadcn-style — and customize everything.
 
 - 🔐 **Own your code** – no lock-in, every line lives in your repo
 - ☁️ **Self-hosted** – powered by your Convex backend
@@ -35,7 +34,7 @@ You **own the components** — shadcn-style — and can extend or rebrand them a
 
 ---
 
-## 🚀 Why Auth?
+## 🚀 Why Auth UI?
 
 Adding auth is easy.  
 **Owning it** — design, data, and cost — isn’t.
@@ -66,7 +65,8 @@ fully functional, fully editable, and ready for production.
 
 - [Convex](https://convex.dev) – Backend & real-time data
 - [Better Auth](https://github.com/get-convex/better-auth) – Secure auth API
-- [Skeleton](https://skeleton.dev) – Design system foundations
+- [Shadcn](https://www.shadcn-svelte.com) – UI components
+- [Skeleton](https://skeleton.dev) – Design system
 
 ---
 
