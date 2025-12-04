@@ -254,7 +254,12 @@ export default defineConfig({
 									{
 										path: 'layout.css',
 										dependencyResolution: 'manual',
-										devDependencies: ['@skeletonlabs/skeleton', 'tw-animate-css', '@types/node']
+										devDependencies: [
+											'@skeletonlabs/skeleton',
+											'tw-animate-css',
+											'@types/node',
+											'svelte-sonner'
+										]
 									}
 								]
 							},

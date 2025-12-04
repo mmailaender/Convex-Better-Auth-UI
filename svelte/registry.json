@@ -4778,6 +4778,10 @@
 						{
 							"ecosystem": "js",
 							"name": "@types/node"
+						},
+						{
+							"ecosystem": "js",
+							"name": "svelte-sonner"
 						}
 					]
 				},
