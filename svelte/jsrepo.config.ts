@@ -25,81 +25,6 @@ export default defineConfig({
 		outputs: [repository({ format: true })],
 		items: [
 			{
-				name: 'base',
-				add: 'when-added',
-				type: 'base',
-				files: [
-					{ path: 'convex.json', target: 'convex.json' },
-					{ path: 'svelte.config.js', target: 'svelte.config.js' },
-					{
-						path: 'src',
-						files: [
-							{
-								path: 'app.css',
-								dependencyResolution: 'manual',
-								devDependencies: ['@skeletonlabs/skeleton', 'tw-animate-css', '@types/node']
-							},
-							{ path: 'app.html' },
-							{ path: 'app.d.ts' },
-							{ path: 'hooks.server.ts' },
-							{
-								path: 'routes',
-								files: [{ path: '+layout.svelte' }, { path: '+layout.server.ts' }]
-							},
-							{
-								path: 'convex',
-								files: [
-									{
-										path: 'auth.constants.ts'
-									},
-									{
-										path: 'tsconfig.json'
-									},
-									{
-										path: 'auth.config.ts'
-									},
-									{
-										path: 'convex.config.ts'
-									},
-									{
-										path: 'http.ts'
-									},
-									{
-										path: 'polyfills.ts'
-									},
-									{
-										path: 'schema.ts'
-									},
-									{
-										path: '_generated'
-									},
-									{
-										path: 'betterAuth',
-										files: [
-											{
-												path: '_generated'
-											},
-											{
-												path: 'adapter.ts'
-											},
-											{
-												path: 'auth.ts'
-											},
-											{
-												path: 'convex.config.ts'
-											},
-											{
-												path: 'schema.ts'
-											}
-										]
-									}
-								]
-							}
-						]
-					}
-				]
-			},
-			{
 				name: 'config',
 				add: 'when-added',
 				type: 'base',
@@ -305,6 +230,84 @@ export default defineConfig({
 				files: [
 					{
 						path: 'src/themes/auth.css'
+					}
+				]
+			},
+			{
+				name: 'base',
+				add: 'when-added',
+				type: 'base',
+				files: [
+					{ path: 'convex.json', target: 'convex.json' },
+					{ path: 'svelte.config.js', target: 'svelte.config.js' },
+					{
+						path: 'src',
+						files: [
+							{ path: 'app.html' },
+							{ path: 'app.d.ts' },
+							{ path: 'hooks.server.ts' },
+							{
+								path: 'routes',
+								files: [
+									{ path: '+layout.svelte' },
+									{ path: '+layout.server.ts' },
+									{
+										path: 'layout.css',
+										dependencyResolution: 'manual',
+										devDependencies: ['@skeletonlabs/skeleton', 'tw-animate-css', '@types/node']
+									}
+								]
+							},
+							{
+								path: 'convex',
+								files: [
+									{
+										path: 'auth.constants.ts'
+									},
+									{
+										path: 'tsconfig.json'
+									},
+									{
+										path: 'auth.config.ts'
+									},
+									{
+										path: 'convex.config.ts'
+									},
+									{
+										path: 'http.ts'
+									},
+									{
+										path: 'polyfills.ts'
+									},
+									{
+										path: 'schema.ts'
+									},
+									{
+										path: '_generated'
+									},
+									{
+										path: 'betterAuth',
+										files: [
+											{
+												path: '_generated'
+											},
+											{
+												path: 'adapter.ts'
+											},
+											{
+												path: 'auth.ts'
+											},
+											{
+												path: 'convex.config.ts'
+											},
+											{
+												path: 'schema.ts'
+											}
+										]
+									}
+								]
+							}
+						]
 					}
 				]
 			}
