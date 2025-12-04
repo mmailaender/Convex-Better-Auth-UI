@@ -1,4 +1,5 @@
 import prettier from 'eslint-config-prettier';
+import convexPlugin from '@convex-dev/eslint-plugin';
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import { includeIgnoreFile } from '@eslint/compat';
@@ -20,6 +21,7 @@ export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
 	...ts.configs.recommended,
+	...convexPlugin.configs.recommended,
 	...svelte.configs['flat/recommended'],
 	prettier,
 	...svelte.configs['flat/prettier'],

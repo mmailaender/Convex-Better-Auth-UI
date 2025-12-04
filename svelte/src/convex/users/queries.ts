@@ -23,12 +23,14 @@ export const isUserExisting = query({
  * Return the currently authenticated user
  */
 export const getActiveUser = query({
+	args: {},
 	handler: async (ctx) => {
 		return await authComponent.safeGetAuthUser(ctx);
 	}
 });
 
 export const listAccounts = query({
+	args: {},
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) {
@@ -53,6 +55,7 @@ export const listAccounts = query({
 });
 
 export const listApiKeys = query({
+	args: {},
 	handler: async (ctx) => {
 		await authComponent.getAuthUser(ctx);
 

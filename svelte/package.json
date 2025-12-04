@@ -26,6 +26,7 @@
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.8",
+		"@convex-dev/eslint-plugin": "^1.0.0",
 		"@eslint/compat": "^2.0.0",
 		"@eslint/js": "^9.39.1",
 		"@internationalized/date": "^3.10.0",

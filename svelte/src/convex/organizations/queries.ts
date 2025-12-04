@@ -8,6 +8,7 @@ import { v } from 'convex/values';
  * Get all organizations for the current user
  */
 export const listOrganizations = query({
+	args: {},
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) {
@@ -69,6 +70,7 @@ export const getOrganizationRole = query({
  * Gets the active organization for the current user
  */
 export const getActiveOrganization = query({
+	args: {},
 	handler: async (ctx) => {
 		await authComponent.getAuthUser(ctx);
 
