@@ -22,660 +22,6 @@
 	},
 	"items": [
 		{
-			"name": "base",
-			"type": "base",
-			"add": "when-added",
-			"registryDependencies": [
-				"primitives",
-				"config",
-				"lib/auth",
-				"lib/organizations",
-				"lib/users",
-				"convex/email",
-				"convex/deviceAuthorization",
-				"convex/organizations",
-				"convex/users"
-			],
-			"dependencies": [
-				{
-					"ecosystem": "js",
-					"name": "better-auth",
-					"version": "1.3.34"
-				},
-				{
-					"ecosystem": "js",
-					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "0.3.0"
-				},
-				{
-					"ecosystem": "js",
-					"name": "convex",
-					"version": "^1.30.0"
-				},
-				{
-					"ecosystem": "js",
-					"name": "@convex-dev/resend",
-					"version": "0.2.0"
-				},
-				{
-					"ecosystem": "js",
-					"name": "@convex-dev/better-auth",
-					"version": "0.9.11"
-				},
-				{
-					"ecosystem": "js",
-					"name": "convex-helpers",
-					"version": "^0.1.106"
-				}
-			],
-			"devDependencies": [
-				{
-					"ecosystem": "js",
-					"name": "@sveltejs/adapter-auto",
-					"version": "^7.0.0"
-				},
-				{
-					"ecosystem": "js",
-					"name": "@sveltejs/vite-plugin-svelte",
-					"version": "^6.2.1"
-				}
-			],
-			"files": [
-				{
-					"type": "base",
-					"role": "file",
-					"path": "convex.json",
-					"relativePath": "convex.json",
-					"_imports_": [],
-					"target": "convex.json",
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "svelte.config.js",
-					"relativePath": "svelte.config.js",
-					"_imports_": [],
-					"target": "svelte.config.js",
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/app.html",
-					"relativePath": "src/app.html",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/app.d.ts",
-					"relativePath": "src/app.d.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/hooks.server.ts",
-					"relativePath": "src/hooks.server.ts",
-					"_imports_": [
-						{
-							"import": "$lib/primitives/utils/routeMatcher",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/utils/routeMatcher.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$convex/auth",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/routes/+layout.svelte",
-					"relativePath": "src/routes/+layout.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/auth/api/auth-client",
-							"item": "lib/auth",
-							"file": {
-								"type": "lib",
-								"path": "auth/api/auth-client.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/primitives/ui/sonner",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/sonner/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/organizations/ui/OrganizationSwitcher.svelte",
-							"item": "lib/organizations",
-							"file": {
-								"type": "lib",
-								"path": "organizations/ui/OrganizationSwitcher.svelte"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/users/ui/UserButton.svelte",
-							"item": "lib/users",
-							"file": {
-								"type": "lib",
-								"path": "users/ui/UserButton.svelte"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/auth/ui/AuthDialogProvider.svelte",
-							"item": "lib/auth",
-							"file": {
-								"type": "lib",
-								"path": "auth/ui/AuthDialogProvider.svelte"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$convex/auth.constants",
-							"item": "base",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.constants.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/routes/+layout.server.ts",
-					"relativePath": "src/routes/+layout.server.ts",
-					"_imports_": [
-						{
-							"import": "$convex/_generated/api",
-							"item": "base",
-							"file": {
-								"type": "base",
-								"path": "src/convex/_generated/api.js"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$convex/auth.constants",
-							"item": "base",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.constants.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/routes/layout.css",
-					"relativePath": "src/routes/layout.css",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": [
-						{
-							"ecosystem": "js",
-							"name": "@skeletonlabs/skeleton"
-						},
-						{
-							"ecosystem": "js",
-							"name": "tw-animate-css"
-						},
-						{
-							"ecosystem": "js",
-							"name": "@types/node"
-						}
-					]
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/auth.constants.ts",
-					"relativePath": "src/convex/auth.constants.ts",
-					"_imports_": [
-						{
-							"import": "./auth.constants.types",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.constants.types.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/tsconfig.json",
-					"relativePath": "src/convex/tsconfig.json",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/auth.config.ts",
-					"relativePath": "src/convex/auth.config.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/convex.config.ts",
-					"relativePath": "src/convex/convex.config.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/http.ts",
-					"relativePath": "src/convex/http.ts",
-					"_imports_": [
-						{
-							"import": "./auth",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "./email",
-							"item": "convex/email",
-							"file": {
-								"type": "convex",
-								"path": "email.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/polyfills.ts",
-					"relativePath": "src/convex/polyfills.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/schema.ts",
-					"relativePath": "src/convex/schema.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/_generated/api.d.ts",
-					"relativePath": "src/convex/_generated/api.d.ts",
-					"_imports_": [
-						{
-							"import": "../auth.js",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../deviceAuthorization.js",
-							"item": "convex/deviceAuthorization",
-							"file": {
-								"type": "convex",
-								"path": "deviceAuthorization.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../email.js",
-							"item": "convex/email",
-							"file": {
-								"type": "convex",
-								"path": "email.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../model/emails/templates/baseEmail.js",
-							"item": "convex/email",
-							"file": {
-								"type": "convex",
-								"path": "model/emails/templates/baseEmail.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../model/emails/templates/emailTemplates.js",
-							"item": "convex/email",
-							"file": {
-								"type": "convex",
-								"path": "model/emails/templates/emailTemplates.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../model/emails/validateEmail.js",
-							"item": "convex/email",
-							"file": {
-								"type": "convex",
-								"path": "model/emails/validateEmail.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../model/organizations/index.js",
-							"item": "convex/organizations",
-							"file": {
-								"type": "convex",
-								"path": "model/organizations/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../organizations/invitations/queries.js",
-							"item": "convex/organizations",
-							"file": {
-								"type": "convex",
-								"path": "organizations/invitations/queries.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../organizations/members/mutations.js",
-							"item": "convex/organizations",
-							"file": {
-								"type": "convex",
-								"path": "organizations/members/mutations.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../organizations/mutations.js",
-							"item": "convex/organizations",
-							"file": {
-								"type": "convex",
-								"path": "organizations/mutations.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../organizations/queries.js",
-							"item": "convex/organizations",
-							"file": {
-								"type": "convex",
-								"path": "organizations/queries.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../storage.js",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/storage.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../users/actions.js",
-							"item": "convex/users",
-							"file": {
-								"type": "convex",
-								"path": "users/actions.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../users/mutations.js",
-							"item": "convex/users",
-							"file": {
-								"type": "convex",
-								"path": "users/mutations.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../users/queries.js",
-							"item": "convex/users",
-							"file": {
-								"type": "convex",
-								"path": "users/queries.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/_generated/api.js",
-					"relativePath": "src/convex/_generated/api.js",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/_generated/dataModel.d.ts",
-					"relativePath": "src/convex/_generated/dataModel.d.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/_generated/server.d.ts",
-					"relativePath": "src/convex/_generated/server.d.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/_generated/server.js",
-					"relativePath": "src/convex/_generated/server.js",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/_generated/api.ts",
-					"relativePath": "src/convex/betterAuth/_generated/api.ts",
-					"_imports_": [
-						{
-							"import": "../organization.js",
-							"item": "convex/organizations",
-							"file": {
-								"type": "convex",
-								"path": "betterAuth/organization.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "../user.js",
-							"item": "convex/users",
-							"file": {
-								"type": "convex",
-								"path": "betterAuth/user.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/_generated/component.ts",
-					"relativePath": "src/convex/betterAuth/_generated/component.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/_generated/dataModel.ts",
-					"relativePath": "src/convex/betterAuth/_generated/dataModel.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/_generated/server.ts",
-					"relativePath": "src/convex/betterAuth/_generated/server.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/adapter.ts",
-					"relativePath": "src/convex/betterAuth/adapter.ts",
-					"_imports_": [
-						{
-							"import": "../auth",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/auth.ts",
-					"relativePath": "src/convex/betterAuth/auth.ts",
-					"_imports_": [
-						{
-							"import": "../auth",
-							"item": "config",
-							"file": {
-								"type": "base",
-								"path": "src/convex/auth.ts"
-							},
-							"meta": {}
-						}
-					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/convex.config.ts",
-					"relativePath": "src/convex/betterAuth/convex.config.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "base",
-					"role": "file",
-					"path": "src/convex/betterAuth/schema.ts",
-					"relativePath": "src/convex/betterAuth/schema.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				}
-			]
-		},
-		{
 			"name": "config",
 			"type": "base",
 			"add": "when-added",
@@ -5180,6 +4526,660 @@
 					"role": "file",
 					"path": "auth.css",
 					"relativePath": "src/themes/auth.css",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				}
+			]
+		},
+		{
+			"name": "base",
+			"type": "base",
+			"add": "when-added",
+			"registryDependencies": [
+				"primitives",
+				"config",
+				"lib/auth",
+				"lib/organizations",
+				"lib/users",
+				"convex/email",
+				"convex/deviceAuthorization",
+				"convex/organizations",
+				"convex/users"
+			],
+			"dependencies": [
+				{
+					"ecosystem": "js",
+					"name": "better-auth",
+					"version": "1.3.34"
+				},
+				{
+					"ecosystem": "js",
+					"name": "@mmailaender/convex-better-auth-svelte",
+					"version": "0.3.0"
+				},
+				{
+					"ecosystem": "js",
+					"name": "convex",
+					"version": "^1.30.0"
+				},
+				{
+					"ecosystem": "js",
+					"name": "@convex-dev/resend",
+					"version": "0.2.0"
+				},
+				{
+					"ecosystem": "js",
+					"name": "@convex-dev/better-auth",
+					"version": "0.9.11"
+				},
+				{
+					"ecosystem": "js",
+					"name": "convex-helpers",
+					"version": "^0.1.106"
+				}
+			],
+			"devDependencies": [
+				{
+					"ecosystem": "js",
+					"name": "@sveltejs/adapter-auto",
+					"version": "^7.0.0"
+				},
+				{
+					"ecosystem": "js",
+					"name": "@sveltejs/vite-plugin-svelte",
+					"version": "^6.2.1"
+				}
+			],
+			"files": [
+				{
+					"type": "base",
+					"role": "file",
+					"path": "convex.json",
+					"relativePath": "convex.json",
+					"_imports_": [],
+					"target": "convex.json",
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "svelte.config.js",
+					"relativePath": "svelte.config.js",
+					"_imports_": [],
+					"target": "svelte.config.js",
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/app.html",
+					"relativePath": "src/app.html",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/app.d.ts",
+					"relativePath": "src/app.d.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/hooks.server.ts",
+					"relativePath": "src/hooks.server.ts",
+					"_imports_": [
+						{
+							"import": "$lib/primitives/utils/routeMatcher",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/routeMatcher.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$convex/auth",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/routes/+layout.svelte",
+					"relativePath": "src/routes/+layout.svelte",
+					"_imports_": [
+						{
+							"import": "$lib/auth/api/auth-client",
+							"item": "lib/auth",
+							"file": {
+								"type": "lib",
+								"path": "auth/api/auth-client.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$lib/primitives/ui/sonner",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/sonner/index.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$lib/organizations/ui/OrganizationSwitcher.svelte",
+							"item": "lib/organizations",
+							"file": {
+								"type": "lib",
+								"path": "organizations/ui/OrganizationSwitcher.svelte"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$lib/users/ui/UserButton.svelte",
+							"item": "lib/users",
+							"file": {
+								"type": "lib",
+								"path": "users/ui/UserButton.svelte"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$lib/auth/ui/AuthDialogProvider.svelte",
+							"item": "lib/auth",
+							"file": {
+								"type": "lib",
+								"path": "auth/ui/AuthDialogProvider.svelte"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$convex/auth.constants",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.constants.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/routes/+layout.server.ts",
+					"relativePath": "src/routes/+layout.server.ts",
+					"_imports_": [
+						{
+							"import": "$convex/_generated/api",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/convex/_generated/api.js"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$convex/auth.constants",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.constants.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/routes/layout.css",
+					"relativePath": "src/routes/layout.css",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "@skeletonlabs/skeleton"
+						},
+						{
+							"ecosystem": "js",
+							"name": "tw-animate-css"
+						},
+						{
+							"ecosystem": "js",
+							"name": "@types/node"
+						}
+					]
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/auth.constants.ts",
+					"relativePath": "src/convex/auth.constants.ts",
+					"_imports_": [
+						{
+							"import": "./auth.constants.types",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.constants.types.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/tsconfig.json",
+					"relativePath": "src/convex/tsconfig.json",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/auth.config.ts",
+					"relativePath": "src/convex/auth.config.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/convex.config.ts",
+					"relativePath": "src/convex/convex.config.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/http.ts",
+					"relativePath": "src/convex/http.ts",
+					"_imports_": [
+						{
+							"import": "./auth",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "./email",
+							"item": "convex/email",
+							"file": {
+								"type": "convex",
+								"path": "email.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/polyfills.ts",
+					"relativePath": "src/convex/polyfills.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/schema.ts",
+					"relativePath": "src/convex/schema.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/_generated/api.d.ts",
+					"relativePath": "src/convex/_generated/api.d.ts",
+					"_imports_": [
+						{
+							"import": "../auth.js",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../deviceAuthorization.js",
+							"item": "convex/deviceAuthorization",
+							"file": {
+								"type": "convex",
+								"path": "deviceAuthorization.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../email.js",
+							"item": "convex/email",
+							"file": {
+								"type": "convex",
+								"path": "email.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../model/emails/templates/baseEmail.js",
+							"item": "convex/email",
+							"file": {
+								"type": "convex",
+								"path": "model/emails/templates/baseEmail.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../model/emails/templates/emailTemplates.js",
+							"item": "convex/email",
+							"file": {
+								"type": "convex",
+								"path": "model/emails/templates/emailTemplates.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../model/emails/validateEmail.js",
+							"item": "convex/email",
+							"file": {
+								"type": "convex",
+								"path": "model/emails/validateEmail.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../model/organizations/index.js",
+							"item": "convex/organizations",
+							"file": {
+								"type": "convex",
+								"path": "model/organizations/index.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../organizations/invitations/queries.js",
+							"item": "convex/organizations",
+							"file": {
+								"type": "convex",
+								"path": "organizations/invitations/queries.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../organizations/members/mutations.js",
+							"item": "convex/organizations",
+							"file": {
+								"type": "convex",
+								"path": "organizations/members/mutations.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../organizations/mutations.js",
+							"item": "convex/organizations",
+							"file": {
+								"type": "convex",
+								"path": "organizations/mutations.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../organizations/queries.js",
+							"item": "convex/organizations",
+							"file": {
+								"type": "convex",
+								"path": "organizations/queries.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../storage.js",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/storage.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../users/actions.js",
+							"item": "convex/users",
+							"file": {
+								"type": "convex",
+								"path": "users/actions.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../users/mutations.js",
+							"item": "convex/users",
+							"file": {
+								"type": "convex",
+								"path": "users/mutations.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../users/queries.js",
+							"item": "convex/users",
+							"file": {
+								"type": "convex",
+								"path": "users/queries.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/_generated/api.js",
+					"relativePath": "src/convex/_generated/api.js",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/_generated/dataModel.d.ts",
+					"relativePath": "src/convex/_generated/dataModel.d.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/_generated/server.d.ts",
+					"relativePath": "src/convex/_generated/server.d.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/_generated/server.js",
+					"relativePath": "src/convex/_generated/server.js",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/_generated/api.ts",
+					"relativePath": "src/convex/betterAuth/_generated/api.ts",
+					"_imports_": [
+						{
+							"import": "../organization.js",
+							"item": "convex/organizations",
+							"file": {
+								"type": "convex",
+								"path": "betterAuth/organization.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "../user.js",
+							"item": "convex/users",
+							"file": {
+								"type": "convex",
+								"path": "betterAuth/user.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/_generated/component.ts",
+					"relativePath": "src/convex/betterAuth/_generated/component.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/_generated/dataModel.ts",
+					"relativePath": "src/convex/betterAuth/_generated/dataModel.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/_generated/server.ts",
+					"relativePath": "src/convex/betterAuth/_generated/server.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/adapter.ts",
+					"relativePath": "src/convex/betterAuth/adapter.ts",
+					"_imports_": [
+						{
+							"import": "../auth",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/auth.ts",
+					"relativePath": "src/convex/betterAuth/auth.ts",
+					"_imports_": [
+						{
+							"import": "../auth",
+							"item": "config",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/convex.config.ts",
+					"relativePath": "src/convex/betterAuth/convex.config.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/schema.ts",
+					"relativePath": "src/convex/betterAuth/schema.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
