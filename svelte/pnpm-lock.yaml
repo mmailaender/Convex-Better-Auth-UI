@@ -127,8 +127,8 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       jsrepo:
-        specifier: ^3.0.7
-        version: 3.0.7(svelte@5.45.4)(vue@3.5.21(typescript@5.9.3))
+        specifier: ^3.0.8
+        version: 3.0.8(svelte@5.45.4)(vue@3.5.21(typescript@5.9.3))
       mode-watcher:
         specifier: ^1.1.0
         version: 1.1.0(svelte@5.45.4)
@@ -2268,8 +2268,8 @@ packages:
   jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
 
-  jsrepo@3.0.7:
-    resolution: {integrity: sha512-UN6E8dbdOsTscNNBsvb7Edib8DkinZ+JGwz0ijSn0UhCUq4oinTkNwPlNk4bkjmbvVIfFCY44oUDnR57QnTlrQ==}
+  jsrepo@3.0.8:
+    resolution: {integrity: sha512-nPbQ/mm7uncDapUYJ1EGZWR/jUO+9/JjcX1Jyp53NiUVyCAZelqzSx74lZSgF3BWdx4iD56rrtQak85FnEyHjw==}
     hasBin: true
     peerDependencies:
       svelte: ^5.0.0
@@ -5719,7 +5719,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  jsrepo@3.0.7(svelte@5.45.4)(vue@3.5.21(typescript@5.9.3)):
+  jsrepo@3.0.8(svelte@5.45.4)(vue@3.5.21(typescript@5.9.3)):
     dependencies:
       commander: 14.0.2
       oxc-parser: 0.96.0
