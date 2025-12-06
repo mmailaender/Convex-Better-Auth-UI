@@ -1,12 +1,17 @@
-import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
+import {
+	createConvexHttpClient,
+	getAuthState
+} from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import type { LayoutServerLoad } from './$types';
 import { api } from '$convex/_generated/api';
 import { AUTH_CONSTANTS } from '$convex/auth.constants';
+import { createAuth } from '$convex/auth';
 
-export const load = (async ({ locals }) => {
+export const load = (async ({ locals, cookies }) => {
 	const token = locals.token;
 	if (!token) return {};
 	const client = createConvexHttpClient({ token });
+	const authState = await getAuthState(createAuth, cookies);
 
 	const orgs = AUTH_CONSTANTS.organizations;
 
@@ -33,6 +38,7 @@ export const load = (async ({ locals }) => {
 	]);
 
 	return {
+		authState,
 		initialData: {
 			activeUser,
 			accountList,

@@ -68,11 +68,8 @@
 			initialData: initialData?.activeOrganization
 		})
 	);
-	// Derived data
-	const user = $derived(userResponse?.data ?? initialData?.activeUser);
-	const activeOrganization = $derived(
-		organizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const user = $derived(userResponse?.data);
+	const activeOrganization = $derived(organizationResponse?.data);
 
 	// Avatar State
 	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');

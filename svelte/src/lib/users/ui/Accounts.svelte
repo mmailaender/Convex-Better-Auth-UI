@@ -79,7 +79,7 @@
 			initialData: initialData?.accountList
 		})
 	);
-	let accountList = $derived(accountListResponse?.data ?? initialData?.accountList);
+	let accountList = $derived(accountListResponse?.data);
 
 	// State for linking accounts
 	let isLinking = $state(false);

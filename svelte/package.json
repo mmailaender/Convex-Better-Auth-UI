@@ -70,7 +70,7 @@
 		"@convex-dev/better-auth": "0.9.11",
 		"@convex-dev/resend": "0.2.0",
 		"@icons-pack/svelte-simple-icons": "^6.5.0",
-		"@mmailaender/convex-better-auth-svelte": "0.3.0",
+		"@mmailaender/convex-better-auth-svelte": "^0.4.0",
 		"@tailwindcss/vite": "^4.1.17",
 		"@zxcvbn-ts/core": "^3.0.4",
 		"@zxcvbn-ts/language-common": "^3.0.4",

@@ -89,13 +89,8 @@
 			initialData: initialData?.activeOrganization
 		})
 	);
-	// Derived state - fallback to initialData during auth sync
-	const organizationList = $derived(
-		organizationListResponse?.data ?? initialData?.organizationList
-	);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const organizationList = $derived(organizationListResponse?.data);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 	const roles = useRoles({}, () => ({
 		initialData: initialData?.role
 	}));
@@ -143,7 +138,7 @@
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
-		const initialSlug = activeOrganization?.slug ?? initialData?.activeOrganization?.slug;
+		const initialSlug = activeOrganization?.slug;
 		if (initialSlug) {
 			const pathname = page.url.pathname;
 			if (/(?:^|\/)\b(active-organization|active-org)\b(?=\/|$)/.test(pathname)) {
@@ -177,7 +172,7 @@
 	});
 
 	$effect(() => {
-		const slug = activeOrganization?.slug ?? initialData?.activeOrganization?.slug;
+		const slug = activeOrganization?.slug;
 		const { pathname, search, hash } = page.url;
 		if (slug && /(?:^|\/)(active-organization|active-org)(?=\/|$)/.test(pathname)) {
 			const newPathname = pathname.replace(
@@ -254,8 +249,8 @@
 		Organizations are disabled, but OrganizationSwitcher is being used. Please turn them on in
 		auth.constants.ts
 	</div>
-{:else if !isAuthenticated && !initialData?.organizationList && !initialData?.activeOrganization}
-	<!-- Gate 2: Not authenticated and no SSR data - don't show anything -->
+{:else if !isAuthenticated}
+	<!-- Gate 2: Not authenticated - don't show anything -->
 	<!-- Return null by not rendering anything -->
 {:else if (isLoading || (organizationListResponse?.isLoading ?? false) || (activeOrganizationResponse?.isLoading ?? false)) && !organizationList && !activeOrganization}
 	<!-- Gate 3: Loading state - only show if queries are loading AND no data is available yet -->

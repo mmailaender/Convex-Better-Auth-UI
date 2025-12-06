@@ -45,7 +45,7 @@
 			initialData: initialData?.invitationList
 		})
 	);
-	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
+	const invitationList = $derived(invitationListResponse?.data);
 
 	// State
 	let selectedInvitationId: string | null = $state(null);

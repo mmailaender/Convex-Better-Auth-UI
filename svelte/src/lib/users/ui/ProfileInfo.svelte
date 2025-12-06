@@ -39,8 +39,7 @@
 			initialData: initialData?.activeUser
 		})
 	);
-	// Derived state
-	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
+	const activeUser = $derived(activeUserResponse?.data);
 
 	// State
 	let isEditingName: boolean = $state(false);

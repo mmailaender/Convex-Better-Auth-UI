@@ -62,10 +62,8 @@
 		})
 	);
 	// Derived data
-	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const activeUser = $derived(activeUserResponse?.data);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 	const members = $derived(activeOrganization?.members);
 
 	// State

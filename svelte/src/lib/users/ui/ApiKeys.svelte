@@ -36,7 +36,7 @@
 		})
 	);
 
-	const apiKeys = $derived(apiKeysResponse?.data ?? initialData?.apiKeys);
+	const apiKeys = $derived(apiKeysResponse?.data);
 
 	// Form state
 	let dialogOpen = $state(false);

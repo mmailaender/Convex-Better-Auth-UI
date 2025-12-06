@@ -53,9 +53,7 @@
 			initialData: initialData?.activeOrganization
 		})
 	);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 	const roles = useRoles({}, () => ({
 		initialData: initialData?.role
 	}));

@@ -31,8 +31,7 @@
 			initialData: initialData?.activeUser
 		})
 	);
-	// Derived state
-	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
+	const activeUser = $derived(activeUserResponse?.data);
 
 	// State
 	let isEditingEmail: boolean = $state(false);

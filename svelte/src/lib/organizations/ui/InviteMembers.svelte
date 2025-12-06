@@ -45,9 +45,7 @@
 			initialData: initialData?.activeOrganization
 		})
 	);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 
 	// State
 	let emailInput: string = $state('');

@@ -13,7 +13,7 @@
 
 	let { children, data } = $props();
 
-	createSvelteAuthClient({ authClient });
+	createSvelteAuthClient({ authClient, getServerState: () => data.authState });
 </script>
 
 <Toaster position="top-center" />

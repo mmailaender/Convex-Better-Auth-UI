@@ -61,11 +61,9 @@
 		})
 	);
 	// Derived data
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 	const members = $derived(activeOrganization?.members);
-	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
+	const invitationList = $derived(invitationListResponse?.data);
 
 	// State
 	let inviteMembersDialogOpen = $state(false);
