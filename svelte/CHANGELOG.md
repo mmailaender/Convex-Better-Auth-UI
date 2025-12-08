@@ -1,5 +1,11 @@
 # auth
 
+## 0.4.1
+
+### Patch Changes
+
+- chore: set only password in auth.constants.ts
+
 ## 0.4.0
 
 ### Minor Changes
