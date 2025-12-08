@@ -78,25 +78,22 @@
 	const organizationListResponse = useQuery(
 		api.organizations.queries.listOrganizations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.organizationList
-		}
+		})
 	);
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
-	// Derived state - fallback to initialData during auth sync
-	const organizationList = $derived(
-		organizationListResponse?.data ?? initialData?.organizationList
-	);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
-	const roles = useRoles({ initialData: initialData?.role });
+	const organizationList = $derived(organizationListResponse?.data);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
+	const roles = useRoles({}, () => ({
+		initialData: initialData?.role
+	}));
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Component state
@@ -141,7 +138,7 @@
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
-		const initialSlug = activeOrganization?.slug ?? initialData?.activeOrganization?.slug;
+		const initialSlug = activeOrganization?.slug;
 		if (initialSlug) {
 			const pathname = page.url.pathname;
 			if (/(?:^|\/)\b(active-organization|active-org)\b(?=\/|$)/.test(pathname)) {
@@ -175,7 +172,7 @@
 	});
 
 	$effect(() => {
-		const slug = activeOrganization?.slug ?? initialData?.activeOrganization?.slug;
+		const slug = activeOrganization?.slug;
 		const { pathname, search, hash } = page.url;
 		if (slug && /(?:^|\/)(active-organization|active-org)(?=\/|$)/.test(pathname)) {
 			const newPathname = pathname.replace(
@@ -252,8 +249,8 @@
 		Organizations are disabled, but OrganizationSwitcher is being used. Please turn them on in
 		auth.constants.ts
 	</div>
-{:else if !isAuthenticated && !initialData?.organizationList && !initialData?.activeOrganization}
-	<!-- Gate 2: Not authenticated and no SSR data - don't show anything -->
+{:else if !isAuthenticated}
+	<!-- Gate 2: Not authenticated - don't show anything -->
 	<!-- Return null by not rendering anything -->
 {:else if (isLoading || (organizationListResponse?.isLoading ?? false) || (activeOrganizationResponse?.isLoading ?? false)) && !organizationList && !activeOrganization}
 	<!-- Gate 3: Loading state - only show if queries are loading AND no data is available yet -->
@@ -278,8 +275,12 @@
 		>
 			<div class="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 				<Avatar.Root class="rounded-container size-8 shrink-0">
-					<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-					<Avatar.Fallback>
+					<Avatar.Image
+						src={activeOrganization?.logo}
+						alt={activeOrganization?.name}
+						class="rounded-container"
+					/>
+					<Avatar.Fallback class="rounded-container">
 						<Building2Icon class="size-5" />
 					</Avatar.Fallback>
 				</Avatar.Root>
@@ -298,8 +299,12 @@
 							class="btn hover:bg-surface-100-900/50 text-surface-700-300 flex h-14 w-full max-w-80 items-center gap-3 p-3 pr-5 text-left text-sm/6"
 						>
 							<Avatar.Root class="rounded-container size-8 shrink-0">
-								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-								<Avatar.Fallback>
+								<Avatar.Image
+									src={activeOrganization?.logo}
+									alt={activeOrganization?.name}
+									class="rounded-container"
+								/>
+								<Avatar.Fallback class="rounded-container">
 									<Building2Icon class="size-4" />
 								</Avatar.Fallback>
 							</Avatar.Root>
@@ -313,8 +318,12 @@
 							class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-t p-3 text-sm/6"
 						>
 							<Avatar.Root class="rounded-container size-8 shrink-0">
-								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-								<Avatar.Fallback>
+								<Avatar.Image
+									src={activeOrganization?.logo}
+									alt={activeOrganization?.name}
+									class="rounded-container"
+								/>
+								<Avatar.Fallback class="rounded-container">
 									<Building2Icon class="size-4" />
 								</Avatar.Fallback>
 							</Avatar.Root>
@@ -332,8 +341,8 @@
 								class="group hover:bg-surface-100-900/50 border-surface-200-800 flex w-full max-w-80 items-center gap-3 border-t p-3"
 							>
 								<Avatar.Root class="rounded-container size-8 shrink-0">
-									<Avatar.Image src={org.logo} alt={org.name} />
-									<Avatar.Fallback>
+									<Avatar.Image src={org.logo} alt={org.name} class="rounded-container" />
+									<Avatar.Fallback class="rounded-container">
 										<Building2Icon class="size-4" />
 									</Avatar.Fallback>
 								</Avatar.Root>

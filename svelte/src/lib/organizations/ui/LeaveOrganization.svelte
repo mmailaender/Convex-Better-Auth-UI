@@ -42,29 +42,28 @@
 
 	// Auth
 	const auth = useAuth();
-	const roles = useRoles({ initialData: initialData?.role });
+	const roles = useRoles({}, () => ({
+		initialData: initialData?.role
+	}));
 	const isOwner = $derived(roles.hasOwnerRole);
 
 	// Queries
 	const activeUserResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeUser
-		}
+		})
 	);
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
-	// Derived data
-	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const activeUser = $derived(activeUserResponse?.data);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 	const members = $derived(activeOrganization?.members);
 
 	// State

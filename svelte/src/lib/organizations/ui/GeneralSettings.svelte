@@ -48,29 +48,28 @@
 	const auth = useAuth();
 
 	const client = useConvexClient();
-	const roles = useRoles({ initialData: initialData?.role });
+	const roles = useRoles({}, () => ({
+		initialData: initialData?.role
+	}));
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries
 	const userResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeUser
-		}
+		})
 	);
 	const organizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
-	// Derived data
-	const user = $derived(userResponse?.data ?? initialData?.activeUser);
-	const activeOrganization = $derived(
-		organizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const user = $derived(userResponse?.data);
+	const activeOrganization = $derived(organizationResponse?.data);
 
 	// Avatar State
 	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');

@@ -49,14 +49,14 @@
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
-	const roles = useRoles({ initialData: initialData?.role });
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
+	const roles = useRoles({}, () => ({
+		initialData: initialData?.role
+	}));
 	const isOwner = $derived(roles.hasOwnerRole);
 
 	// State

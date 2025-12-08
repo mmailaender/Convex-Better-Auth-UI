@@ -41,13 +41,11 @@
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeOrganization
-		}
+		})
 	);
-	const activeOrganization = $derived(
-		activeOrganizationResponse?.data ?? initialData?.activeOrganization
-	);
+	const activeOrganization = $derived(activeOrganizationResponse?.data);
 
 	// State
 	let emailInput: string = $state('');

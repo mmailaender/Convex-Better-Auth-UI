@@ -9,19 +9,29 @@ type Role = typeof authClient.$Infer.Member.role;
 
 type UseRolesArgs = {
 	orgId?: string;
-	initialData?: Role;
 };
 
-export function useRoles(args: UseRolesArgs = {}) {
+type UseRolesOptions =
+	| {
+			initialData?: Role;
+	  }
+	| (() => { initialData?: Role });
+
+export function useRoles(args: UseRolesArgs = {}, options?: UseRolesOptions) {
 	const auth = useAuth();
+
+	const getOptions = typeof options === 'function' ? options : () => options;
+	const initialRole = getOptions()?.initialData;
 
 	const roleResponse = useQuery(
 		api.organizations.queries.getOrganizationRole,
 		() => (auth.isAuthenticated ? { organizationId: args.orgId } : 'skip'),
-		{ initialData: args.initialData }
+		() => ({
+			initialData: initialRole
+		})
 	);
 
-	const role = $derived(roleResponse?.data ?? args.initialData);
+	const role = $derived(roleResponse?.data ?? initialRole);
 
 	return {
 		get hasOwnerRole() {

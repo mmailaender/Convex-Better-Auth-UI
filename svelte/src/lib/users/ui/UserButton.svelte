@@ -48,12 +48,11 @@
 	const activeUserResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.activeUser
-		}
+		})
 	);
-	// Derived state - prefer initialData over empty query results during auth sync
-	const activeUser = $derived(activeUserResponse?.data ?? initialData?.activeUser);
+	const activeUser = $derived(activeUserResponse?.data);
 
 	// State
 	let userPopoverOpen = $state(false);
@@ -89,7 +88,7 @@
 	});
 </script>
 
-{#if initialData?.activeUser || (isAuthenticated && activeUser)}
+{#if isAuthenticated && activeUser}
 	<Popover.Root
 		bind:open={userPopoverOpen}
 		positioning={{

@@ -32,18 +32,20 @@
 
 	// Auth
 	const auth = useAuth();
-	const roles = useRoles({ initialData: initialData?.role });
+	const roles = useRoles({}, () => ({
+		initialData: initialData?.role
+	}));
 	const isOwnerOrAdmin = $derived(roles.hasOwnerOrAdminRole);
 
 	// Queries
 	const invitationListResponse = useQuery(
 		api.organizations.invitations.queries.listInvitations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		{
+		() => ({
 			initialData: initialData?.invitationList
-		}
+		})
 	);
-	const invitationList = $derived(invitationListResponse?.data ?? initialData?.invitationList);
+	const invitationList = $derived(invitationListResponse?.data);
 
 	// State
 	let selectedInvitationId: string | null = $state(null);

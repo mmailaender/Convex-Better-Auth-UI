@@ -1,5 +1,24 @@
 # auth
 
+## 0.4.2
+
+### Patch Changes
+
+- Small fixed
+
+## 0.4.1
+
+### Patch Changes
+
+- chore: set only password in auth.constants.ts
+
+## 0.4.0
+
+### Minor Changes
+
+- feat: New CLI allwowing to set up auth UI in new projects in ~5 minutes (Before ~15 Minutes)
+- feat: Added SSR support for isAuthenticated and isLoading auth states
+
 ## 0.3.0
 
 ### Minor Changes
