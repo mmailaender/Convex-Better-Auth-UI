@@ -1,19 +1,17 @@
 import { defineConfig } from 'jsrepo';
 import { repository } from 'jsrepo/outputs';
-import { fs } from 'jsrepo/providers';
+import { fs, jsrepo } from 'jsrepo/providers';
 
 export default defineConfig({
-	providers: [fs()],
+	providers: [fs(), jsrepo()],
 	registry: {
 		name: '@auth/svelte',
 		description: 'Plug & Play Auth Widgets for your application',
 		homepage: 'https://etesie.dev/docs/auth',
-		authors: undefined,
-		bugs: 'https://github.com/mmailaender/auth/issues',
-		repository: 'https://github.com/mmailaender/auth',
+		bugs: 'https://github.com/mmailaender/Convex-Better-Auth-UI/issues',
+		repository: 'https://github.com/mmailaender/Convex-Better-Auth-UI',
 		tags: ['auth', 'svelte', 'ui', 'convex', 'better-auth'],
 		version: 'package',
-		access: undefined,
 		defaultPaths: {
 			base: './',
 			convex: './src/convex',

@@ -1,9 +1,9 @@
 {
 	"name": "@auth/svelte",
-	"bugs": "https://github.com/mmailaender/auth/issues",
+	"bugs": "https://github.com/mmailaender/Convex-Better-Auth-UI/issues",
 	"description": "Plug & Play Auth Widgets for your application",
 	"homepage": "https://etesie.dev/docs/auth",
-	"repository": "https://github.com/mmailaender/auth",
+	"repository": "https://github.com/mmailaender/Convex-Better-Auth-UI",
 	"tags": [
 		"auth",
 		"svelte",
@@ -140,7 +140,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.555.0"
+					"version": "^0.556.0"
 				}
 			],
 			"files": [
@@ -222,12 +222,12 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.0.6"
+					"version": "^1.0.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.555.0"
+					"version": "^0.556.0"
 				}
 			],
 			"files": [
@@ -525,12 +525,12 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.0.6"
+					"version": "^1.0.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.555.0"
+					"version": "^0.556.0"
 				}
 			],
 			"files": [
@@ -810,12 +810,12 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.0.6"
+					"version": "^1.0.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.555.0"
+					"version": "^0.556.0"
 				}
 			],
 			"files": [
@@ -1327,7 +1327,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.2.0"
+					"version": "0.2.1"
 				}
 			],
 			"devDependencies": [],
@@ -1686,12 +1686,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.555.0"
+					"version": "^0.556.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.0.6"
+					"version": "^1.0.7"
 				}
 			],
 			"files": [
@@ -2633,7 +2633,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.555.0"
+					"version": "^0.556.0"
 				},
 				{
 					"ecosystem": "js",
@@ -2643,7 +2643,7 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.0.6"
+					"version": "^1.0.7"
 				},
 				{
 					"ecosystem": "js",
@@ -4567,7 +4567,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.2.0"
+					"version": "0.2.1"
 				},
 				{
 					"ecosystem": "js",
