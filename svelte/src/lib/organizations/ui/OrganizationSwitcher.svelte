@@ -275,8 +275,12 @@
 		>
 			<div class="flex w-full max-w-64 items-center gap-3 overflow-hidden">
 				<Avatar.Root class="rounded-container size-8 shrink-0">
-					<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-					<Avatar.Fallback>
+					<Avatar.Image
+						src={activeOrganization?.logo}
+						alt={activeOrganization?.name}
+						class="rounded-container"
+					/>
+					<Avatar.Fallback class="rounded-container">
 						<Building2Icon class="size-5" />
 					</Avatar.Fallback>
 				</Avatar.Root>
@@ -295,8 +299,12 @@
 							class="btn hover:bg-surface-100-900/50 text-surface-700-300 flex h-14 w-full max-w-80 items-center gap-3 p-3 pr-5 text-left text-sm/6"
 						>
 							<Avatar.Root class="rounded-container size-8 shrink-0">
-								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-								<Avatar.Fallback>
+								<Avatar.Image
+									src={activeOrganization?.logo}
+									alt={activeOrganization?.name}
+									class="rounded-container"
+								/>
+								<Avatar.Fallback class="rounded-container">
 									<Building2Icon class="size-4" />
 								</Avatar.Fallback>
 							</Avatar.Root>
@@ -310,8 +318,12 @@
 							class="text-surface-700-300 border-surface-200-800 flex max-w-80 items-center gap-3 border-t p-3 text-sm/6"
 						>
 							<Avatar.Root class="rounded-container size-8 shrink-0">
-								<Avatar.Image src={activeOrganization?.logo} alt={activeOrganization?.name} />
-								<Avatar.Fallback>
+								<Avatar.Image
+									src={activeOrganization?.logo}
+									alt={activeOrganization?.name}
+									class="rounded-container"
+								/>
+								<Avatar.Fallback class="rounded-container">
 									<Building2Icon class="size-4" />
 								</Avatar.Fallback>
 							</Avatar.Root>
@@ -329,8 +341,8 @@
 								class="group hover:bg-surface-100-900/50 border-surface-200-800 flex w-full max-w-80 items-center gap-3 border-t p-3"
 							>
 								<Avatar.Root class="rounded-container size-8 shrink-0">
-									<Avatar.Image src={org.logo} alt={org.name} />
-									<Avatar.Fallback>
+									<Avatar.Image src={org.logo} alt={org.name} class="rounded-container" />
+									<Avatar.Fallback class="rounded-container">
 										<Building2Icon class="size-4" />
 									</Avatar.Fallback>
 								</Avatar.Root>
