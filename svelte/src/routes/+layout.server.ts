@@ -9,7 +9,7 @@ import { createAuth } from '$convex/auth';
 
 export const load = (async ({ locals, cookies }) => {
 	const token = locals.token;
-	if (!token) return {};
+	if (!token) return { authState: undefined, initialData: undefined };
 	const client = createConvexHttpClient({ token });
 	const authState = await getAuthState(createAuth, cookies);
 

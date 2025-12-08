@@ -26,7 +26,6 @@ type ProviderFlags = {
 	spotify?: boolean;
 	vk?: boolean;
 	zoom?: boolean;
-	keypass?: boolean;
 	password?: boolean;
 };
 
