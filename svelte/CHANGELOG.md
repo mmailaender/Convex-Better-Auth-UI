@@ -1,5 +1,11 @@
 # auth
 
+## 0.4.3
+
+### Patch Changes
+
+- fix: return always authState as part of SSR to return correctly authState during unauthenticated state.
+
 ## 0.4.2
 
 ### Patch Changes
