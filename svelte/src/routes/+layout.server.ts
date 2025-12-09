@@ -8,10 +8,10 @@ import { AUTH_CONSTANTS } from '$convex/auth.constants';
 import { createAuth } from '$convex/auth';
 
 export const load = (async ({ locals, cookies }) => {
-	const token = locals.token;
-	if (!token) return { authState: undefined, initialData: undefined };
-	const client = createConvexHttpClient({ token });
 	const authState = await getAuthState(createAuth, cookies);
+	const token = locals.token;
+	if (!token) return { authState, initialData: undefined };
+	const client = createConvexHttpClient({ token });
 
 	const orgs = AUTH_CONSTANTS.organizations;
 
