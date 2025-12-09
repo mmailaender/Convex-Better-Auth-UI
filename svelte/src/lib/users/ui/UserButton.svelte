@@ -41,8 +41,6 @@
 
 	// Auth
 	const auth = useAuth();
-	const isLoading = $derived(auth.isLoading);
-	const isAuthenticated = $derived(auth.isAuthenticated);
 
 	// Queries
 	const activeUserResponse = useQuery(
@@ -88,7 +86,7 @@
 	});
 </script>
 
-{#if isAuthenticated && activeUser}
+{#if auth.isAuthenticated && activeUser}
 	<Popover.Root
 		bind:open={userPopoverOpen}
 		positioning={{
@@ -139,7 +137,7 @@
 			</div>
 		</Popover.Content>
 	</Popover.Root>
-{:else if isLoading}
+{:else if auth.isLoading}
 	<div class="placeholder-circle size-10 animate-pulse"></div>
 {:else}
 	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
