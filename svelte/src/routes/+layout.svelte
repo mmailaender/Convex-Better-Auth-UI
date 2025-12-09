@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import './layout.css';
+	import favicon from '$lib/assets/favicon.svg';
+
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { authClient } from '$lib/auth/api/auth-client';
 
@@ -15,6 +17,10 @@
 
 	createSvelteAuthClient({ authClient, getServerState: () => data.authState });
 </script>
+
+<svelte:head>
+	<link rel="icon" href={favicon} />
+</svelte:head>
 
 <Toaster position="top-center" />
 <AuthDialogProvider initialData={data.initialData}>
