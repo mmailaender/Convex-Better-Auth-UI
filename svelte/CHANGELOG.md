@@ -1,5 +1,11 @@
 # auth
 
+## 0.4.4
+
+### Patch Changes
+
+- fix: breaking error that happened if Popover.Content contains an {#each} block with reactive data during teardown. e.g. closing OrganizationProfile while viewing Members.
+
 ## 0.4.3
 
 ### Patch Changes
