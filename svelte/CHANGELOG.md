@@ -1,5 +1,11 @@
 # auth
 
+## 0.5.1
+
+### Patch Changes
+
+- fix: Add composite index for organizationId and userId in member table back
+
 ## 0.5.0
 
 ### Minor Changes
