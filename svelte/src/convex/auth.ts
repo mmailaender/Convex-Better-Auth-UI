@@ -5,7 +5,7 @@ import type { DataModel } from './_generated/dataModel';
 import authSchema from './betterAuth/schema';
 import authConfig from './auth.config';
 
-import { betterAuth, BetterAuthOptions } from 'better-auth';
+import { betterAuth, type BetterAuthOptions } from 'better-auth';
 
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
