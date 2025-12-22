@@ -90,6 +90,7 @@ export const tables = {
 		role: v.string(),
 		createdAt: v.number()
 	})
+		.index('organizationId_userId', ['organizationId', 'userId'])
 		.index('organizationId', ['organizationId'])
 		.index('userId', ['userId'])
 		.index('role', ['role']),
