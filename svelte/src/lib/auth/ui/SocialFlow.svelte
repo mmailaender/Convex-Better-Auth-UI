@@ -58,7 +58,7 @@
 		| 'naver'
 		| 'tiktok'
 		| 'twitch'
-		| 'x'
+		| 'twitter'
 		| 'dropbox'
 		| 'linear'
 		| 'gitlab'
@@ -140,7 +140,7 @@
 	if (AUTH_CONSTANTS.providers.twitch)
 		activeProviders.push({ id: 'twitch', label: 'Sign in with Twitch', Icon: SiTwitch });
 	if (AUTH_CONSTANTS.providers.x)
-		activeProviders.push({ id: 'x', label: 'Sign in with X', Icon: SiX });
+		activeProviders.push({ id: 'twitter', label: 'Sign in with X', Icon: SiX });
 	if (AUTH_CONSTANTS.providers.dropbox)
 		activeProviders.push({ id: 'dropbox', label: 'Sign in with Dropbox', Icon: SiDropbox });
 	if (AUTH_CONSTANTS.providers.linear)
