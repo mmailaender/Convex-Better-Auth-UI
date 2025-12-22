@@ -262,6 +262,14 @@ export default defineConfig({
 								]
 							},
 							{
+								path: 'lib',
+								files: [
+									{
+										path: 'assets'
+									}
+								]
+							},
+							{
 								path: 'convex',
 								files: [
 									{
@@ -284,6 +292,9 @@ export default defineConfig({
 									},
 									{
 										path: 'schema.ts'
+									},
+									{
+										path: 'migrations.ts'
 									},
 									{
 										path: '_generated'

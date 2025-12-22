@@ -33,12 +33,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.9.11"
+					"version": "0.10.6"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.3.34"
+					"version": "1.4.7"
 				}
 			],
 			"devDependencies": [],
@@ -64,6 +64,15 @@
 							"file": {
 								"type": "base",
 								"path": "src/convex/betterAuth/schema.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "./auth.config",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/convex/auth.config.ts"
 							},
 							"meta": {}
 						},
@@ -133,14 +142,14 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.4.0"
+					"version": "^0.5.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.556.0"
+					"version": "^0.562.0"
 				}
 			],
 			"files": [
@@ -190,17 +199,17 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.3.34"
+					"version": "1.4.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.9.11"
+					"version": "0.10.6"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
+					"version": "^1.31.2"
 				},
 				{
 					"ecosystem": "js",
@@ -210,7 +219,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.4.0"
+					"version": "^0.5.0"
 				},
 				{
 					"ecosystem": "js",
@@ -227,7 +236,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.556.0"
+					"version": "^0.562.0"
 				}
 			],
 			"files": [
@@ -530,7 +539,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.556.0"
+					"version": "^0.562.0"
 				}
 			],
 			"files": [
@@ -610,17 +619,17 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
+					"version": "^1.31.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.3.34"
+					"version": "1.4.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.106"
+					"version": "^0.1.108"
 				}
 			],
 			"devDependencies": [],
@@ -783,7 +792,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.14.1"
+					"version": "^5.15.0"
 				},
 				{
 					"ecosystem": "js",
@@ -793,7 +802,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.4.0"
+					"version": "^0.5.0"
 				},
 				{
 					"ecosystem": "js",
@@ -803,7 +812,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
+					"version": "^1.31.2"
 				}
 			],
 			"devDependencies": [
@@ -815,7 +824,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.556.0"
+					"version": "^0.562.0"
 				}
 			],
 			"files": [
@@ -1327,7 +1336,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.2.1"
+					"version": "0.2.3"
 				}
 			],
 			"devDependencies": [],
@@ -1433,17 +1442,17 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
+					"version": "^1.31.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.3.34"
+					"version": "1.4.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.106"
+					"version": "^0.1.108"
 				}
 			],
 			"devDependencies": [],
@@ -1669,24 +1678,24 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.4.0"
+					"version": "^0.5.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
+					"version": "^1.31.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.14.1"
+					"version": "^5.15.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.556.0"
+					"version": "^0.562.0"
 				},
 				{
 					"ecosystem": "js",
@@ -2490,12 +2499,12 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
+					"version": "^1.31.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.3.34"
+					"version": "1.4.7"
 				}
 			],
 			"devDependencies": [],
@@ -2591,7 +2600,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.14.1"
+					"version": "^5.15.0"
 				},
 				{
 					"ecosystem": "js",
@@ -2606,7 +2615,7 @@
 				{
 					"ecosystem": "js",
 					"name": "runed",
-					"version": "^0.37.0"
+					"version": "^0.37.1"
 				},
 				{
 					"ecosystem": "js",
@@ -2633,7 +2642,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.556.0"
+					"version": "^0.562.0"
 				},
 				{
 					"ecosystem": "js",
@@ -4552,32 +4561,37 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.3.34"
+					"version": "1.4.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.4.0"
+					"version": "^0.5.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.30.0"
-				},
-				{
-					"ecosystem": "js",
-					"name": "@convex-dev/resend",
-					"version": "0.2.1"
+					"version": "^1.31.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.9.11"
+					"version": "0.10.6"
+				},
+				{
+					"ecosystem": "js",
+					"name": "@convex-dev/resend",
+					"version": "0.2.3"
+				},
+				{
+					"ecosystem": "js",
+					"name": "@convex-dev/migrations",
+					"version": "^0.3.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.106"
+					"version": "^0.1.108"
 				}
 			],
 			"devDependencies": [
@@ -4670,6 +4684,15 @@
 					"path": "src/routes/+layout.svelte",
 					"relativePath": "src/routes/+layout.svelte",
 					"_imports_": [
+						{
+							"import": "$lib/assets/favicon.svg",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/lib/assets/favicon.svg"
+							},
+							"meta": {}
+						},
 						{
 							"import": "$lib/auth/api/auth-client",
 							"item": "lib/auth",
@@ -4797,6 +4820,16 @@
 				{
 					"type": "base",
 					"role": "file",
+					"path": "src/lib/assets/favicon.svg",
+					"relativePath": "src/lib/assets/favicon.svg",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
 					"path": "src/convex/auth.constants.ts",
 					"relativePath": "src/convex/auth.constants.ts",
 					"_imports_": [
@@ -4888,6 +4921,16 @@
 					"role": "file",
 					"path": "src/convex/schema.ts",
 					"relativePath": "src/convex/schema.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/migrations.ts",
+					"relativePath": "src/convex/migrations.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],

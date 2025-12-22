@@ -271,8 +271,12 @@ export const updateOrganizationProfileModel = async (
 	}
 
 	// Prepare Better Auth update data
-	const betterAuthUpdateData: Parameters<typeof auth.api.updateOrganization>[0]['body']['data'] =
-		{};
+	const betterAuthUpdateData: {
+		name?: string;
+		slug?: string;
+		logo?: string;
+		metadata?: Record<string, unknown>;
+	} = {};
 	if (name !== undefined) betterAuthUpdateData.name = name.trim();
 	if (slug !== undefined) betterAuthUpdateData.slug = slug.trim();
 	// Note: `logo` and `logoId` are fully handled above (including storage deletion and BA update),

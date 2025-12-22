@@ -3,8 +3,9 @@ import { requireActionCtx } from '@convex-dev/better-auth/utils';
 import { components, internal } from './_generated/api';
 import type { DataModel } from './_generated/dataModel';
 import authSchema from './betterAuth/schema';
+import authConfig from './auth.config';
 
-import { betterAuth } from 'better-auth';
+import { betterAuth, BetterAuthOptions } from 'better-auth';
 
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
@@ -89,12 +90,9 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
-export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optionsOnly: false }) =>
+export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 	// Configure your Better Auth instance here
-	betterAuth({
-		logger: {
-			disabled: optionsOnly
-		},
+	return {
 		// All auth requests will be proxied through your sveltekit server
 		baseURL: siteUrl,
 		database: authComponent.adapter(ctx),
@@ -212,7 +210,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 				clientId: process.env.TWITCH_CLIENT_ID as string,
 				clientSecret: process.env.TWITCH_CLIENT_SECRET as string
 			},
-			x: {
+			twitter: {
 				enabled: AUTH_CONSTANTS.providers.x ?? false,
 				clientId: process.env.X_CLIENT_ID as string,
 				clientSecret: process.env.X_CLIENT_SECRET as string
@@ -293,7 +291,10 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 
 		plugins: [
 			// The Convex plugin is required
-			convex(),
+			convex({
+				authConfig,
+				jwksRotateOnTokenGenerationError: true
+			}),
 			...(AUTH_CONSTANTS.providers.emailOTP
 				? [
 						emailOTP({
@@ -358,4 +359,9 @@ export const createAuth = (ctx: GenericCtx<DataModel>, { optionsOnly } = { optio
 					]
 				: [])
 		]
-	});
+	} satisfies BetterAuthOptions;
+};
+
+export const createAuth = (ctx: GenericCtx<DataModel>) => {
+	return betterAuth(createAuthOptions(ctx));
+};

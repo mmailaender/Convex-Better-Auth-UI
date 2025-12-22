@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as deviceAuthorization from "../deviceAuthorization.js";
 import type * as email from "../email.js";
 import type * as http from "../http.js";
+import type * as migrations from "../migrations.js";
 import type * as model_emails_templates_baseEmail from "../model/emails/templates/baseEmail.js";
 import type * as model_emails_templates_emailTemplates from "../model/emails/templates/emailTemplates.js";
 import type * as model_emails_validateEmail from "../model/emails/validateEmail.js";
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   deviceAuthorization: typeof deviceAuthorization;
   email: typeof email;
   http: typeof http;
+  migrations: typeof migrations;
   "model/emails/templates/baseEmail": typeof model_emails_templates_baseEmail;
   "model/emails/templates/emailTemplates": typeof model_emails_templates_emailTemplates;
   "model/emails/validateEmail": typeof model_emails_validateEmail;
@@ -290,6 +292,7 @@ export declare const components: {
             | {
                 data: {
                   createdAt: number;
+                  expiresAt?: null | number;
                   privateKey: string;
                   publicKey: string;
                 };
@@ -318,6 +321,7 @@ export declare const components: {
               }
             | {
                 data: {
+                  createdAt: number;
                   email: string;
                   expiresAt: number;
                   inviterId: string;
@@ -522,7 +526,12 @@ export declare const components: {
                 model: "jwks";
                 where?: Array<{
                   connector?: "AND" | "OR";
-                  field: "publicKey" | "privateKey" | "createdAt" | "_id";
+                  field:
+                    | "publicKey"
+                    | "privateKey"
+                    | "createdAt"
+                    | "expiresAt"
+                    | "_id";
                   operator?:
                     | "lt"
                     | "lte"
@@ -619,6 +628,7 @@ export declare const components: {
                     | "role"
                     | "status"
                     | "expiresAt"
+                    | "createdAt"
                     | "inviterId"
                     | "_id";
                   operator?:
@@ -888,7 +898,12 @@ export declare const components: {
                 model: "jwks";
                 where?: Array<{
                   connector?: "AND" | "OR";
-                  field: "publicKey" | "privateKey" | "createdAt" | "_id";
+                  field:
+                    | "publicKey"
+                    | "privateKey"
+                    | "createdAt"
+                    | "expiresAt"
+                    | "_id";
                   operator?:
                     | "lt"
                     | "lte"
@@ -985,6 +1000,7 @@ export declare const components: {
                     | "role"
                     | "status"
                     | "expiresAt"
+                    | "createdAt"
                     | "inviterId"
                     | "_id";
                   operator?:
@@ -1382,12 +1398,18 @@ export declare const components: {
                 model: "jwks";
                 update: {
                   createdAt?: number;
+                  expiresAt?: null | number;
                   privateKey?: string;
                   publicKey?: string;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
-                  field: "publicKey" | "privateKey" | "createdAt" | "_id";
+                  field:
+                    | "publicKey"
+                    | "privateKey"
+                    | "createdAt"
+                    | "expiresAt"
+                    | "_id";
                   operator?:
                     | "lt"
                     | "lte"
@@ -1492,6 +1514,7 @@ export declare const components: {
             | {
                 model: "invitation";
                 update: {
+                  createdAt?: number;
                   email?: string;
                   expiresAt?: number;
                   inviterId?: string;
@@ -1507,6 +1530,7 @@ export declare const components: {
                     | "role"
                     | "status"
                     | "expiresAt"
+                    | "createdAt"
                     | "inviterId"
                     | "_id";
                   operator?:
@@ -1851,12 +1875,18 @@ export declare const components: {
                 model: "jwks";
                 update: {
                   createdAt?: number;
+                  expiresAt?: null | number;
                   privateKey?: string;
                   publicKey?: string;
                 };
                 where?: Array<{
                   connector?: "AND" | "OR";
-                  field: "publicKey" | "privateKey" | "createdAt" | "_id";
+                  field:
+                    | "publicKey"
+                    | "privateKey"
+                    | "createdAt"
+                    | "expiresAt"
+                    | "_id";
                   operator?:
                     | "lt"
                     | "lte"
@@ -1961,6 +1991,7 @@ export declare const components: {
             | {
                 model: "invitation";
                 update: {
+                  createdAt?: number;
                   email?: string;
                   expiresAt?: number;
                   inviterId?: string;
@@ -1976,6 +2007,7 @@ export declare const components: {
                     | "role"
                     | "status"
                     | "expiresAt"
+                    | "createdAt"
                     | "inviterId"
                     | "_id";
                   operator?:
@@ -2221,6 +2253,92 @@ export declare const components: {
           userId: string;
         },
         null
+      >;
+    };
+  };
+  migrations: {
+    lib: {
+      cancel: FunctionReference<
+        "mutation",
+        "internal",
+        { name: string },
+        {
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }
+      >;
+      cancelAll: FunctionReference<
+        "mutation",
+        "internal",
+        { sinceTs?: number },
+        Array<{
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }>
+      >;
+      clearAll: FunctionReference<
+        "mutation",
+        "internal",
+        { before?: number },
+        null
+      >;
+      getStatus: FunctionReference<
+        "query",
+        "internal",
+        { limit?: number; names?: Array<string> },
+        Array<{
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }>
+      >;
+      migrate: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          batchSize?: number;
+          cursor?: string | null;
+          dryRun: boolean;
+          fnHandle: string;
+          name: string;
+          next?: Array<{ fnHandle: string; name: string }>;
+          oneBatchOnly?: boolean;
+        },
+        {
+          batchSize?: number;
+          cursor?: string | null;
+          error?: string;
+          isDone: boolean;
+          latestEnd?: number;
+          latestStart: number;
+          name: string;
+          next?: Array<string>;
+          processed: number;
+          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
+        }
       >;
     };
   };
