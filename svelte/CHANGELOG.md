@@ -1,5 +1,11 @@
 # auth
 
+## 0.5.0
+
+### Minor Changes
+
+- feat: update to convex better auth 0.10 and better auth 0.4
+
 ## 0.4.4
 
 ### Patch Changes

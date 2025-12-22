@@ -3,8 +3,8 @@ import { query } from './_generated/server';
 import { createAuth } from '../auth';
 import schema from './schema';
 import { withSystemFields } from 'convex-helpers/validators';
-import { GenericCtx } from '@convex-dev/better-auth';
-import { DataModel } from '../_generated/dataModel';
+import type { GenericCtx } from '@convex-dev/better-auth';
+import type { DataModel } from '../_generated/dataModel';
 
 // Export a static instance for Better Auth schema generation
 export const auth = createAuth({} as GenericCtx<DataModel>);
