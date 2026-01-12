@@ -522,7 +522,7 @@
 			]
 		},
 		{
-			"name": "routes/reset-password",
+			"name": "routes/(auth)/reset-password",
 			"type": "routes",
 			"add": "when-added",
 			"registryDependencies": [
@@ -547,7 +547,7 @@
 					"type": "routes",
 					"role": "file",
 					"path": "reset-password/+page.svelte",
-					"relativePath": "src/routes/reset-password/+page.svelte",
+					"relativePath": "src/routes/(auth)/reset-password/+page.svelte",
 					"_imports_": [
 						{
 							"import": "$lib/primitives/ui/password",
@@ -575,7 +575,7 @@
 			]
 		},
 		{
-			"name": "routes/signin",
+			"name": "routes/(auth)/signin",
 			"type": "routes",
 			"add": "when-added",
 			"registryDependencies": [
@@ -588,7 +588,7 @@
 					"type": "routes",
 					"role": "file",
 					"path": "signin/+page.svelte",
-					"relativePath": "src/routes/signin/+page.svelte",
+					"relativePath": "src/routes/(auth)/signin/+page.svelte",
 					"_imports_": [
 						{
 							"import": "$lib/auth/ui/SignIn.svelte",
@@ -2550,7 +2550,7 @@
 			]
 		},
 		{
-			"name": "routes/device-authorization",
+			"name": "routes/(auth)/device-authorization",
 			"type": "routes",
 			"add": "when-added",
 			"registryDependencies": [
@@ -2564,7 +2564,7 @@
 					"type": "routes",
 					"role": "file",
 					"path": "device-authorization/[code]/+page.svelte",
-					"relativePath": "src/routes/device-authorization/[code]/+page.svelte",
+					"relativePath": "src/routes/(auth)/device-authorization/[code]/+page.svelte",
 					"_imports_": [
 						{
 							"import": "$lib/auth/api/auth-client",
