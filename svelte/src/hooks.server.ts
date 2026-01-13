@@ -63,6 +63,12 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 };
 
 export const setTokenFromCookies: Handle = async ({ event, resolve }) => {
+	// ⛑️ During build/prerender, skip all auth logic.
+	// This prevents "BetterAuthError on a page with prerendering enabled".
+	if (building) {
+		return resolve(event);
+	}
+
 	event.locals.token = await getToken(createAuth, event.cookies);
 
 	return resolve(event);
