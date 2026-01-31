@@ -17,11 +17,15 @@
   </p>
 </p>
 
+<p align="center">
+  <img src="./showcase.gif" alt="Auth UI preview" width="900" />
+</p>
+
 ---
 
 ## 🧩 What is Auth UI?
 
-**Auth** gives you full-ownership authentication and organization management for **SvelteKit** or **React** — built on  
+**Auth UI** gives you full-ownership authentication and organization management for **SvelteKit** or **React** — built on  
 **Better Auth + Convex**, wrapped in an extensible UI layer you completely control.
 
 You don’t integrate a service.  
