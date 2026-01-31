@@ -61,7 +61,7 @@
 	@apply border-surface-400-600 placeholder:text-surface-400-600 hover:border-surface-500 text-surface-950-50 disabled:bg-surface-200-800 disabled:text-surface-600-400 active:border-primary-500 focus:border-primary-500 h-9 w-full border px-2.5 text-sm ring-0 duration-300 ease-in-out;
 }
 @utility textarea {
-	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 border px-2.5 text-sm duration-300 ease-in-out;
+	@apply border-surface-400-600 placeholder:text-surface-500 hover:border-surface-500 text-surface-950-50 rounded-container border px-2.5 text-sm duration-300 ease-in-out;
 }
 
 @utility select {
