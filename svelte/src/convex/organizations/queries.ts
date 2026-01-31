@@ -72,7 +72,10 @@ export const getOrganizationRole = query({
 export const getActiveOrganization = query({
 	args: {},
 	handler: async (ctx) => {
-		await authComponent.getAuthUser(ctx);
+		const user = await authComponent.safeGetAuthUser(ctx);
+		if (!user) {
+			return null;
+		}
 
 		try {
 			const auth = createAuth(ctx);
