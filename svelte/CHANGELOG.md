@@ -1,5 +1,16 @@
 # auth
 
+## 0.5.2
+
+### Patch Changes
+
+- fix: Use safeGetAuthUser in getActiveOrganization query to prevent auth errors
+- fix: Resolve prerender auth error in hooks.server.ts
+- feat: Add updateOrganization mutation for organization profile updates
+- refactor: Move auth routes to (auth) route group for better project organization
+- chore: Upgrade @convex-dev/better-auth from 0.10.6 to 0.10.10
+- chore: Update dependencies to latest versions
+
 ## 0.5.1
 
 ### Patch Changes
