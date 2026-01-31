@@ -5,7 +5,7 @@
     <img src="./banner.webp" alt="Auth Logo">
   </picture>
   <h2 align="center">
-    Auth UI
+    Convex Better Auth UI
   </h2>
 
   <p align="center">
@@ -63,9 +63,15 @@ fully functional, fully editable, and ready for production.
 
 ## 🧠 Built With
 
-- [Convex](https://convex.dev) – Backend & real-time data
-- [Better Auth](https://github.com/get-convex/better-auth) – Secure auth API
-- [Skeleton](https://skeleton.dev) – Design system foundations
+- **Convex** – Backend, auth data & real-time sync
+- **Better Auth** – Secure, framework-agnostic auth core
+- **SvelteKit / React** – First-class framework support
+
+### UI & Styling
+
+- **Tailwind CSS** – Utility-first styling
+- **Shadcn** – Copy-paste components you own
+- **Skeleton** – Design-system primitives & theming
 
 ---
 

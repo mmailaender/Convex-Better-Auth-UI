@@ -48,15 +48,10 @@ export default defineConfig({
 				type: 'routes',
 				files: [
 					{
-						path: 'src/routes/api',
-						files: [
-							{
-								path: 'auth/[...all]/+server.ts'
-							},
-							{
-								path: 'organization/accept-invitation/[invitationId]/+page.svelte'
-							}
-						]
+						path: 'src/routes/api/auth/*/+server.ts'
+					},
+					{
+						path: 'src/routes/api/organization/accept-invitation/*/+page.svelte'
 					}
 				]
 			},
@@ -71,12 +66,12 @@ export default defineConfig({
 				]
 			},
 			{
-				name: 'routes/reset-password',
+				name: 'routes/(auth)/reset-password',
 				add: 'when-added',
 				type: 'routes',
 				files: [
 					{
-						path: 'src/routes/reset-password',
+						path: 'src/routes/(auth)/reset-password',
 						files: [
 							{
 								path: '+page.svelte'
@@ -86,12 +81,12 @@ export default defineConfig({
 				]
 			},
 			{
-				name: 'routes/signin',
+				name: 'routes/(auth)/signin',
 				add: 'when-added',
 				type: 'routes',
 				files: [
 					{
-						path: 'src/routes/signin',
+						path: 'src/routes/(auth)/signin',
 						files: [
 							{
 								path: '+page.svelte'
@@ -195,17 +190,12 @@ export default defineConfig({
 				]
 			},
 			{
-				name: 'routes/device-authorization',
+				name: 'routes/(auth)/device-authorization',
 				add: 'when-added',
 				type: 'routes',
 				files: [
 					{
-						path: 'src/routes/device-authorization',
-						files: [
-							{
-								path: '[code]/+page.svelte'
-							}
-						]
+						path: 'src/routes/*/device-authorization/*/+page.svelte'
 					}
 				]
 			},
