@@ -912,6 +912,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "query",
         "internal",
         {
+          join?: any;
           limit?: number;
           model:
             | "user"
@@ -965,6 +966,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "query",
         "internal",
         {
+          join?: any;
           model:
             | "user"
             | "session"
@@ -1998,6 +2000,23 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "mutation",
         "internal",
         { sessionId: string; userId: string },
+        null,
+        Name
+      >;
+      updateOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          data: {
+            logo?: null | string;
+            logoId?: null | string;
+            metadata?: null | string;
+            name?: string;
+            plans?: null | Array<string>;
+            slug?: string;
+          };
+          organizationId: string;
+        },
         null,
         Name
       >;
