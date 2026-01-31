@@ -48,15 +48,10 @@ export default defineConfig({
 				type: 'routes',
 				files: [
 					{
-						path: 'src/routes/api',
-						files: [
-							{
-								path: 'auth/[...all]/+server.ts'
-							},
-							{
-								path: 'organization/accept-invitation/[invitationId]/+page.svelte'
-							}
-						]
+						path: 'src/routes/api/auth/*/+server.ts'
+					},
+					{
+						path: 'src/routes/api/organization/accept-invitation/*/+page.svelte'
 					}
 				]
 			},
@@ -200,12 +195,7 @@ export default defineConfig({
 				type: 'routes',
 				files: [
 					{
-						path: 'src/routes/(auth)/device-authorization',
-						files: [
-							{
-								path: '[code]/+page.svelte'
-							}
-						]
+						path: 'src/routes/*/device-authorization/*/+page.svelte'
 					}
 				]
 			},
