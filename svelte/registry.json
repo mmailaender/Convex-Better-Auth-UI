@@ -33,12 +33,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.10.6"
+					"version": "0.10.10"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.4.7"
+					"version": "1.4.9"
 				}
 			],
 			"devDependencies": [],
@@ -149,14 +149,14 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.562.0"
+					"version": "^0.563.1"
 				}
 			],
 			"files": [
 				{
 					"type": "routes",
 					"role": "file",
-					"path": "api/auth/[...all]/+server.ts",
+					"path": "[...all]/+server.ts",
 					"relativePath": "src/routes/api/auth/[...all]/+server.ts",
 					"_imports_": [],
 					"registryDependencies": [],
@@ -166,7 +166,7 @@
 				{
 					"type": "routes",
 					"role": "file",
-					"path": "api/organization/accept-invitation/[invitationId]/+page.svelte",
+					"path": "[invitationId]/+page.svelte",
 					"relativePath": "src/routes/api/organization/accept-invitation/[invitationId]/+page.svelte",
 					"_imports_": [
 						{
@@ -199,17 +199,17 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.4.7"
+					"version": "1.4.9"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.10.6"
+					"version": "0.10.10"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				},
 				{
 					"ecosystem": "js",
@@ -236,7 +236,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.562.0"
+					"version": "^0.563.1"
 				}
 			],
 			"files": [
@@ -522,7 +522,7 @@
 			]
 		},
 		{
-			"name": "routes/reset-password",
+			"name": "routes/(auth)/reset-password",
 			"type": "routes",
 			"add": "when-added",
 			"registryDependencies": [
@@ -539,7 +539,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.562.0"
+					"version": "^0.563.1"
 				}
 			],
 			"files": [
@@ -547,7 +547,7 @@
 					"type": "routes",
 					"role": "file",
 					"path": "reset-password/+page.svelte",
-					"relativePath": "src/routes/reset-password/+page.svelte",
+					"relativePath": "src/routes/(auth)/reset-password/+page.svelte",
 					"_imports_": [
 						{
 							"import": "$lib/primitives/ui/password",
@@ -575,7 +575,7 @@
 			]
 		},
 		{
-			"name": "routes/signin",
+			"name": "routes/(auth)/signin",
 			"type": "routes",
 			"add": "when-added",
 			"registryDependencies": [
@@ -588,7 +588,7 @@
 					"type": "routes",
 					"role": "file",
 					"path": "signin/+page.svelte",
-					"relativePath": "src/routes/signin/+page.svelte",
+					"relativePath": "src/routes/(auth)/signin/+page.svelte",
 					"_imports_": [
 						{
 							"import": "$lib/auth/ui/SignIn.svelte",
@@ -619,17 +619,17 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.4.7"
+					"version": "1.4.9"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.108"
+					"version": "^0.1.111"
 				}
 			],
 			"devDependencies": [],
@@ -812,7 +812,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				}
 			],
 			"devDependencies": [
@@ -824,7 +824,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.562.0"
+					"version": "^0.563.1"
 				}
 			],
 			"files": [
@@ -1442,17 +1442,17 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.4.7"
+					"version": "1.4.9"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.108"
+					"version": "^0.1.111"
 				}
 			],
 			"devDependencies": [],
@@ -1683,7 +1683,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				},
 				{
 					"ecosystem": "js",
@@ -1695,7 +1695,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.562.0"
+					"version": "^0.563.1"
 				},
 				{
 					"ecosystem": "js",
@@ -2499,12 +2499,12 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.4.7"
+					"version": "1.4.9"
 				}
 			],
 			"devDependencies": [],
@@ -2550,7 +2550,7 @@
 			]
 		},
 		{
-			"name": "routes/device-authorization",
+			"name": "routes/(auth)/device-authorization",
 			"type": "routes",
 			"add": "when-added",
 			"registryDependencies": [
@@ -2563,8 +2563,8 @@
 				{
 					"type": "routes",
 					"role": "file",
-					"path": "device-authorization/[code]/+page.svelte",
-					"relativePath": "src/routes/device-authorization/[code]/+page.svelte",
+					"path": "(auth)/device-authorization/[code]/+page.svelte",
+					"relativePath": "src/routes/(auth)/device-authorization/[code]/+page.svelte",
 					"_imports_": [
 						{
 							"import": "$lib/auth/api/auth-client",
@@ -2642,7 +2642,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.562.0"
+					"version": "^0.563.1"
 				},
 				{
 					"ecosystem": "js",
@@ -4561,7 +4561,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.4.7"
+					"version": "1.4.9"
 				},
 				{
 					"ecosystem": "js",
@@ -4571,12 +4571,12 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.31.2"
+					"version": "^1.31.7"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.10.6"
+					"version": "0.10.10"
 				},
 				{
 					"ecosystem": "js",
@@ -4591,7 +4591,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex-helpers",
-					"version": "^0.1.108"
+					"version": "^0.1.111"
 				}
 			],
 			"devDependencies": [

@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { mutation } from './_generated/server';
-import { withSystemFields } from 'convex-helpers/validators';
+import { partial, withSystemFields } from 'convex-helpers/validators';
+import { omit } from 'convex-helpers';
 import schema from './schema';
 import { type Id } from './_generated/dataModel';
 import { ConvexError } from 'convex/values';
@@ -103,6 +104,21 @@ export const setActiveOrganization = mutation({
 			await ctx.db.patch(sessionId, { activeOrganizationId: activeOrgId });
 		}
 
+		return null;
+	}
+});
+
+/**
+ * Dedicated updateOrganization mutation as auth.api.updateOrganization needs an authenticated user.
+ */
+export const updateOrganization = mutation({
+	args: {
+		organizationId: v.id('organization'),
+		data: v.object(partial(omit(schema.tables.organization.validator.fields, ['createdAt'])))
+	},
+	returns: v.null(),
+	handler: async (ctx, { organizationId, data }) => {
+		await ctx.db.patch(organizationId, data);
 		return null;
 	}
 });

@@ -1115,6 +1115,7 @@ export declare const components: {
         "query",
         "internal",
         {
+          join?: any;
           limit?: number;
           model:
             | "user"
@@ -1167,6 +1168,7 @@ export declare const components: {
         "query",
         "internal",
         {
+          join?: any;
           model:
             | "user"
             | "session"
@@ -2195,6 +2197,22 @@ export declare const components: {
         "mutation",
         "internal",
         { sessionId: string; userId: string },
+        null
+      >;
+      updateOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          data: {
+            logo?: null | string;
+            logoId?: null | string;
+            metadata?: null | string;
+            name?: string;
+            plans?: null | Array<string>;
+            slug?: string;
+          };
+          organizationId: string;
+        },
         null
       >;
     };
