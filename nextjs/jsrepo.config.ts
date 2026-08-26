@@ -163,7 +163,7 @@ export default defineConfig({
 							},
 							{
 								path: 'utils',
-								files: [{ path: 'safeRedirect.ts' }]
+								files: [{ path: 'safeRedirect.ts' }, { path: 'signInRedirect.ts' }]
 							}
 						]
 					},

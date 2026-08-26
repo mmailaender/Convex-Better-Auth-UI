@@ -13,6 +13,10 @@ import { Mail } from 'lucide-react';
 // Utils
 import { cn } from '../../../lib/utils';
 import { safeRedirect } from '../../../lib/auth/utils/safeRedirect';
+import {
+	resolveSignInCallbackURL,
+	resolveSignInRedirect
+} from '../../../lib/auth/utils/signInRedirect';
 
 // Constants
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
@@ -72,23 +76,20 @@ export default function SignIn({
 	const availableMethods = getAvailableMethods();
 
 	const getRedirectURL = useCallback((): string | undefined => {
-		if (redirectParam) {
-			return redirectParam;
+		if (typeof window !== 'undefined') {
+			return resolveSignInRedirect(redirectParam, new URL(window.location.href));
 		}
 
-		const redirectTo = searchParams.get('redirectTo');
-		if (redirectTo) {
-			return redirectTo;
-		}
-
-		if (typeof window !== 'undefined' && window.location.pathname.includes('/signin')) {
-			return '/';
-		}
+		if (redirectParam) return redirectParam;
+		return searchParams.get('redirectTo') ?? undefined;
 	}, [redirectParam, searchParams]);
 
 	/** Absolute same-origin callback URL for Better Auth flows that leave the page */
 	const getCallbackURL = (): string =>
-		typeof window === 'undefined' ? '/' : window.location.origin + safeRedirect(getRedirectURL());
+		typeof window === 'undefined'
+			? '/'
+			: window.location.origin +
+				safeRedirect(resolveSignInCallbackURL(redirectParam, new URL(window.location.href)));
 
 	/** Redirects after sign-in; a target on another host goes home */
 	const handleRedirect = useCallback((): void => {

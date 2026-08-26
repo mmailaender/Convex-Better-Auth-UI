@@ -3716,6 +3716,15 @@
 							"meta": {}
 						},
 						{
+							"import": "$lib/auth/utils/signInRedirect",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/signInRedirect.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "$lib/auth/context.svelte",
 							"item": "auth/lib",
 							"file": {
@@ -3783,6 +3792,16 @@
 					"role": "file",
 					"path": "auth/utils/safeRedirect.ts",
 					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "auth/utils/signInRedirect.ts",
+					"relativePath": "src/lib/auth/utils/signInRedirect.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
