@@ -24,6 +24,7 @@
 	import { DIALOG_KEY } from '$lib/users/utils/user.constants';
 
 	// Types
+	import type { Snippet } from 'svelte';
 	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { Pathname } from '$app/types';
 	import type { GetActiveUserType, ListAccountsType } from '$lib/auth/types';
@@ -31,13 +32,17 @@
 	// Props
 	const {
 		popoverPlacement = 'bottom',
-		initialData
+		initialData,
+		signInTrigger
 	}: {
 		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: {
 			activeUser?: GetActiveUserType;
 			accountList?: ListAccountsType;
 		};
+		/** Optional replacement for the default sign-in button. Receives `open` to
+		 * launch the UserButton-owned sign-in dialog. */
+		signInTrigger?: Snippet<[{ open: () => void }]>;
 	} = $props();
 
 	// Auth
@@ -96,15 +101,15 @@
 			offset: { mainAxis: 8, crossAxis: 0 }
 		}}
 	>
-		<Popover.Trigger>
+		<Popover.Trigger class="flex size-10 items-center justify-center rounded-full">
 			<Avatar.Root
-				class="ring-surface-100-900 size-9 ring-0 duration-200 ease-out hover:ring-4"
+				class="ring-surface-100-900 size-9 ring-0 ring-inset duration-200 ease-out hover:ring-4"
 				onStatusChange={(details) => (avatarStatus = details.status)}
 			>
 				<Avatar.Image src={activeUser?.image} alt={activeUser?.name} />
 				<Avatar.Fallback>
 					{#if avatarStatus === 'loading'}
-						<div class="placeholder-circle size-10 animate-pulse"></div>
+						<div class="placeholder-circle size-full animate-pulse"></div>
 					{:else}
 						<Avatar.Marble name={activeUser?.name} />
 					{/if}
@@ -139,7 +144,11 @@
 		</Popover.Content>
 	</Popover.Root>
 {:else if auth.isLoading || auth.isAuthenticated}
-	<div class="placeholder-circle size-10 animate-pulse"></div>
+	<div class="flex size-10 items-center justify-center">
+		<div class="placeholder-circle size-9 animate-pulse"></div>
+	</div>
+{:else if signInTrigger}
+	{@render signInTrigger({ open: () => (signInDialogOpen = true) })}
 {:else}
 	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
 		Sign in
@@ -156,7 +165,7 @@
 	}}
 >
 	<Dialog.Content
-		class="sm:rounded-container h-full max-h-[100dvh] w-full rounded-none sm:h-auto sm:max-h-[90vh] sm:w-4xl sm:max-w-md"
+		class="sm:rounded-container h-full max-h-dvh w-full rounded-none sm:h-auto sm:max-h-[90vh] sm:w-4xl sm:max-w-md"
 	>
 		{#key signInKey}
 			<SignIn onSignIn={() => (signInDialogOpen = false)} class="p-2 sm:p-8" />
