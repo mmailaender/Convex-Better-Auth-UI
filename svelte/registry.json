@@ -3707,11 +3707,11 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/utils/signInRedirect",
+							"import": "$lib/auth/utils/safeRedirect",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
-								"path": "auth/utils/signInRedirect.ts"
+								"path": "auth/utils/safeRedirect.ts"
 							},
 							"meta": {}
 						},
@@ -3781,8 +3781,8 @@
 				{
 					"type": "lib",
 					"role": "file",
-					"path": "auth/utils/signInRedirect.ts",
-					"relativePath": "src/lib/auth/utils/signInRedirect.ts",
+					"path": "auth/utils/safeRedirect.ts",
+					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -4737,11 +4737,11 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/utils/signInRedirect",
+							"import": "$lib/auth/utils/safeRedirect",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
-								"path": "auth/utils/signInRedirect.ts"
+								"path": "auth/utils/safeRedirect.ts"
 							},
 							"meta": {}
 						}
@@ -4775,11 +4775,11 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/utils/signInRedirect",
+							"import": "$lib/auth/utils/safeRedirect",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
-								"path": "auth/utils/signInRedirect.ts"
+								"path": "auth/utils/safeRedirect.ts"
 							},
 							"meta": {}
 						},

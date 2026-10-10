@@ -1,6 +1,7 @@
 <script lang="ts">
 	// Sveltekit
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	// Svelte
 	import { toast } from 'svelte-sonner';
 
@@ -18,11 +19,7 @@
 
 	// Utils
 	import { cn } from '$lib/primitives/utils';
-	import {
-		gotoSameOriginPath,
-		resolveSignInCallbackURL,
-		resolveSignInRedirect
-	} from '$lib/auth/utils/signInRedirect';
+	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
 
 	// Context
 	import { getAuthContext } from '$lib/auth/context.svelte';
@@ -96,29 +93,37 @@
 	});
 
 	/**
-	 * Gets the redirect URL based on redirectTo or current URL params; only a same-origin
-	 * path counts, anything else is ignored
+	 * Gets the redirect URL based on redirectTo or current URL params
 	 */
 	function getRedirectURL(): string | undefined {
-		return resolveSignInRedirect(redirectParam, page.url);
+		if (redirectParam) return redirectParam;
+
+		const redirectTo = page.url.searchParams.get('redirectTo');
+		if (redirectTo) {
+			return redirectTo;
+		}
+
+		if (page.url.pathname.includes('/signin')) {
+			return '/';
+		}
 	}
 
 	/**
-	 * Gets the absolute same-origin callback URL for Better Auth flows that leave the page
+	 * Absolute same-origin callback URL for Better Auth flows that leave the page
 	 */
 	function getCallbackURL(): string {
-		return resolveSignInCallbackURL(redirectParam, page.url);
+		return page.url.origin + safeRedirect(getRedirectURL(), '/', page.url.origin);
 	}
 
 	/**
-	 * Handles the redirect after successful authentication
+	 * Handles the redirect after successful authentication; a target on another host goes home
 	 */
 	async function handleRedirect(): Promise<void> {
-		// A same-origin path or nothing: resolveSignInRedirect drops any other target.
 		const redirectURL = getRedirectURL();
-		if (!redirectURL || typeof window === 'undefined') return;
+		if (!redirectURL) return;
 
-		await gotoSameOriginPath(redirectURL, { invalidateAll: true });
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
+		await goto(safeRedirect(redirectURL, '/', page.url.origin), { invalidateAll: true });
 	}
 
 	/**

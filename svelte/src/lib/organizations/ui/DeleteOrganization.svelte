@@ -1,10 +1,13 @@
 <script lang="ts">
+	// Navigation
+	import { goto } from '$app/navigation';
+
 	// API
 	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
-	import { gotoSameOriginPath, sameOriginPath } from '$lib/auth/utils/signInRedirect';
+	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
@@ -78,8 +81,9 @@
 				onSuccessfulDelete();
 			}
 
-			// Navigate to the specified same-origin path or home by default
-			void gotoSameOriginPath(sameOriginPath(redirectTo, window.location.origin) ?? '/');
+			// Navigate to the specified URL if it is on this site, else home
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
+			void goto(safeRedirect(redirectTo));
 		} catch (err) {
 			if (err instanceof Error) {
 				toast.error(err.message);

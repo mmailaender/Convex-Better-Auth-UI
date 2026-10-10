@@ -16,7 +16,6 @@ import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
 import { ConvexError } from 'convex/values';
 import { useActiveOrganizationData } from '@/lib/auth/hooks';
-import { pushSameOriginPath } from '@/lib/auth/utils/signInRedirect';
 
 /**
  * Component for deleting an organization
@@ -59,8 +58,12 @@ export default function DeleteOrganization({
 				onSuccessfulDelete();
 			}
 
-			// Navigate to the specified same-origin path or home by default
-			pushSameOriginPath(router, redirectTo ?? '/');
+			// Navigate to the specified URL or home by default
+			if (redirectTo) {
+				router.push(redirectTo);
+			} else {
+				router.push('/');
+			}
 		} catch (error) {
 			if (error instanceof ConvexError) {
 				toast.error(error.data);

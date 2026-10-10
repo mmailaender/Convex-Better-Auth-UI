@@ -19,7 +19,6 @@ import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { authClient } from '../../../lib/auth/api/auth-client';
-import { pushSameOriginPath, sameOriginPath } from '../../../lib/auth/utils/signInRedirect';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
@@ -127,14 +126,11 @@ export default function CreateOrganization({
 			if (onSuccessfulCreate) onSuccessfulCreate();
 
 			// Redirect
-			const redirectUrl = sameOriginPath(
-				redirectTo ?? searchParams.get('redirectTo'),
-				window.location.origin
-			);
+			const redirectUrl = redirectTo ?? searchParams.get('redirectTo');
 
-			// Navigate to the specified same-origin path
+			// Navigate to the specified URL
 			if (redirectUrl) {
-				pushSameOriginPath(router, redirectUrl);
+				router.push(redirectUrl);
 			} else {
 				let needsRedirect = false;
 				if (activeOrgSlug) {
