@@ -12,6 +12,7 @@ import { Mail } from 'lucide-react';
 
 // Utils
 import { cn } from '../../../lib/utils';
+import { safeRedirect } from '../../../lib/auth/utils/safeRedirect';
 
 // Constants
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
@@ -85,27 +86,16 @@ export default function SignIn({
 		}
 	}, [redirectParam, searchParams]);
 
-	const handleRedirect = useCallback((): 'internal' | 'external' | 'none' => {
+	/** Absolute same-origin callback URL for Better Auth flows that leave the page */
+	const getCallbackURL = (): string =>
+		typeof window === 'undefined' ? '/' : window.location.origin + safeRedirect(getRedirectURL());
+
+	/** Redirects after sign-in; a target on another host goes home */
+	const handleRedirect = useCallback((): void => {
 		const redirectURL = getRedirectURL();
-		if (!redirectURL || typeof window === 'undefined') return 'none';
+		if (!redirectURL) return;
 
-		try {
-			const target = new URL(redirectURL, window.location.origin);
-			if (target.origin === window.location.origin) {
-				router.push(`${target.pathname}${target.search}${target.hash}`);
-				return 'internal';
-			}
-
-			window.location.assign(target.toString());
-			return 'external';
-		} catch {
-			if (redirectURL.startsWith('/')) {
-				router.push(redirectURL);
-				return 'internal';
-			}
-		}
-
-		return 'none';
+		router.push(safeRedirect(redirectURL));
 	}, [getRedirectURL, router]);
 
 	const handleAuthSuccess = () => {
@@ -120,11 +110,9 @@ export default function SignIn({
 		if (isSigningIn && isAuthenticated && !isLoading) {
 			console.log('Convex auth synchronized, redirecting...');
 			onSignIn?.();
-			const redirectMode = handleRedirect();
-			if (redirectMode !== 'external') {
-				setSubmitting(false);
-				setIsSigningIn(false);
-			}
+			handleRedirect();
+			setSubmitting(false);
+			setIsSigningIn(false);
 		}
 	}, [isSigningIn, isAuthenticated, isLoading, onSignIn, handleRedirect]);
 
@@ -153,7 +141,7 @@ export default function SignIn({
 			await authClient.signIn.magicLink(
 				{
 					email,
-					callbackURL: getRedirectURL() || '/',
+					callbackURL: getCallbackURL(),
 					errorCallbackURL: '/signin?error=magic-link-failed'
 				},
 				{
@@ -239,7 +227,7 @@ export default function SignIn({
 						onBack={resetToEmailStep}
 						submitting={submitting}
 						onSubmittingChange={setSubmitting}
-						callbackURL={getRedirectURL() || '/'}
+						callbackURL={getCallbackURL()}
 					/>
 				);
 			case 'email-otp-flow':
@@ -260,7 +248,7 @@ export default function SignIn({
 						onBack={resetToEmailStep}
 						submitting={submitting}
 						onSubmittingChange={setSubmitting}
-						callbackURL={getRedirectURL() || '/'}
+						callbackURL={getCallbackURL()}
 						onLinkSent={() => {
 							setMagicLinkSent(true);
 							setIsSigningIn(true);
@@ -366,7 +354,7 @@ export default function SignIn({
 						<SocialFlow
 							show={currentStep === 'email'}
 							dividerAfter={availableMethods.length > 0}
-							callbackURL={getRedirectURL() || '/'}
+							callbackURL={getCallbackURL()}
 							onSuccess={handleAuthSuccess}
 							onSubmittingChange={setSubmitting}
 						/>

@@ -753,8 +753,8 @@
 				{
 					"type": "lib",
 					"role": "file",
-					"path": "auth/utils/signInRedirect.ts",
-					"relativePath": "src/lib/auth/utils/signInRedirect.ts",
+					"path": "auth/utils/safeRedirect.ts",
+					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
