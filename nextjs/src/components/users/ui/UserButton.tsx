@@ -1,6 +1,6 @@
 'use client';
 
-import { ComponentProps, useState } from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useConvexAuth } from 'convex/react';
 import { ChevronRight } from 'lucide-react';
@@ -16,9 +16,13 @@ import { useActiveUserData } from '@/lib/auth/hooks';
 type PopoverRootProps = ComponentProps<typeof Popover.Root>;
 
 export default function UserButton({
-	popoverPlacement = 'bottom'
+	popoverPlacement = 'bottom',
+	signInTrigger
 }: {
 	popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
+	/** Optional replacement for the default sign-in button. Receives `open` to
+	 * launch the UserButton-owned sign-in dialog. */
+	signInTrigger?: (context: Readonly<{ open: () => void }>) => ReactNode;
 }) {
 	const router = useRouter();
 	const pathname = usePathname();
@@ -43,11 +47,20 @@ export default function UserButton({
 	return (
 		<>
 			{isLoading ? (
-				<div className="placeholder-circle size-10 animate-pulse" />
+				<div className="flex size-10 items-center justify-center">
+					<div className="placeholder-circle size-9 animate-pulse" />
+				</div>
 			) : !isAuthenticated ? (
-				<button className="btn preset-filled-primary-500" onClick={() => setSignInDialogOpen(true)}>
-					Sign in
-				</button>
+				signInTrigger ? (
+					signInTrigger({ open: () => setSignInDialogOpen(true) })
+				) : (
+					<button
+						className="btn preset-filled-primary-500"
+						onClick={() => setSignInDialogOpen(true)}
+					>
+						Sign in
+					</button>
+				)
 			) : user ? (
 				<Popover.Root
 					open={userPopoverOpen}
@@ -58,15 +71,16 @@ export default function UserButton({
 						offset: { mainAxis: 8, crossAxis: 0 }
 					}}
 				>
-					<Popover.Trigger>
+					{/* Fixed px keeps browser root font-size preferences from changing control geometry. */}
+					<Popover.Trigger className="flex size-10 items-center justify-center rounded-full">
 						<Avatar.Root
-							className="ring-surface-100-900 size-9 ring-0 duration-200 ease-out hover:ring-4"
+							className="ring-surface-100-900 size-9 ring-0 duration-200 ease-out ring-inset hover:ring-4"
 							onStatusChange={(details) => setAvatarStatus(details.status)}
 						>
 							<Avatar.Image src={user.image ?? undefined} alt={user.name} />
 							<Avatar.Fallback>
 								{avatarStatus === 'loading' ? (
-									<div className="placeholder-circle size-10 animate-pulse" />
+									<div className="placeholder-circle size-full animate-pulse" />
 								) : (
 									<Avatar.Marble name={user.name} />
 								)}
@@ -99,7 +113,9 @@ export default function UserButton({
 					</Popover.Content>
 				</Popover.Root>
 			) : (
-				<div className="placeholder-circle size-10 animate-pulse" />
+				<div className="flex size-10 items-center justify-center">
+					<div className="placeholder-circle size-9 animate-pulse" />
+				</div>
 			)}
 
 			<Dialog.Root
@@ -109,7 +125,7 @@ export default function UserButton({
 					if (!nextOpen) setSignInKey((key) => key + 1);
 				}}
 			>
-				<Dialog.Content className="sm:rounded-container h-full max-h-[100dvh] w-full rounded-none sm:h-auto sm:max-h-[90vh] sm:w-4xl sm:max-w-md">
+				<Dialog.Content className="sm:rounded-container h-full max-h-dvh w-full rounded-none sm:h-auto sm:max-h-[90vh] sm:w-4xl sm:max-w-md">
 					<SignIn
 						key={signInKey}
 						onSignIn={() => setSignInDialogOpen(false)}

@@ -12,7 +12,7 @@
 	import InviteMembers from '$lib/organizations/ui/InviteMembers.svelte';
 
 	// API
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';

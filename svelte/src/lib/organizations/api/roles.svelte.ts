@@ -1,5 +1,5 @@
 // API
-import { useQuery } from '@mmailaender/convex-svelte';
+import { useQuery } from 'convex-svelte';
 import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 import { getAuthContext } from '$lib/auth/context.svelte';
 

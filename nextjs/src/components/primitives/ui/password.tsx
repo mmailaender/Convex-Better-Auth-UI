@@ -2,14 +2,14 @@
 
 import * as React from 'react';
 import { Progress as ProgressPrimitive } from '@ark-ui/react/progress';
-import { zxcvbn, zxcvbnOptions, type ZxcvbnResult } from '@zxcvbn-ts/core';
+import { ZxcvbnFactory, type ZxcvbnResult } from '@zxcvbn-ts/core';
 import * as zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
 import * as zxcvbnEnPackage from '@zxcvbn-ts/language-en';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-zxcvbnOptions.setOptions({
+const zxcvbnInstance = new ZxcvbnFactory({
 	translations: zxcvbnEnPackage.translations,
 	graphs: zxcvbnCommonPackage.adjacencyGraphs,
 	dictionary: {
@@ -37,7 +37,7 @@ const PasswordContext = React.createContext<{
 	value: '',
 	setValue: () => {},
 	minScore: 3,
-	strength: zxcvbn(''),
+	strength: zxcvbnInstance.check(''),
 	submitted: false,
 	setSubmitted: () => {},
 	inputEl: null,
@@ -69,7 +69,7 @@ function Root({ children, hidden = true, minScore = 3, onerror }: RootProps) {
 	const [submitted, setSubmitted] = React.useState(false);
 	const [inputEl, setInputEl] = React.useState<HTMLInputElement | null>(null);
 	const errorId = React.useId();
-	const strength = React.useMemo(() => zxcvbn(value), [value]);
+	const strength = React.useMemo(() => zxcvbnInstance.check(value), [value]);
 	const errorMessage = getErrorMessage(inputEl, submitted);
 	const lastErrorRef = React.useRef<string | null>(null);
 

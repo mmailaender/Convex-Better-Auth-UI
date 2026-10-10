@@ -3,7 +3,7 @@
 	import { tick } from 'svelte';
 
 	// API
-	import { useQuery, useConvexClient, useMutation } from '@mmailaender/convex-svelte';
+	import { useQuery, useConvexClient, useMutation } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
 	const { api } = getAuthContext();

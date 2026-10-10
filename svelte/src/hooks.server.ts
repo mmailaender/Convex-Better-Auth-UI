@@ -4,7 +4,7 @@ import { redirect, type Handle } from '@sveltejs/kit';
 import { getSessionCookie } from 'better-auth/cookies';
 import { createRouteMatcher } from '$lib/primitives/utils/routeMatcher';
 import { getToken } from '@mmailaender/convex-better-auth-svelte/sveltekit';
-import { withServerConvexToken } from '@mmailaender/convex-svelte/sveltekit/server';
+import { withServerConvexToken } from 'convex-svelte/sveltekit/server';
 
 /* --------------------------------------------------------- */
 /* -------------------- route match helpers ---------------- */

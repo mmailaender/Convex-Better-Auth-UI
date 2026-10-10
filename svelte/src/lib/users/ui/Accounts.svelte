@@ -59,7 +59,7 @@
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { useConvexClient, useQuery } from '@mmailaender/convex-svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { ConvexError } from 'convex/values';
 	const client = useConvexClient();
 

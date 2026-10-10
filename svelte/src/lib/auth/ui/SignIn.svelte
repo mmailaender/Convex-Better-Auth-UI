@@ -20,6 +20,7 @@
 	// Utils
 	import { cn } from '$lib/primitives/utils';
 	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
+	import { resolveSignInCallbackURL, resolveSignInRedirect } from '$lib/auth/utils/signInRedirect';
 
 	// Context
 	import { getAuthContext } from '$lib/auth/context.svelte';
@@ -96,23 +97,17 @@
 	 * Gets the redirect URL based on redirectTo or current URL params
 	 */
 	function getRedirectURL(): string | undefined {
-		if (redirectParam) return redirectParam;
-
-		const redirectTo = page.url.searchParams.get('redirectTo');
-		if (redirectTo) {
-			return redirectTo;
-		}
-
-		if (page.url.pathname.includes('/signin')) {
-			return '/';
-		}
+		return resolveSignInRedirect(redirectParam, page.url);
 	}
 
 	/**
 	 * Absolute same-origin callback URL for Better Auth flows that leave the page
 	 */
 	function getCallbackURL(): string {
-		return page.url.origin + safeRedirect(getRedirectURL(), '/', page.url.origin);
+		return (
+			page.url.origin +
+			safeRedirect(resolveSignInCallbackURL(redirectParam, page.url), '/', page.url.origin)
+		);
 	}
 
 	/**

@@ -46,7 +46,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -62,7 +62,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -630,7 +630,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@better-auth/api-key",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -644,7 +644,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -709,7 +709,7 @@
 						{
 							"ecosystem": "js",
 							"name": "@better-auth/api-key",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						},
 						{
 							"ecosystem": "js",
@@ -718,7 +718,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -755,6 +755,16 @@
 					"role": "file",
 					"path": "auth/utils/safeRedirect.ts",
 					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "auth/utils/signInRedirect.ts",
+					"relativePath": "src/lib/auth/utils/signInRedirect.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -933,7 +943,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -953,7 +963,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1004,7 +1014,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -1146,7 +1156,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1191,7 +1201,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1211,7 +1221,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1257,7 +1267,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -1541,7 +1551,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []

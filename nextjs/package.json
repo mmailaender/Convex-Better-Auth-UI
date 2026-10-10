@@ -1,6 +1,6 @@
 {
 	"name": "auth",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"private": true,
 	"scripts": {
 		"dev:frontend": "next dev --turbopack",
@@ -19,15 +19,15 @@
 	},
 	"dependencies": {
 		"@ark-ui/react": "^5.36.2",
-		"@better-auth/api-key": "1.6.9",
+		"@better-auth/api-key": "1.6.16",
 		"@convex-dev/better-auth": "0.12.0",
 		"@convex-dev/migrations": "^0.3.4",
 		"@convex-dev/resend": "0.2.3",
 		"@icons-pack/react-simple-icons": "13.7.0",
-		"@zxcvbn-ts/core": "^3.0.4",
-		"@zxcvbn-ts/language-common": "^3.0.4",
-		"@zxcvbn-ts/language-en": "^3.0.2",
-		"better-auth": "1.6.9",
+		"@zxcvbn-ts/core": "^4.1.2",
+		"@zxcvbn-ts/language-common": "^4.1.2",
+		"@zxcvbn-ts/language-en": "^4.1.1",
+		"better-auth": "1.6.16",
 		"clsx": "^2.1.1",
 		"convex": "1.36.1",
 		"convex-helpers": "^0.1.115",

@@ -1,5 +1,18 @@
 # auth
 
+## 0.9.0
+
+### Minor Changes
+
+- chore: Upgrade Better Auth to 1.6.16, `@convex-dev/better-auth` to 0.12.4, Convex to 1.42.0, and `@zxcvbn-ts` packages to 4.x
+- refactor: Replace `@mmailaender/convex-svelte` with `convex-svelte`
+
+#### Migration
+
+1. Replace `@mmailaender/convex-svelte` with `convex-svelte` in your dependencies and update all imports.
+
+→ `jsrepo update 'base/ssr' 'auth/lib' 'users/lib' 'organizations/lib'`
+
 ## 0.8.0
 
 ### Minor Changes
