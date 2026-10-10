@@ -22,6 +22,7 @@ describe('safeRedirect', () => {
 		['a newline that turns into a protocol-relative URL', '/\n/attacker.example'],
 		['a dot segment that resolves to a protocol-relative path', '/..//attacker.example'],
 		['a javascript: URL', 'javascript:alert(document.domain)'],
+		['a same-origin blob: URL', `blob:${ORIGIN}/id`],
 		['a malformed URL', 'http://[']
 	] as const) {
 		it(`falls back for ${label}`, () => {
@@ -29,4 +30,8 @@ describe('safeRedirect', () => {
 			assert.equal(safeRedirect(target, '/settings', ORIGIN), '/settings');
 		});
 	}
+
+	it('keeps the origin of a callback built from a same-origin blob: URL', () => {
+		assert.equal(ORIGIN + safeRedirect(`blob:${ORIGIN}/id`, '/', ORIGIN), `${ORIGIN}/`);
+	});
 });
