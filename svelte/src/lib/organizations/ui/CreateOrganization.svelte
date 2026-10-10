@@ -24,6 +24,7 @@
 	import { useConvexClient, useQuery } from '@mmailaender/convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
@@ -174,21 +175,10 @@
 
 			// Redirect
 			const redirectUrl = props.redirectTo ?? page.url.searchParams.get('redirectTo');
-			// Navigate to the specified URL
+			// Navigate to the specified URL if it is on this site, else home
 			if (redirectUrl) {
-				try {
-					const target = new URL(redirectUrl, window.location.origin);
-					if (target.origin === window.location.origin) {
-						const internalPath = `${target.pathname}${target.search}${target.hash}`;
-						void goto(resolve(internalPath as Pathname));
-					} else {
-						window.location.assign(target.toString());
-					}
-				} catch {
-					if (redirectUrl.startsWith('/')) {
-						void goto(resolve(redirectUrl as Pathname));
-					}
-				}
+				// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
+				void goto(safeRedirect(redirectUrl, '/', page.url.origin));
 			} else {
 				let needsRedirect = false;
 				if (activeOrgSlug) {

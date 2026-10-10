@@ -19,6 +19,7 @@ import { optimizeImage } from '@/components/primitives/utils/optimizeImage';
 import { useConvexAuth, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { authClient } from '../../../lib/auth/api/auth-client';
+import { safeRedirect } from '../../../lib/auth/utils/safeRedirect';
 
 // Types
 import type { Id } from '@/convex/_generated/dataModel';
@@ -128,9 +129,9 @@ export default function CreateOrganization({
 			// Redirect
 			const redirectUrl = redirectTo ?? searchParams.get('redirectTo');
 
-			// Navigate to the specified URL
+			// Navigate to the specified URL if it is on this site, else home
 			if (redirectUrl) {
-				router.push(redirectUrl);
+				router.push(safeRedirect(redirectUrl));
 			} else {
 				let needsRedirect = false;
 				if (activeOrgSlug) {

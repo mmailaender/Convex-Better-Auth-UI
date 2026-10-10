@@ -3707,6 +3707,15 @@
 							"meta": {}
 						},
 						{
+							"import": "$lib/auth/utils/safeRedirect",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/safeRedirect.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "$lib/auth/context.svelte",
 							"item": "auth/lib",
 							"file": {
@@ -3765,6 +3774,16 @@
 							"meta": {}
 						}
 					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "auth/utils/safeRedirect.ts",
+					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -4716,6 +4735,15 @@
 								"path": "auth/context.svelte.ts"
 							},
 							"meta": {}
+						},
+						{
+							"import": "$lib/auth/utils/safeRedirect",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/safeRedirect.ts"
+							},
+							"meta": {}
 						}
 					],
 					"registryDependencies": [],
@@ -4743,6 +4771,15 @@
 							"file": {
 								"type": "lib",
 								"path": "auth/context.svelte.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "$lib/auth/utils/safeRedirect",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/safeRedirect.ts"
 							},
 							"meta": {}
 						},
