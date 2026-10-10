@@ -1,0 +1,17 @@
+{
+	"name": "convex-better-auth-ui",
+	"private": true,
+	"workspaces": [
+		"svelte",
+		"nextjs"
+	],
+	"scripts": {
+		"changeset": "changeset",
+		"version-packages": "changeset version",
+		"release": "node scripts/release.mjs"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.31.0"
+	},
+	"packageManager": "pnpm@11.9.0"
+}

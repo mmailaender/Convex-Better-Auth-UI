@@ -1,4 +1,4 @@
-# auth
+# @auth/svelte
 
 ## 0.9.0
 
