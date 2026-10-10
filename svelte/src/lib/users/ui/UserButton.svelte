@@ -16,7 +16,7 @@
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
 	const { api } = getAuthContext();
 

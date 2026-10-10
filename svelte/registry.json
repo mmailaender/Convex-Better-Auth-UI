@@ -44,7 +44,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -60,7 +60,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -119,22 +119,22 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.36.1"
+					"version": "^1.42.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.12.0"
+					"version": "0.12.4"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.2.3"
+					"version": "0.2.5"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/migrations",
-					"version": "^0.3.4"
+					"version": "^0.3.5"
 				}
 			],
 			"devDependencies": [
@@ -146,7 +146,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@sveltejs/vite-plugin-svelte",
-					"version": "^7.0.0"
+					"version": "^7.1.2"
 				}
 			],
 			"files": [
@@ -391,17 +391,17 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.7.3"
+					"version": "^0.8.0"
 				},
 				{
 					"ecosystem": "js",
-					"name": "@mmailaender/convex-svelte",
-					"version": "^0.18.0"
+					"name": "convex-svelte",
+					"version": "^0.14.0"
 				}
 			],
 			"devDependencies": [],
@@ -452,7 +452,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.21.1"
+					"version": "^5.22.1"
 				},
 				{
 					"ecosystem": "js",
@@ -472,17 +472,17 @@
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/core",
-					"version": "^3.0.4"
+					"version": "^4.1.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/language-common",
-					"version": "^3.0.4"
+					"version": "^4.1.2"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/language-en",
-					"version": "^3.0.2"
+					"version": "^4.1.1"
 				},
 				{
 					"ecosystem": "js",
@@ -504,7 +504,7 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.0"
+					"version": "^1.1.1"
 				},
 				{
 					"ecosystem": "js",
@@ -514,7 +514,7 @@
 				{
 					"ecosystem": "js",
 					"name": "tailwind-merge",
-					"version": "^3.5.0"
+					"version": "^3.6.0"
 				}
 			],
 			"files": [
@@ -3439,13 +3439,13 @@
 			"dependencies": [
 				{
 					"ecosystem": "js",
-					"name": "@mmailaender/convex-svelte",
-					"version": "^0.18.0"
+					"name": "convex-svelte",
+					"version": "^0.14.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.7.3"
+					"version": "^0.8.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3457,7 +3457,7 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.0"
+					"version": "^1.1.1"
 				},
 				{
 					"ecosystem": "js",
@@ -3514,7 +3514,7 @@
 						{
 							"ecosystem": "js",
 							"name": "@better-auth/api-key",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						},
 						{
 							"ecosystem": "js",
@@ -3523,7 +3523,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -3802,14 +3802,14 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.7.3"
+					"version": "^0.8.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.0"
+					"version": "^1.1.1"
 				},
 				{
 					"ecosystem": "js",
@@ -3917,7 +3917,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -3937,7 +3937,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -3975,7 +3975,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.21.1"
+					"version": "^5.22.1"
 				},
 				{
 					"ecosystem": "js",
@@ -3985,24 +3985,24 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.7.3"
+					"version": "^0.8.0"
 				},
 				{
 					"ecosystem": "js",
-					"name": "@mmailaender/convex-svelte",
-					"version": "^0.18.0"
+					"name": "convex-svelte",
+					"version": "^0.14.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.36.1"
+					"version": "^1.42.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.0"
+					"version": "^1.1.1"
 				},
 				{
 					"ecosystem": "js",
@@ -4531,7 +4531,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -4576,7 +4576,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -4596,7 +4596,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -4633,23 +4633,23 @@
 			"dependencies": [
 				{
 					"ecosystem": "js",
-					"name": "@mmailaender/convex-svelte",
-					"version": "^0.18.0"
+					"name": "convex-svelte",
+					"version": "^0.14.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.7.3"
+					"version": "^0.8.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.36.1"
+					"version": "^1.42.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.21.1"
+					"version": "^5.22.1"
 				}
 			],
 			"devDependencies": [
@@ -4661,7 +4661,7 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.0"
+					"version": "^1.1.1"
 				}
 			],
 			"files": [
@@ -5538,7 +5538,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []

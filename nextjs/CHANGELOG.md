@@ -1,5 +1,11 @@
 # @auth/nextjs
 
+## 0.1.2
+
+### Patch Changes
+
+- chore: Updated dependency versions (Better Auth 1.6.16, `@zxcvbn-ts` 4.x)
+
 ## 0.1.0
 
 ### Minor Changes

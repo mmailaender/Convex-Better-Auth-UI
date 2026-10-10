@@ -13,7 +13,7 @@
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// API
-	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
+	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { ConvexError } from 'convex/values';

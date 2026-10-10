@@ -1,6 +1,6 @@
 import { Context, watch } from 'runed';
 import type { ReadableBoxedValues, WritableBoxedValues } from 'svelte-toolbelt';
-import { zxcvbn, zxcvbnOptions } from '@zxcvbn-ts/core';
+import { ZxcvbnFactory } from '@zxcvbn-ts/core';
 import * as zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
 import * as zxcvbnEnPackage from '@zxcvbn-ts/language-en';
 
@@ -13,7 +13,7 @@ const passwordOptions = {
 	}
 };
 
-zxcvbnOptions.setOptions(passwordOptions);
+const zxcvbnInstance = new ZxcvbnFactory(passwordOptions);
 
 type PasswordRootStateProps = WritableBoxedValues<{
 	hidden: boolean;
@@ -46,7 +46,7 @@ class PasswordRootState {
 	constructor(readonly opts: PasswordRootStateProps) {}
 
 	// only re-run when the password changes
-	strength = $derived.by(() => zxcvbn(this.passwordState.value));
+	strength = $derived.by(() => zxcvbnInstance.check(this.passwordState.value));
 }
 
 type PasswordInputStateProps = WritableBoxedValues<{

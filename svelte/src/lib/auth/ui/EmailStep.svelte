@@ -3,7 +3,7 @@
 	import { toast } from 'svelte-sonner';
 
 	// API
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useConvexClient } from 'convex-svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
 	const { api } = getAuthContext();
 
