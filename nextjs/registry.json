@@ -753,6 +753,16 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "auth/utils/signInRedirect.ts",
+					"relativePath": "src/lib/auth/utils/signInRedirect.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "auth/ui/DeviceAuthorization.tsx",
 					"relativePath": "src/components/auth/ui/DeviceAuthorization.tsx",
 					"_imports_": [],

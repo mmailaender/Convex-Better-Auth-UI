@@ -12,6 +12,11 @@ import { Mail } from 'lucide-react';
 
 // Utils
 import { cn } from '../../../lib/utils';
+import {
+	pushSameOriginPath,
+	resolveSignInCallbackURL,
+	resolveSignInRedirect
+} from '../../../lib/auth/utils/signInRedirect';
 
 // Constants
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
@@ -70,42 +75,32 @@ export default function SignIn({
 
 	const availableMethods = getAvailableMethods();
 
+	/** The current page with the router's query; undefined while rendering on the server */
+	const getCurrentURL = useCallback((): URL | undefined => {
+		if (typeof window === 'undefined') return undefined;
+		const currentURL = new URL(window.location.pathname, window.location.origin);
+		currentURL.search = searchParams.toString();
+		return currentURL;
+	}, [searchParams]);
+
+	/** The destination after sign-in; only a same-origin path counts, anything else is ignored */
 	const getRedirectURL = useCallback((): string | undefined => {
-		if (redirectParam) {
-			return redirectParam;
-		}
+		const currentURL = getCurrentURL();
+		return currentURL && resolveSignInRedirect(redirectParam, currentURL);
+	}, [getCurrentURL, redirectParam]);
 
-		const redirectTo = searchParams.get('redirectTo');
-		if (redirectTo) {
-			return redirectTo;
-		}
+	/** The absolute same-origin callback URL for Better Auth flows that leave the page */
+	const getCallbackURL = (): string => {
+		const currentURL = getCurrentURL();
+		return currentURL ? resolveSignInCallbackURL(redirectParam, currentURL) : '/';
+	};
 
-		if (typeof window !== 'undefined' && window.location.pathname.includes('/signin')) {
-			return '/';
-		}
-	}, [redirectParam, searchParams]);
-
-	const handleRedirect = useCallback((): 'internal' | 'external' | 'none' => {
+	const handleRedirect = useCallback((): void => {
+		// A same-origin path or nothing: resolveSignInRedirect drops any other target.
 		const redirectURL = getRedirectURL();
-		if (!redirectURL || typeof window === 'undefined') return 'none';
+		if (!redirectURL) return;
 
-		try {
-			const target = new URL(redirectURL, window.location.origin);
-			if (target.origin === window.location.origin) {
-				router.push(`${target.pathname}${target.search}${target.hash}`);
-				return 'internal';
-			}
-
-			window.location.assign(target.toString());
-			return 'external';
-		} catch {
-			if (redirectURL.startsWith('/')) {
-				router.push(redirectURL);
-				return 'internal';
-			}
-		}
-
-		return 'none';
+		pushSameOriginPath(router, redirectURL);
 	}, [getRedirectURL, router]);
 
 	const handleAuthSuccess = () => {
@@ -120,11 +115,9 @@ export default function SignIn({
 		if (isSigningIn && isAuthenticated && !isLoading) {
 			console.log('Convex auth synchronized, redirecting...');
 			onSignIn?.();
-			const redirectMode = handleRedirect();
-			if (redirectMode !== 'external') {
-				setSubmitting(false);
-				setIsSigningIn(false);
-			}
+			handleRedirect();
+			setSubmitting(false);
+			setIsSigningIn(false);
 		}
 	}, [isSigningIn, isAuthenticated, isLoading, onSignIn, handleRedirect]);
 
@@ -153,7 +146,7 @@ export default function SignIn({
 			await authClient.signIn.magicLink(
 				{
 					email,
-					callbackURL: getRedirectURL() || '/',
+					callbackURL: getCallbackURL(),
 					errorCallbackURL: '/signin?error=magic-link-failed'
 				},
 				{
@@ -239,7 +232,7 @@ export default function SignIn({
 						onBack={resetToEmailStep}
 						submitting={submitting}
 						onSubmittingChange={setSubmitting}
-						callbackURL={getRedirectURL() || '/'}
+						callbackURL={getCallbackURL()}
 					/>
 				);
 			case 'email-otp-flow':
@@ -260,7 +253,7 @@ export default function SignIn({
 						onBack={resetToEmailStep}
 						submitting={submitting}
 						onSubmittingChange={setSubmitting}
-						callbackURL={getRedirectURL() || '/'}
+						callbackURL={getCallbackURL()}
 						onLinkSent={() => {
 							setMagicLinkSent(true);
 							setIsSigningIn(true);
@@ -366,7 +359,7 @@ export default function SignIn({
 						<SocialFlow
 							show={currentStep === 'email'}
 							dividerAfter={availableMethods.length > 0}
-							callbackURL={getRedirectURL() || '/'}
+							callbackURL={getCallbackURL()}
 							onSuccess={handleAuthSuccess}
 							onSubmittingChange={setSubmitting}
 						/>

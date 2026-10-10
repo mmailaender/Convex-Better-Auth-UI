@@ -160,6 +160,10 @@ export default defineConfig({
 										dependencies: ['@convex-dev/better-auth']
 									}
 								]
+							},
+							{
+								path: 'utils',
+								files: [{ path: 'signInRedirect.ts' }]
 							}
 						]
 					},
