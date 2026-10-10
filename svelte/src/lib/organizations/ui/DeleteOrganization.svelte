@@ -1,13 +1,10 @@
 <script lang="ts">
-	// Navigation
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
-
 	// API
 	import { useQuery, useConvexClient } from '@mmailaender/convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { gotoSameOriginPath, sameOriginPath } from '$lib/auth/utils/signInRedirect';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
@@ -19,7 +16,6 @@
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// Types
-	import type { Pathname } from '$app/types';
 	import type { GetActiveOrganizationType, Role } from '$lib/auth/types';
 
 	/**
@@ -82,24 +78,8 @@
 				onSuccessfulDelete();
 			}
 
-			// Navigate to the specified URL or home by default
-			if (redirectTo) {
-				try {
-					const target = new URL(redirectTo, window.location.origin);
-					if (target.origin === window.location.origin) {
-						const internalPath = `${target.pathname}${target.search}${target.hash}`;
-						void goto(resolve(internalPath as Pathname));
-					} else {
-						window.location.assign(target.toString());
-					}
-				} catch {
-					if (redirectTo.startsWith('/')) {
-						void goto(resolve(redirectTo as Pathname));
-					}
-				}
-			} else {
-				void goto(resolve('/'));
-			}
+			// Navigate to the specified same-origin path or home by default
+			void gotoSameOriginPath(sameOriginPath(redirectTo, window.location.origin) ?? '/');
 		} catch (err) {
 			if (err instanceof Error) {
 				toast.error(err.message);

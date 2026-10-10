@@ -24,6 +24,7 @@
 	import { useConvexClient, useQuery } from '@mmailaender/convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { gotoSameOriginPath, sameOriginPath } from '$lib/auth/utils/signInRedirect';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
@@ -173,22 +174,13 @@
 			resetForm();
 
 			// Redirect
-			const redirectUrl = props.redirectTo ?? page.url.searchParams.get('redirectTo');
-			// Navigate to the specified URL
+			const redirectUrl = sameOriginPath(
+				props.redirectTo ?? page.url.searchParams.get('redirectTo'),
+				window.location.origin
+			);
+			// Navigate to the specified same-origin path
 			if (redirectUrl) {
-				try {
-					const target = new URL(redirectUrl, window.location.origin);
-					if (target.origin === window.location.origin) {
-						const internalPath = `${target.pathname}${target.search}${target.hash}`;
-						void goto(resolve(internalPath as Pathname));
-					} else {
-						window.location.assign(target.toString());
-					}
-				} catch {
-					if (redirectUrl.startsWith('/')) {
-						void goto(resolve(redirectUrl as Pathname));
-					}
-				}
+				void gotoSameOriginPath(redirectUrl);
 			} else {
 				let needsRedirect = false;
 				if (activeOrgSlug) {

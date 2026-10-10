@@ -1,8 +1,6 @@
 <script lang="ts">
 	// Sveltekit
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	// Svelte
 	import { toast } from 'svelte-sonner';
 
@@ -20,13 +18,15 @@
 
 	// Utils
 	import { cn } from '$lib/primitives/utils';
+	import {
+		gotoSameOriginPath,
+		resolveSignInCallbackURL,
+		resolveSignInRedirect
+	} from '$lib/auth/utils/signInRedirect';
 
 	// Context
 	import { getAuthContext } from '$lib/auth/context.svelte';
 	const { authConstants, authClient } = getAuthContext();
-
-	// SvelteKit types
-	import type { Pathname } from '$app/types';
 
 	// Types
 	type AuthStep =
@@ -96,70 +96,43 @@
 	});
 
 	/**
-	 * Gets the redirect URL based on redirectTo or current URL params
+	 * Gets the redirect URL based on redirectTo or current URL params; only a same-origin
+	 * path counts, anything else is ignored
 	 */
 	function getRedirectURL(): string | undefined {
-		if (redirectParam) return redirectParam;
+		return resolveSignInRedirect(redirectParam, page.url);
+	}
 
-		const redirectTo = page.url.searchParams.get('redirectTo');
-		if (redirectTo) {
-			return redirectTo;
-		}
-
-		if (page.url.pathname.includes('/signin')) {
-			return '/';
-		}
+	/**
+	 * Gets the absolute same-origin callback URL for Better Auth flows that leave the page
+	 */
+	function getCallbackURL(): string {
+		return resolveSignInCallbackURL(redirectParam, page.url);
 	}
 
 	/**
 	 * Handles the redirect after successful authentication
 	 */
-	async function handleRedirect(): Promise<'internal' | 'external' | 'none'> {
+	async function handleRedirect(): Promise<void> {
+		// A same-origin path or nothing: resolveSignInRedirect drops any other target.
 		const redirectURL = getRedirectURL();
-		if (!redirectURL || typeof window === 'undefined') return 'none';
+		if (!redirectURL || typeof window === 'undefined') return;
 
-		try {
-			const target = new URL(redirectURL, window.location.origin);
-			if (target.origin === window.location.origin) {
-				const internalPath = `${target.pathname}${target.search}${target.hash}`;
-				await goto(resolve(internalPath as Pathname), { invalidateAll: true });
-				return 'internal';
-			}
-
-			window.location.assign(target.toString());
-			return 'external';
-		} catch {
-			if (redirectURL.startsWith('/')) {
-				await goto(resolve(redirectURL as Pathname), { invalidateAll: true });
-				return 'internal';
-			}
-		}
-
-		return 'none';
+		await gotoSameOriginPath(redirectURL, { invalidateAll: true });
 	}
 
 	/**
 	 * Completes sign-in by keeping the loading UI active until navigation fully settles
 	 */
 	async function finalizeSignIn(): Promise<void> {
-		let shouldResetState = true;
-
 		try {
-			const redirectMode = await handleRedirect();
-
-			// External redirects unload the page, so keep the spinner visible until then.
-			if (redirectMode === 'external') {
-				shouldResetState = false;
-				return;
-			}
+			await handleRedirect();
 		} catch (error) {
 			console.error('Sign-in redirect failed:', error);
 		} finally {
-			if (shouldResetState) {
-				submitting = false;
-				isSigningIn = false;
-				redirectInProgress = false;
-			}
+			submitting = false;
+			isSigningIn = false;
+			redirectInProgress = false;
 		}
 	}
 
@@ -199,7 +172,7 @@
 			await authClient.signIn.magicLink(
 				{
 					email,
-					callbackURL: getRedirectURL() || '/',
+					callbackURL: getCallbackURL(),
 					errorCallbackURL: '/signin?error=magic-link-failed'
 				},
 				{
@@ -363,7 +336,7 @@
 				show={currentStep === 'email'}
 				onSuccess={handleAuthSuccess}
 				onSubmittingChange={(value) => (submitting = value)}
-				callbackURL={getRedirectURL() || '/'}
+				callbackURL={getCallbackURL()}
 				dividerAfter={availableEmailMethods.length > 0}
 			/>
 
@@ -385,7 +358,7 @@
 						onBack={resetToEmailStep}
 						{submitting}
 						onSubmittingChange={(value) => (submitting = value)}
-						callbackURL={getRedirectURL() || '/'}
+						callbackURL={getCallbackURL()}
 						onVerifyEmail={() => {
 							currentStep = 'verify-email';
 							verifyContext = 'emailVerification';
@@ -407,7 +380,7 @@
 						onBack={resetToEmailStep}
 						{submitting}
 						onSubmittingChange={(value) => (submitting = value)}
-						callbackURL={getRedirectURL() || '/'}
+						callbackURL={getCallbackURL()}
 						onLinkSent={() => {
 							verifyContext = 'magicLink';
 							magicLinkSent = true;
