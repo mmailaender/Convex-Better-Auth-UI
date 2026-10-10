@@ -1,6 +1,7 @@
 {
-	"name": "auth",
+	"name": "@auth/svelte",
 	"version": "0.9.0",
+	"private": true,
 	"type": "module",
 	"scripts": {
 		"dev:frontend": "vite dev",
@@ -18,13 +19,9 @@
 		"vercel:link": "cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie\"",
 		"vercel:pull": "cross-env-shell \"vercel env pull --token $VERCEL_TOKEN --scope etesie\"",
 		"init:repo": "pnpm config set auto-install-peers true && pnpm install && cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie && vercel env pull --token $VERCEL_TOKEN --scope etesie\" && pnpm dev",
-		"pull:convex": "rm -rf ./src/convex && cp -r ../convex ./src/convex",
-		"changeset": "changeset",
-		"version-packages": "changeset version",
-		"ci:release": "jsrepo publish && changeset tag"
+		"pull:convex": "rm -rf ./src/convex && cp -r ../convex ./src/convex"
 	},
 	"devDependencies": {
-		"@changesets/cli": "^2.31.0",
 		"@convex-dev/eslint-plugin": "^2.0.0",
 		"@eslint/compat": "^2.1.0",
 		"@eslint/js": "^10.0.1",
