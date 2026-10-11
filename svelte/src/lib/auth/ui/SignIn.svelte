@@ -121,7 +121,7 @@
 		if (!redirectURL) return;
 
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-		await goto(safeRedirect(redirectURL, '/', page.url.origin), { invalidateAll: true });
+		await goto(safeRedirect(redirectURL, '/', page.url.origin), { refreshAll: true });
 	}
 
 	/**

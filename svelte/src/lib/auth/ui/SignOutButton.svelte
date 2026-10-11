@@ -2,7 +2,7 @@
 	import { cn } from '#lib/primitives/utils.js';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authClient } = getAuthContext();
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface SignOutButtonProps {
 		onSuccess?: () => void;
@@ -16,8 +16,8 @@
 		const result = await authClient.signOut();
 		if (result.data?.success) {
 			onSuccess?.();
-			// Use invalidateAll() to refresh all data and trigger middleware re-execution
-			invalidateAll();
+			// Use refreshAll() to refresh all data and trigger middleware re-execution
+			refreshAll();
 		} else {
 			onError?.();
 		}

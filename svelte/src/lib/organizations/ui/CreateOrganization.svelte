@@ -197,7 +197,7 @@
 					// Reconstruct the URL with the new organization ID
 					currentUrl.pathname = pathSegments.join('/');
 					const nextPath = `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
-					void goto(resolve(nextPath as Path), { invalidateAll: true });
+					void goto(resolve(nextPath as Path), { refreshAll: true });
 				}
 			}
 		} catch (err: unknown) {

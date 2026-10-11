@@ -226,16 +226,15 @@
 		}
 
 		// Sanitize current URL in-place: keep dialog, remove success/error
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.searchParams.set('dialog', 'user-profile');
 		url.searchParams.delete('success');
 		url.searchParams.delete('error');
 		const path = `${url.pathname}${url.search}${url.hash}`;
 		void goto(resolve(path as Path), {
-			replaceState: true,
-			noScroll: true,
-			keepFocus: true,
-			invalidateAll: false
+			replace: true,
+			reset: false,
+			refreshAll: false
 		});
 	});
 
@@ -256,7 +255,7 @@
 			return;
 		} else {
 			// For social providers
-			const baseUrl = new URL(page.url);
+			const baseUrl = new URL(page.url.href);
 			// Ensure callback keeps the dialog open on return
 			baseUrl.searchParams.set('dialog', 'user-profile');
 			// Success URL carries a friendly message

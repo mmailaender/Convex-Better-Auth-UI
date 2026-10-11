@@ -62,7 +62,7 @@
 		try {
 			isSubmitting = true;
 
-			const currentUrl = new URL(page.url);
+			const currentUrl = new URL(page.url.href);
 			if (
 				!currentUrl.searchParams.has('dialog') ||
 				currentUrl.searchParams.get('dialog') !== 'profile'

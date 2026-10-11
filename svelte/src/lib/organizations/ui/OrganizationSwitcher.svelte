@@ -112,13 +112,12 @@
 	// 3: Open via button — push history entry + open immediately for snappy UX
 	function openProfileModal() {
 		switcherPopoverOpen = false;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
 			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-				replaceState: false,
-				noScroll: true,
-				keepFocus: true
+				replace: false,
+				reset: false
 			});
 		}
 	}
@@ -142,9 +141,8 @@
 				);
 
 				void goto(resolve(`${newPathname}${page.url.search}${page.url.hash}` as Path), {
-					replaceState: true,
-					noScroll: true,
-					keepFocus: true
+					replace: true,
+					reset: false
 				});
 			}
 		}
@@ -177,9 +175,8 @@
 			);
 
 			void goto(resolve(`${newPathname}${search}${hash}` as Path), {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true
+				replace: true,
+				reset: false
 			});
 		}
 	});
@@ -219,10 +216,10 @@
 				);
 
 				// Navigate to the new URL
-				await goto(resolve(newPathname as Path), { replaceState: true });
+				await goto(resolve(newPathname as Path), { replace: true });
 			} else {
 				// No slug replacement needed, just refresh current page
-				await goto(resolve((page.url.pathname + page.url.search) as Path), { replaceState: true });
+				await goto(resolve((page.url.pathname + page.url.search) as Path), { replace: true });
 			}
 
 			// Close popover

@@ -127,12 +127,11 @@
 
 		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
 		if (hasDialog) {
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.delete('dialog');
 			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true
+				replace: true,
+				reset: false
 			});
 		}
 		userProfile.open = false;

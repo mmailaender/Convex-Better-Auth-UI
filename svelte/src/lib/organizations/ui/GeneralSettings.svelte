@@ -238,7 +238,7 @@
 					`/${trimmed}`
 				);
 
-				await goto(resolve(newPathname as Path), { replaceState: true });
+				await goto(resolve(newPathname as Path), { replace: true });
 			}
 
 			isEditingSlug = false;

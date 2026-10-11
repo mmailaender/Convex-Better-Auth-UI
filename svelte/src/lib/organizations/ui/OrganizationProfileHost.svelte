@@ -120,13 +120,12 @@
 	function closeProfileModal() {
 		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
 		if (hasDialog) {
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.delete('dialog');
 			url.searchParams.delete('tab');
 			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true
+				replace: true,
+				reset: false
 			});
 		}
 		orgProfile.open = false;

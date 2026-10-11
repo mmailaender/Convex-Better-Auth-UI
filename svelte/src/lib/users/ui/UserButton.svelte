@@ -72,13 +72,12 @@
 	 */
 	function openProfileModal(): void {
 		userPopoverOpen = false;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
 			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-				replaceState: false,
-				noScroll: true,
-				keepFocus: true
+				replace: false,
+				reset: false
 			});
 		}
 	}
