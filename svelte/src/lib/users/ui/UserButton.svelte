@@ -102,7 +102,7 @@
 	>
 		<Popover.Trigger class="flex size-10 items-center justify-center rounded-full">
 			<Avatar.Root
-				class="ring-surface-100-900 size-9 ring-0 ring-inset duration-200 ease-out hover:ring-4"
+				class="ring-surface-100-900 size-9 ring-0 duration-200 ease-out ring-inset hover:ring-4"
 				onStatusChange={(details) => (avatarStatus = details.status)}
 			>
 				<Avatar.Image src={activeUser?.image} alt={activeUser?.name} />

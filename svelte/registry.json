@@ -119,7 +119,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@tailwindcss/vite",
-					"version": "^4.3.1"
+					"version": "^4.3.3"
 				},
 				{
 					"ecosystem": "js",
@@ -151,12 +151,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@sveltejs/vite-plugin-svelte",
-					"version": "^7.1.2"
+					"version": "^7.3.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "vite",
-					"version": "^8.1.0"
+					"version": "^8.3.4"
 				}
 			],
 			"files": [
@@ -416,7 +416,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
@@ -472,7 +472,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.22.1"
+					"version": "^5.24.3"
 				},
 				{
 					"ecosystem": "js",
@@ -492,12 +492,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/core",
-					"version": "^4.1.2"
+					"version": "^4.2.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/language-common",
-					"version": "^4.1.2"
+					"version": "^4.1.3"
 				},
 				{
 					"ecosystem": "js",
@@ -514,17 +514,17 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "tailwind-variants",
-					"version": "^3.2.2"
+					"version": "^3.3.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
@@ -534,7 +534,7 @@
 				{
 					"ecosystem": "js",
 					"name": "tailwind-merge",
-					"version": "^3.6.0"
+					"version": "^3.7.0"
 				}
 			],
 			"files": [
@@ -3465,7 +3465,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3477,12 +3477,12 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -3841,19 +3841,19 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -4014,7 +4014,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.22.1"
+					"version": "^5.24.3"
 				},
 				{
 					"ecosystem": "js",
@@ -4024,7 +4024,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
@@ -4041,12 +4041,12 @@
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -4678,7 +4678,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
@@ -4688,19 +4688,19 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.22.1"
+					"version": "^5.24.3"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				}
 			],
 			"files": [
@@ -5463,7 +5463,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [

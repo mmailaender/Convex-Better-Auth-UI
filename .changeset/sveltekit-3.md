@@ -4,6 +4,8 @@
 
 **BREAKING:** Migrate to SvelteKit 3. Components now import library and Convex code through the `#lib` and `#convex` subpath imports instead of the `$lib` and `$convex` aliases, the `base` item ships a `vite.config.ts` (SvelteKit 3 no longer reads `svelte.config.js`), declares the Convex URLs in `src/env.ts` (SvelteKit 3 only exposes environment variables declared there, including to `$env/static/public`), and navigation uses the SvelteKit 3 `goto` options (`replace`, `reset`, `refreshAll`).
 
+chore: Upgrade `@mmailaender/convex-better-auth-svelte` to 0.9.0, `@ark-ui/svelte` to 5.24, `@lucide/svelte` to 1.x, `svelte-sonner` to 1.2, Vite to 8.3, Vitest to 5 and the lint/format tooling; drop the unused `vaul-svelte`, `mode-watcher` and `@internationalized/date`
+
 #### Migration
 
 1. Upgrade your app to SvelteKit 3 by following https://svelte.dev/docs/kit/migrating-to-sveltekit-3 (`npx sv migrate sveltekit-3`).
