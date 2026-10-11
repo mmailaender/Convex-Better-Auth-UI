@@ -1,10 +1,10 @@
 import type { FunctionReturnType } from 'convex/server';
-import type { api } from '$convex/_generated/api';
+import type { api } from '#convex/_generated/api.js';
 import type { authClient } from '#lib/auth/api/auth-client.js';
-import type { AuthConstants } from '$convex/auth.constants.types';
+import type { AuthConstants } from '#convex/auth.constants.types.js';
 
 // Re-export for convenience
-export type { AuthConstants } from '$convex/auth.constants.types';
+export type { AuthConstants } from '#convex/auth.constants.types.js';
 
 // ── User types ──────────────────────────────────────────────────────────────
 export type GetActiveUserType = FunctionReturnType<typeof api.users.queries.getActiveUser>;

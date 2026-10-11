@@ -2,13 +2,13 @@
 '@auth/svelte': minor
 ---
 
-**BREAKING:** Migrate to SvelteKit 3. Components now import library code through the `#lib` subpath import instead of `$lib`, the `base` item ships a `vite.config.ts` (SvelteKit 3 no longer reads `svelte.config.js`), declares the Convex URLs in `src/env.ts` (SvelteKit 3 only exposes environment variables declared there, including to `$env/static/public`), and navigation uses the SvelteKit 3 `goto` options (`replace`, `reset`, `refreshAll`).
+**BREAKING:** Migrate to SvelteKit 3. Components now import library and Convex code through the `#lib` and `#convex` subpath imports instead of the `$lib` and `$convex` aliases, the `base` item ships a `vite.config.ts` (SvelteKit 3 no longer reads `svelte.config.js`), declares the Convex URLs in `src/env.ts` (SvelteKit 3 only exposes environment variables declared there, including to `$env/static/public`), and navigation uses the SvelteKit 3 `goto` options (`replace`, `reset`, `refreshAll`).
 
 #### Migration
 
 1. Upgrade your app to SvelteKit 3 by following https://svelte.dev/docs/kit/migrating-to-sveltekit-3 (`npx sv migrate sveltekit-3`).
-2. Make sure your `package.json` declares the `#lib` subpath import (`"imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*" }`) and set `paths.lib` to `#lib` in your jsrepo config.
+2. Declare the subpath imports in your `package.json` (`"imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*", "#convex/*": "./src/convex/*" }`) and set `paths.lib` to `#lib` in your jsrepo config.
 3. Add `src/env.ts` declaring `PUBLIC_CONVEX_URL` and `PUBLIC_CONVEX_SITE_URL` as public static variables (shipped with `base`).
-4. Move the `$convex` alias from `svelte.config.js` into the `sveltekit({ alias: { $convex: './src/convex' } })` options in `vite.config.ts`.
+4. Remove the `$convex` alias from your config (SvelteKit 3 deprecates `config.alias`); `#convex/*` replaces it.
 
 → `jsrepo update 'base' 'base/ssr' 'primitives' 'auth/lib' 'auth/routes' 'users/lib' 'organizations/lib' 'organizations/routes' 'admin/lib' 'admin/routes' 'device-authorization/routes'`

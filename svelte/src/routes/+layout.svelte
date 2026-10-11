@@ -5,8 +5,8 @@
 
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { authClient } from '#lib/auth/api/auth-client.js';
-	import { api } from '$convex/_generated/api';
-	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+	import { api } from '#convex/_generated/api.js';
+	import { AUTH_CONSTANTS } from '#convex/auth.constants.js';
 
 	import { Toaster } from '#lib/primitives/ui/sonner/index.js';
 	import OrganizationSwitcher from '#lib/organizations/ui/OrganizationSwitcher.svelte';
