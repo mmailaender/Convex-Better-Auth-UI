@@ -177,8 +177,9 @@
 			const redirectUrl = props.redirectTo ?? page.url.searchParams.get('redirectTo');
 			// Navigate to the specified URL if it is on this site, else home
 			if (redirectUrl) {
-				// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-				void goto(safeRedirect(redirectUrl, '/', page.url.origin));
+				const target = safeRedirect(redirectUrl, '/', page.url.origin);
+				// SvelteKit 3's goto rejects paths that aren't app pages; fall back to a full page load
+				void goto(target).catch(() => window.location.assign(target));
 			} else {
 				let needsRedirect = false;
 				if (activeOrgSlug) {

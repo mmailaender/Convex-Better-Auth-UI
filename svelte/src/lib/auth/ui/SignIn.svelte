@@ -120,8 +120,9 @@
 		const redirectURL = getRedirectURL();
 		if (!redirectURL) return;
 
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-		await goto(safeRedirect(redirectURL, '/', page.url.origin), { refreshAll: true });
+		const target = safeRedirect(redirectURL, '/', page.url.origin);
+		// SvelteKit 3's goto rejects paths that aren't app pages; fall back to a full page load
+		await goto(target, { refreshAll: true }).catch(() => window.location.assign(target));
 	}
 
 	/**

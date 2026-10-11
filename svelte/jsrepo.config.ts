@@ -36,12 +36,16 @@ export default defineConfig({
 				type: 'base',
 				files: [
 					{ path: 'convex.dist.json', target: 'convex.json' },
-					{ path: 'svelte.config.js', target: 'svelte.config.js' },
+					{
+						path: 'vite.config.dist.ts',
+						target: 'vite.config.ts'
+					},
 					{
 						path: 'src',
 						files: [
 							{ path: 'app.html' },
 							{ path: 'app.d.ts' },
+							{ path: 'env.ts' },
 							{
 								path: 'routes',
 								files: [
