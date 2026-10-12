@@ -32,13 +32,13 @@ jobs:
 
       - name: Create release pull request or publish to jsrepo
         id: changesets
-        uses: changesets/action@v1.8.0
+        uses: changesets/action@v2.1.2
         # Publishing to jsrepo.com authenticates with the JSREPO_TOKEN repository secret.
+        # The action pushes the tags `pnpm run release` creates and turns them into GitHub releases.
         with:
-          publish: pnpm run release
-          version: pnpm run version-packages
-          title: 'chore: version packages'
-          commit: 'chore: version packages'
+          publish-script: pnpm run release
+          version-script: pnpm run version-packages
+          pr-title: 'chore: version packages'
+          commit-message: 'chore: version packages'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JSREPO_TOKEN: ${{ secrets.JSREPO_TOKEN }}

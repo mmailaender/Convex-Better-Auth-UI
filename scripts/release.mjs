@@ -26,12 +26,10 @@ for (const dir of registries) {
 	}
 
 	console.log(`Publishing ${name}@${version} to jsrepo.com...`);
-	run('pnpm', ['install', '--frozen-lockfile'], dir);
 	run('pnpm', ['exec', 'jsrepo', 'publish'], dir);
-
-	const tag = `${name}@${version}`;
-	run('git', ['tag', tag]);
-	run('git', ['push', 'origin', tag]);
-	// changesets/action picks up this line to create the GitHub release.
-	console.log(`New tag: ${tag}`);
 }
+
+// Tags every registry version that has no `<name>@<version>` tag yet, locally or on the remote.
+// changesets/action reads the tags from the CHANGESETS_OUTPUT report this writes, pushes them
+// and creates the GitHub releases.
+run('pnpm', ['exec', 'changeset', 'git-tag']);

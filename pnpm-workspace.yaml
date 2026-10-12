@@ -1,4 +1,9 @@
+packages:
+  - svelte
+  - nextjs
+
 allowBuilds:
+  '@tailwindcss/oxide': true
   esbuild: true
   sharp: false
   unrs-resolver: false
