@@ -2,7 +2,7 @@
 	// Svelte
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { pushState, replaceState } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
 	/** UI **/
@@ -162,8 +162,9 @@
 		// Ensure dialog stays present in the URL and state while navigating tabs inside the dialog
 		url.searchParams.set('dialog', 'organization-profile');
 
-		pushState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-			dialog: 'organization-profile'
+		goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+			shallow: true,
+			state: { dialog: 'organization-profile' }
 		});
 	}
 
@@ -175,8 +176,10 @@
 			// Keep dialog open in URL/state
 			url.searchParams.set('dialog', 'organization-profile');
 
-			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-				dialog: 'organization-profile'
+			goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+				shallow: true,
+				replace: true,
+				state: { dialog: 'organization-profile' }
 			});
 		}
 		activeMobileTab = '';
@@ -193,7 +196,10 @@
 				const url = new URL(window.location.href);
 				url.searchParams.delete('dialog');
 				url.searchParams.delete('tab');
-				replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {});
+				goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+					shallow: true,
+					replace: true
+				});
 				// Allow the dialog fade-out to complete, then reset flags.
 				setTimeout(() => {
 					suppressMobileTransition = false;
@@ -276,8 +282,10 @@
 			// Ensure dialog param remains so OrganizationSwitcher keeps the dialog open on reload
 			url.searchParams.set('dialog', 'organization-profile');
 
-			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
-				dialog: 'organization-profile'
+			goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+				shallow: true,
+				replace: true,
+				state: { dialog: 'organization-profile' }
 			});
 		}
 	});
