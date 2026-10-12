@@ -11,10 +11,41 @@
  */
 import { v } from 'convex/values';
 import { paginationOptsValidator } from 'convex/server';
-import { mutation, query } from './_generated/server';
+import { mutation, query, type MutationCtx } from './_generated/server';
 import { withSystemFields } from 'convex-helpers/validators';
 import schema from './schema';
 import { type Id } from './_generated/dataModel';
+
+/**
+ * Points a user's active organization, and that of each of their sessions, away
+ * from `organizationId` when it is the active one: to another organization they
+ * are a member of, or to none.
+ */
+async function moveOffOrganization(
+	ctx: MutationCtx,
+	userId: string,
+	organizationId: Id<'organization'>
+): Promise<void> {
+	const nextMembership = (
+		await ctx.db
+			.query('member')
+			.withIndex('userId', (q) => q.eq('userId', userId))
+			.take(2)
+	).find((membership) => membership.organizationId !== organizationId);
+	const nextOrganizationId = nextMembership?.organizationId ?? null;
+
+	const user = await ctx.db.get('user', userId as Id<'user'>);
+	if (user?.activeOrganizationId === organizationId) {
+		await ctx.db.patch('user', user._id, { activeOrganizationId: nextOrganizationId });
+	}
+
+	const sessions = ctx.db.query('session').withIndex('userId', (q) => q.eq('userId', userId));
+	for await (const session of sessions) {
+		if (session.activeOrganizationId === organizationId) {
+			await ctx.db.patch('session', session._id, { activeOrganizationId: nextOrganizationId });
+		}
+	}
+}
 
 /**
  * List every organization in the deployment, newest first. Unlike
@@ -106,6 +137,10 @@ export const getOrganizationWithMembers = query({
 /**
  * Force-delete an organization and all of its dependent records (members,
  * invitations, stored logo) regardless of the caller's membership.
+ *
+ * Members whose active organization this was switch to another organization
+ * they belong to (or none), on their user record and on their sessions, so
+ * nobody is left pointing at a deleted organization.
  */
 export const adminDeleteOrganization = mutation({
 	args: { organizationId: v.id('organization') },
@@ -116,11 +151,12 @@ export const adminDeleteOrganization = mutation({
 			return null;
 		}
 
-		// Remove memberships.
+		// Remove memberships, moving members off this organization first.
 		const members = ctx.db
 			.query('member')
 			.withIndex('organizationId', (q) => q.eq('organizationId', args.organizationId));
 		for await (const member of members) {
+			await moveOffOrganization(ctx, member.userId, args.organizationId);
 			await ctx.db.delete('member', member._id);
 		}
 

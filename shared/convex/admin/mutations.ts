@@ -5,7 +5,7 @@ import { APIError } from 'better-auth/api';
 import { authComponent, createAuth } from '../auth';
 import { components } from '../_generated/api';
 import { AUTH_CONSTANTS } from '../auth.constants';
-import { assertNotSelf, requireAppAdmin } from '../model/admin';
+import { appRoleValidator, assertNotSelf, requireAppAdmin } from '../model/admin';
 
 /**
  * Translate Better Auth `APIError`s into `ConvexError`s, mirroring the
@@ -26,21 +26,23 @@ export const createUser = mutation({
 		email: v.string(),
 		password: v.string(),
 		name: v.string(),
-		role: v.optional(v.string())
+		role: v.optional(appRoleValidator)
 	},
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.createUser({
+			await auth.api.createUser({
 				body: {
 					email: args.email,
 					password: args.password,
 					name: args.name,
-					role: (args.role ?? 'user') as 'admin' | 'user'
+					role: args.role ?? 'user'
 				},
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -54,17 +56,19 @@ export const createUser = mutation({
 export const setRole = mutation({
 	args: {
 		userId: v.string(),
-		role: v.string()
+		role: appRoleValidator
 	},
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'change the role of');
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.setRole({
-				body: { userId: args.userId, role: args.role as 'admin' | 'user' },
+			await auth.api.setRole({
+				body: { userId: args.userId, role: args.role },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -81,12 +85,13 @@ export const banUser = mutation({
 		banReason: v.optional(v.string()),
 		banExpiresIn: v.optional(v.number())
 	},
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'ban');
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.banUser({
+			await auth.api.banUser({
 				body: {
 					userId: args.userId,
 					banReason: args.banReason,
@@ -94,6 +99,7 @@ export const banUser = mutation({
 				},
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -105,14 +111,16 @@ export const banUser = mutation({
  */
 export const unbanUser = mutation({
 	args: { userId: v.string() },
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.unbanUser({
+			await auth.api.unbanUser({
 				body: { userId: args.userId },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -124,15 +132,17 @@ export const unbanUser = mutation({
  */
 export const removeUser = mutation({
 	args: { userId: v.string() },
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'delete');
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.removeUser({
+			await auth.api.removeUser({
 				body: { userId: args.userId },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -147,14 +157,16 @@ export const setUserPassword = mutation({
 		userId: v.string(),
 		newPassword: v.string()
 	},
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.setUserPassword({
+			await auth.api.setUserPassword({
 				body: { userId: args.userId, newPassword: args.newPassword },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -162,18 +174,29 @@ export const setUserPassword = mutation({
 });
 
 /**
- * Revoke a single user session by token (admin only).
+ * Revoke a single user session by id (admin only). Takes the id from
+ * `admin/queries.listUserSessions` and looks the token up here, so session
+ * tokens never reach the client.
  */
 export const revokeUserSession = mutation({
-	args: { sessionToken: v.string() },
+	args: { sessionId: v.string() },
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
+		const session: { token: string } | null = await ctx.runQuery(
+			components.betterAuth.adapter.findOne,
+			{ model: 'session', where: [{ field: '_id', value: args.sessionId }] }
+		);
+		if (!session) {
+			throw new ConvexError('Session not found');
+		}
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.revokeUserSession({
-				body: { sessionToken: args.sessionToken },
+			await auth.api.revokeUserSession({
+				body: { sessionToken: session.token },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -185,14 +208,16 @@ export const revokeUserSession = mutation({
  */
 export const revokeUserSessions = mutation({
 	args: { userId: v.string() },
+	returns: v.null(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		const auth = createAuth(ctx);
 		try {
-			return await auth.api.revokeUserSessions({
+			await auth.api.revokeUserSessions({
 				body: { userId: args.userId },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			return null;
 		} catch (error) {
 			return toConvexError(error);
 		}
@@ -212,7 +237,7 @@ export const deleteOrganizationAsAdmin = mutation({
 			throw new ConvexError('Organizations are not enabled');
 		}
 		await ctx.runMutation(components.betterAuth.adminOrganizations.adminDeleteOrganization, {
-			organizationId: args.organizationId as never
+			organizationId: args.organizationId
 		});
 		return null;
 	}

@@ -1,4 +1,4 @@
-import { ConvexError } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { authComponent } from '../../auth';
 
 // Types
@@ -14,7 +14,18 @@ import type { MutationCtx, QueryCtx } from '../../_generated/server';
  */
 const APP_ADMIN_ROLES = ['admin'];
 
-const getAdminUserIds = (): string[] =>
+/**
+ * Application roles an admin can assign. These are the Better Auth admin
+ * plugin's default roles; extend both together if you configure custom roles.
+ */
+export const appRoleValidator = v.union(v.literal('user'), v.literal('admin'));
+
+/**
+ * Better Auth user ids listed in the `ADMIN_USER_IDS` env var. These users are
+ * admins regardless of their `role` field, which is how the first admin is
+ * bootstrapped.
+ */
+export const getAdminUserIds = (): string[] =>
 	(process.env.ADMIN_USER_IDS ?? '')
 		.split(',')
 		.map((id) => id.trim())
@@ -27,9 +38,9 @@ const getAdminUserIds = (): string[] =>
  *
  * Better Auth stores the `role` field as a (potentially comma-separated) string.
  */
-export const isAppAdminUser = (user: { _id: string; role?: string | null } | null): boolean => {
+export const isAppAdminUser = (user: { id: string; role?: string | null } | null): boolean => {
 	if (!user) return false;
-	if (getAdminUserIds().includes(user._id)) return true;
+	if (getAdminUserIds().includes(user.id)) return true;
 	const roles = (user.role ?? '')
 		.split(',')
 		.map((role) => role.trim())
@@ -43,7 +54,7 @@ export const isAppAdminUser = (user: { _id: string; role?: string | null } | nul
  */
 export const getIsAppAdmin = async (ctx: QueryCtx | MutationCtx): Promise<boolean> => {
 	const user = await authComponent.safeGetAuthUser(ctx);
-	return isAppAdminUser(user as { _id: string; role?: string | null } | null);
+	return user ? isAppAdminUser({ id: user._id, role: user.role }) : false;
 };
 
 /**
@@ -58,7 +69,7 @@ export const requireAppAdmin = async (ctx: QueryCtx | MutationCtx) => {
 	if (!user) {
 		throw new ConvexError('Not authenticated');
 	}
-	if (!isAppAdminUser(user as { _id: string; role?: string | null })) {
+	if (!isAppAdminUser({ id: user._id, role: user.role })) {
 		throw new ConvexError('Forbidden: application admin role required');
 	}
 	return user;
