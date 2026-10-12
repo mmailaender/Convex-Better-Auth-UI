@@ -1,8 +1,7 @@
 <script lang="ts">
 	// SvelteKit
-	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { Pathname } from '$app/types';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// Icons
 	import ShieldAlertIcon from '@lucide/svelte/icons/shield-alert';
@@ -10,10 +9,13 @@
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 
 	// Components
-	import AdminDashboard from '$lib/admin/ui/AdminDashboard.svelte';
+	import AdminDashboard from '#lib/admin/ui/AdminDashboard.svelte';
+
+	// Constants
+	import { ADMIN_ROUTE } from '#lib/admin/utils/admin.constants.js';
 
 	const { api } = getAuthContext();
 	const auth = useAuth();
@@ -28,10 +30,19 @@
 	// Convex function. Signed-out visitors go to sign-in and return to /admin.
 	$effect(() => {
 		if (!auth.isLoading && !auth.isAuthenticated) {
-			void goto(resolve(`/signin?redirectTo=${encodeURIComponent('/admin')}` as Pathname));
+			void gotoApp(
+				`${resolve('/(auth)/signin')}?redirectTo=${encodeURIComponent(resolve(ADMIN_ROUTE))}`,
+				{
+					replace: true
+				}
+			);
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>Admin</title>
+</svelte:head>
 
 {#if auth.isLoading || !auth.isAuthenticated || isAdmin === undefined}
 	<!-- Resolving auth or the admin check → a neutral spinner (no content flash). -->
@@ -57,10 +68,10 @@
 	<div
 		class="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center"
 	>
-		<ShieldAlertIcon class="size-10 opacity-60" />
+		<ShieldAlertIcon class="size-10 opacity-60" aria-hidden="true" />
 		<div>
 			<h1 class="h4">Access denied</h1>
-			<p class="mt-1 text-sm opacity-60">You don't have permission to view this page.</p>
+			<p class="text-surface-600-400 mt-1 text-sm">You don't have permission to view this page.</p>
 		</div>
 		<a href={resolve('/')} class="btn preset-tonal">Back to home</a>
 	</div>

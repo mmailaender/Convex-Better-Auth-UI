@@ -8,6 +8,7 @@ import { ShieldAlert } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import AdminDashboard from '@/components/admin/ui/AdminDashboard';
+import { ADMIN_ROUTE } from '@/components/admin/utils/admin.constants';
 
 /**
  * `/admin` — the application admin dashboard page.
@@ -28,7 +29,7 @@ export default function AdminPage() {
 	// Signed-out visitors go to sign-in and are returned to /admin afterwards.
 	useEffect(() => {
 		if (!isLoading && !isAuthenticated) {
-			router.replace(`/signin?redirectTo=${encodeURIComponent('/admin')}`);
+			router.replace(`/signin?redirectTo=${encodeURIComponent(ADMIN_ROUTE)}`);
 		}
 	}, [router, isLoading, isAuthenticated]);
 
@@ -58,10 +59,10 @@ export default function AdminPage() {
 	if (isAdmin === false) {
 		return (
 			<div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
-				<ShieldAlert className="size-10 opacity-60" />
+				<ShieldAlert className="size-10 opacity-60" aria-hidden="true" />
 				<div>
 					<h1 className="h4">Access denied</h1>
-					<p className="mt-1 text-sm opacity-60">
+					<p className="text-surface-600-400 mt-1 text-sm">
 						You don&apos;t have permission to view this page.
 					</p>
 				</div>

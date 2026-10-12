@@ -235,7 +235,17 @@ export default defineConfig({
 				registryDependencies: ['config', 'auth/lib', 'primitives', 'users/lib', 'admin/convex'],
 				files: [
 					{
-						path: 'src/lib/admin'
+						path: 'src/lib/admin',
+						files: [
+							{ path: 'api' },
+							{
+								path: 'types.ts',
+								dependencyResolution: 'manual',
+								dependencies: ['convex']
+							},
+							{ path: 'ui' },
+							{ path: 'utils' }
+						]
 					}
 				]
 			},

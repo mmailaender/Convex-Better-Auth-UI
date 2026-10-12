@@ -6,8 +6,9 @@
 	import ShieldIcon from '@lucide/svelte/icons/shield';
 
 	// Constants & API
-	import { getAuthContext } from '$lib/auth/context.svelte';
-	import { useIsAppAdmin } from '$lib/admin/api/admin.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
+	import { useIsAppAdmin } from '#lib/admin/api/admin.svelte.js';
+	import { ADMIN_ROUTE } from '#lib/admin/utils/admin.constants.js';
 
 	let { class: className }: { class?: string } = $props();
 
@@ -22,12 +23,8 @@
 	entry point. The admin dashboard is the `/admin` route.
 -->
 {#if authConstants.admin && admin.isAppAdmin}
-	<a
-		href={resolve('/admin')}
-		class={className ?? 'btn preset-tonal gap-2'}
-		aria-label="Open admin dashboard"
-	>
-		<ShieldIcon class="size-4" />
+	<a href={resolve(ADMIN_ROUTE)} class={className ?? 'btn preset-tonal gap-2'}>
+		<ShieldIcon class="size-4" aria-hidden="true" />
 		<span>Admin</span>
 	</a>
 {/if}

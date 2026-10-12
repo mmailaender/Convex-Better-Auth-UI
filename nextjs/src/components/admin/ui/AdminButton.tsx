@@ -21,12 +21,8 @@ export default function AdminButton({ className }: { className?: string }) {
 	if (!AUTH_CONSTANTS.admin || !isAppAdmin) return null;
 
 	return (
-		<Link
-			href={ADMIN_ROUTE}
-			className={className ?? 'btn preset-tonal gap-2'}
-			aria-label="Open admin dashboard"
-		>
-			<Shield className="size-4" />
+		<Link href={ADMIN_ROUTE} className={className ?? 'btn preset-tonal gap-2'}>
+			<Shield className="size-4" aria-hidden="true" />
 			<span>Admin</span>
 		</Link>
 	);

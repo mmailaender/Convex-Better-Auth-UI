@@ -1,25 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { toast } from 'sonner';
-import { KeyRound, LogIn, LogOut, Search, ShieldBan, ShieldCheck, Trash } from 'lucide-react';
+import { EllipsisVertical, Loader2, Search } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import * as Avatar from '@/components/primitives/ui/avatar';
 import * as Dialog from '@/components/primitives/ui/dialog';
+import * as Menu from '@/components/primitives/ui/menu';
+import * as Password from '@/components/primitives/ui/password';
 import { authClient } from '@/lib/auth/api/auth-client';
 import { useActiveUserData } from '@/lib/auth/hooks';
 import CreateUser from '@/components/admin/ui/CreateUser';
+import { USERS_MAX, USERS_PAGE_SIZE } from '@/components/admin/utils/admin.constants';
+import type { AdminUser, AppRole } from '@/components/admin/types';
 
-type AdminUserRow = {
-	id: string;
-	name: string;
-	email: string;
-	image?: string | null;
-	role?: string | null;
-	banned?: boolean | null;
-};
+const BAN_DURATIONS = [
+	{ label: 'Permanent', value: '' },
+	{ label: '1 hour', value: String(60 * 60) },
+	{ label: '1 day', value: String(60 * 60 * 24) },
+	{ label: '7 days', value: String(60 * 60 * 24 * 7) },
+	{ label: '30 days', value: String(60 * 60 * 24 * 30) }
+];
+
+type UserDialog = 'ban' | 'delete' | 'password';
+
+function errorMessage(error: unknown, fallback: string): string {
+	return error instanceof Error ? error.message : fallback;
+}
+
+function banTitle(user: AdminUser): string {
+	const until = user.banExpires ? `until ${new Date(user.banExpires).toLocaleString()}` : '';
+	return ['Banned', until, user.banReason ? `: ${user.banReason}` : ''].join(' ').trim();
+}
 
 /**
  * Admin users management table. Lists every user with search, role management,
@@ -29,15 +43,25 @@ type AdminUserRow = {
  */
 export default function UsersTable() {
 	const activeUser = useActiveUserData();
+	const [searchInput, setSearchInput] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [limit, setLimit] = useState(50);
+	const [limit, setLimit] = useState(USERS_PAGE_SIZE);
+
+	// Search runs 250ms after the last keystroke instead of on every one
+	useEffect(() => {
+		const timer = setTimeout(() => setSearchQuery(searchInput.trim()), 250);
+		return () => clearTimeout(timer);
+	}, [searchInput]);
 
 	const result = useQuery(api.admin.queries.listUsers, {
 		searchValue: searchQuery || undefined,
 		limit
 	});
-	const users = (result?.users ?? []) as AdminUserRow[];
-	const total = result?.total ?? 0;
+	// Keep showing the previous result while a new search or page loads
+	const [data, setData] = useState(result);
+	if (result !== undefined && result !== data) setData(result);
+	const isStale = result === undefined && data !== undefined;
+	const users = data?.users ?? [];
 
 	// Mutations
 	const setRole = useMutation(api.admin.mutations.setRole);
@@ -48,253 +72,300 @@ export default function UsersTable() {
 	const revokeUserSessions = useMutation(api.admin.mutations.revokeUserSessions);
 
 	// Dialog state
-	const [selectedUser, setSelectedUser] = useState<AdminUserRow | null>(null);
-	const [banDialogOpen, setBanDialogOpen] = useState(false);
-	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-	const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+	const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+	const [openDialog, setOpenDialog] = useState<UserDialog | null>(null);
 	const [banReason, setBanReason] = useState('');
 	const [banExpiresIn, setBanExpiresIn] = useState('');
 	const [newPassword, setNewPassword] = useState('');
+	const [submitting, setSubmitting] = useState(false);
 
-	const isSelf = (user: AdminUserRow) => user.id === activeUser?._id;
+	const isSelf = (user: AdminUser) => user.id === activeUser?._id;
 
-	async function handleRoleChange(user: AdminUserRow, role: string) {
+	function showDialog(user: AdminUser, dialog: UserDialog) {
+		setSelectedUser(user);
+		setBanReason('');
+		setBanExpiresIn('');
+		setNewPassword('');
+		setOpenDialog(dialog);
+	}
+
+	function dialogProps(dialog: UserDialog) {
+		return {
+			open: openDialog === dialog,
+			onOpenChange: (open: boolean) => setOpenDialog(open ? dialog : null)
+		};
+	}
+
+	async function handleRoleChange(user: AdminUser, role: AppRole) {
+		if (role === (user.isAppAdmin ? 'admin' : 'user')) return;
 		try {
 			await setRole({ userId: user.id, role });
-			toast.success('Role updated');
+			toast.success(`${user.name} is now ${role === 'admin' ? 'an admin' : 'a user'}`);
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to update role');
+			toast.error(errorMessage(error, 'Failed to update role'));
 		}
 	}
 
-	async function handleUnban(user: AdminUserRow) {
+	async function handleUnban(user: AdminUser) {
 		try {
 			await unbanUser({ userId: user.id });
-			toast.success('User unbanned');
+			toast.success(`Unbanned ${user.name}`);
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to unban user');
+			toast.error(errorMessage(error, 'Failed to unban user'));
 		}
 	}
 
-	async function handleBanSubmit() {
-		if (!selectedUser) return;
-		try {
-			await banUser({
-				userId: selectedUser.id,
-				banReason: banReason || undefined,
-				banExpiresIn: banExpiresIn ? Number(banExpiresIn) : undefined
-			});
-			toast.success('User banned');
-			setBanDialogOpen(false);
-			setBanReason('');
-			setBanExpiresIn('');
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to ban user');
-		}
-	}
-
-	async function handleDeleteSubmit() {
-		if (!selectedUser) return;
-		try {
-			await removeUser({ userId: selectedUser.id });
-			toast.success('User deleted');
-			setDeleteDialogOpen(false);
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to delete user');
-		}
-	}
-
-	async function handlePasswordSubmit() {
-		if (!selectedUser) return;
-		try {
-			await setUserPassword({ userId: selectedUser.id, newPassword });
-			toast.success('Password updated');
-			setPasswordDialogOpen(false);
-			setNewPassword('');
-		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to set password');
-		}
-	}
-
-	async function handleRevokeSessions(user: AdminUserRow) {
+	async function handleRevokeSessions(user: AdminUser) {
 		try {
 			await revokeUserSessions({ userId: user.id });
 			toast.success(`Signed ${user.name} out everywhere`);
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to revoke sessions');
+			toast.error(errorMessage(error, 'Failed to revoke sessions'));
 		}
 	}
 
-	async function handleImpersonate(user: AdminUserRow) {
+	async function handleImpersonate(user: AdminUser) {
 		const { error } = await authClient.admin.impersonateUser({ userId: user.id });
 		if (error) {
 			toast.error(error.message ?? 'Failed to impersonate user');
 			return;
 		}
-		toast.success(`Impersonating ${user.name}`);
-		window.location.href = '/';
+		// Full reload so the Convex client and the server-rendered auth data pick up the impersonated session
+		// eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a client-side navigation would keep the admin's session state
+		window.location.assign('/');
 	}
+
+	async function submitDialog(action: () => Promise<unknown>, success: string, failure: string) {
+		setSubmitting(true);
+		try {
+			await action();
+			toast.success(success);
+			setOpenDialog(null);
+		} catch (error) {
+			toast.error(errorMessage(error, failure));
+		} finally {
+			setSubmitting(false);
+		}
+	}
+
+	function handleBanSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const user = selectedUser;
+		if (!user) return;
+		void submitDialog(
+			() =>
+				banUser({
+					userId: user.id,
+					banReason: banReason.trim() || undefined,
+					banExpiresIn: banExpiresIn ? Number(banExpiresIn) : undefined
+				}),
+			`Banned ${user.name}`,
+			'Failed to ban user'
+		);
+	}
+
+	function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const user = selectedUser;
+		if (!user) return;
+		void submitDialog(
+			() => setUserPassword({ userId: user.id, newPassword }),
+			`Updated the password of ${user.name}`,
+			'Failed to set password'
+		);
+	}
+
+	function handleDeleteSubmit() {
+		const user = selectedUser;
+		if (!user) return;
+		void submitDialog(
+			() => removeUser({ userId: user.id }),
+			`Deleted ${user.name}`,
+			'Failed to delete user'
+		);
+	}
+
+	const submitLabel = (idle: string, busy: string) =>
+		submitting ? (
+			<>
+				<Loader2 className="size-4 animate-spin" aria-hidden="true" />
+				{busy}
+			</>
+		) : (
+			idle
+		);
 
 	return (
 		<div className="flex h-full flex-col">
-			<div className="flex flex-shrink-0 items-center gap-3 py-4">
+			<div className="flex shrink-0 items-center gap-3 py-4">
 				<div className="relative flex-1">
 					<div className="pointer-events-none absolute inset-y-0 flex items-center">
-						<Search className="text-surface-400-600 size-4" />
+						<Search className="text-surface-400-600 size-4" aria-hidden="true" />
 					</div>
 					<input
-						type="text"
+						type="search"
 						className="input w-full !border-0 border-transparent pl-6 text-sm"
-						placeholder="Search users..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder="Search by name or email..."
+						aria-label="Search users by name or email"
+						value={searchInput}
+						onChange={(e) => setSearchInput(e.target.value)}
 					/>
 				</div>
+				{data ? (
+					<span className="text-surface-600-400 hidden text-xs whitespace-nowrap sm:inline">
+						{data.total} {data.total === 1 ? 'user' : 'users'}
+					</span>
+				) : null}
 				<CreateUser />
 			</div>
 
-			{!result ? (
-				<div className="p-4 text-sm opacity-60">Loading users...</div>
+			{!data ? (
+				<div className="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
+					<Loader2 className="size-4 animate-spin" aria-hidden="true" />
+					Loading users...
+				</div>
 			) : users.length === 0 ? (
-				<div className="p-4 text-sm opacity-60">No users found.</div>
+				<div className="text-surface-600-400 p-4 text-sm">
+					{searchQuery ? `No users match "${searchQuery}".` : 'No users yet.'}
+				</div>
 			) : (
-				<div className="max-h-[calc(80vh-12rem)] overflow-y-auto pb-12">
+				<div
+					className={`max-h-[calc(80vh-12rem)] overflow-y-auto pb-12 transition-opacity ${
+						isStale ? 'opacity-60' : ''
+					}`}
+				>
 					<table className="table w-full">
-						<thead className="sticky top-0 z-20">
+						<thead className="bg-surface-50-950 sticky top-0 z-20">
 							<tr>
 								<th className="text-surface-600-400 p-2 !pl-3 text-left text-xs font-semibold">
-									Name
+									User
 								</th>
 								<th className="text-surface-600-400 hidden p-2 text-left text-xs sm:table-cell">
 									Email
 								</th>
-								<th className="text-surface-600-400 !w-32 p-2 text-left text-xs">Role</th>
-								<th className="!w-32 p-2 text-right"></th>
+								<th className="text-surface-600-400 w-32 p-2 text-left text-xs">Role</th>
+								<th className="text-surface-600-400 hidden w-28 p-2 text-left text-xs md:table-cell">
+									Joined
+								</th>
+								<th className="w-12 p-2">
+									<span className="sr-only">Actions</span>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
 							{users.map((user) => (
 								<tr key={user.id} className="!border-surface-300-700 !border-t">
-									<td className="!py-3 !pl-3">
-										<div className="flex items-center space-x-2">
-											<Avatar.Root className="size-8 sm:size-6">
+									<td className="max-w-0 !py-3 !pl-3">
+										<div className="flex items-center gap-2">
+											<Avatar.Root className="size-8 shrink-0 sm:size-6">
 												<Avatar.Image src={user.image ?? undefined} alt={user.name} />
 												<Avatar.Fallback>
 													<Avatar.Marble name={user.name} />
 												</Avatar.Fallback>
 											</Avatar.Root>
-											<div className="flex flex-col truncate">
-												<span className="truncate text-sm">
-													{user.name}
+											<div className="flex min-w-0 flex-col">
+												<div className="flex min-w-0 items-center gap-2">
+													<span className="truncate text-sm">{user.name}</span>
+													{isSelf(user) ? (
+														<span className="badge preset-tonal shrink-0">You</span>
+													) : null}
 													{user.banned ? (
-														<span className="badge preset-filled-error-50-950 border-error-200-800 ml-2 h-5 border px-2">
+														<span
+															className="badge preset-filled-error-50-950 border-error-200-800 shrink-0 border"
+															title={banTitle(user)}
+														>
 															Banned
 														</span>
 													) : null}
-												</span>
+												</div>
 												<span className="text-surface-700-300 truncate text-xs sm:hidden">
 													{user.email}
 												</span>
 											</div>
 										</div>
 									</td>
-									<td className="!text-surface-600-400 hidden !truncate text-sm sm:table-cell">
+									<td className="text-surface-600-400 hidden max-w-0 truncate text-sm sm:table-cell">
 										{user.email}
 									</td>
-									<td className="!w-32">
-										{isSelf(user) ? (
-											<span className="badge preset-filled-warning-50-950 border-warning-200-800 h-7 border px-2">
-												{user.role ?? 'user'}
+									<td>
+										{isSelf(user) || user.isBootstrapAdmin ? (
+											<span
+												className="badge preset-filled-warning-50-950 border-warning-200-800 h-7 border px-2"
+												title={
+													user.isBootstrapAdmin
+														? 'Admin through the ADMIN_USER_IDS environment variable'
+														: "You can't change your own role"
+												}
+											>
+												{user.isAppAdmin ? 'Admin' : 'User'}
 											</span>
 										) : (
 											<select
-												value={(user.role ?? 'user').includes('admin') ? 'admin' : 'user'}
-												onChange={(e) => handleRoleChange(user, e.target.value)}
+												value={user.isAppAdmin ? 'admin' : 'user'}
+												onChange={(e) => handleRoleChange(user, e.target.value as AppRole)}
 												className="select cursor-pointer text-sm"
+												aria-label={`Role of ${user.name}`}
 											>
 												<option value="user">User</option>
 												<option value="admin">Admin</option>
 											</select>
 										)}
 									</td>
-									<td className="!w-32">
-										<div className="flex justify-end gap-1">
-											{!isSelf(user) && (
-												<>
-													<button
-														type="button"
-														title="Impersonate"
-														className="btn-icon preset-filled-surface-200-800 hover:preset-filled-primary-300-700"
-														onClick={() => handleImpersonate(user)}
-													>
-														<LogIn className="size-4 opacity-70" />
-													</button>
-													<button
-														type="button"
-														title="Set password"
-														className="btn-icon preset-filled-surface-200-800"
-														onClick={() => {
-															setSelectedUser(user);
-															setPasswordDialogOpen(true);
-														}}
-													>
-														<KeyRound className="size-4 opacity-70" />
-													</button>
-													<button
-														type="button"
-														title="Revoke sessions"
-														className="btn-icon preset-filled-surface-200-800"
-														onClick={() => handleRevokeSessions(user)}
-													>
-														<LogOut className="size-4 opacity-70" />
-													</button>
+									<td className="text-surface-600-400 hidden text-sm md:table-cell">
+										{new Date(user.createdAt).toLocaleDateString()}
+									</td>
+									<td className="text-right">
+										{!isSelf(user) ? (
+											<Menu.Root>
+												<Menu.Trigger
+													className="btn-icon hover:preset-tonal"
+													aria-label={`Actions for ${user.name}`}
+												>
+													<EllipsisVertical className="size-4" aria-hidden="true" />
+												</Menu.Trigger>
+												<Menu.Content className="bg-surface-50-950">
+													{!user.isAppAdmin && !user.banned ? (
+														<Menu.Item value="impersonate" onClick={() => handleImpersonate(user)}>
+															Impersonate
+														</Menu.Item>
+													) : null}
+													<Menu.Item value="password" onClick={() => showDialog(user, 'password')}>
+														Set password
+													</Menu.Item>
+													<Menu.Item value="revoke" onClick={() => handleRevokeSessions(user)}>
+														Sign out everywhere
+													</Menu.Item>
 													{user.banned ? (
-														<button
-															type="button"
-															title="Unban"
-															className="btn-icon preset-filled-surface-200-800 hover:preset-filled-success-300-700"
-															onClick={() => handleUnban(user)}
-														>
-															<ShieldCheck className="size-4 opacity-70" />
-														</button>
+														<Menu.Item value="unban" onClick={() => handleUnban(user)}>
+															Unban
+														</Menu.Item>
 													) : (
-														<button
-															type="button"
-															title="Ban"
-															className="btn-icon preset-filled-surface-200-800 hover:preset-filled-warning-300-700"
-															onClick={() => {
-																setSelectedUser(user);
-																setBanDialogOpen(true);
-															}}
-														>
-															<ShieldBan className="size-4 opacity-70" />
-														</button>
+														<Menu.Item value="ban" onClick={() => showDialog(user, 'ban')}>
+															Ban
+														</Menu.Item>
 													)}
-													<button
-														type="button"
-														title="Delete"
-														className="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
-														onClick={() => {
-															setSelectedUser(user);
-															setDeleteDialogOpen(true);
-														}}
+													<Menu.Item
+														value="delete"
+														variant="destructive"
+														onClick={() => showDialog(user, 'delete')}
 													>
-														<Trash className="size-4 opacity-70" />
-													</button>
-												</>
-											)}
-										</div>
+														Delete
+													</Menu.Item>
+												</Menu.Content>
+											</Menu.Root>
+										) : null}
 									</td>
 								</tr>
 							))}
 						</tbody>
 					</table>
-					{users.length < total ? (
+					{data.hasMore && limit < USERS_MAX ? (
 						<div className="flex justify-center py-3">
 							<button
 								type="button"
 								className="btn preset-tonal"
-								onClick={() => setLimit(limit + 50)}
+								onClick={() => setLimit(Math.min(limit + USERS_PAGE_SIZE, USERS_MAX))}
+								disabled={isStale}
 							>
 								Load more
 							</button>
@@ -304,14 +375,18 @@ export default function UsersTable() {
 			)}
 
 			{/* Ban dialog */}
-			<Dialog.Root open={banDialogOpen} onOpenChange={setBanDialogOpen}>
+			<Dialog.Root {...dialogProps('ban')}>
 				<Dialog.Content className="md:max-w-108">
 					<Dialog.Header>
 						<Dialog.Title>Ban {selectedUser?.name}</Dialog.Title>
+						<Dialog.Description className="text-surface-700-300">
+							They are signed out everywhere and can&apos;t sign in until the ban ends or you lift
+							it.
+						</Dialog.Description>
 					</Dialog.Header>
-					<div className="flex flex-col gap-3">
+					<form id="admin-ban-user" className="flex flex-col gap-3" onSubmit={handleBanSubmit}>
 						<label className="label">
-							<span>Reason (optional)</span>
+							<span className="label-text">Reason (optional)</span>
 							<input
 								type="text"
 								className="input"
@@ -321,98 +396,107 @@ export default function UsersTable() {
 							/>
 						</label>
 						<label className="label">
-							<span>Duration</span>
+							<span className="label-text">Duration</span>
 							<select
 								className="select"
 								value={banExpiresIn}
 								onChange={(e) => setBanExpiresIn(e.target.value)}
 							>
-								<option value="">Permanent</option>
-								<option value={String(60 * 60 * 24)}>1 day</option>
-								<option value={String(60 * 60 * 24 * 7)}>7 days</option>
-								<option value={String(60 * 60 * 24 * 30)}>30 days</option>
+								{BAN_DURATIONS.map((duration) => (
+									<option key={duration.value} value={duration.value}>
+										{duration.label}
+									</option>
+								))}
 							</select>
 						</label>
-					</div>
+					</form>
 					<Dialog.Footer>
-						<button
-							type="button"
-							className="btn preset-tonal"
-							onClick={() => setBanDialogOpen(false)}
-						>
+						<Dialog.Close className="btn preset-tonal" disabled={submitting}>
 							Cancel
-						</button>
+						</Dialog.Close>
 						<button
-							type="button"
-							className="btn preset-filled-warning-500"
-							onClick={handleBanSubmit}
+							type="submit"
+							form="admin-ban-user"
+							className="btn preset-filled-error-500"
+							disabled={submitting}
+							aria-busy={submitting}
 						>
-							Ban user
+							{submitLabel('Ban user', 'Banning...')}
 						</button>
 					</Dialog.Footer>
+					<Dialog.CloseX />
 				</Dialog.Content>
 			</Dialog.Root>
 
 			{/* Set password dialog */}
-			<Dialog.Root open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+			<Dialog.Root {...dialogProps('password')}>
 				<Dialog.Content className="md:max-w-108">
 					<Dialog.Header>
 						<Dialog.Title>Set password for {selectedUser?.name}</Dialog.Title>
+						<Dialog.Description className="text-surface-700-300">
+							Their existing sessions stay signed in. Use &quot;Sign out everywhere&quot; to end
+							them.
+						</Dialog.Description>
 					</Dialog.Header>
-					<label className="label">
-						<span>New password</span>
-						<input
-							type="password"
-							className="input"
-							value={newPassword}
-							onChange={(e) => setNewPassword(e.target.value)}
-						/>
-					</label>
+					<form id="admin-set-password" onSubmit={handlePasswordSubmit}>
+						<label className="label">
+							<span className="label-text">New password</span>
+							<Password.Root minScore={0}>
+								<Password.Input
+									value={newPassword}
+									onChange={(e) => setNewPassword(e.currentTarget.value)}
+									autoComplete="new-password"
+									minLength={8}
+									required
+								>
+									<Password.ToggleVisibility />
+								</Password.Input>
+							</Password.Root>
+						</label>
+					</form>
 					<Dialog.Footer>
-						<button
-							type="button"
-							className="btn preset-tonal"
-							onClick={() => setPasswordDialogOpen(false)}
-						>
+						<Dialog.Close className="btn preset-tonal" disabled={submitting}>
 							Cancel
-						</button>
+						</Dialog.Close>
 						<button
-							type="button"
+							type="submit"
+							form="admin-set-password"
 							className="btn preset-filled-primary-500"
-							onClick={handlePasswordSubmit}
-							disabled={!newPassword}
+							disabled={submitting}
+							aria-busy={submitting}
 						>
-							Save
+							{submitLabel('Set password', 'Saving...')}
 						</button>
 					</Dialog.Footer>
+					<Dialog.CloseX />
 				</Dialog.Content>
 			</Dialog.Root>
 
 			{/* Delete dialog */}
-			<Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+			<Dialog.Root {...dialogProps('delete')}>
 				<Dialog.Content className="md:max-w-108">
 					<Dialog.Header>
-						<Dialog.Title>Delete user</Dialog.Title>
+						<Dialog.Title>Delete {selectedUser?.name}</Dialog.Title>
+						<Dialog.Description className="text-surface-700-300">
+							This permanently deletes the account, its sessions and its organization memberships.
+							This can&apos;t be undone.
+						</Dialog.Description>
 					</Dialog.Header>
-					<Dialog.Description>
-						Are you sure you want to permanently delete {selectedUser?.name}? This cannot be undone.
-					</Dialog.Description>
 					<Dialog.Footer>
-						<button
-							type="button"
-							className="btn preset-tonal"
-							onClick={() => setDeleteDialogOpen(false)}
-						>
+						<Dialog.Close className="btn preset-tonal" disabled={submitting}>
 							Cancel
-						</button>
+						</Dialog.Close>
 						<button
 							type="button"
 							className="btn preset-filled-error-500"
 							onClick={handleDeleteSubmit}
+							disabled={submitting}
+							aria-busy={submitting}
 						>
-							Delete
+							{submitLabel('Delete user', 'Deleting...')}
 						</button>
 					</Dialog.Footer>
+					<Dialog.CloseX />
 				</Dialog.Content>
 			</Dialog.Root>
 		</div>

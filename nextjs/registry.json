@@ -1600,6 +1600,16 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "admin/types.ts",
+					"relativePath": "src/components/admin/types.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "admin/ui/AdminButton.tsx",
 					"relativePath": "src/components/admin/ui/AdminButton.tsx",
 					"_imports_": [],

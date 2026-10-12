@@ -1,20 +1,18 @@
 <script lang="ts">
 	// SvelteKit
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
-	import type { Pathname } from '$app/types';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	// Primitives
-	import * as Tabs from '$lib/primitives/ui/tabs';
+	import * as Tabs from '#lib/primitives/ui/tabs/index.js';
 	// Icons
 	import UsersIcon from '@lucide/svelte/icons/users';
 	import BuildingIcon from '@lucide/svelte/icons/building-2';
 	// Components
-	import UsersTable from '$lib/admin/ui/UsersTable.svelte';
-	import OrganizationsTable from '$lib/admin/ui/OrganizationsTable.svelte';
+	import UsersTable from '#lib/admin/ui/UsersTable.svelte';
+	import OrganizationsTable from '#lib/admin/ui/OrganizationsTable.svelte';
 	// Constants & API
-	import { getAuthContext } from '$lib/auth/context.svelte';
-	import { TAB_ORGANIZATIONS, TAB_USERS } from '$lib/admin/utils/admin.constants';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
+	import { TAB_ORGANIZATIONS, TAB_USERS } from '#lib/admin/utils/admin.constants.js';
 
 	const { authConstants } = getAuthContext();
 	const organizationsEnabled = Boolean(authConstants.organizations);
@@ -28,14 +26,10 @@
 	);
 
 	function setActiveTab(tab: string | null) {
-		if (!tab) return;
-		const url = new URL(page.url);
+		if (!tab || tab === activeTab) return;
+		const url = new URL(page.url.href);
 		url.searchParams.set('adminTab', tab);
-		void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-			replaceState: true,
-			keepFocus: true,
-			noScroll: true
-		});
+		void gotoApp(url, { replace: true, reset: false });
 	}
 </script>
 

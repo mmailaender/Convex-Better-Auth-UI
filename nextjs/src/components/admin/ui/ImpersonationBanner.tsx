@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useConvexAuth, useQuery } from 'convex/react';
 import { toast } from 'sonner';
-import { VenetianMask } from 'lucide-react';
+import { Loader2, VenetianMask } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import { authClient } from '@/lib/auth/api/auth-client';
@@ -11,7 +11,7 @@ import { useActiveUserData } from '@/lib/auth/hooks';
 import { ADMIN_ROUTE } from '@/components/admin/utils/admin.constants';
 
 /**
- * Fixed banner shown while the current session is an admin impersonation
+ * Banner shown while the current session is an admin impersonation
  * (`session.impersonatedBy` is set). Renders nothing otherwise. Mount it once in
  * the root layout (gated by `AUTH_CONSTANTS.admin`) so an impersonating admin
  * always sees who they are acting as and can return to their own session.
@@ -36,12 +36,15 @@ export default function ImpersonationBanner() {
 			return;
 		}
 		// Full reload so the Convex client picks up the restored admin session.
-		window.location.href = ADMIN_ROUTE;
+		window.location.assign(ADMIN_ROUTE);
 	}
 
 	return (
-		<div className="preset-filled-warning-500 sticky top-0 z-50 flex min-w-0 items-center justify-center gap-3 px-4 py-2 text-sm">
-			<VenetianMask className="size-4 shrink-0" />
+		<div
+			className="preset-filled-warning-500 sticky top-0 z-50 flex min-w-0 items-center justify-center gap-3 px-4 py-2 text-sm"
+			role="status"
+		>
+			<VenetianMask className="size-4 shrink-0" aria-hidden="true" />
 			<span className="truncate">
 				You are impersonating <strong>{activeUser?.name ?? 'another user'}</strong>
 			</span>
@@ -50,7 +53,9 @@ export default function ImpersonationBanner() {
 				className="btn btn-sm preset-outlined shrink-0"
 				onClick={handleStop}
 				disabled={stopping}
+				aria-busy={stopping}
 			>
+				{stopping ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
 				Stop impersonating
 			</button>
 		</div>

@@ -1,21 +1,20 @@
 <script lang="ts">
 	// Primitives
-	import * as Avatar from '$lib/primitives/ui/avatar';
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Menu from '#lib/primitives/ui/menu/index.js';
+	import { Portal } from '@ark-ui/svelte/portal';
 	// Icons
-	import TrashIcon from '@lucide/svelte/icons/trash';
-	import UsersIcon from '@lucide/svelte/icons/users';
+	import EllipsisVerticalIcon from '@lucide/svelte/icons/ellipsis-vertical';
+	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	// API
 	import { useQuery, useConvexClient, usePaginatedQuery } from 'convex-svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	import { toast } from 'svelte-sonner';
+	// Types
+	import type { AdminOrganization } from '#lib/admin/types.js';
 
-	type OrgRow = {
-		_id: string;
-		name: string;
-		slug: string;
-		logo?: string | null;
-	};
+	const PAGE_SIZE = 25;
 
 	const { api } = getAuthContext();
 	const client = useConvexClient();
@@ -23,98 +22,126 @@
 	const orgsQuery = usePaginatedQuery(
 		api.admin.queries.listAllOrganizations,
 		() => ({}),
-		() => ({ initialNumItems: 25 })
+		() => ({ initialNumItems: PAGE_SIZE })
 	);
-	const organizations = $derived((orgsQuery.results ?? []) as OrgRow[]);
+	const organizations = $derived(orgsQuery.results ?? []);
 
-	let selectedOrg = $state<OrgRow | null>(null);
+	let selectedOrg = $state<AdminOrganization | null>(null);
 	let membersOpen = $state(false);
 	let deleteOpen = $state(false);
+	let deleting = $state(false);
 
 	const orgDetailResponse = useQuery(api.admin.queries.getOrganizationWithMembers, () =>
 		membersOpen && selectedOrg ? { organizationId: selectedOrg._id } : 'skip'
 	);
 	const orgDetail = $derived(orgDetailResponse?.data);
 
+	function openDialog(org: AdminOrganization, dialog: 'members' | 'delete') {
+		selectedOrg = org;
+		membersOpen = dialog === 'members';
+		deleteOpen = dialog === 'delete';
+	}
+
 	async function handleDelete() {
-		if (!selectedOrg) return;
+		const org = selectedOrg;
+		if (!org) return;
+		deleting = true;
 		try {
 			await client.mutation(api.admin.mutations.deleteOrganizationAsAdmin, {
-				organizationId: selectedOrg._id
+				organizationId: org._id
 			});
-			toast.success('Organization deleted');
+			toast.success(`Deleted ${org.name}`);
 			deleteOpen = false;
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to delete organization');
+		} finally {
+			deleting = false;
 		}
 	}
 </script>
 
 <div class="flex h-full flex-col py-4">
-	{#if orgsQuery.status === 'LoadingFirstPage'}
-		<div class="p-4 text-sm opacity-60">Loading organizations...</div>
+	{#if orgsQuery.error}
+		<div class="text-error-600-400 p-4 text-sm">{orgsQuery.error.message}</div>
+	{:else if orgsQuery.status === 'LoadingFirstPage'}
+		<div class="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
+			<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
+			Loading organizations...
+		</div>
 	{:else if organizations.length === 0}
-		<div class="p-4 text-sm opacity-60">No organizations found.</div>
+		<div class="text-surface-600-400 p-4 text-sm">No organizations yet.</div>
 	{:else}
 		<div class="max-h-[calc(80vh-12rem)] overflow-y-auto pb-12">
 			<table class="table w-full">
-				<thead class="sticky top-0 z-20">
+				<thead class="bg-surface-50-950 sticky top-0 z-20">
 					<tr>
 						<th class="text-surface-600-400 p-2 !pl-3 text-left text-xs font-semibold">Name</th>
 						<th class="text-surface-600-400 hidden p-2 text-left text-xs sm:table-cell">Slug</th>
-						<th class="!w-24 p-2 text-right"></th>
+						<th class="text-surface-600-400 hidden w-28 p-2 text-left text-xs md:table-cell">
+							Created
+						</th>
+						<th class="w-12 p-2"><span class="sr-only">Actions</span></th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each organizations as org (org._id)}
 						<tr class="!border-surface-300-700 !border-t">
-							<td class="!py-3 !pl-3">
-								<div class="flex items-center space-x-2">
-									<Avatar.Root class="size-8 sm:size-6">
+							<td class="max-w-0 !py-3 !pl-3">
+								<div class="flex items-center gap-2">
+									<Avatar.Root class="size-8 shrink-0 sm:size-6">
 										<Avatar.Image src={org.logo ?? undefined} alt={org.name} />
 										<Avatar.Fallback>
 											<Avatar.Marble name={org.name} />
 										</Avatar.Fallback>
 									</Avatar.Root>
-									<span class="truncate text-sm">{org.name}</span>
+									<div class="flex min-w-0 flex-col">
+										<span class="truncate text-sm">{org.name}</span>
+										<span class="text-surface-700-300 truncate text-xs sm:hidden">{org.slug}</span>
+									</div>
 								</div>
 							</td>
-							<td class="!text-surface-600-400 hidden !truncate text-sm sm:table-cell"
-								>{org.slug}</td
-							>
-							<td class="!w-24">
-								<div class="flex justify-end gap-1">
-									<button
-										type="button"
-										title="View members"
-										class="btn-icon preset-filled-surface-200-800"
-										onclick={() => {
-											selectedOrg = org;
-											membersOpen = true;
-										}}
+							<td class="text-surface-600-400 hidden max-w-0 truncate text-sm sm:table-cell">
+								{org.slug}
+							</td>
+							<td class="text-surface-600-400 hidden text-sm md:table-cell">
+								{new Date(org.createdAt).toLocaleDateString()}
+							</td>
+							<td class="text-right">
+								<Menu.Root>
+									<Menu.Trigger
+										class="btn-icon hover:preset-tonal"
+										aria-label={`Actions for ${org.name}`}
 									>
-										<UsersIcon class="size-4 opacity-70" />
-									</button>
-									<button
-										type="button"
-										title="Delete organization"
-										class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
-										onclick={() => {
-											selectedOrg = org;
-											deleteOpen = true;
-										}}
-									>
-										<TrashIcon class="size-4 opacity-70" />
-									</button>
-								</div>
+										<EllipsisVerticalIcon class="size-4" aria-hidden="true" />
+									</Menu.Trigger>
+									<Portal>
+										<Menu.Content class="bg-surface-50-950">
+											<Menu.Item value="members" onclick={() => openDialog(org, 'members')}>
+												View members
+											</Menu.Item>
+											<Menu.Item
+												value="delete"
+												variant="destructive"
+												onclick={() => openDialog(org, 'delete')}
+											>
+												Delete
+											</Menu.Item>
+										</Menu.Content>
+									</Portal>
+								</Menu.Root>
 							</td>
 						</tr>
 					{/each}
 				</tbody>
 			</table>
-			{#if orgsQuery.status === 'CanLoadMore'}
+			{#if orgsQuery.status === 'CanLoadMore' || orgsQuery.status === 'LoadingMore'}
 				<div class="flex justify-center py-3">
-					<button type="button" class="btn preset-tonal" onclick={() => orgsQuery.loadMore(25)}>
+					<button
+						type="button"
+						class="btn preset-tonal"
+						onclick={() => orgsQuery.loadMore(PAGE_SIZE)}
+						disabled={orgsQuery.status === 'LoadingMore'}
+					>
 						Load more
 					</button>
 				</div>
@@ -126,32 +153,53 @@
 	<Dialog.Root bind:open={membersOpen}>
 		<Dialog.Content class="md:max-w-108">
 			<Dialog.Header>
-				<Dialog.Title>{selectedOrg?.name} members</Dialog.Title>
+				<Dialog.Title>{selectedOrg?.name}</Dialog.Title>
+				<Dialog.Description class="text-surface-700-300">
+					{#if orgDetail}
+						{orgDetail.members.length}
+						{orgDetail.members.length === 1 ? 'member' : 'members'}
+					{:else}
+						Members
+					{/if}
+				</Dialog.Description>
 			</Dialog.Header>
-			<div class="flex max-h-[60vh] flex-col gap-2 overflow-y-auto">
-				{#if !orgDetail}
-					<div class="text-sm opacity-60">Loading members...</div>
+			<div class="flex max-h-[60vh] flex-col gap-3 overflow-y-auto">
+				{#if orgDetailResponse.error}
+					<div class="text-error-600-400 text-sm">{orgDetailResponse.error.message}</div>
+				{:else if !orgDetail}
+					<div class="text-surface-600-400 flex items-center gap-2 text-sm" role="status">
+						<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
+						Loading members...
+					</div>
 				{:else if orgDetail.members.length === 0}
-					<div class="text-sm opacity-60">No members.</div>
+					<div class="text-surface-600-400 text-sm">No members.</div>
 				{:else}
 					{#each orgDetail.members as member (member._id)}
 						<div class="flex items-center gap-3">
-							<Avatar.Root class="size-8">
+							<Avatar.Root class="size-8 shrink-0">
 								<Avatar.Image src={member.user?.image ?? undefined} alt={member.user?.name ?? ''} />
 								<Avatar.Fallback>
 									<Avatar.Marble name={member.user?.name ?? '?'} />
 								</Avatar.Fallback>
 							</Avatar.Root>
-							<div class="flex flex-1 flex-col truncate">
-								<span class="truncate text-sm">{member.user?.name ?? 'Unknown user'}</span>
+							<div class="flex min-w-0 flex-1 flex-col">
+								<span class="truncate text-sm">{member.user?.name ?? 'Deleted user'}</span>
 								<span class="text-surface-700-300 truncate text-xs">{member.user?.email}</span>
 							</div>
-							<span class="badge preset-filled-surface-300-700 h-6 px-2 text-xs">{member.role}</span
+							<span
+								class="badge h-6 shrink-0 border px-2 capitalize {member.role === 'owner'
+									? 'preset-filled-primary-50-950 border-primary-200-800'
+									: member.role === 'admin'
+										? 'preset-filled-warning-50-950 border-warning-200-800'
+										: 'preset-filled-surface-300-700 border-surface-400-600'}"
 							>
+								{member.role}
+							</span>
 						</div>
 					{/each}
 				{/if}
 			</div>
+			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
 
@@ -159,20 +207,30 @@
 	<Dialog.Root bind:open={deleteOpen}>
 		<Dialog.Content class="md:max-w-108">
 			<Dialog.Header>
-				<Dialog.Title>Delete organization</Dialog.Title>
+				<Dialog.Title>Delete {selectedOrg?.name}</Dialog.Title>
+				<Dialog.Description class="text-surface-700-300">
+					This permanently deletes the organization with its memberships and pending invitations.
+					Members who had it active switch to another of their organizations. This can't be undone.
+				</Dialog.Description>
 			</Dialog.Header>
-			<Dialog.Description>
-				Are you sure you want to permanently delete {selectedOrg?.name}? All members and invitations
-				will be removed. This cannot be undone.
-			</Dialog.Description>
 			<Dialog.Footer>
-				<button type="button" class="btn preset-tonal" onclick={() => (deleteOpen = false)}>
-					Cancel
-				</button>
-				<button type="button" class="btn preset-filled-error-500" onclick={handleDelete}>
-					Delete
+				<Dialog.Close class="btn preset-tonal" disabled={deleting}>Cancel</Dialog.Close>
+				<button
+					type="button"
+					class="btn preset-filled-error-500"
+					onclick={handleDelete}
+					disabled={deleting}
+					aria-busy={deleting}
+				>
+					{#if deleting}
+						<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
+						Deleting...
+					{:else}
+						Delete organization
+					{/if}
 				</button>
 			</Dialog.Footer>
+			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>
 </div>
