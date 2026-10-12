@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Sveltekit
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	// Svelte
 	import { toast } from 'svelte-sonner';
 
@@ -116,9 +116,7 @@
 		if (!redirectURL) return;
 
 		const target = safeRedirect(redirectURL, '/', page.url.origin);
-		// SvelteKit 3's goto rejects paths that aren't app pages; fall back to a full page load
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-		await goto(target, { refreshAll: true }).catch(() => window.location.assign(target));
+		await gotoApp(target, { refreshAll: true });
 	}
 
 	/**

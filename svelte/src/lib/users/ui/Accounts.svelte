@@ -1,8 +1,7 @@
 <script lang="ts">
 	// Svelte
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { tick } from 'svelte';
 
 	// Context
@@ -61,7 +60,6 @@
 	const client = useConvexClient();
 
 	// Types
-	import type { Path } from '$app/types';
 	import type { ListAccountsType } from '#lib/auth/types.js';
 
 	let { initialData }: { initialData?: { accountList?: ListAccountsType } } = $props();
@@ -229,8 +227,7 @@
 		url.searchParams.set('dialog', 'user-profile');
 		url.searchParams.delete('success');
 		url.searchParams.delete('error');
-		const path = `${url.pathname}${url.search}${url.hash}`;
-		void goto(resolve(path as Path), {
+		void gotoApp(url, {
 			replace: true,
 			reset: false,
 			refreshAll: false

@@ -10,9 +10,8 @@
 	import SignOutButton from '#lib/auth/ui/SignOutButton.svelte';
 
 	// SvelteKit navigation/state
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
@@ -26,7 +25,6 @@
 	// Types
 	import type { Snippet } from 'svelte';
 	import type { PopoverRootProps } from '@ark-ui/svelte';
-	import type { Path } from '$app/types';
 	import type { GetActiveUserType, ListAccountsType } from '#lib/auth/types.js';
 
 	// Props
@@ -75,7 +73,7 @@
 		const url = new URL(page.url.href);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+			void gotoApp(url, {
 				replace: false,
 				reset: false
 			});

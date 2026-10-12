@@ -108,7 +108,24 @@ export default defineConfig({
 				type: 'lib',
 				files: [
 					{
-						path: 'src/lib/primitives'
+						path: 'src/lib/primitives',
+						files: [
+							{ path: 'hooks' },
+							{ path: 'ui' },
+							{ path: 'utils.ts' },
+							{
+								path: 'utils',
+								files: [
+									{ path: 'dragState.svelte.ts' },
+									{ path: 'focusScroll.ts' },
+									{ path: 'mobileState.svelte.ts' },
+									{ path: 'navigation.ts' },
+									{ path: 'navigation.test.ts', role: 'test' },
+									{ path: 'optimizeImage.ts' },
+									{ path: 'routeMatcher.ts' }
+								]
+							}
+						]
 					}
 				]
 			},

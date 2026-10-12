@@ -3419,6 +3419,16 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "primitives/utils.ts",
+					"relativePath": "src/lib/primitives/utils.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "primitives/utils/dragState.svelte.ts",
 					"relativePath": "src/lib/primitives/utils/dragState.svelte.ts",
 					"_imports_": [],
@@ -3449,6 +3459,42 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "primitives/utils/navigation.ts",
+					"relativePath": "src/lib/primitives/utils/navigation.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "test",
+					"path": "primitives/utils/navigation.test.ts",
+					"relativePath": "src/lib/primitives/utils/navigation.test.ts",
+					"_imports_": [
+						{
+							"import": "./navigation",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "primitives/utils/optimizeImage.ts",
 					"relativePath": "src/lib/primitives/utils/optimizeImage.ts",
 					"_imports_": [],
@@ -3461,16 +3507,6 @@
 					"role": "file",
 					"path": "primitives/utils/routeMatcher.ts",
 					"relativePath": "src/lib/primitives/utils/routeMatcher.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "lib",
-					"role": "file",
-					"path": "primitives/utils.ts",
-					"relativePath": "src/lib/primitives/utils.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -3721,6 +3757,15 @@
 					"path": "auth/ui/SignIn.svelte",
 					"relativePath": "src/lib/auth/ui/SignIn.svelte",
 					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "./EmailStep.svelte",
 							"item": "auth/lib",
@@ -4065,8 +4110,8 @@
 			"type": "lib",
 			"add": "when-added",
 			"registryDependencies": [
-				"auth/lib",
-				"primitives"
+				"primitives",
+				"auth/lib"
 			],
 			"dependencies": [
 				{
@@ -4114,6 +4159,15 @@
 					"path": "users/ui/Accounts.svelte",
 					"relativePath": "src/lib/users/ui/Accounts.svelte",
 					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
@@ -4431,6 +4485,15 @@
 							"meta": {}
 						},
 						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
@@ -4542,6 +4605,15 @@
 					"path": "users/ui/UserProfileHost.svelte",
 					"relativePath": "src/lib/users/ui/UserProfileHost.svelte",
 					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
@@ -4807,6 +4879,15 @@
 					"relativePath": "src/lib/organizations/ui/CreateOrganization.svelte",
 					"_imports_": [
 						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
@@ -4863,6 +4944,15 @@
 					"relativePath": "src/lib/organizations/ui/DeleteOrganization.svelte",
 					"_imports_": [
 						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
@@ -4918,6 +5008,15 @@
 					"path": "organizations/ui/GeneralSettings.svelte",
 					"relativePath": "src/lib/organizations/ui/GeneralSettings.svelte",
 					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
@@ -5291,6 +5390,15 @@
 					"relativePath": "src/lib/organizations/ui/OrganizationProfile.svelte",
 					"_imports_": [
 						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/primitives/ui/tabs/index.js",
 							"item": "primitives",
 							"file": {
@@ -5374,6 +5482,15 @@
 					"relativePath": "src/lib/organizations/ui/OrganizationProfileHost.svelte",
 					"_imports_": [
 						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
@@ -5420,6 +5537,15 @@
 					"path": "organizations/ui/OrganizationSwitcher.svelte",
 					"relativePath": "src/lib/organizations/ui/OrganizationSwitcher.svelte",
 					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "#lib/primitives/ui/popover/index.js",
 							"item": "primitives",

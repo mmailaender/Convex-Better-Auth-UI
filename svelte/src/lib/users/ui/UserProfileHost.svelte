@@ -2,8 +2,7 @@
 	// Svelte
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// Primitives
 	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
@@ -19,7 +18,6 @@
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Types
-	import type { Path } from '$app/types';
 	import type { GetActiveUserType, ListAccountsType } from '#lib/auth/types.js';
 
 	type UserProfileHostProps = {
@@ -128,7 +126,7 @@
 		if (hasDialog) {
 			const url = new URL(page.url.href);
 			url.searchParams.delete('dialog');
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+			void gotoApp(url, {
 				replace: true,
 				reset: false
 			});

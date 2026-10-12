@@ -1,8 +1,7 @@
 <script lang="ts">
 	// Svelte
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { SvelteURL } from 'svelte/reactivity';
 
 	/** UI **/
@@ -30,7 +29,6 @@
 
 	// Types
 	import type { GenericId } from 'convex/values';
-	import type { Path } from '$app/types';
 
 	// Auth state
 	const auth = useAuth();
@@ -178,9 +176,7 @@
 			// Navigate to the specified URL if it is on this site, else home
 			if (redirectUrl) {
 				const target = safeRedirect(redirectUrl, '/', page.url.origin);
-				// SvelteKit 3's goto rejects paths that aren't app pages; fall back to a full page load
-				// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-				void goto(target).catch(() => window.location.assign(target));
+				void gotoApp(target);
 			} else {
 				let needsRedirect = false;
 				if (activeOrgSlug) {
@@ -198,8 +194,7 @@
 				if (needsRedirect) {
 					// Reconstruct the URL with the new organization ID
 					currentUrl.pathname = pathSegments.join('/');
-					const nextPath = `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
-					void goto(resolve(nextPath as Path), { refreshAll: true });
+					void gotoApp(currentUrl, { refreshAll: true });
 				}
 			}
 		} catch (err: unknown) {

@@ -1,9 +1,8 @@
 <script lang="ts">
 	// Svelte
 	import { tick } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// UI Components
 	// Icons
@@ -28,7 +27,6 @@
 	const { api } = getAuthContext();
 
 	// Types
-	import type { Path } from '$app/types';
 	import type { GetActiveOrganizationType, GetActiveUserType, Role } from '#lib/auth/types.js';
 
 	// Props
@@ -240,7 +238,7 @@
 					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
 					`/${trimmed}`
 				);
-				await goto(resolve(newPathname as Path), { replace: true });
+				await gotoApp(newPathname, { replace: true });
 			}
 
 			isEditingSlug = false;

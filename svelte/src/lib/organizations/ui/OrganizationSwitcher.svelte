@@ -1,8 +1,7 @@
 <script lang="ts">
 	// Svelte
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { onMount } from 'svelte';
 
 	// Primitives
@@ -32,7 +31,6 @@
 
 	// Types
 	import type { PopoverRootProps } from '@ark-ui/svelte';
-	import type { Path } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		ListOrganizationsType,
@@ -117,7 +115,7 @@
 		const url = new URL(page.url.href);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+			void gotoApp(url, {
 				replace: false,
 				reset: false
 			});
@@ -139,7 +137,7 @@
 					/\/(active-organization|active-org)(?=\/|$)/g,
 					`/${initialSlug}`
 				);
-				void goto(resolve(`${newPathname}${page.url.search}${page.url.hash}` as Path), {
+				void gotoApp(`${newPathname}${page.url.search}${page.url.hash}`, {
 					replace: true,
 					reset: false
 				});
@@ -171,7 +169,7 @@
 				/\/(active-organization|active-org)(?=\/|$)/g,
 				`/${slug}`
 			);
-			void goto(resolve(`${newPathname}${search}${hash}` as Path), {
+			void gotoApp(`${newPathname}${search}${hash}`, {
 				replace: true,
 				reset: false
 			});
@@ -213,10 +211,10 @@
 				);
 
 				// Navigate to the new URL
-				await goto(resolve(newPathname as Path), { replace: true });
+				await gotoApp(newPathname, { replace: true });
 			} else {
 				// No slug replacement needed, just refresh current page
-				await goto(resolve((page.url.pathname + page.url.search) as Path), { replace: true });
+				await gotoApp(page.url.pathname + page.url.search, { replace: true });
 			}
 
 			// Close popover

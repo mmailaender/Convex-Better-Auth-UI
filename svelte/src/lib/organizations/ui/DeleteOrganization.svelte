@@ -1,8 +1,8 @@
 <script lang="ts">
 	// Navigation
-	import { goto } from '$app/navigation';
 
 	// API
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
@@ -83,9 +83,7 @@
 
 			// Navigate to the specified URL if it is on this site, else home
 			const target = safeRedirect(redirectTo);
-			// SvelteKit 3's goto rejects paths that aren't app pages; fall back to a full page load
-			// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-			void goto(target).catch(() => window.location.assign(target));
+			void gotoApp(target);
 		} catch (err) {
 			if (err instanceof Error) {
 				toast.error(err.message);

@@ -1,9 +1,8 @@
 <script lang="ts">
 	// Svelte
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 
 	/** UI **/
 	// Primitives
@@ -28,7 +27,6 @@
 	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 
 	// Types
-	import type { Path } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		GetActiveUserType,
@@ -160,7 +158,7 @@
 		url.searchParams.set('tab', value);
 		// Ensure dialog stays present in the URL and state while navigating tabs inside the dialog
 		url.searchParams.set('dialog', 'organization-profile');
-		goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+		gotoApp(url, {
 			shallow: true,
 			state: { dialog: 'organization-profile' }
 		});
@@ -173,7 +171,7 @@
 			url.searchParams.delete('tab');
 			// Keep dialog open in URL/state
 			url.searchParams.set('dialog', 'organization-profile');
-			goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+			gotoApp(url, {
 				shallow: true,
 				replace: true,
 				state: { dialog: 'organization-profile' }
@@ -193,7 +191,7 @@
 				const url = new URL(window.location.href);
 				url.searchParams.delete('dialog');
 				url.searchParams.delete('tab');
-				goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+				gotoApp(url, {
 					shallow: true,
 					replace: true
 				});
@@ -278,7 +276,7 @@
 			url.searchParams.set('tab', normalized);
 			// Ensure dialog param remains so OrganizationSwitcher keeps the dialog open on reload
 			url.searchParams.set('dialog', 'organization-profile');
-			goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
+			gotoApp(url, {
 				shallow: true,
 				replace: true,
 				state: { dialog: 'organization-profile' }
