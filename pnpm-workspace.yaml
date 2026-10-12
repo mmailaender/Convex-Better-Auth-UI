@@ -1,0 +1,25 @@
+packages:
+  - svelte
+  - nextjs
+
+# Refuse to install a dependency whose `engines` the current Node.js doesn't satisfy
+engineStrict: true
+
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
+
+peerDependencyRules:
+  allowedVersions:
+    # These peer ranges predate SvelteKit 3. Nothing we use touches the SvelteKit APIs it changed:
+    # only `runed/kit` does, nothing imports it, and better-auth's `svelte-kit` and test helpers are unused.
+    'runed>@sveltejs/kit': '3'
+    '@icons-pack/svelte-simple-icons>@sveltejs/kit': '3'
+    'better-auth>@sveltejs/kit': '3'
+    'better-auth>vitest': '5'
+    # eslint-config-next's plugins work with ESLint 10 but don't declare it yet
+    'eslint-plugin-import>eslint': '10'
+    'eslint-plugin-jsx-a11y>eslint': '10'
+    'eslint-plugin-react>eslint': '10'

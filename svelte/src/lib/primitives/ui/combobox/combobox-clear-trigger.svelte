@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Combobox as ComboboxPrimitive } from '@ark-ui/svelte/combobox';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	type ComboboxClearTriggerProps = ComboboxPrimitive.ClearTriggerProps & {
 		class?: string;

@@ -21,8 +21,6 @@ import {
 	SiPaypal,
 	SiReddit,
 	SiRoblox,
-	SiSalesforce,
-	SiSlack,
 	SiSpotify,
 	SiTiktok,
 	SiTwitch,
@@ -30,6 +28,7 @@ import {
 	SiX,
 	SiZoom
 } from '@icons-pack/react-simple-icons';
+import { SiSalesforce, SiSlack } from '@/components/primitives/ui/brand-icons';
 import { useMutation } from 'convex/react';
 import { ConvexError } from 'convex/values';
 import { KeyRound, Lock, Trash2 } from 'lucide-react';

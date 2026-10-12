@@ -2,7 +2,7 @@
 	import { box } from 'svelte-toolbelt';
 	import { usePassword, usePasswordError } from './password.svelte.js';
 	import type { PasswordRootProps } from './types';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let {
 		ref = $bindable(null),

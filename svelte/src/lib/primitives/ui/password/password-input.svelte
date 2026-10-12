@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 	import { box, mergeProps } from 'svelte-toolbelt';
 	import { usePasswordInput } from './password.svelte.js';
 	import type { PasswordInputProps } from './types';

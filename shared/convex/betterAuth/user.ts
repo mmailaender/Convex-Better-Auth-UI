@@ -1,6 +1,6 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import { partial, withSystemFields } from 'convex-helpers/validators';
+import { withSystemFields } from 'convex-helpers/validators';
 import schema from './schema';
 
 /**
@@ -41,7 +41,7 @@ export const getUserByEmail = query({
 export const updateUser = mutation({
 	args: {
 		userId: v.id('user'),
-		data: partial(schema.tables.user.validator)
+		data: schema.tables.user.validator.partial()
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {

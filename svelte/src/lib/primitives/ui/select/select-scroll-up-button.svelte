@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChevronUpIcon from '@lucide/svelte/icons/chevron-up';
-	import { cn, type WithElementRef } from '$lib/primitives/utils.js';
+	import { cn, type WithElementRef } from '#lib/primitives/utils.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	let {

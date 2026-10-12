@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Menu as MenuPrimitive } from '@ark-ui/svelte';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 	let {
 		ref = $bindable(null),
 		class: className,

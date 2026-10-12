@@ -1,9 +1,8 @@
 <script lang="ts">
 	// Svelte
 	import { tick } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// UI Components
 	// Icons
@@ -12,24 +11,23 @@
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Avatar from '$lib/primitives/ui/avatar';
-	import * as ImageCropper from '$lib/primitives/ui/image-cropper';
-	import { getFileFromUrl } from '$lib/primitives/ui/image-cropper';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import * as ImageCropper from '#lib/primitives/ui/image-cropper/index.js';
+	import { getFileFromUrl } from '#lib/primitives/ui/image-cropper/index.js';
 
 	// Utils
-	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { optimizeImage } from '#lib/primitives/utils/optimizeImage.js';
 
 	// API
 	import { useQuery, useConvexClient, useMutation } from 'convex-svelte';
 	import { ConvexError } from 'convex/values';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api } = getAuthContext();
 
 	// Types
-	import type { Pathname } from '$app/types';
-	import type { GetActiveOrganizationType, GetActiveUserType, Role } from '$lib/auth/types';
+	import type { GetActiveOrganizationType, GetActiveUserType, Role } from '#lib/auth/types.js';
 
 	// Props
 	let {
@@ -240,7 +238,7 @@
 					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
 					`/${trimmed}`
 				);
-				await goto(resolve(newPathname as Pathname), { replaceState: true });
+				await gotoApp(newPathname, { replace: true });
 			}
 
 			isEditingSlug = false;

@@ -18,7 +18,7 @@ import {
 const reactSimpleIconsDependency = {
 	ecosystem: 'js' as const,
 	name: '@icons-pack/react-simple-icons',
-	version: '13.7.0'
+	version: '13.15.1'
 };
 
 export default defineConfig({
@@ -164,7 +164,7 @@ export default defineConfig({
 							},
 							{
 								path: 'utils',
-								files: [{ path: 'signInRedirect.ts' }]
+								files: [{ path: 'safeRedirect.ts' }, { path: 'signInRedirect.ts' }]
 							}
 						]
 					},

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Separator } from '$lib/primitives/ui/separator/index.js';
-	import { cn } from '$lib/primitives/utils.js';
+	import { Separator } from '#lib/primitives/ui/separator/index.js';
+	import { cn } from '#lib/primitives/utils.js';
 	import type { ComponentProps } from 'svelte';
 
 	let {

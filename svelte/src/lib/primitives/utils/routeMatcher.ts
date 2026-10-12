@@ -52,10 +52,7 @@ export type RouteMatcherFn = (pathname: string) => boolean;
  * Can be a single pattern, an array of patterns, a RegExp, or a custom matcher function.
  */
 export type RouteMatcherParam =
-	| PathPattern
-	| PathPattern[]
-	| RegExp
-	| ((pathname: string) => boolean);
+	PathPattern | PathPattern[] | RegExp | ((pathname: string) => boolean);
 
 /**
  * Returns a function that accepts a pathname string and returns whether the request matches the list of

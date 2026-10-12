@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { CopyButton } from '$lib/primitives/ui/copy-button';
+	import { CopyButton } from '#lib/primitives/ui/copy-button/index.js';
 	import type { PasswordCopyButtonProps } from './types';
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 	import { usePasswordCopy } from './password.svelte.js';
 
 	let { ref = $bindable(null), class: className, ...rest }: PasswordCopyButtonProps = $props();

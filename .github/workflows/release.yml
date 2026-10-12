@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6.0.8
+
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create release pull request or publish to jsrepo
+        id: changesets
+        uses: changesets/action@v2.1.2
+        # Publishing to jsrepo.com authenticates with the JSREPO_TOKEN repository secret.
+        # The action pushes the tags `pnpm run release` creates and turns them into GitHub releases.
+        with:
+          publish-script: pnpm run release
+          version-script: pnpm run version-packages
+          pr-title: 'chore: version packages'
+          commit-message: 'chore: version packages'
+        env:
+          JSREPO_TOKEN: ${{ secrets.JSREPO_TOKEN }}

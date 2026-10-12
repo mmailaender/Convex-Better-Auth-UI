@@ -1,8 +1,7 @@
 <script lang="ts">
 	// Sveltekit
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	// Svelte
 	import { toast } from 'svelte-sonner';
 
@@ -19,24 +18,20 @@
 	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// Utils
-	import { cn } from '$lib/primitives/utils';
-	import { resolveSignInCallbackURL, resolveSignInRedirect } from '$lib/auth/utils/signInRedirect';
+	import { cn } from '#lib/primitives/utils.js';
+	import { safeRedirect } from '#lib/auth/utils/safeRedirect.js';
+	import {
+		resolveSignInCallbackURL,
+		resolveSignInRedirect
+	} from '#lib/auth/utils/signInRedirect.js';
 
 	// Context
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authConstants, authClient } = getAuthContext();
-
-	// SvelteKit types
-	import type { Pathname } from '$app/types';
 
 	// Types
 	type AuthStep =
-		| 'email'
-		| 'password-flow'
-		| 'email-otp-flow'
-		| 'magic-link-flow'
-		| 'verify-email'
-		| 'success';
+		'email' | 'password-flow' | 'email-otp-flow' | 'magic-link-flow' | 'verify-email' | 'success';
 	type EmailAuthMethod = 'password' | 'emailOTP' | 'magicLink';
 
 	interface SignInProps {
@@ -103,59 +98,39 @@
 		return resolveSignInRedirect(redirectParam, page.url);
 	}
 
+	/**
+	 * Absolute same-origin callback URL for Better Auth flows that leave the page
+	 */
 	function getCallbackURL(): string {
-		return resolveSignInCallbackURL(redirectParam, page.url);
+		return (
+			page.url.origin +
+			safeRedirect(resolveSignInCallbackURL(redirectParam, page.url), '/', page.url.origin)
+		);
 	}
 
 	/**
-	 * Handles the redirect after successful authentication
+	 * Handles the redirect after successful authentication; a target on another host goes home
 	 */
-	async function handleRedirect(): Promise<'internal' | 'external' | 'none'> {
+	async function handleRedirect(): Promise<void> {
 		const redirectURL = getRedirectURL();
-		if (!redirectURL || typeof window === 'undefined') return 'none';
+		if (!redirectURL) return;
 
-		try {
-			const target = new URL(redirectURL, window.location.origin);
-			if (target.origin === window.location.origin) {
-				const internalPath = `${target.pathname}${target.search}${target.hash}`;
-				await goto(resolve(internalPath as Pathname), { invalidateAll: true });
-				return 'internal';
-			}
-
-			window.location.assign(target.toString());
-			return 'external';
-		} catch {
-			if (redirectURL.startsWith('/')) {
-				await goto(resolve(redirectURL as Pathname), { invalidateAll: true });
-				return 'internal';
-			}
-		}
-
-		return 'none';
+		const target = safeRedirect(redirectURL, '/', page.url.origin);
+		await gotoApp(target, { refreshAll: true });
 	}
 
 	/**
 	 * Completes sign-in by keeping the loading UI active until navigation fully settles
 	 */
 	async function finalizeSignIn(): Promise<void> {
-		let shouldResetState = true;
-
 		try {
-			const redirectMode = await handleRedirect();
-
-			// External redirects unload the page, so keep the spinner visible until then.
-			if (redirectMode === 'external') {
-				shouldResetState = false;
-				return;
-			}
+			await handleRedirect();
 		} catch (error) {
 			console.error('Sign-in redirect failed:', error);
 		} finally {
-			if (shouldResetState) {
-				submitting = false;
-				isSigningIn = false;
-				redirectInProgress = false;
-			}
+			submitting = false;
+			isSigningIn = false;
+			redirectInProgress = false;
 		}
 	}
 

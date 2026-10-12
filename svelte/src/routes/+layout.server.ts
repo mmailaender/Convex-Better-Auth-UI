@@ -3,9 +3,9 @@ import {
 	getAuthState
 } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import type { LayoutServerLoad } from './$types';
-import { api } from '$convex/_generated/api';
-import { AUTH_CONSTANTS } from '$convex/auth.constants';
-import { building } from '$app/environment';
+import { api } from '#convex/_generated/api.js';
+import { AUTH_CONSTANTS } from '#convex/auth.constants.js';
+import { building } from '$app/env';
 
 export const load = (async ({ locals }) => {
 	// During build/prerender, skip auth state fetching (BETTER_AUTH_SECRET not available)

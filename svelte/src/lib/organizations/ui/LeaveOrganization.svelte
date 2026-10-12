@@ -5,9 +5,9 @@
 
 	/** UI */
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import { toast } from 'svelte-sonner';
-	import * as Select from '$lib/primitives/ui/select';
+	import * as Select from '#lib/primitives/ui/select/index.js';
 	import { createListCollection } from '@ark-ui/svelte/select';
 	// Icons
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
@@ -15,14 +15,14 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 	import { ConvexError } from 'convex/values';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
 	// Types
-	import type { GetActiveOrganizationType, GetActiveUserType, Role } from '$lib/auth/types';
+	import type { GetActiveOrganizationType, GetActiveUserType, Role } from '#lib/auth/types.js';
 
 	// Props
 	let {

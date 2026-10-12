@@ -22,7 +22,7 @@ export default defineConfig({
 		defaultPaths: {
 			base: './',
 			convex: './src/convex',
-			lib: '$lib',
+			lib: './src/lib',
 			routes: './src/routes',
 			themes: './src/themes'
 		},
@@ -37,12 +37,16 @@ export default defineConfig({
 				type: 'base',
 				files: [
 					{ path: 'convex.dist.json', target: 'convex.json' },
-					{ path: 'svelte.config.js', target: 'svelte.config.js' },
+					{
+						path: 'vite.config.dist.ts',
+						target: 'vite.config.ts'
+					},
 					{
 						path: 'src',
 						files: [
 							{ path: 'app.html' },
 							{ path: 'app.d.ts' },
+							{ path: 'env.ts' },
 							{
 								path: 'routes',
 								files: [
@@ -105,7 +109,24 @@ export default defineConfig({
 				type: 'lib',
 				files: [
 					{
-						path: 'src/lib/primitives'
+						path: 'src/lib/primitives',
+						files: [
+							{ path: 'hooks' },
+							{ path: 'ui' },
+							{ path: 'utils.ts' },
+							{
+								path: 'utils',
+								files: [
+									{ path: 'dragState.svelte.ts' },
+									{ path: 'focusScroll.ts' },
+									{ path: 'mobileState.svelte.ts' },
+									{ path: 'navigation.ts' },
+									{ path: 'navigation.test.ts', role: 'test' },
+									{ path: 'optimizeImage.ts' },
+									{ path: 'routeMatcher.ts' }
+								]
+							}
+						]
 					}
 				]
 			},
@@ -146,7 +167,7 @@ export default defineConfig({
 							},
 							{
 								path: 'utils',
-								files: [{ path: 'signInRedirect.ts' }]
+								files: [{ path: 'safeRedirect.ts' }, { path: 'signInRedirect.ts' }]
 							}
 						]
 					}

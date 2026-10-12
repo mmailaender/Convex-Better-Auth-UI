@@ -1,0 +1,13 @@
+{
+	"name": "convex-better-auth-ui",
+	"private": true,
+	"scripts": {
+		"changeset": "changeset",
+		"version-packages": "changeset version",
+		"release": "node scripts/release.mjs"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^3.0.3"
+	},
+	"packageManager": "pnpm@12.11.2"
+}

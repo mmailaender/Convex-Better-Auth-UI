@@ -46,7 +46,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -62,7 +62,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -448,6 +448,16 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "primitives/ui/brand-icons.tsx",
+					"relativePath": "src/components/primitives/ui/brand-icons.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "primitives/ui/dialog.tsx",
 					"relativePath": "src/components/primitives/ui/dialog.tsx",
 					"_imports_": [],
@@ -630,7 +640,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@better-auth/api-key",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -639,12 +649,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@icons-pack/react-simple-icons",
-					"version": "13.7.0"
+					"version": "13.15.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -709,7 +719,7 @@
 						{
 							"ecosystem": "js",
 							"name": "@better-auth/api-key",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						},
 						{
 							"ecosystem": "js",
@@ -718,7 +728,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -748,6 +758,16 @@
 							"name": "@convex-dev/better-auth"
 						}
 					],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "auth/utils/safeRedirect.ts",
+					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
 					"devDependencies": []
 				},
 				{
@@ -933,7 +953,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -953,7 +973,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -999,12 +1019,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@icons-pack/react-simple-icons",
-					"version": "13.7.0"
+					"version": "13.15.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -1146,7 +1166,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1191,7 +1211,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1211,7 +1231,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1257,7 +1277,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -1476,7 +1496,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1496,7 +1516,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -1560,7 +1580,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.9"
+					"version": "1.6.16"
 				},
 				{
 					"ecosystem": "js",
@@ -1762,7 +1782,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []

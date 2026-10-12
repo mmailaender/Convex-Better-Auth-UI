@@ -63,10 +63,7 @@ export type RouteMatcherFn = (req: NextRequest) => boolean;
  * Can be a single pattern, an array of patterns, a RegExp, or a custom matcher function.
  */
 export type RouteMatcherParam =
-	| PathPattern
-	| PathPattern[]
-	| RegExp
-	| ((req: NextRequest) => boolean);
+	PathPattern | PathPattern[] | RegExp | ((req: NextRequest) => boolean);
 
 /**
  * Returns a function that accepts a `NextRequest` object and returns whether the request matches the list of

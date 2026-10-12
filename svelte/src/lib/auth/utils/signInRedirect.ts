@@ -1,6 +1,8 @@
+import type { ReadonlyURL } from '$app/state';
+
 export function resolveSignInRedirect(
 	redirectParam: string | undefined,
-	currentURL: URL
+	currentURL: ReadonlyURL
 ): string | undefined {
 	if (redirectParam) return redirectParam;
 
@@ -12,7 +14,7 @@ export function resolveSignInRedirect(
 
 export function resolveSignInCallbackURL(
 	redirectParam: string | undefined,
-	currentURL: URL
+	currentURL: ReadonlyURL
 ): string {
 	return (
 		resolveSignInRedirect(redirectParam, currentURL) ??

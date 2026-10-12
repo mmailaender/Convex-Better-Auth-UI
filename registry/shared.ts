@@ -5,13 +5,13 @@ const manual = 'manual' as const;
 export const betterAuthApiKeyDependency = {
 	ecosystem: 'js' as const,
 	name: '@better-auth/api-key',
-	version: '1.6.9'
+	version: '1.6.16'
 };
 
 export const betterAuthDependency = {
 	ecosystem: 'js' as const,
 	name: 'better-auth',
-	version: '1.6.9'
+	version: '1.6.16'
 };
 
 const sharedMeta = {

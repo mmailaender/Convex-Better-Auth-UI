@@ -12,10 +12,11 @@ import { Mail } from 'lucide-react';
 
 // Utils
 import { cn } from '../../../lib/utils';
+import { safeRedirect } from '../../../lib/auth/utils/safeRedirect';
 import {
 	resolveSignInCallbackURL,
 	resolveSignInRedirect
-} from '@/lib/auth/utils/signInRedirect';
+} from '../../../lib/auth/utils/signInRedirect';
 
 // Constants
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
@@ -31,12 +32,7 @@ import { MagicLinkFlow } from './MagicLinkFlow';
 import { SocialFlow } from './SocialFlow';
 
 type AuthStep =
-	| 'email'
-	| 'password-flow'
-	| 'email-otp-flow'
-	| 'magic-link-flow'
-	| 'verify-email'
-	| 'success';
+	'email' | 'password-flow' | 'email-otp-flow' | 'magic-link-flow' | 'verify-email' | 'success';
 type AuthMethod = 'password' | 'emailOTP' | 'magicLink';
 
 interface SignInProps {
@@ -83,35 +79,19 @@ export default function SignIn({
 		return searchParams.get('redirectTo') ?? undefined;
 	}, [redirectParam, searchParams]);
 
-	const getCallbackURL = useCallback((): string => {
-		if (typeof window !== 'undefined') {
-			return resolveSignInCallbackURL(redirectParam, new URL(window.location.href));
-		}
+	/** Absolute same-origin callback URL for Better Auth flows that leave the page */
+	const getCallbackURL = (): string =>
+		typeof window === 'undefined'
+			? '/'
+			: window.location.origin +
+				safeRedirect(resolveSignInCallbackURL(redirectParam, new URL(window.location.href)));
 
-		return getRedirectURL() ?? '/';
-	}, [getRedirectURL, redirectParam]);
-
-	const handleRedirect = useCallback((): 'internal' | 'external' | 'none' => {
+	/** Redirects after sign-in; a target on another host goes home */
+	const handleRedirect = useCallback((): void => {
 		const redirectURL = getRedirectURL();
-		if (!redirectURL || typeof window === 'undefined') return 'none';
+		if (!redirectURL) return;
 
-		try {
-			const target = new URL(redirectURL, window.location.origin);
-			if (target.origin === window.location.origin) {
-				router.push(`${target.pathname}${target.search}${target.hash}`);
-				return 'internal';
-			}
-
-			window.location.assign(target.toString());
-			return 'external';
-		} catch {
-			if (redirectURL.startsWith('/')) {
-				router.push(redirectURL);
-				return 'internal';
-			}
-		}
-
-		return 'none';
+		router.push(safeRedirect(redirectURL));
 	}, [getRedirectURL, router]);
 
 	const handleAuthSuccess = () => {
@@ -126,11 +106,9 @@ export default function SignIn({
 		if (isSigningIn && isAuthenticated && !isLoading) {
 			console.log('Convex auth synchronized, redirecting...');
 			onSignIn?.();
-			const redirectMode = handleRedirect();
-			if (redirectMode !== 'external') {
-				setSubmitting(false);
-				setIsSigningIn(false);
-			}
+			handleRedirect();
+			setSubmitting(false);
+			setIsSigningIn(false);
 		}
 	}, [isSigningIn, isAuthenticated, isLoading, onSignIn, handleRedirect]);
 

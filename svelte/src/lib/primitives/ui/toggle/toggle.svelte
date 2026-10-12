@@ -26,7 +26,7 @@
 
 <script lang="ts">
 	import { Toggle as TogglePrimitive } from '@ark-ui/svelte/toggle';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 	let {
 		ref = $bindable(null),
 		pressed = $bindable(false),

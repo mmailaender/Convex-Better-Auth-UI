@@ -1,16 +1,16 @@
 <script lang="ts">
-	import ProfileInfo from '$lib/users/ui/ProfileInfo.svelte';
-	import Emails from '$lib/users/ui/Emails.svelte';
-	import DeleteUser from '$lib/users/ui/DeleteUser.svelte';
+	import ProfileInfo from '#lib/users/ui/ProfileInfo.svelte';
+	import Emails from '#lib/users/ui/Emails.svelte';
+	import DeleteUser from '#lib/users/ui/DeleteUser.svelte';
 	import Accounts from './Accounts.svelte';
 	import ApiKeys from './ApiKeys.svelte';
 
 	// Context
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authConstants } = getAuthContext();
 
 	// Types
-	import type { GetActiveUserType, ListAccountsType } from '$lib/auth/types';
+	import type { GetActiveUserType, ListAccountsType } from '#lib/auth/types.js';
 
 	let {
 		initialData

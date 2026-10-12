@@ -3,7 +3,7 @@
 	import { usePasswordStrength } from './password.svelte.js';
 	import type { PasswordStrengthProps } from './types.js';
 	import { Progress as ProgressPrimitive } from '@ark-ui/svelte/progress';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let { class: className }: PasswordStrengthProps = $props();
 

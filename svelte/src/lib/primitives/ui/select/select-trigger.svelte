@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Select as SelectPrimitive } from '@ark-ui/svelte/select';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
-	import { cn, type WithoutChild } from '$lib/primitives/utils.js';
+	import { cn, type WithoutChild } from '#lib/primitives/utils.js';
 
 	let {
 		ref = $bindable(null),

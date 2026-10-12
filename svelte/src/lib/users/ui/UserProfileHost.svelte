@@ -2,25 +2,23 @@
 	// Svelte
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	// Components
-	import UserProfile from '$lib/users/ui/UserProfile.svelte';
+	import UserProfile from '#lib/users/ui/UserProfile.svelte';
 	// Utils
-	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
+	import { isEditableElement, scheduleScrollIntoView } from '#lib/primitives/utils/focusScroll.js';
 
 	// Constants
-	import { DIALOG_KEY } from '$lib/users/utils/user.constants';
+	import { DIALOG_KEY } from '#lib/users/utils/user.constants.js';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Types
-	import type { Pathname } from '$app/types';
-	import type { GetActiveUserType, ListAccountsType } from '$lib/auth/types';
+	import type { GetActiveUserType, ListAccountsType } from '#lib/auth/types.js';
 
 	type UserProfileHostProps = {
 		initialData?: {
@@ -126,12 +124,11 @@
 
 		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
 		if (hasDialog) {
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.delete('dialog');
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true
+			void gotoApp(url, {
+				replace: true,
+				reset: false
 			});
 		}
 		userProfile.open = false;

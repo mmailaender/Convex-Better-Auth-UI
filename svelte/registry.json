@@ -16,7 +16,7 @@
 	"defaultPaths": {
 		"base": "./",
 		"convex": "./src/convex",
-		"lib": "$lib",
+		"lib": "./src/lib",
 		"routes": "./src/routes",
 		"themes": "./src/themes"
 	},
@@ -44,7 +44,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -60,7 +60,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -118,35 +118,45 @@
 			"dependencies": [
 				{
 					"ecosystem": "js",
+					"name": "@tailwindcss/vite",
+					"version": "^4.3.3"
+				},
+				{
+					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.42.0"
+					"version": "^1.46.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.12.4"
+					"version": "0.12.5"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.2.5"
+					"version": "0.2.9"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/migrations",
-					"version": "^0.3.5"
+					"version": "^0.3.7"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@sveltejs/adapter-auto",
-					"version": "^7.0.1"
+					"version": "^8.0.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@sveltejs/vite-plugin-svelte",
-					"version": "^7.1.2"
+					"version": "^7.3.1"
+				},
+				{
+					"ecosystem": "js",
+					"name": "vite",
+					"version": "^8.3.4"
 				}
 			],
 			"files": [
@@ -164,10 +174,10 @@
 				{
 					"type": "base",
 					"role": "file",
-					"path": "svelte.config.js",
-					"relativePath": "svelte.config.js",
+					"path": "vite.config.dist.ts",
+					"relativePath": "vite.config.dist.ts",
 					"_imports_": [],
-					"target": "svelte.config.js",
+					"target": "vite.config.ts",
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -187,6 +197,16 @@
 					"role": "file",
 					"path": "src/app.d.ts",
 					"relativePath": "src/app.d.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/env.ts",
+					"relativePath": "src/env.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -396,7 +416,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
@@ -413,7 +433,7 @@
 					"relativePath": "src/hooks.server.ts",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils/routeMatcher",
+							"import": "#lib/primitives/utils/routeMatcher.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -452,7 +472,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.22.1"
+					"version": "^5.24.3"
 				},
 				{
 					"ecosystem": "js",
@@ -472,12 +492,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/core",
-					"version": "^4.1.2"
+					"version": "^4.2.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@zxcvbn-ts/language-common",
-					"version": "^4.1.2"
+					"version": "^4.1.3"
 				},
 				{
 					"ecosystem": "js",
@@ -494,17 +514,17 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "tailwind-variants",
-					"version": "^3.2.2"
+					"version": "^3.3.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
@@ -514,7 +534,7 @@
 				{
 					"ecosystem": "js",
 					"name": "tailwind-merge",
-					"version": "^3.6.0"
+					"version": "^3.7.0"
 				}
 			],
 			"files": [
@@ -555,7 +575,7 @@
 					"relativePath": "src/lib/primitives/ui/avatar/avatar-fallback.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -575,7 +595,7 @@
 					"relativePath": "src/lib/primitives/ui/avatar/avatar-image.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -595,7 +615,7 @@
 					"relativePath": "src/lib/primitives/ui/avatar/avatar-marble.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -615,7 +635,7 @@
 					"relativePath": "src/lib/primitives/ui/avatar/avatar.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -678,11 +698,60 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "primitives/ui/brand-icons/SiSalesforce.svelte",
+					"relativePath": "src/lib/primitives/ui/brand-icons/SiSalesforce.svelte",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/ui/brand-icons/SiSlack.svelte",
+					"relativePath": "src/lib/primitives/ui/brand-icons/SiSlack.svelte",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/ui/brand-icons/index.ts",
+					"relativePath": "src/lib/primitives/ui/brand-icons/index.ts",
+					"_imports_": [
+						{
+							"import": "./SiSlack.svelte",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/SiSlack.svelte"
+							},
+							"meta": {}
+						},
+						{
+							"import": "./SiSalesforce.svelte",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/SiSalesforce.svelte"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "primitives/ui/combobox/combobox-clear-trigger.svelte",
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-clear-trigger.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -702,7 +771,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-content.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -722,7 +791,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-control.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -742,7 +811,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-input.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -762,7 +831,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-item-group-label.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -782,7 +851,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-item-group.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -802,7 +871,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-item-indicator.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -822,7 +891,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-item-text.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -842,7 +911,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-item.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -862,7 +931,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-label.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -882,7 +951,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-positioner.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -902,7 +971,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-root.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -922,7 +991,7 @@
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-trigger.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1070,7 +1139,7 @@
 					"relativePath": "src/lib/primitives/ui/copy-button/copy-button.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/hooks/use-clipboard.svelte",
+							"import": "#lib/primitives/hooks/use-clipboard.svelte.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1079,7 +1148,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1128,7 +1197,7 @@
 					"relativePath": "src/lib/primitives/ui/copy-button/types.ts",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/hooks/use-clipboard.svelte",
+							"import": "#lib/primitives/hooks/use-clipboard.svelte.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1148,7 +1217,7 @@
 					"relativePath": "src/lib/primitives/ui/dialog/dialog-backdrop.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1197,7 +1266,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1217,7 +1286,7 @@
 					"relativePath": "src/lib/primitives/ui/dialog/dialog-description.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1237,7 +1306,7 @@
 					"relativePath": "src/lib/primitives/ui/dialog/dialog-footer.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1257,7 +1326,7 @@
 					"relativePath": "src/lib/primitives/ui/dialog/dialog-header.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1287,7 +1356,7 @@
 					"relativePath": "src/lib/primitives/ui/dialog/dialog-title.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1418,7 +1487,7 @@
 					"relativePath": "src/lib/primitives/ui/drawer/drawer-backdrop.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1467,7 +1536,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1487,7 +1556,7 @@
 					"relativePath": "src/lib/primitives/ui/drawer/drawer-description.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1507,7 +1576,7 @@
 					"relativePath": "src/lib/primitives/ui/drawer/drawer-footer.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1527,7 +1596,7 @@
 					"relativePath": "src/lib/primitives/ui/drawer/drawer-header.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1557,7 +1626,7 @@
 					"relativePath": "src/lib/primitives/ui/drawer/drawer-title.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1716,7 +1785,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1736,7 +1805,7 @@
 					"relativePath": "src/lib/primitives/ui/image-cropper/image-cropper-controls.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1774,7 +1843,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1823,7 +1892,7 @@
 					"relativePath": "src/lib/primitives/ui/image-cropper/image-cropper-dialog.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1832,7 +1901,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1870,7 +1939,7 @@
 					"relativePath": "src/lib/primitives/ui/image-cropper/image-cropper-preview.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -1897,7 +1966,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2116,7 +2185,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/dropdown-menu-shortcut.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2255,7 +2324,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-checkbox-item.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2275,7 +2344,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-content.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2295,7 +2364,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-item-group-label.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2325,7 +2394,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-item.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2345,7 +2414,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-label.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2375,7 +2444,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-radio-item.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2395,7 +2464,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-separator.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2415,7 +2484,7 @@
 					"relativePath": "src/lib/primitives/ui/menu/menu-trigger-item.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2510,7 +2579,7 @@
 					"relativePath": "src/lib/primitives/ui/password/password-copy.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/copy-button",
+							"import": "#lib/primitives/ui/copy-button/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2528,7 +2597,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2557,7 +2626,7 @@
 					"relativePath": "src/lib/primitives/ui/password/password-error.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2586,7 +2655,7 @@
 					"relativePath": "src/lib/primitives/ui/password/password-input.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2642,7 +2711,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2662,7 +2731,7 @@
 					"relativePath": "src/lib/primitives/ui/password/password-toggle-visibility.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/toggle",
+							"import": "#lib/primitives/ui/toggle/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2689,7 +2758,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2727,7 +2796,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2757,7 +2826,7 @@
 					"relativePath": "src/lib/primitives/ui/password/types.ts",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/copy-button/types",
+							"import": "#lib/primitives/ui/copy-button/types.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2806,7 +2875,7 @@
 					"relativePath": "src/lib/primitives/ui/popover/popover-content.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2826,7 +2895,7 @@
 					"relativePath": "src/lib/primitives/ui/popover/popover-trigger.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2938,7 +3007,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-content.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2958,7 +3027,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-group-heading.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -2988,7 +3057,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-item.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3008,7 +3077,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-label.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3028,7 +3097,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-scroll-down-button.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3048,7 +3117,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-scroll-up-button.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3068,7 +3137,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-separator.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/separator/index.js",
+							"import": "#lib/primitives/ui/separator/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3077,7 +3146,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3097,7 +3166,7 @@
 					"relativePath": "src/lib/primitives/ui/select/select-trigger.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3137,7 +3206,7 @@
 					"relativePath": "src/lib/primitives/ui/separator/separator.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3234,7 +3303,7 @@
 					"relativePath": "src/lib/primitives/ui/tabs/tabs-content.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3254,7 +3323,7 @@
 					"relativePath": "src/lib/primitives/ui/tabs/tabs-list.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3274,7 +3343,7 @@
 					"relativePath": "src/lib/primitives/ui/tabs/tabs-trigger.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3294,7 +3363,7 @@
 					"relativePath": "src/lib/primitives/ui/tabs/tabs.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3334,7 +3403,7 @@
 					"relativePath": "src/lib/primitives/ui/toggle/toggle.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils.js",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3343,6 +3412,16 @@
 							"meta": {}
 						}
 					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/utils.ts",
+					"relativePath": "src/lib/primitives/utils.ts",
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -3380,6 +3459,42 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "primitives/utils/navigation.ts",
+					"relativePath": "src/lib/primitives/utils/navigation.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "test",
+					"path": "primitives/utils/navigation.test.ts",
+					"relativePath": "src/lib/primitives/utils/navigation.test.ts",
+					"_imports_": [
+						{
+							"import": "./navigation",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "primitives/utils/optimizeImage.ts",
 					"relativePath": "src/lib/primitives/utils/optimizeImage.ts",
 					"_imports_": [],
@@ -3392,16 +3507,6 @@
 					"role": "file",
 					"path": "primitives/utils/routeMatcher.ts",
 					"relativePath": "src/lib/primitives/utils/routeMatcher.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "lib",
-					"role": "file",
-					"path": "primitives/utils.ts",
-					"relativePath": "src/lib/primitives/utils.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -3445,24 +3550,24 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@icons-pack/svelte-simple-icons",
-					"version": "^6.5.0"
+					"version": "^7.2.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -3514,7 +3619,7 @@
 						{
 							"ecosystem": "js",
 							"name": "@better-auth/api-key",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						},
 						{
 							"ecosystem": "js",
@@ -3523,7 +3628,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -3535,7 +3640,7 @@
 					"relativePath": "src/lib/auth/ui/AuthProvider.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3544,7 +3649,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3564,7 +3669,7 @@
 					"relativePath": "src/lib/auth/ui/EmailOtpFlow.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3584,7 +3689,7 @@
 					"relativePath": "src/lib/auth/ui/EmailStep.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3604,7 +3709,7 @@
 					"relativePath": "src/lib/auth/ui/MagicLinkFlow.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3624,7 +3729,7 @@
 					"relativePath": "src/lib/auth/ui/PasswordFlow.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/password",
+							"import": "#lib/primitives/ui/password/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3633,7 +3738,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3652,6 +3757,15 @@
 					"path": "auth/ui/SignIn.svelte",
 					"relativePath": "src/lib/auth/ui/SignIn.svelte",
 					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "./EmailStep.svelte",
 							"item": "auth/lib",
@@ -3698,7 +3812,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3707,7 +3821,16 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/utils/signInRedirect",
+							"import": "#lib/auth/utils/safeRedirect.js",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/safeRedirect.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/auth/utils/signInRedirect.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3716,7 +3839,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3736,7 +3859,7 @@
 					"relativePath": "src/lib/auth/ui/SignOutButton.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/utils",
+							"import": "#lib/primitives/utils.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3745,7 +3868,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3765,7 +3888,16 @@
 					"relativePath": "src/lib/auth/ui/SocialFlow.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/primitives/ui/brand-icons/index.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/index.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3774,6 +3906,16 @@
 							"meta": {}
 						}
 					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "auth/utils/safeRedirect.ts",
+					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -3802,19 +3944,19 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -3835,7 +3977,7 @@
 					"relativePath": "src/routes/(auth)/signin/+page.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/ui/SignIn.svelte",
+							"import": "#lib/auth/ui/SignIn.svelte",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3855,7 +3997,7 @@
 					"relativePath": "src/routes/(auth)/reset-password/+page.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/password",
+							"import": "#lib/primitives/ui/password/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -3864,7 +4006,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/api/auth-client",
+							"import": "#lib/auth/api/auth-client.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -3917,7 +4059,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -3937,7 +4079,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -3968,24 +4110,24 @@
 			"type": "lib",
 			"add": "when-added",
 			"registryDependencies": [
-				"auth/lib",
-				"primitives"
+				"primitives",
+				"auth/lib"
 			],
 			"dependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.22.1"
+					"version": "^5.24.3"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@icons-pack/svelte-simple-icons",
-					"version": "^6.5.0"
+					"version": "^7.2.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3995,19 +4137,19 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.42.0"
+					"version": "^1.46.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -4018,7 +4160,16 @@
 					"relativePath": "src/lib/users/ui/Accounts.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4027,7 +4178,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/select",
+							"import": "#lib/primitives/ui/select/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4036,7 +4187,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4045,7 +4196,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/drawer",
+							"import": "#lib/primitives/ui/drawer/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4054,7 +4205,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/password",
+							"import": "#lib/primitives/ui/password/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4063,7 +4214,16 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/mobileState.svelte",
+							"import": "#lib/primitives/ui/brand-icons/index.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/index.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/utils/mobileState.svelte.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4072,7 +4232,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/focusScroll",
+							"import": "#lib/primitives/utils/focusScroll.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4081,7 +4241,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4101,7 +4261,7 @@
 					"relativePath": "src/lib/users/ui/ApiKeys.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4110,7 +4270,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/select",
+							"import": "#lib/primitives/ui/select/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4119,7 +4279,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/menu",
+							"import": "#lib/primitives/ui/menu/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4128,7 +4288,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4137,7 +4297,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4157,7 +4317,7 @@
 					"relativePath": "src/lib/users/ui/DeleteUser.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4166,7 +4326,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4175,7 +4335,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/users/utils/userProfile",
+							"import": "#lib/users/utils/userProfile.js",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4195,7 +4355,7 @@
 					"relativePath": "src/lib/users/ui/Emails.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4204,7 +4364,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4224,7 +4384,7 @@
 					"relativePath": "src/lib/users/ui/ProfileInfo.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4233,7 +4393,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4242,7 +4402,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/image-cropper",
+							"import": "#lib/primitives/ui/image-cropper/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4251,7 +4411,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/optimizeImage",
+							"import": "#lib/primitives/utils/optimizeImage.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4260,7 +4420,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4280,7 +4440,7 @@
 					"relativePath": "src/lib/users/ui/UserButton.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/popover",
+							"import": "#lib/primitives/ui/popover/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4289,7 +4449,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4298,7 +4458,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4307,7 +4467,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/ui/SignIn.svelte",
+							"import": "#lib/auth/ui/SignIn.svelte",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4316,7 +4476,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/ui/SignOutButton.svelte",
+							"import": "#lib/auth/ui/SignOutButton.svelte",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4325,7 +4485,16 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4334,7 +4503,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/users/utils/user.constants",
+							"import": "#lib/users/utils/user.constants.js",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4343,7 +4512,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4363,7 +4532,7 @@
 					"relativePath": "src/lib/users/ui/UserProfile.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/users/ui/ProfileInfo.svelte",
+							"import": "#lib/users/ui/ProfileInfo.svelte",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4372,7 +4541,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/users/ui/Emails.svelte",
+							"import": "#lib/users/ui/Emails.svelte",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4381,7 +4550,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/users/ui/DeleteUser.svelte",
+							"import": "#lib/users/ui/DeleteUser.svelte",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4408,7 +4577,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4417,7 +4586,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4437,7 +4606,16 @@
 					"relativePath": "src/lib/users/ui/UserProfileHost.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4446,7 +4624,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/users/ui/UserProfile.svelte",
+							"import": "#lib/users/ui/UserProfile.svelte",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4455,7 +4633,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/focusScroll",
+							"import": "#lib/primitives/utils/focusScroll.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4464,7 +4642,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/users/utils/user.constants",
+							"import": "#lib/users/utils/user.constants.js",
 							"item": "users/lib",
 							"file": {
 								"type": "lib",
@@ -4473,7 +4651,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4531,7 +4709,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -4576,7 +4754,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -4596,7 +4774,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -4639,29 +4817,29 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.42.0"
+					"version": "^1.46.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@ark-ui/svelte",
-					"version": "^5.22.1"
+					"version": "^5.24.3"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				}
 			],
 			"files": [
@@ -4672,7 +4850,7 @@
 					"relativePath": "src/lib/organizations/api/roles.svelte.ts",
 					"_imports_": [
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4681,7 +4859,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4701,7 +4879,16 @@
 					"relativePath": "src/lib/organizations/ui/CreateOrganization.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4710,7 +4897,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/image-cropper",
+							"import": "#lib/primitives/ui/image-cropper/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4719,7 +4906,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/optimizeImage",
+							"import": "#lib/primitives/utils/optimizeImage.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4728,11 +4915,20 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
 								"path": "auth/context.svelte.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/auth/utils/safeRedirect.js",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/safeRedirect.ts"
 							},
 							"meta": {}
 						}
@@ -4748,7 +4944,16 @@
 					"relativePath": "src/lib/organizations/ui/DeleteOrganization.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -4757,7 +4962,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4766,7 +4971,16 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/auth/utils/safeRedirect.js",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/utils/safeRedirect.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4775,7 +4989,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4795,7 +5009,16 @@
 					"relativePath": "src/lib/organizations/ui/GeneralSettings.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4804,7 +5027,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/image-cropper",
+							"import": "#lib/primitives/ui/image-cropper/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4813,7 +5036,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/optimizeImage",
+							"import": "#lib/primitives/utils/optimizeImage.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4822,7 +5045,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -4831,7 +5054,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4840,7 +5063,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4860,7 +5083,7 @@
 					"relativePath": "src/lib/organizations/ui/Invitations.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4869,7 +5092,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -4878,7 +5101,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4887,7 +5110,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4907,7 +5130,7 @@
 					"relativePath": "src/lib/organizations/ui/InviteMembers.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/select",
+							"import": "#lib/primitives/ui/select/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4916,7 +5139,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4925,7 +5148,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4945,7 +5168,7 @@
 					"relativePath": "src/lib/organizations/ui/LeaveOrganization.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4954,7 +5177,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/select",
+							"import": "#lib/primitives/ui/select/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -4963,7 +5186,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -4972,7 +5195,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -4981,7 +5204,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5001,7 +5224,7 @@
 					"relativePath": "src/lib/organizations/ui/Members.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5010,7 +5233,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/drawer",
+							"import": "#lib/primitives/ui/drawer/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5019,7 +5242,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5028,7 +5251,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/select",
+							"import": "#lib/primitives/ui/select/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5037,7 +5260,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5046,7 +5269,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5055,7 +5278,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5075,7 +5298,7 @@
 					"relativePath": "src/lib/organizations/ui/MembersAndInvitations.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/tabs",
+							"import": "#lib/primitives/ui/tabs/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5084,7 +5307,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5093,7 +5316,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/drawer",
+							"import": "#lib/primitives/ui/drawer/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5102,7 +5325,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/Members.svelte",
+							"import": "#lib/organizations/ui/Members.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5111,7 +5334,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/Invitations.svelte",
+							"import": "#lib/organizations/ui/Invitations.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5120,7 +5343,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/InviteMembers.svelte",
+							"import": "#lib/organizations/ui/InviteMembers.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5129,7 +5352,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5138,7 +5361,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5147,7 +5370,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5167,7 +5390,16 @@
 					"relativePath": "src/lib/organizations/ui/OrganizationProfile.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/tabs",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/tabs/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5176,7 +5408,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/GeneralSettings.svelte",
+							"import": "#lib/organizations/ui/GeneralSettings.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5185,7 +5417,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/DeleteOrganization.svelte",
+							"import": "#lib/organizations/ui/DeleteOrganization.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5194,7 +5426,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/MembersAndInvitations.svelte",
+							"import": "#lib/organizations/ui/MembersAndInvitations.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5203,7 +5435,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/LeaveOrganization.svelte",
+							"import": "#lib/organizations/ui/LeaveOrganization.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5212,7 +5444,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/utils/mobileState.svelte",
+							"import": "#lib/primitives/utils/mobileState.svelte.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5221,7 +5453,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5230,7 +5462,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5250,7 +5482,16 @@
 					"relativePath": "src/lib/organizations/ui/OrganizationProfileHost.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5259,7 +5500,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/OrganizationProfile.svelte",
+							"import": "#lib/organizations/ui/OrganizationProfile.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5268,7 +5509,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/utils/organization.constants",
+							"import": "#lib/organizations/utils/organization.constants.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5277,7 +5518,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5297,7 +5538,16 @@
 					"relativePath": "src/lib/organizations/ui/OrganizationSwitcher.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/primitives/ui/popover",
+							"import": "#lib/primitives/utils/navigation.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/navigation.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/popover/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5306,7 +5556,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/dialog",
+							"import": "#lib/primitives/ui/dialog/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5315,7 +5565,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/primitives/ui/avatar",
+							"import": "#lib/primitives/ui/avatar/index.js",
 							"item": "primitives",
 							"file": {
 								"type": "lib",
@@ -5324,7 +5574,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/CreateOrganization.svelte",
+							"import": "#lib/organizations/ui/CreateOrganization.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5333,7 +5583,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/ui/LeaveOrganization.svelte",
+							"import": "#lib/organizations/ui/LeaveOrganization.svelte",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5342,7 +5592,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/api/roles.svelte",
+							"import": "#lib/organizations/api/roles.svelte.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5351,7 +5601,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/context.svelte",
+							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5360,7 +5610,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/organizations/utils/organization.constants",
+							"import": "#lib/organizations/utils/organization.constants.js",
 							"item": "organizations/lib",
 							"file": {
 								"type": "lib",
@@ -5369,7 +5619,7 @@
 							"meta": {}
 						},
 						{
-							"import": "$lib/auth/types",
+							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5406,7 +5656,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -5417,7 +5667,7 @@
 					"relativePath": "src/routes/api/organization/accept-invitation/[invitationId]/+page.svelte",
 					"_imports_": [
 						{
-							"import": "$lib/auth/api/auth-client",
+							"import": "#lib/auth/api/auth-client.js",
 							"item": "auth/lib",
 							"file": {
 								"type": "lib",
@@ -5455,7 +5705,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -5475,7 +5725,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []
@@ -5536,19 +5786,19 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "svelte-sonner",
-					"version": "^1.1.1"
+					"version": "^1.2.1"
 				}
 			],
 			"files": [
@@ -5557,17 +5807,7 @@
 					"role": "file",
 					"path": "admin/api/admin.svelte.ts",
 					"relativePath": "src/lib/admin/api/admin.svelte.ts",
-					"_imports_": [
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5577,26 +5817,7 @@
 					"role": "file",
 					"path": "admin/ui/AdminButton.svelte",
 					"relativePath": "src/lib/admin/ui/AdminButton.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/api/admin.svelte",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/api/admin.svelte.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5606,53 +5827,7 @@
 					"role": "file",
 					"path": "admin/ui/AdminDashboard.svelte",
 					"relativePath": "src/lib/admin/ui/AdminDashboard.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/primitives/ui/tabs",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/tabs/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/ui/UsersTable.svelte",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/ui/UsersTable.svelte"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/ui/OrganizationsTable.svelte",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/ui/OrganizationsTable.svelte"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/utils/admin.constants",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/utils/admin.constants.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5662,26 +5837,7 @@
 					"role": "file",
 					"path": "admin/ui/CreateUser.svelte",
 					"relativePath": "src/lib/admin/ui/CreateUser.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/primitives/ui/dialog",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/dialog/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5691,26 +5847,7 @@
 					"role": "file",
 					"path": "admin/ui/ImpersonationBanner.svelte",
 					"relativePath": "src/lib/admin/ui/ImpersonationBanner.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/utils/admin.constants",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/utils/admin.constants.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5720,35 +5857,7 @@
 					"role": "file",
 					"path": "admin/ui/OrganizationsTable.svelte",
 					"relativePath": "src/lib/admin/ui/OrganizationsTable.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/primitives/ui/avatar",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/avatar/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/primitives/ui/dialog",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/dialog/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5758,44 +5867,7 @@
 					"role": "file",
 					"path": "admin/ui/UsersTable.svelte",
 					"relativePath": "src/lib/admin/ui/UsersTable.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/primitives/ui/avatar",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/avatar/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/primitives/ui/dialog",
-							"item": "primitives",
-							"file": {
-								"type": "lib",
-								"path": "primitives/ui/dialog/index.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/ui/CreateUser.svelte",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/ui/CreateUser.svelte"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5830,14 +5902,14 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.8.0"
+					"version": "^0.9.0"
 				}
 			],
 			"devDependencies": [
 				{
 					"ecosystem": "js",
 					"name": "@lucide/svelte",
-					"version": "^0.577.0"
+					"version": "^1.55.0"
 				}
 			],
 			"files": [
@@ -5846,26 +5918,7 @@
 					"role": "file",
 					"path": "+page.svelte",
 					"relativePath": "src/routes/admin/+page.svelte",
-					"_imports_": [
-						{
-							"import": "$lib/auth/context.svelte",
-							"item": "auth/lib",
-							"file": {
-								"type": "lib",
-								"path": "auth/context.svelte.ts"
-							},
-							"meta": {}
-						},
-						{
-							"import": "$lib/admin/ui/AdminDashboard.svelte",
-							"item": "admin/lib",
-							"file": {
-								"type": "lib",
-								"path": "admin/ui/AdminDashboard.svelte"
-							},
-							"meta": {}
-						}
-					],
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5960,7 +6013,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.9"
+							"version": "1.6.16"
 						}
 					],
 					"devDependencies": []

@@ -5,11 +5,11 @@
 		"baseColor": "slate"
 	},
 	"aliases": {
-		"components": "$lib/primitives",
-		"utils": "$lib/primitives/utils",
-		"ui": "$lib/primitives/ui",
-		"hooks": "$lib/primitives/hooks",
-		"lib": "$lib"
+		"components": "#lib/primitives",
+		"utils": "#lib/primitives/utils",
+		"ui": "#lib/primitives/ui",
+		"hooks": "#lib/primitives/hooks",
+		"lib": "#lib"
 	},
 	"typescript": true,
 	"registry": "https://shadcn-svelte.com/registry"
