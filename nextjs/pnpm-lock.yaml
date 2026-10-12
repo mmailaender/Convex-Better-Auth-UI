@@ -73,8 +73,8 @@ importers:
         version: 3.5.0
     devDependencies:
       '@skeletonlabs/skeleton':
-        specifier: ^4.15.2
-        version: 4.15.2(tailwindcss@4.2.4)
+        specifier: ^5.0.0
+        version: 5.0.1(tailwindcss@4.2.4)
       '@tailwindcss/forms':
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.2.4)
@@ -980,8 +980,8 @@ packages:
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
 
-  '@skeletonlabs/skeleton@4.15.2':
-    resolution: {integrity: sha512-5O23Py76nw56aoieV2b2T7MJ6xS0DwDjUULpwLnCXxXOnmzADEoWoQxb/ABbqg04IMOygtRzK3HO22I1+kFsog==}
+  '@skeletonlabs/skeleton@5.0.1':
+    resolution: {integrity: sha512-WozocxlhoeJdo60qnY+JvvpVqyfV5AsB4PrBisAcIcMIMXMbXfI8a5JJ7KbqfONVjBl1AtRTqdFW6g3dBOlsIg==}
     peerDependencies:
       tailwindcss: ^4.0.0
 
@@ -3973,7 +3973,7 @@ snapshots:
       selderee: 0.11.0
     optional: true
 
-  '@skeletonlabs/skeleton@4.15.2(tailwindcss@4.2.4)':
+  '@skeletonlabs/skeleton@5.0.1(tailwindcss@4.2.4)':
     dependencies:
       tailwindcss: 4.2.4
 

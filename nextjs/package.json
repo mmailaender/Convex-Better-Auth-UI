@@ -38,7 +38,7 @@
 		"tailwind-merge": "^3.5.0"
 	},
 	"devDependencies": {
-		"@skeletonlabs/skeleton": "^4.15.2",
+		"@skeletonlabs/skeleton": "^5.0.0",
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/postcss": "^4.2.4",
 		"@types/node": "^24.12.2",

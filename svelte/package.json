@@ -26,7 +26,7 @@
 		"@eslint/compat": "^2.1.1",
 		"@eslint/js": "^10.0.1",
 		"@lucide/svelte": "^1.55.0",
-		"@skeletonlabs/skeleton": "4.15.2",
+		"@skeletonlabs/skeleton": "^5.0.0",
 		"@sveltejs/adapter-auto": "^8.0.0",
 		"@sveltejs/adapter-vercel": "^7.0.0",
 		"@sveltejs/kit": "^3.0.0",

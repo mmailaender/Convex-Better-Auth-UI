@@ -400,12 +400,12 @@
 					<Dialog.Title>Your new API key</Dialog.Title>
 				</Dialog.Header>
 				<p class="text-sm">Copy and store this key now. You won’t be able to see it again.</p>
-				<div class="input-group mt-4 grid-cols-[1fr_auto]">
-					<input class="ig-input" readonly value={newKey} />
+				<div class="field-group mt-4 grid-cols-[1fr_auto]">
+					<input class="input" readonly value={newKey} />
 					<Toggle.Root
 						bind:pressed={copied}
 						onclick={handleCopyClick}
-						class="ig-btn preset-filled-surface-200-800"
+						class="btn preset-filled-surface-200-800"
 						aria-label="Copy API key"
 					>
 						{#if copied}

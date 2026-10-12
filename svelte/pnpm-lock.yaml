@@ -79,8 +79,8 @@ importers:
         specifier: ^1.55.0
         version: 1.55.0(svelte@5.57.2(@typescript-eslint/types@8.71.1))
       '@skeletonlabs/skeleton':
-        specifier: 4.15.2
-        version: 4.15.2(tailwindcss@4.3.3)
+        specifier: ^5.0.0
+        version: 5.0.1(tailwindcss@4.3.3)
       '@sveltejs/adapter-auto':
         specifier: ^8.0.0
         version: 8.0.0(@sveltejs/kit@3.0.1(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.2(@typescript-eslint/types@8.71.1))(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.1)(jiti@2.7.0)))(svelte@5.57.2(@typescript-eslint/types@8.71.1))(typescript@6.0.3)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.1)(jiti@2.7.0)))
@@ -1182,8 +1182,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@skeletonlabs/skeleton@4.15.2':
-    resolution: {integrity: sha512-5O23Py76nw56aoieV2b2T7MJ6xS0DwDjUULpwLnCXxXOnmzADEoWoQxb/ABbqg04IMOygtRzK3HO22I1+kFsog==}
+  '@skeletonlabs/skeleton@5.0.1':
+    resolution: {integrity: sha512-WozocxlhoeJdo60qnY+JvvpVqyfV5AsB4PrBisAcIcMIMXMbXfI8a5JJ7KbqfONVjBl1AtRTqdFW6g3dBOlsIg==}
     peerDependencies:
       tailwindcss: ^4.0.0
 
@@ -3976,7 +3976,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.52.2':
     optional: true
 
-  '@skeletonlabs/skeleton@4.15.2(tailwindcss@4.3.3)':
+  '@skeletonlabs/skeleton@5.0.1(tailwindcss@4.3.3)':
     dependencies:
       tailwindcss: 4.3.3
 
