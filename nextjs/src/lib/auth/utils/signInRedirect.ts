@@ -10,7 +10,10 @@ export function resolveSignInRedirect(
 	if (currentURL.pathname === '/signin') return '/';
 }
 
-export function resolveSignInCallbackURL(redirectParam: string | undefined, currentURL: URL): string {
+export function resolveSignInCallbackURL(
+	redirectParam: string | undefined,
+	currentURL: URL
+): string {
 	return (
 		resolveSignInRedirect(redirectParam, currentURL) ??
 		`${currentURL.pathname}${currentURL.search}${currentURL.hash}`
