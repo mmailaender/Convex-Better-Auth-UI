@@ -124,22 +124,22 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.42.0"
+					"version": "^1.46.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/better-auth",
-					"version": "0.12.4"
+					"version": "0.12.5"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/resend",
-					"version": "0.2.5"
+					"version": "0.2.9"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@convex-dev/migrations",
-					"version": "^0.3.5"
+					"version": "^0.3.7"
 				}
 			],
 			"devDependencies": [
@@ -4034,7 +4034,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.42.0"
+					"version": "^1.46.0"
 				}
 			],
 			"devDependencies": [
@@ -4683,7 +4683,7 @@
 				{
 					"ecosystem": "js",
 					"name": "convex",
-					"version": "^1.42.0"
+					"version": "^1.46.0"
 				},
 				{
 					"ecosystem": "js",
