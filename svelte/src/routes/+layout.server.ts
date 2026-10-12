@@ -33,9 +33,7 @@ export const load = (async ({ locals }) => {
 		orgs
 			? client.query(api.organizations.queries.getActiveOrganization)
 			: Promise.resolve(undefined),
-
 		orgs ? client.query(api.organizations.queries.listOrganizations) : Promise.resolve(undefined),
-
 		orgs
 			? client.query(api.organizations.invitations.queries.listInvitations)
 			: Promise.resolve(undefined),

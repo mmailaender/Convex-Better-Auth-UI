@@ -56,13 +56,16 @@
 	const userResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({ initialData: initialData?.activeUser })
+		() => ({
+			initialData: initialData?.activeUser
+		})
 	);
-
 	const organizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({ initialData: initialData?.activeOrganization })
+		() => ({
+			initialData: initialData?.activeOrganization
+		})
 	);
 	const user = $derived(userResponse?.data);
 	const activeOrganization = $derived(organizationResponse?.data);
@@ -237,7 +240,6 @@
 					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
 					`/${trimmed}`
 				);
-
 				await goto(resolve(newPathname as Path), { replace: true });
 			}
 

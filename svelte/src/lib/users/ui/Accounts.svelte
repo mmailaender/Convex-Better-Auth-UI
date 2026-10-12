@@ -75,7 +75,9 @@
 	let accountListResponse = useQuery(
 		api.users.queries.listAccounts,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({ initialData: initialData?.accountList })
+		() => ({
+			initialData: initialData?.accountList
+		})
 	);
 	let accountList = $derived(accountListResponse?.data);
 

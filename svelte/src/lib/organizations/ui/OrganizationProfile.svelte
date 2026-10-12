@@ -94,7 +94,6 @@
 	onMount(() => {
 		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
 		const ua = navigator.userAgent;
-
 		const isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
@@ -161,7 +160,6 @@
 		url.searchParams.set('tab', value);
 		// Ensure dialog stays present in the URL and state while navigating tabs inside the dialog
 		url.searchParams.set('dialog', 'organization-profile');
-
 		goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 			shallow: true,
 			state: { dialog: 'organization-profile' }
@@ -175,7 +173,6 @@
 			url.searchParams.delete('tab');
 			// Keep dialog open in URL/state
 			url.searchParams.set('dialog', 'organization-profile');
-
 			goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				shallow: true,
 				replace: true,
@@ -281,7 +278,6 @@
 			url.searchParams.set('tab', normalized);
 			// Ensure dialog param remains so OrganizationSwitcher keeps the dialog open on reload
 			url.searchParams.set('dialog', 'organization-profile');
-
 			goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				shallow: true,
 				replace: true,
@@ -322,7 +318,6 @@
 				</div>
 				<div>
 					<LeaveOrganization {initialData} />
-
 					<DeleteOrganization {onSuccessfulDelete} {initialData} />
 				</div>
 			</Tabs.Content>
@@ -402,9 +397,7 @@
 						<h6 class="h6 pb-12 pl-10">General settings</h6>
 						<GeneralSettings {initialData} />
 					</div>
-
 					<DeleteOrganization {onSuccessfulDelete} {initialData} />
-
 					<LeaveOrganization {initialData} />
 				{:else if activeMobileTab === 'members'}
 					<h6 class="h6 pb-6 pl-10">Members</h6>

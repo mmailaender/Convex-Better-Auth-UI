@@ -53,7 +53,6 @@
 	onMount(() => {
 		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
 		const ua = navigator.userAgent;
-
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
@@ -162,7 +161,6 @@
 			>
 				<UserProfile {initialData} />
 			</div>
-
 			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>

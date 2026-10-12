@@ -34,15 +34,14 @@
 		popoverPlacement = 'bottom',
 		initialData,
 		signInTrigger
-
-		/** Optional replacement for the default sign-in button. Receives `open` to
-		 * launch the UserButton-owned sign-in dialog. */
 	}: {
 		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: {
 			activeUser?: GetActiveUserType;
 			accountList?: ListAccountsType;
 		};
+		/** Optional replacement for the default sign-in button. Receives `open` to
+		 * launch the UserButton-owned sign-in dialog. */
 		signInTrigger?: Snippet<[{ open: () => void }]>;
 	} = $props();
 
@@ -53,9 +52,10 @@
 	const activeUserResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({ initialData: initialData?.activeUser })
+		() => ({
+			initialData: initialData?.activeUser
+		})
 	);
-
 	const activeUser = $derived(activeUserResponse?.data);
 
 	// State
@@ -149,9 +149,9 @@
 {:else if signInTrigger}
 	{@render signInTrigger({ open: () => (signInDialogOpen = true) })}
 {:else}
-	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}
-		>Sign in</button
-	>
+	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
+		Sign in
+	</button>
 {/if}
 <!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
 <Dialog.Root

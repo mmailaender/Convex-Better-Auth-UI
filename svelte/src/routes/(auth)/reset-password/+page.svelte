@@ -198,10 +198,9 @@
 					</div>
 					<div class="flex gap-2">
 						<a href={resolve('signin')} class="btn preset-tonal">Back to Sign In</a>
-
-						<button type="button" class="btn preset-filled" onclick={handleTryAgain}
-							>Try Again</button
-						>
+						<button type="button" class="btn preset-filled" onclick={handleTryAgain}>
+							Try Again
+						</button>
 					</div>
 				</div>
 			{/if}
