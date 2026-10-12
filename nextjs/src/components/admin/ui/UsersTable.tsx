@@ -130,7 +130,9 @@ export default function UsersTable() {
 			toast.error(error.message ?? 'Failed to impersonate user');
 			return;
 		}
-		// Full reload so the Convex client and the server-rendered auth data pick up the impersonated session
+		// Refresh the Convex JWT cookie the server renders with, then reload so every query
+		// runs as the impersonated user
+		await authClient.getSession();
 		// eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a client-side navigation would keep the admin's session state
 		window.location.assign('/');
 	}
@@ -315,7 +317,7 @@ export default function UsersTable() {
 										{new Date(user.createdAt).toLocaleDateString()}
 									</td>
 									<td className="text-right">
-										{!isSelf(user) ? (
+										{!isSelf(user) && !user.isAppAdmin ? (
 											<Menu.Root>
 												<Menu.Trigger
 													className="btn-icon hover:preset-tonal"
@@ -324,7 +326,7 @@ export default function UsersTable() {
 													<EllipsisVertical className="size-4" aria-hidden="true" />
 												</Menu.Trigger>
 												<Menu.Content className="bg-surface-50-950">
-													{!user.isAppAdmin && !user.banned ? (
+													{!user.banned ? (
 														<Menu.Item value="impersonate" onClick={() => handleImpersonate(user)}>
 															Impersonate
 														</Menu.Item>
@@ -434,8 +436,8 @@ export default function UsersTable() {
 					<Dialog.Header>
 						<Dialog.Title>Set password for {selectedUser?.name}</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
-							Their existing sessions stay signed in. Use &quot;Sign out everywhere&quot; to end
-							them.
+							If they sign in without a password today, they can also use their email and this
+							password from now on. Their existing sessions stay signed in.
 						</Dialog.Description>
 					</Dialog.Header>
 					<form id="admin-set-password" onSubmit={handlePasswordSubmit}>
@@ -479,7 +481,8 @@ export default function UsersTable() {
 						<Dialog.Title>Delete {selectedUser?.name}</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
 							This permanently deletes the account, its sessions and its organization memberships.
-							This can&apos;t be undone.
+							If they own an organization with other members, delete it or make someone else its
+							owner first. This can&apos;t be undone.
 						</Dialog.Description>
 					</Dialog.Header>
 					<Dialog.Footer>

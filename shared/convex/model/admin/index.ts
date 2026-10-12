@@ -1,5 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { authComponent } from '../../auth';
+import { components } from '../../_generated/api';
 
 // Types
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
@@ -83,5 +84,32 @@ export const requireAppAdmin = async (ctx: QueryCtx | MutationCtx) => {
 export const assertNotSelf = (adminUserId: string, targetUserId: string, action: string): void => {
 	if (adminUserId === targetUserId) {
 		throw new ConvexError(`You cannot ${action} your own account.`);
+	}
+};
+
+/**
+ * Guard for admin actions on another admin, so one admin can't lock out, take
+ * over or quietly sign in as another:
+ * - admins from `ADMIN_USER_IDS` can't be changed from the dashboard at all
+ * - other admins have to lose their admin role (`setRole`) before they can be
+ *   banned, deleted, signed out or given a new password
+ */
+export const assertCanManageUser = async (
+	ctx: QueryCtx | MutationCtx,
+	targetUserId: string,
+	action: 'set-role' | 'manage'
+): Promise<void> => {
+	if (getAdminUserIds().includes(targetUserId)) {
+		throw new ConvexError(
+			'This admin is set in the ADMIN_USER_IDS environment variable and can only be changed there.'
+		);
+	}
+	if (action === 'set-role') return;
+	const target: { _id: string; role?: string | null } | null = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{ model: 'user', where: [{ field: '_id', value: targetUserId }] }
+	);
+	if (target && isAppAdminUser({ id: target._id, role: target.role })) {
+		throw new ConvexError('Remove their admin role first.');
 	}
 };

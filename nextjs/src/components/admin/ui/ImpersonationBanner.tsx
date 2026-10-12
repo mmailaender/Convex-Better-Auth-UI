@@ -35,7 +35,9 @@ export default function ImpersonationBanner() {
 			toast.error(error.message ?? 'Failed to stop impersonating');
 			return;
 		}
-		// Full reload so the Convex client picks up the restored admin session.
+		// Refresh the Convex JWT cookie the server renders with, then reload so every query
+		// runs as the admin again
+		await authClient.getSession();
 		window.location.assign(ADMIN_ROUTE);
 	}
 

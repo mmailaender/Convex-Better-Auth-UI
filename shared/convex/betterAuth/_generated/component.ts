@@ -2019,7 +2019,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "mutation",
         "internal",
         { organizationId: string },
-        null,
+        null | string,
         Name
       >;
       getOrganizationWithMembers: FunctionReference<
@@ -2082,6 +2082,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           pageStatus?: "SplitRecommended" | "SplitRequired" | null;
           splitCursor?: string | null;
         },
+        Name
+      >;
+      listSharedOwnedOrganizations: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        Array<string>,
         Name
       >;
     };

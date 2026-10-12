@@ -136,15 +136,18 @@ export const getOrganizationWithMembers = query({
 
 /**
  * Force-delete an organization and all of its dependent records (members,
- * invitations, stored logo) regardless of the caller's membership.
+ * invitations) regardless of the caller's membership.
  *
  * Members whose active organization this was switch to another organization
  * they belong to (or none), on their user record and on their sessions, so
  * nobody is left pointing at a deleted organization.
+ *
+ * Returns the organization's `logoId` for the caller to delete: logos live in
+ * the app's file storage, which this component can't reach.
  */
 export const adminDeleteOrganization = mutation({
 	args: { organizationId: v.id('organization') },
-	returns: v.null(),
+	returns: v.union(v.null(), v.string()),
 	handler: async (ctx, args) => {
 		const organization = await ctx.db.get('organization', args.organizationId);
 		if (!organization) {
@@ -168,12 +171,37 @@ export const adminDeleteOrganization = mutation({
 			await ctx.db.delete('invitation', invitation._id);
 		}
 
-		// Remove the stored logo, if any.
-		if (organization.logoId) {
-			await ctx.storage.delete(organization.logoId);
-		}
-
 		await ctx.db.delete('organization', args.organizationId);
-		return null;
+		return organization.logoId ?? null;
+	}
+});
+
+/**
+ * Names of the organizations a user owns that still have other members.
+ * Deleting such a user fails (see `organization.deleteUser`), so the admin
+ * dashboard checks first to explain why.
+ */
+export const listSharedOwnedOrganizations = query({
+	args: { userId: v.string() },
+	returns: v.array(v.string()),
+	handler: async (ctx, args) => {
+		const names: string[] = [];
+		const memberships = ctx.db
+			.query('member')
+			.withIndex('userId', (q) => q.eq('userId', args.userId));
+		for await (const membership of memberships) {
+			if (membership.role !== 'owner') continue;
+			const members = await ctx.db
+				.query('member')
+				.withIndex('organizationId', (q) => q.eq('organizationId', membership.organizationId))
+				.take(2);
+			if (members.length < 2) continue;
+			const organization = await ctx.db.get(
+				'organization',
+				membership.organizationId as Id<'organization'>
+			);
+			if (organization) names.push(organization.name);
+		}
+		return names;
 	}
 });

@@ -44,7 +44,11 @@
 	<title>Admin</title>
 </svelte:head>
 
-{#if auth.isLoading || !auth.isAuthenticated || isAdmin === undefined}
+{#if adminResponse.error}
+	<div class="text-error-600-400 mx-auto max-w-md p-6 text-center text-sm">
+		{adminResponse.error.message}
+	</div>
+{:else if auth.isLoading || !auth.isAuthenticated || isAdmin === undefined}
 	<!-- Resolving auth or the admin check → a neutral spinner (no content flash). -->
 	<div class="flex min-h-[60vh] w-full items-center justify-center p-6">
 		<div

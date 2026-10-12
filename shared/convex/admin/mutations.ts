@@ -5,7 +5,15 @@ import { APIError } from 'better-auth/api';
 import { authComponent, createAuth } from '../auth';
 import { components } from '../_generated/api';
 import { AUTH_CONSTANTS } from '../auth.constants';
-import { appRoleValidator, assertNotSelf, requireAppAdmin } from '../model/admin';
+import {
+	appRoleValidator,
+	assertCanManageUser,
+	assertNotSelf,
+	requireAppAdmin
+} from '../model/admin';
+
+// Types
+import type { Id } from '../_generated/dataModel';
 
 /**
  * Translate Better Auth `APIError`s into `ConvexError`s, mirroring the
@@ -19,7 +27,25 @@ const toConvexError = (error: unknown): never => {
 };
 
 /**
- * Create a new user (admin only).
+ * Better Auth checks the password length on `setUserPassword` but not on
+ * `createUser` or when linking a password account, so do it here.
+ */
+const assertPasswordLength = async (
+	auth: ReturnType<typeof createAuth>,
+	password: string
+): Promise<void> => {
+	const { minPasswordLength, maxPasswordLength } = (await auth.$context).password.config;
+	if (password.length < minPasswordLength || password.length > maxPasswordLength) {
+		throw new ConvexError(
+			`Password must be between ${minPasswordLength} and ${maxPasswordLength} characters.`
+		);
+	}
+};
+
+/**
+ * Create a new user (admin only). The email counts as verified, since an admin
+ * vouches for it, so the user can sign in right away even when email
+ * verification is required.
  */
 export const createUser = mutation({
 	args: {
@@ -32,13 +58,15 @@ export const createUser = mutation({
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		const auth = createAuth(ctx);
+		await assertPasswordLength(auth, args.password);
 		try {
 			await auth.api.createUser({
 				body: {
 					email: args.email,
 					password: args.password,
 					name: args.name,
-					role: args.role ?? 'user'
+					role: args.role ?? 'user',
+					data: { emailVerified: true }
 				},
 				headers: await authComponent.getHeaders(ctx)
 			});
@@ -51,7 +79,7 @@ export const createUser = mutation({
 
 /**
  * Set a user's application role (admin only). An admin cannot change their own
- * role to avoid self-lockout.
+ * role to avoid self-lockout, nor that of an `ADMIN_USER_IDS` admin.
  */
 export const setRole = mutation({
 	args: {
@@ -62,6 +90,7 @@ export const setRole = mutation({
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'change the role of');
+		await assertCanManageUser(ctx, args.userId, 'set-role');
 		const auth = createAuth(ctx);
 		try {
 			await auth.api.setRole({
@@ -89,6 +118,7 @@ export const banUser = mutation({
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'ban');
+		await assertCanManageUser(ctx, args.userId, 'manage');
 		const auth = createAuth(ctx);
 		try {
 			await auth.api.banUser({
@@ -128,7 +158,9 @@ export const unbanUser = mutation({
 });
 
 /**
- * Permanently remove a user (admin only). An admin cannot remove themselves.
+ * Permanently remove a user (admin only). An admin cannot remove themselves or
+ * another admin, and a user who owns an organization with other members has to
+ * give it up first.
  */
 export const removeUser = mutation({
 	args: { userId: v.string() },
@@ -136,6 +168,22 @@ export const removeUser = mutation({
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'delete');
+		await assertCanManageUser(ctx, args.userId, 'manage');
+		if (AUTH_CONSTANTS.organizations) {
+			const sharedOrganizations = await ctx.runQuery(
+				components.betterAuth.adminOrganizations.listSharedOwnedOrganizations,
+				{ userId: args.userId }
+			);
+			if (sharedOrganizations.length > 0) {
+				throw new ConvexError(
+					`This user owns ${sharedOrganizations.join(', ')}, which still ${
+						sharedOrganizations.length === 1 ? 'has' : 'have'
+					} other members. Delete ${
+						sharedOrganizations.length === 1 ? 'it' : 'them'
+					} or make another member the owner first.`
+				);
+			}
+		}
 		const auth = createAuth(ctx);
 		try {
 			await auth.api.removeUser({
@@ -150,7 +198,9 @@ export const removeUser = mutation({
 });
 
 /**
- * Set a user's password (admin only).
+ * Set a user's password (admin only). A user who signs in without a password
+ * (social, magic link or email code) gets a password account, so they can sign
+ * in with their email and this password too.
  */
 export const setUserPassword = mutation({
 	args: {
@@ -159,8 +209,29 @@ export const setUserPassword = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
+		const admin = await requireAppAdmin(ctx);
+		if (admin._id !== args.userId) {
+			await assertCanManageUser(ctx, args.userId, 'manage');
+		}
 		const auth = createAuth(ctx);
+		const credentialAccount = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+			model: 'account',
+			where: [
+				{ field: 'userId', value: args.userId },
+				{ field: 'providerId', value: 'credential' }
+			]
+		});
+		if (!credentialAccount) {
+			await assertPasswordLength(auth, args.newPassword);
+			const authContext = await auth.$context;
+			await authContext.internalAdapter.linkAccount({
+				userId: args.userId,
+				providerId: 'credential',
+				accountId: args.userId,
+				password: await authContext.password.hash(args.newPassword)
+			});
+			return null;
+		}
 		try {
 			await auth.api.setUserPassword({
 				body: { userId: args.userId, newPassword: args.newPassword },
@@ -182,13 +253,16 @@ export const revokeUserSession = mutation({
 	args: { sessionId: v.string() },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
-		const session: { token: string } | null = await ctx.runQuery(
+		const admin = await requireAppAdmin(ctx);
+		const session: { token: string; userId: string } | null = await ctx.runQuery(
 			components.betterAuth.adapter.findOne,
 			{ model: 'session', where: [{ field: '_id', value: args.sessionId }] }
 		);
 		if (!session) {
 			throw new ConvexError('Session not found');
+		}
+		if (session.userId !== admin._id) {
+			await assertCanManageUser(ctx, session.userId, 'manage');
 		}
 		const auth = createAuth(ctx);
 		try {
@@ -210,7 +284,10 @@ export const revokeUserSessions = mutation({
 	args: { userId: v.string() },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
+		const admin = await requireAppAdmin(ctx);
+		if (admin._id !== args.userId) {
+			await assertCanManageUser(ctx, args.userId, 'manage');
+		}
 		const auth = createAuth(ctx);
 		try {
 			await auth.api.revokeUserSessions({
@@ -236,9 +313,13 @@ export const deleteOrganizationAsAdmin = mutation({
 		if (!AUTH_CONSTANTS.organizations) {
 			throw new ConvexError('Organizations are not enabled');
 		}
-		await ctx.runMutation(components.betterAuth.adminOrganizations.adminDeleteOrganization, {
-			organizationId: args.organizationId
-		});
+		const logoId = await ctx.runMutation(
+			components.betterAuth.adminOrganizations.adminDeleteOrganization,
+			{ organizationId: args.organizationId }
+		);
+		if (logoId) {
+			await ctx.storage.delete(logoId as Id<'_storage'>);
+		}
 		return null;
 	}
 });

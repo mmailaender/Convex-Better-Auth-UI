@@ -135,7 +135,9 @@
 			toast.error(error.message ?? 'Failed to impersonate user');
 			return;
 		}
-		// Full reload so the Convex client picks up the impersonated session.
+		// Refresh the Convex JWT cookie the server renders with, then reload so every query
+		// runs as the impersonated user
+		await authClient.getSession();
 		window.location.assign(resolve('/'));
 	}
 
@@ -315,7 +317,7 @@
 								{formatDate(user.createdAt)}
 							</td>
 							<td class="text-right">
-								{#if !isSelf(user)}
+								{#if !isSelf(user) && !user.isAppAdmin}
 									<Menu.Root>
 										<Menu.Trigger
 											class="btn-icon hover:preset-tonal"
@@ -325,7 +327,7 @@
 										</Menu.Trigger>
 										<Portal>
 											<Menu.Content class="bg-surface-50-950">
-												{#if !user.isAppAdmin && !user.banned}
+												{#if !user.banned}
 													<Menu.Item value="impersonate" onclick={() => handleImpersonate(user)}>
 														Impersonate
 													</Menu.Item>
@@ -431,7 +433,8 @@
 			<Dialog.Header>
 				<Dialog.Title>Set password for {selectedUser?.name}</Dialog.Title>
 				<Dialog.Description class="text-surface-700-300">
-					Their existing sessions stay signed in. Use "Sign out everywhere" to end them.
+					If they sign in without a password today, they can also use their email and this password
+					from now on. Their existing sessions stay signed in.
 				</Dialog.Description>
 			</Dialog.Header>
 			<form id="admin-set-password" onsubmit={handlePasswordSubmit}>
@@ -476,8 +479,9 @@
 			<Dialog.Header>
 				<Dialog.Title>Delete {selectedUser?.name}</Dialog.Title>
 				<Dialog.Description class="text-surface-700-300">
-					This permanently deletes the account, its sessions and its organization memberships. This
-					can't be undone.
+					This permanently deletes the account, its sessions and its organization memberships. If
+					they own an organization with other members, delete it or make someone else its owner
+					first. This can't be undone.
 				</Dialog.Description>
 			</Dialog.Header>
 			<Dialog.Footer>

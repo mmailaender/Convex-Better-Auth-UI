@@ -148,21 +148,27 @@ export const listUsers = query({
 			}
 
 			const bootstrapAdminIds = getAdminUserIds();
+			const now = Date.now();
 			return {
-				users: users.map((user) => ({
-					id: user.id,
-					name: user.name,
-					email: user.email,
-					emailVerified: Boolean(user.emailVerified),
-					image: user.image ?? null,
-					role: user.role ?? null,
-					banned: Boolean(user.banned),
-					banReason: user.banReason ?? null,
-					banExpires: toMillis(user.banExpires),
-					createdAt: toMillis(user.createdAt) ?? 0,
-					isAppAdmin: isAppAdminUser({ id: user.id, role: user.role }),
-					isBootstrapAdmin: bootstrapAdminIds.includes(user.id)
-				})),
+				users: users.map((user) => {
+					const banExpires = toMillis(user.banExpires);
+					// Better Auth only lifts an expired ban when the user next signs in
+					const banned = Boolean(user.banned) && (banExpires === null || banExpires > now);
+					return {
+						id: user.id,
+						name: user.name,
+						email: user.email,
+						emailVerified: Boolean(user.emailVerified),
+						image: user.image ?? null,
+						role: user.role ?? null,
+						banned,
+						banReason: banned ? (user.banReason ?? null) : null,
+						banExpires: banned ? banExpires : null,
+						createdAt: toMillis(user.createdAt) ?? 0,
+						isAppAdmin: isAppAdminUser({ id: user.id, role: user.role }),
+						isBootstrapAdmin: bootstrapAdminIds.includes(user.id)
+					};
+				}),
 				total,
 				hasMore
 			};
