@@ -21,7 +21,7 @@ export default defineConfig({
 		defaultPaths: {
 			base: './',
 			convex: './src/convex',
-			lib: '#lib',
+			lib: './src/lib',
 			routes: './src/routes',
 			themes: './src/themes'
 		},
