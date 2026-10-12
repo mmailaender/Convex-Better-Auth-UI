@@ -79,7 +79,7 @@
 		"svelte-easy-crop": "^5.0.1",
 		"svelte-toolbelt": "^0.10.6"
 	},
-	"packageManager": "pnpm@11.9.0",
+	"packageManager": "pnpm@12.11.2",
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*",
