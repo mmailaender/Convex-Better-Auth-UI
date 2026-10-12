@@ -5,7 +5,7 @@ import {
 import type { LayoutServerLoad } from './$types';
 import { api } from '$convex/_generated/api';
 import { AUTH_CONSTANTS } from '$convex/auth.constants';
-import { building } from '$app/environment';
+import { building } from '$app/env';
 
 export const load = (async ({ locals }) => {
 	// During build/prerender, skip auth state fetching (BETTER_AUTH_SECRET not available)
@@ -33,7 +33,9 @@ export const load = (async ({ locals }) => {
 		orgs
 			? client.query(api.organizations.queries.getActiveOrganization)
 			: Promise.resolve(undefined),
+
 		orgs ? client.query(api.organizations.queries.listOrganizations) : Promise.resolve(undefined),
+
 		orgs
 			? client.query(api.organizations.invitations.queries.listInvitations)
 			: Promise.resolve(undefined),

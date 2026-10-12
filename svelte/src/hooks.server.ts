@@ -1,5 +1,5 @@
 import { sequence } from '@sveltejs/kit/hooks';
-import { building } from '$app/environment';
+import { building } from '$app/env';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { getSessionCookie } from 'better-auth/cookies';
 import { createRouteMatcher } from '$lib/primitives/utils/routeMatcher';
