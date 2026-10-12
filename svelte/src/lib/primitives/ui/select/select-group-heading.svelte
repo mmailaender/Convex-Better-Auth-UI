@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Select as SelectPrimitive } from '@ark-ui/svelte/select';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let {
 		ref = $bindable(null),

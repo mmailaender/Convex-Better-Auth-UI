@@ -2,7 +2,7 @@
 	// Svelte
 	import { SvelteSet } from 'svelte/reactivity';
 
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 	import { usePasswordError } from './password.svelte.js';
 
 	let { class: className }: { class?: string } = $props();

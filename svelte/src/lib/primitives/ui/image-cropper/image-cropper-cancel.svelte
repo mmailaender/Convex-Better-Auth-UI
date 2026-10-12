@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useImageCropperCancel } from './image-cropper.svelte.js';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 
 	type ButtonProps = HTMLAttributes<HTMLButtonElement> & {

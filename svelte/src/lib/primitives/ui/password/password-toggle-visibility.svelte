@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Toggle } from '$lib/primitives/ui/toggle';
+	import { Toggle } from '#lib/primitives/ui/toggle/index.js';
 	import EyeIcon from '@lucide/svelte/icons/eye';
 	import EyeOffIcon from '@lucide/svelte/icons/eye-off';
 	import { usePasswordToggleVisibility } from './password.svelte.js';
 	import type { PasswordToggleVisibilityProps } from './types.js';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let { ref = $bindable(null), class: className }: PasswordToggleVisibilityProps = $props();
 

@@ -6,13 +6,13 @@
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Password from '$lib/primitives/ui/password';
+	import * as Password from '#lib/primitives/ui/password/index.js';
 
 	// Icons
 	import AlertTriangleIcon from '@lucide/svelte/icons/alert-triangle';
 
 	// API
-	import { authClient } from '$lib/auth/api/auth-client';
+	import { authClient } from '#lib/auth/api/auth-client.js';
 	import { onMount } from 'svelte';
 
 	type ResetState = 'loading' | 'valid-token' | 'invalid-token' | 'error';

@@ -5,7 +5,7 @@
 	// API
 	import { useQuery, useConvexClient, useMutation } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 	const updateProfile = useMutation(api.users.mutations.updateProfile);
@@ -15,16 +15,16 @@
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Avatar from '$lib/primitives/ui/avatar';
-	import * as ImageCropper from '$lib/primitives/ui/image-cropper';
-	import { getFileFromUrl } from '$lib/primitives/ui/image-cropper';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import * as ImageCropper from '#lib/primitives/ui/image-cropper/index.js';
+	import { getFileFromUrl } from '#lib/primitives/ui/image-cropper/index.js';
 
 	// Utils
-	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { optimizeImage } from '#lib/primitives/utils/optimizeImage.js';
 
 	// Types
 	import type { GenericId } from 'convex/values';
-	import type { GetActiveUserType } from '$lib/auth/types';
+	import type { GetActiveUserType } from '#lib/auth/types.js';
 
 	// Props
 	let { initialData }: { initialData?: { activeUser?: GetActiveUserType } } = $props();

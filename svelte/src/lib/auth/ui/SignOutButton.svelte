@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn } from '$lib/primitives/utils';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { cn } from '#lib/primitives/utils.js';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authClient } = getAuthContext();
 	import { invalidateAll } from '$app/navigation';
 

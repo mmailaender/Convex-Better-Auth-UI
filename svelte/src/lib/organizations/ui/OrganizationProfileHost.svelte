@@ -6,15 +6,15 @@
 	import { resolve } from '$app/paths';
 
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	// Components
-	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
+	import OrganizationProfile from '#lib/organizations/ui/OrganizationProfile.svelte';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Constants
-	import { DIALOG_KEY } from '$lib/organizations/utils/organization.constants';
+	import { DIALOG_KEY } from '#lib/organizations/utils/organization.constants.js';
 
 	// Types
 	import type { Path } from '$app/types';
@@ -23,7 +23,7 @@
 		GetActiveUserType,
 		ListInvitationsType,
 		Role
-	} from '$lib/auth/types';
+	} from '#lib/auth/types.js';
 
 	type OrganizationProfileHostProps = {
 		initialData?: {

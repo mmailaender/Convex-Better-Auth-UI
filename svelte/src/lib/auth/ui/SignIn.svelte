@@ -18,12 +18,15 @@
 	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// Utils
-	import { cn } from '$lib/primitives/utils';
-	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
-	import { resolveSignInCallbackURL, resolveSignInRedirect } from '$lib/auth/utils/signInRedirect';
+	import { cn } from '#lib/primitives/utils.js';
+	import { safeRedirect } from '#lib/auth/utils/safeRedirect.js';
+	import {
+		resolveSignInCallbackURL,
+		resolveSignInRedirect
+	} from '#lib/auth/utils/signInRedirect.js';
 
 	// Context
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authConstants, authClient } = getAuthContext();
 
 	// Types

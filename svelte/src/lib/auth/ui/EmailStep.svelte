@@ -4,7 +4,7 @@
 
 	// API
 	import { useConvexClient } from 'convex-svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api } = getAuthContext();
 
 	type AuthMethod = 'password' | 'emailOTP' | 'magicLink';

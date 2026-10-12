@@ -1,9 +1,9 @@
 <script lang="ts">
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Drawer from '$lib/primitives/ui/drawer';
-	import * as Avatar from '$lib/primitives/ui/avatar';
-	import * as Select from '$lib/primitives/ui/select';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Drawer from '#lib/primitives/ui/drawer/index.js';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import * as Select from '#lib/primitives/ui/select/index.js';
 	import { Portal } from '@ark-ui/svelte/portal';
 	import { createListCollection } from '@ark-ui/svelte/select';
 	import { toast } from 'svelte-sonner';
@@ -14,13 +14,18 @@
 
 	// API
 	import { useQuery } from 'convex-svelte';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient } = getAuthContext();
 
 	// Types
-	import type { Member, Role, GetActiveOrganizationType, GetActiveUserType } from '$lib/auth/types';
+	import type {
+		Member,
+		Role,
+		GetActiveOrganizationType,
+		GetActiveUserType
+	} from '#lib/auth/types.js';
 
 	// Props
 	let {

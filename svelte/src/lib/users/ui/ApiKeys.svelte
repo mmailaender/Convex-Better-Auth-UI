@@ -3,9 +3,9 @@
 	import { SvelteDate } from 'svelte/reactivity';
 
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Select from '$lib/primitives/ui/select';
-	import * as Menu from '$lib/primitives/ui/menu';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Select from '#lib/primitives/ui/select/index.js';
+	import * as Menu from '#lib/primitives/ui/menu/index.js';
 	import { Toggle } from '@ark-ui/svelte/toggle';
 	import { createListCollection } from '@ark-ui/svelte/select';
 	import { toast } from 'svelte-sonner';
@@ -15,14 +15,14 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	// Types
 	import { Portal } from '@ark-ui/svelte';
-	import type { ListApiKeysType } from '$lib/auth/types';
+	import type { ListApiKeysType } from '#lib/auth/types.js';
 	type ListApiKeysResponse = NonNullable<ListApiKeysType>;
 	type ApiKeyType = ListApiKeysResponse['apiKeys'][number];
 
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient } = getAuthContext();
 
 	let { initialData }: { initialData?: { apiKeys?: ListApiKeysType } } = $props();

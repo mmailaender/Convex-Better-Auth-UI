@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Tabs as TabsPrimitive } from '@ark-ui/svelte/tabs';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let { ref = $bindable(null), class: className, ...restProps }: TabsPrimitive.ListProps = $props();
 </script>

@@ -1,13 +1,13 @@
 <script lang="ts">
 	// Primitives
-	import * as Popover from '$lib/primitives/ui/popover';
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Avatar from '$lib/primitives/ui/avatar';
+	import * as Popover from '#lib/primitives/ui/popover/index.js';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
 	// Icons
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	// Components
-	import SignIn from '$lib/auth/ui/SignIn.svelte';
-	import SignOutButton from '$lib/auth/ui/SignOutButton.svelte';
+	import SignIn from '#lib/auth/ui/SignIn.svelte';
+	import SignOutButton from '#lib/auth/ui/SignOutButton.svelte';
 
 	// SvelteKit navigation/state
 	import { goto } from '$app/navigation';
@@ -17,17 +17,17 @@
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { useQuery } from 'convex-svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api } = getAuthContext();
 
 	// Constants
-	import { DIALOG_KEY } from '$lib/users/utils/user.constants';
+	import { DIALOG_KEY } from '#lib/users/utils/user.constants.js';
 
 	// Types
 	import type { Snippet } from 'svelte';
 	import type { PopoverRootProps } from '@ark-ui/svelte';
 	import type { Path } from '$app/types';
-	import type { GetActiveUserType, ListAccountsType } from '$lib/auth/types';
+	import type { GetActiveUserType, ListAccountsType } from '#lib/auth/types.js';
 
 	// Props
 	const {

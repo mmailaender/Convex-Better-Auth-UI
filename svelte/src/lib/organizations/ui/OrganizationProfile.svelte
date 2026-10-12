@@ -7,7 +7,7 @@
 
 	/** UI **/
 	// Primitives
-	import * as Tabs from '$lib/primitives/ui/tabs';
+	import * as Tabs from '#lib/primitives/ui/tabs/index.js';
 	// Icons
 	import BoltIcon from '@lucide/svelte/icons/bolt';
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
@@ -16,16 +16,16 @@
 	// import WalletIcon from '@lucide/svelte/icons/wallet';
 	import XIcon from '@lucide/svelte/icons/x';
 	// Widgets
-	import GeneralSettings from '$lib/organizations/ui/GeneralSettings.svelte';
-	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
-	import MembersAndInvitations from '$lib/organizations/ui/MembersAndInvitations.svelte';
-	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
+	import GeneralSettings from '#lib/organizations/ui/GeneralSettings.svelte';
+	import DeleteOrganization from '#lib/organizations/ui/DeleteOrganization.svelte';
+	import MembersAndInvitations from '#lib/organizations/ui/MembersAndInvitations.svelte';
+	import LeaveOrganization from '#lib/organizations/ui/LeaveOrganization.svelte';
 	// Utils
-	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
+	import { useMobileState } from '#lib/primitives/utils/mobileState.svelte.js';
 	const mobileState = useMobileState();
 
 	// API
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 
 	// Types
 	import type { Path } from '$app/types';
@@ -34,7 +34,7 @@
 		GetActiveUserType,
 		ListInvitationsType,
 		Role
-	} from '$lib/auth/types';
+	} from '#lib/auth/types.js';
 
 	// Types
 	type OrganizationProfileProps = {

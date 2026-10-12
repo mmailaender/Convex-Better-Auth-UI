@@ -1,25 +1,25 @@
 <script lang="ts">
 	// Primitives
-	import * as Tabs from '$lib/primitives/ui/tabs';
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Drawer from '$lib/primitives/ui/drawer';
+	import * as Tabs from '#lib/primitives/ui/tabs/index.js';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Drawer from '#lib/primitives/ui/drawer/index.js';
 	import { Dialog as ArkDialog, useDialog } from '@ark-ui/svelte/dialog';
 	// Icons
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	// Components
-	import Members from '$lib/organizations/ui/Members.svelte';
-	import Invitations from '$lib/organizations/ui/Invitations.svelte';
-	import InviteMembers from '$lib/organizations/ui/InviteMembers.svelte';
+	import Members from '#lib/organizations/ui/Members.svelte';
+	import Invitations from '#lib/organizations/ui/Invitations.svelte';
+	import InviteMembers from '#lib/organizations/ui/InviteMembers.svelte';
 
 	// API
 	import { useQuery } from 'convex-svelte';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api } = getAuthContext();
 
 	// Types
-	import type { GetActiveOrganizationType, ListInvitationsType, Role } from '$lib/auth/types';
+	import type { GetActiveOrganizationType, ListInvitationsType, Role } from '#lib/auth/types.js';
 
 	// Props
 	let {

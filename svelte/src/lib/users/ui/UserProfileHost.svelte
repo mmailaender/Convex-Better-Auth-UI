@@ -6,21 +6,21 @@
 	import { resolve } from '$app/paths';
 
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	// Components
-	import UserProfile from '$lib/users/ui/UserProfile.svelte';
+	import UserProfile from '#lib/users/ui/UserProfile.svelte';
 	// Utils
-	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
+	import { isEditableElement, scheduleScrollIntoView } from '#lib/primitives/utils/focusScroll.js';
 
 	// Constants
-	import { DIALOG_KEY } from '$lib/users/utils/user.constants';
+	import { DIALOG_KEY } from '#lib/users/utils/user.constants.js';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Types
 	import type { Path } from '$app/types';
-	import type { GetActiveUserType, ListAccountsType } from '$lib/auth/types';
+	import type { GetActiveUserType, ListAccountsType } from '#lib/auth/types.js';
 
 	type UserProfileHostProps = {
 		initialData?: {

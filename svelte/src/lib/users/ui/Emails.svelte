@@ -4,7 +4,7 @@
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient } = getAuthContext();
 
 	// Icons
@@ -14,7 +14,7 @@
 	import { tick } from 'svelte';
 
 	// Types
-	import type { GetActiveUserType } from '$lib/auth/types';
+	import type { GetActiveUserType } from '#lib/auth/types.js';
 
 	// Props
 	let { initialData }: { initialData?: { activeUser?: GetActiveUserType } } = $props();

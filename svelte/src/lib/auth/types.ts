@@ -1,6 +1,6 @@
 import type { FunctionReturnType } from 'convex/server';
 import type { api } from '$convex/_generated/api';
-import type { authClient } from '$lib/auth/api/auth-client';
+import type { authClient } from '#lib/auth/api/auth-client.js';
 import type { AuthConstants } from '$convex/auth.constants.types';
 
 // Re-export for convenience

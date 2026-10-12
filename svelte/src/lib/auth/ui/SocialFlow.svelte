@@ -34,7 +34,7 @@
 	} from '@icons-pack/svelte-simple-icons';
 
 	// Context
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authClient, authConstants } = getAuthContext();
 
 	type Provider =

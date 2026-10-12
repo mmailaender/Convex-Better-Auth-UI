@@ -17,7 +17,7 @@
 		return (prefix || '') + Math.random().toString(36).substring(2);
 	};
 
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 
 	// Props
 	interface Props {

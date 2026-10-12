@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Avatar as AvatarPrimitive } from '@ark-ui/svelte/avatar';
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let { class: className, ...restProps }: AvatarPrimitive.FallbackProps = $props();
 </script>

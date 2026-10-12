@@ -13,18 +13,18 @@
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Avatar from '$lib/primitives/ui/avatar';
-	import * as ImageCropper from '$lib/primitives/ui/image-cropper';
-	import { getFileFromUrl } from '$lib/primitives/ui/image-cropper';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import * as ImageCropper from '#lib/primitives/ui/image-cropper/index.js';
+	import { getFileFromUrl } from '#lib/primitives/ui/image-cropper/index.js';
 
 	// Utils
-	import { optimizeImage } from '$lib/primitives/utils/optimizeImage';
+	import { optimizeImage } from '#lib/primitives/utils/optimizeImage.js';
 
 	// API
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
-	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
+	import { safeRedirect } from '#lib/auth/utils/safeRedirect.js';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 

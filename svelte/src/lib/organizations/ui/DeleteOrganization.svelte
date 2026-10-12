@@ -5,21 +5,21 @@
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
-	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
+	import { safeRedirect } from '#lib/auth/utils/safeRedirect.js';
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
 	/** UI **/
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	// Icons
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 
 	// Types
-	import type { GetActiveOrganizationType, Role } from '$lib/auth/types';
+	import type { GetActiveOrganizationType, Role } from '#lib/auth/types.js';
 
 	/**
 	 * Component for deleting an organization

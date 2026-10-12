@@ -1,6 +1,6 @@
 <script lang="ts">
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import { toast } from 'svelte-sonner';
 	// Icons
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
@@ -8,12 +8,12 @@
 	// API
 	import { useConvexClient } from 'convex-svelte';
 	import { ConvexError } from 'convex/values';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient } = getAuthContext();
 	const client = useConvexClient();
 
 	// Utils
-	import { requestCloseUserProfile } from '$lib/users/utils/userProfile';
+	import { requestCloseUserProfile } from '#lib/users/utils/userProfile.js';
 
 	// State
 	let deleteDialogOpen: boolean = $state(false);

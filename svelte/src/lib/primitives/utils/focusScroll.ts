@@ -1,6 +1,6 @@
 // Keyboard-aware, centered scroll-into-view utilities
 // Usage:
-//   import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
+//   import { isEditableElement, scheduleScrollIntoView } from '#lib/primitives/utils/focusScroll.js';
 //   if (isEditableElement(el)) scheduleScrollIntoView(el);
 
 export function isEditableElement(el: HTMLElement): boolean {

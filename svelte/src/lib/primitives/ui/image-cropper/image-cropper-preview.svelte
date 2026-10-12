@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as Avatar from '$lib/primitives/ui/avatar';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
 	import type { ImageCropperPreviewProps } from './types';
 	import { useImageCropperPreview } from './image-cropper.svelte.js';
 	import UploadIcon from '@lucide/svelte/icons/upload';
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 
 	let { child, class: className }: ImageCropperPreviewProps = $props();
 

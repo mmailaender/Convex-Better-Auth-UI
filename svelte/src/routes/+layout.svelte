@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '#lib/assets/favicon.svg';
 
 	import { createSvelteAuthClient } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { authClient } from '$lib/auth/api/auth-client';
+	import { authClient } from '#lib/auth/api/auth-client.js';
 	import { api } from '$convex/_generated/api';
 	import { AUTH_CONSTANTS } from '$convex/auth.constants';
 
-	import { Toaster } from '$lib/primitives/ui/sonner';
-	import OrganizationSwitcher from '$lib/organizations/ui/OrganizationSwitcher.svelte';
-	import UserButton from '$lib/users/ui/UserButton.svelte';
-	import AuthProvider from '$lib/auth/ui/AuthProvider.svelte';
-	import UserProfileHost from '$lib/users/ui/UserProfileHost.svelte';
-	import OrganizationProfileHost from '$lib/organizations/ui/OrganizationProfileHost.svelte';
+	import { Toaster } from '#lib/primitives/ui/sonner/index.js';
+	import OrganizationSwitcher from '#lib/organizations/ui/OrganizationSwitcher.svelte';
+	import UserButton from '#lib/users/ui/UserButton.svelte';
+	import AuthProvider from '#lib/auth/ui/AuthProvider.svelte';
+	import UserProfileHost from '#lib/users/ui/UserProfileHost.svelte';
+	import OrganizationProfileHost from '#lib/organizations/ui/OrganizationProfileHost.svelte';
 
 	let { children, data } = $props();
 

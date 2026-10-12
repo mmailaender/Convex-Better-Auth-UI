@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/primitives/utils.js';
+	import { cn } from '#lib/primitives/utils.js';
 	import { Popover as PopoverPrimitive } from '@ark-ui/svelte/popover';
 
 	let {

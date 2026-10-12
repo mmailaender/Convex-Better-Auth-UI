@@ -3,9 +3,9 @@
 	import { scale } from 'svelte/transition';
 
 	// Hooks
-	import { UseClipboard } from '$lib/primitives/hooks/use-clipboard.svelte';
+	import { UseClipboard } from '#lib/primitives/hooks/use-clipboard.svelte.js';
 	// Utils
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 
 	// Icons
 	import CheckIcon from '@lucide/svelte/icons/check';

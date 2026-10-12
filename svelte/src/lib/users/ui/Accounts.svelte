@@ -6,16 +6,16 @@
 	import { tick } from 'svelte';
 
 	// Context
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient, authConstants } = getAuthContext();
 
 	// UI Components
 	// Primitives
-	import * as Select from '$lib/primitives/ui/select';
+	import * as Select from '#lib/primitives/ui/select/index.js';
 	import { createListCollection } from '@ark-ui/svelte/select';
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Drawer from '$lib/primitives/ui/drawer';
-	import * as Password from '$lib/primitives/ui/password';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Drawer from '#lib/primitives/ui/drawer/index.js';
+	import * as Password from '#lib/primitives/ui/password/index.js';
 	import { toast } from 'svelte-sonner';
 
 	// Icons
@@ -53,9 +53,9 @@
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 
 	// Utils
-	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
+	import { useMobileState } from '#lib/primitives/utils/mobileState.svelte.js';
 	const mobileState = useMobileState();
-	import { isEditableElement, scheduleScrollIntoView } from '$lib/primitives/utils/focusScroll';
+	import { isEditableElement, scheduleScrollIntoView } from '#lib/primitives/utils/focusScroll.js';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
@@ -65,7 +65,7 @@
 
 	// Types
 	import type { Path } from '$app/types';
-	import type { ListAccountsType } from '$lib/auth/types';
+	import type { ListAccountsType } from '#lib/auth/types.js';
 
 	let { initialData }: { initialData?: { accountList?: ListAccountsType } } = $props();
 

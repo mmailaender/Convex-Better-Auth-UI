@@ -1,6 +1,6 @@
 <script lang="ts">
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import { toast } from 'svelte-sonner';
 	// Icons
 	import SearchIcon from '@lucide/svelte/icons/search';
@@ -8,13 +8,13 @@
 
 	// API
 	import { useQuery } from 'convex-svelte';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient } = getAuthContext();
 
 	// Types
-	import type { Role, ListInvitationsType } from '$lib/auth/types';
+	import type { Role, ListInvitationsType } from '#lib/auth/types.js';
 
 	// Props
 	let {
