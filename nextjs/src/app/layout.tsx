@@ -71,7 +71,7 @@ export default async function RootLayout({
 						<header className="flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4">
 							<Link
 								href="/"
-								className="mr-auto min-w-0 truncate text-xl font-bold text-white sm:text-2xl"
+								className="text-surface-950-50 mr-auto min-w-0 truncate text-xl font-bold sm:text-2xl"
 							>
 								Next.js
 							</Link>
