@@ -54,6 +54,11 @@ export const listApiKeys = query({
 			return apiKeys;
 		} catch (error) {
 			if (error instanceof APIError) {
+				// Like listAccounts, handle a 401: the api-key plugin can't resolve an admin's impersonation session
+				// inside a query, and throwing here takes down every page that shows the user button
+				if (error.statusCode === 401) {
+					return null;
+				}
 				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
 			}
 			throw error;
