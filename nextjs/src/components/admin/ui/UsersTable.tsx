@@ -9,6 +9,7 @@ import { api } from '@/convex/_generated/api';
 import * as Avatar from '@/components/primitives/ui/avatar';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import * as Menu from '@/components/primitives/ui/menu';
+import { Portal } from '@ark-ui/react/portal';
 import * as Password from '@/components/primitives/ui/password';
 import { authClient } from '@/lib/auth/api/auth-client';
 import { useActiveUserData } from '@/lib/auth/hooks';
@@ -325,35 +326,44 @@ export default function UsersTable() {
 												>
 													<EllipsisVertical className="size-4" aria-hidden="true" />
 												</Menu.Trigger>
-												<Menu.Content className="bg-surface-50-950">
-													{!user.banned ? (
-														<Menu.Item value="impersonate" onClick={() => handleImpersonate(user)}>
-															Impersonate
+												{/* Portaled so the table's scroll container doesn't clip the menu */}
+												<Portal>
+													<Menu.Content className="bg-surface-50-950">
+														{!user.banned ? (
+															<Menu.Item
+																value="impersonate"
+																onClick={() => handleImpersonate(user)}
+															>
+																Impersonate
+															</Menu.Item>
+														) : null}
+														<Menu.Item
+															value="password"
+															onClick={() => showDialog(user, 'password')}
+														>
+															Set password
 														</Menu.Item>
-													) : null}
-													<Menu.Item value="password" onClick={() => showDialog(user, 'password')}>
-														Set password
-													</Menu.Item>
-													<Menu.Item value="revoke" onClick={() => handleRevokeSessions(user)}>
-														Sign out everywhere
-													</Menu.Item>
-													{user.banned ? (
-														<Menu.Item value="unban" onClick={() => handleUnban(user)}>
-															Unban
+														<Menu.Item value="revoke" onClick={() => handleRevokeSessions(user)}>
+															Sign out everywhere
 														</Menu.Item>
-													) : (
-														<Menu.Item value="ban" onClick={() => showDialog(user, 'ban')}>
-															Ban
+														{user.banned ? (
+															<Menu.Item value="unban" onClick={() => handleUnban(user)}>
+																Unban
+															</Menu.Item>
+														) : (
+															<Menu.Item value="ban" onClick={() => showDialog(user, 'ban')}>
+																Ban
+															</Menu.Item>
+														)}
+														<Menu.Item
+															value="delete"
+															variant="destructive"
+															onClick={() => showDialog(user, 'delete')}
+														>
+															Delete
 														</Menu.Item>
-													)}
-													<Menu.Item
-														value="delete"
-														variant="destructive"
-														onClick={() => showDialog(user, 'delete')}
-													>
-														Delete
-													</Menu.Item>
-												</Menu.Content>
+													</Menu.Content>
+												</Portal>
 											</Menu.Root>
 										) : null}
 									</td>

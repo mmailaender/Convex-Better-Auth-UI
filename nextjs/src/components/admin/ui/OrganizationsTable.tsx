@@ -9,6 +9,7 @@ import { api } from '@/convex/_generated/api';
 import * as Avatar from '@/components/primitives/ui/avatar';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import * as Menu from '@/components/primitives/ui/menu';
+import { Portal } from '@ark-ui/react/portal';
 import type { AdminOrganization } from '@/components/admin/types';
 
 const PAGE_SIZE = 25;
@@ -126,18 +127,21 @@ export default function OrganizationsTable() {
 											>
 												<EllipsisVertical className="size-4" aria-hidden="true" />
 											</Menu.Trigger>
-											<Menu.Content className="bg-surface-50-950">
-												<Menu.Item value="members" onClick={() => openDialog(org, 'members')}>
-													View members
-												</Menu.Item>
-												<Menu.Item
-													value="delete"
-													variant="destructive"
-													onClick={() => openDialog(org, 'delete')}
-												>
-													Delete
-												</Menu.Item>
-											</Menu.Content>
+											{/* Portaled so the table's scroll container doesn't clip the menu */}
+											<Portal>
+												<Menu.Content className="bg-surface-50-950">
+													<Menu.Item value="members" onClick={() => openDialog(org, 'members')}>
+														View members
+													</Menu.Item>
+													<Menu.Item
+														value="delete"
+														variant="destructive"
+														onClick={() => openDialog(org, 'delete')}
+													>
+														Delete
+													</Menu.Item>
+												</Menu.Content>
+											</Portal>
 										</Menu.Root>
 									</td>
 								</tr>
