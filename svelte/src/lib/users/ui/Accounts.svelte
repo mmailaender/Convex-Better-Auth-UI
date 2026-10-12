@@ -19,35 +19,32 @@
 	import { toast } from 'svelte-sonner';
 
 	// Icons
-	import {
-		SiGithub,
-		SiGoogle,
-		SiFacebook,
-		SiApple,
-		SiAtlassian,
-		SiDiscord,
-		SiFigma,
-		SiLine,
-		SiHuggingface,
-		SiKakao,
-		SiKick,
-		SiPaypal,
-		SiSalesforce,
-		SiSlack,
-		SiNotion,
-		SiNaver,
-		SiTiktok,
-		SiTwitch,
-		SiX,
-		SiDropbox,
-		SiLinear,
-		SiGitlab,
-		SiReddit,
-		SiRoblox,
-		SiSpotify,
-		SiVk,
-		SiZoom
-	} from '@icons-pack/svelte-simple-icons';
+	import SiGithub from '@icons-pack/svelte-simple-icons/icons/SiGithub';
+	import SiGoogle from '@icons-pack/svelte-simple-icons/icons/SiGoogle';
+	import SiFacebook from '@icons-pack/svelte-simple-icons/icons/SiFacebook';
+	import SiApple from '@icons-pack/svelte-simple-icons/icons/SiApple';
+	import SiAtlassian from '@icons-pack/svelte-simple-icons/icons/SiAtlassian';
+	import SiDiscord from '@icons-pack/svelte-simple-icons/icons/SiDiscord';
+	import SiFigma from '@icons-pack/svelte-simple-icons/icons/SiFigma';
+	import SiLine from '@icons-pack/svelte-simple-icons/icons/SiLine';
+	import SiHuggingface from '@icons-pack/svelte-simple-icons/icons/SiHuggingface';
+	import SiKakao from '@icons-pack/svelte-simple-icons/icons/SiKakao';
+	import SiKick from '@icons-pack/svelte-simple-icons/icons/SiKick';
+	import SiPaypal from '@icons-pack/svelte-simple-icons/icons/SiPaypal';
+	import SiNotion from '@icons-pack/svelte-simple-icons/icons/SiNotion';
+	import SiNaver from '@icons-pack/svelte-simple-icons/icons/SiNaver';
+	import SiTiktok from '@icons-pack/svelte-simple-icons/icons/SiTiktok';
+	import SiTwitch from '@icons-pack/svelte-simple-icons/icons/SiTwitch';
+	import SiX from '@icons-pack/svelte-simple-icons/icons/SiX';
+	import SiDropbox from '@icons-pack/svelte-simple-icons/icons/SiDropbox';
+	import SiLinear from '@icons-pack/svelte-simple-icons/icons/SiLinear';
+	import SiGitlab from '@icons-pack/svelte-simple-icons/icons/SiGitlab';
+	import SiReddit from '@icons-pack/svelte-simple-icons/icons/SiReddit';
+	import SiRoblox from '@icons-pack/svelte-simple-icons/icons/SiRoblox';
+	import SiSpotify from '@icons-pack/svelte-simple-icons/icons/SiSpotify';
+	import SiVk from '@icons-pack/svelte-simple-icons/icons/SiVk';
+	import SiZoom from '@icons-pack/svelte-simple-icons/icons/SiZoom';
+	import { SiSalesforce, SiSlack } from '#lib/primitives/ui/brand-icons/index.js';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
 	import LockIcon from '@lucide/svelte/icons/lock';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';

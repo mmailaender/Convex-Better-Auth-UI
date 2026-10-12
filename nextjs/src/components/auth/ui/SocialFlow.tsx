@@ -21,8 +21,6 @@ import {
 	SiPaypal,
 	SiReddit,
 	SiRoblox,
-	SiSalesforce,
-	SiSlack,
 	SiSpotify,
 	SiTiktok,
 	SiTwitch,
@@ -30,6 +28,7 @@ import {
 	SiX,
 	SiZoom
 } from '@icons-pack/react-simple-icons';
+import { SiSalesforce, SiSlack } from '@/components/primitives/ui/brand-icons';
 import { toast } from 'sonner';
 
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';

@@ -64,7 +64,7 @@
 		"@convex-dev/better-auth": "0.12.5",
 		"@convex-dev/migrations": "^0.3.7",
 		"@convex-dev/resend": "0.2.9",
-		"@icons-pack/svelte-simple-icons": "^6.5.0",
+		"@icons-pack/svelte-simple-icons": "^7.2.0",
 		"@mmailaender/convex-better-auth-svelte": "^0.9.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"@zxcvbn-ts/core": "^4.2.0",

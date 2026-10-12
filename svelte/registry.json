@@ -698,6 +698,55 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "primitives/ui/brand-icons/SiSalesforce.svelte",
+					"relativePath": "src/lib/primitives/ui/brand-icons/SiSalesforce.svelte",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/ui/brand-icons/SiSlack.svelte",
+					"relativePath": "src/lib/primitives/ui/brand-icons/SiSlack.svelte",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/ui/brand-icons/index.ts",
+					"relativePath": "src/lib/primitives/ui/brand-icons/index.ts",
+					"_imports_": [
+						{
+							"import": "./SiSlack.svelte",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/SiSlack.svelte"
+							},
+							"meta": {}
+						},
+						{
+							"import": "./SiSalesforce.svelte",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/SiSalesforce.svelte"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "primitives/ui/combobox/combobox-clear-trigger.svelte",
 					"relativePath": "src/lib/primitives/ui/combobox/combobox-clear-trigger.svelte",
 					"_imports_": [
@@ -3470,7 +3519,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@icons-pack/svelte-simple-icons",
-					"version": "^6.5.0"
+					"version": "^7.2.0"
 				}
 			],
 			"devDependencies": [
@@ -3794,6 +3843,15 @@
 					"relativePath": "src/lib/auth/ui/SocialFlow.svelte",
 					"_imports_": [
 						{
+							"import": "#lib/primitives/ui/brand-icons/index.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/index.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/auth/context.svelte.js",
 							"item": "auth/lib",
 							"file": {
@@ -4019,7 +4077,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@icons-pack/svelte-simple-icons",
-					"version": "^6.5.0"
+					"version": "^7.2.0"
 				},
 				{
 					"ecosystem": "js",
@@ -4098,6 +4156,15 @@
 							"file": {
 								"type": "lib",
 								"path": "primitives/ui/password/index.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/ui/brand-icons/index.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/brand-icons/index.ts"
 							},
 							"meta": {}
 						},
