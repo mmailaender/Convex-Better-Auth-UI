@@ -163,7 +163,7 @@
 					{/if}
 				</Dialog.Description>
 			</Dialog.Header>
-			<div class="flex max-h-[60vh] flex-col gap-3 overflow-y-auto">
+			<div class="flex max-h-[60vh] w-full flex-col gap-3 overflow-y-auto">
 				{#if orgDetailResponse.error}
 					<div class="text-error-600-400 text-sm">{orgDetailResponse.error.message}</div>
 				{:else if !orgDetail}

@@ -387,7 +387,7 @@
 					They are signed out everywhere and can't sign in until the ban ends or you lift it.
 				</Dialog.Description>
 			</Dialog.Header>
-			<form id="admin-ban-user" class="flex flex-col gap-3" onsubmit={handleBanSubmit}>
+			<form id="admin-ban-user" class="flex w-full flex-col gap-3" onsubmit={handleBanSubmit}>
 				<label class="label">
 					<span class="label-text">Reason (optional)</span>
 					<input
@@ -437,7 +437,7 @@
 					from now on. Their existing sessions stay signed in.
 				</Dialog.Description>
 			</Dialog.Header>
-			<form id="admin-set-password" onsubmit={handlePasswordSubmit}>
+			<form id="admin-set-password" class="w-full" onsubmit={handlePasswordSubmit}>
 				<label class="label">
 					<span class="label-text">New password</span>
 					<Password.Root minScore={0}>

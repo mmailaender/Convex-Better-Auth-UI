@@ -386,7 +386,11 @@ export default function UsersTable() {
 							it.
 						</Dialog.Description>
 					</Dialog.Header>
-					<form id="admin-ban-user" className="flex flex-col gap-3" onSubmit={handleBanSubmit}>
+					<form
+						id="admin-ban-user"
+						className="flex w-full flex-col gap-3"
+						onSubmit={handleBanSubmit}
+					>
 						<label className="label">
 							<span className="label-text">Reason (optional)</span>
 							<input
@@ -440,7 +444,7 @@ export default function UsersTable() {
 							password from now on. Their existing sessions stay signed in.
 						</Dialog.Description>
 					</Dialog.Header>
-					<form id="admin-set-password" onSubmit={handlePasswordSubmit}>
+					<form id="admin-set-password" className="w-full" onSubmit={handlePasswordSubmit}>
 						<label className="label">
 							<span className="label-text">New password</span>
 							<Password.Root minScore={0}>

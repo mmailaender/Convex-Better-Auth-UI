@@ -39,7 +39,6 @@
 			});
 			toast.success(`Created ${name.trim()}`);
 			open = false;
-			reset();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to create user');
 		} finally {
@@ -48,7 +47,7 @@
 	}
 </script>
 
-<Dialog.Root bind:open onOpenChange={(details) => !details.open && reset()}>
+<Dialog.Root bind:open onOpenChange={(details) => details.open && reset()}>
 	<Dialog.Trigger class="btn preset-filled-primary-500 shrink-0 gap-2" aria-label="New user">
 		<PlusIcon class="size-4" aria-hidden="true" />
 		<span class="hidden sm:inline">New user</span>
@@ -60,7 +59,7 @@
 				The user can sign in with this email and password right away.
 			</Dialog.Description>
 		</Dialog.Header>
-		<form id="admin-create-user" class="flex flex-col gap-3" onsubmit={handleSubmit}>
+		<form id="admin-create-user" class="flex w-full flex-col gap-3" onsubmit={handleSubmit}>
 			<label class="label">
 				<span class="label-text">Name</span>
 				<input type="text" class="input" bind:value={name} autocomplete="off" required />

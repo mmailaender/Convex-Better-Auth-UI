@@ -25,7 +25,8 @@ export default function CreateUser() {
 
 	function handleOpenChange(nextOpen: boolean) {
 		setOpen(nextOpen);
-		if (!nextOpen) {
+		// Reset on open rather than close, so the fields don't empty while the dialog fades out
+		if (nextOpen) {
 			setName('');
 			setEmail('');
 			setPassword('');
@@ -63,7 +64,7 @@ export default function CreateUser() {
 						The user can sign in with this email and password right away.
 					</Dialog.Description>
 				</Dialog.Header>
-				<form id="admin-create-user" className="flex flex-col gap-3" onSubmit={handleSubmit}>
+				<form id="admin-create-user" className="flex w-full flex-col gap-3" onSubmit={handleSubmit}>
 					<label className="label">
 						<span className="label-text">Name</span>
 						<input

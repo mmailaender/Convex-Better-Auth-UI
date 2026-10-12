@@ -170,7 +170,7 @@ export default function OrganizationsTable() {
 								: 'Members'}
 						</Dialog.Description>
 					</Dialog.Header>
-					<div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto">
+					<div className="flex max-h-[60vh] w-full flex-col gap-3 overflow-y-auto">
 						{!orgDetail ? (
 							<div className="text-surface-600-400 flex items-center gap-2 text-sm" role="status">
 								<Loader2 className="size-4 animate-spin" aria-hidden="true" />
