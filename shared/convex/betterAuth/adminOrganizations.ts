@@ -13,6 +13,7 @@ import { v } from 'convex/values';
 import { paginationOptsValidator } from 'convex/server';
 import { mutation, query, type MutationCtx } from './_generated/server';
 import { withSystemFields } from 'convex-helpers/validators';
+import { paginator } from 'convex-helpers/server/pagination';
 import schema from './schema';
 import { type Id } from './_generated/dataModel';
 
@@ -66,7 +67,11 @@ export const listAllOrganizations = query({
 		)
 	}),
 	handler: async (ctx, args) => {
-		return await ctx.db.query('organization').order('desc').paginate(args.paginationOpts);
+		// Components can't use the built-in `.paginate()`, so page with convex-helpers' stream reader
+		return await paginator(ctx.db, schema)
+			.query('organization')
+			.order('desc')
+			.paginate(args.paginationOpts);
 	}
 });
 
