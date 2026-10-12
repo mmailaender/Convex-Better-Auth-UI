@@ -256,3 +256,8 @@
 		cursor: pointer;
 	}
 }
+
+/* Skeleton 5 sizes badges at 0.8 × text-xs, which leaves counts and role labels hard to read */
+@utility badge {
+	--badge-size: var(--text-xs);
+}
