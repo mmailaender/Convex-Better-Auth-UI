@@ -11,8 +11,7 @@
 		"start": "next start",
 		"lint": "eslint .",
 		"test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/**/*.test.ts\"",
-		"format": "prettier --write .",
-		"pull:convex": "rm -rf ./convex && cp -r ../convex ./convex"
+		"format": "prettier --write ."
 	},
 	"dependencies": {
 		"@ark-ui/react": "^5.39.3",

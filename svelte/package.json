@@ -18,8 +18,7 @@
 		"test": "npm run test:unit -- --run",
 		"vercel:link": "cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie\"",
 		"vercel:pull": "cross-env-shell \"vercel env pull --token $VERCEL_TOKEN --scope etesie\"",
-		"init:repo": "pnpm config set auto-install-peers true && pnpm install && cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie && vercel env pull --token $VERCEL_TOKEN --scope etesie\" && pnpm dev",
-		"pull:convex": "rm -rf ./src/convex && cp -r ../convex ./src/convex"
+		"init:repo": "pnpm config set auto-install-peers true && pnpm install && cross-env-shell \"vercel link --yes --token $VERCEL_TOKEN --scope etesie && vercel env pull --token $VERCEL_TOKEN --scope etesie\" && pnpm dev"
 	},
 	"devDependencies": {
 		"@convex-dev/eslint-plugin": "^5.0.0",
