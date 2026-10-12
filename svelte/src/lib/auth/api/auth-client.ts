@@ -8,7 +8,7 @@ import {
 } from 'better-auth/client/plugins';
 import { apiKeyClient } from '@better-auth/api-key/client';
 
-import { AUTH_CONSTANTS } from '$convex/auth.constants';
+import { AUTH_CONSTANTS } from '#convex/auth.constants.js';
 
 export const authClient = createAuthClient({
 	plugins: [

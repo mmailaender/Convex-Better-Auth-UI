@@ -354,12 +354,12 @@ export default function ApiKeys() {
 							<p className="text-sm">
 								Copy and store this key now. You won&apos;t be able to see it again.
 							</p>
-							<div className="input-group mt-4 grid-cols-[1fr_auto]">
-								<input className="ig-input" readOnly value={newKey} />
+							<div className="field-group mt-4 grid-cols-[1fr_auto]">
+								<input className="input" readOnly value={newKey} />
 								<Toggle.Root
 									pressed={copied}
 									onClick={() => void handleCopyClick()}
-									className="ig-btn preset-filled-surface-200-800"
+									className="btn preset-filled-surface-200-800"
 									aria-label="Copy API key"
 								>
 									{copied ? <Check className="size-4" /> : <Copy className="size-4" />}

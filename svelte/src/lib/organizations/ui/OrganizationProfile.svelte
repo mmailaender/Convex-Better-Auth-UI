@@ -1,13 +1,12 @@
 <script lang="ts">
 	// Svelte
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { onMount } from 'svelte';
-	import { pushState, replaceState } from '$app/navigation';
-	import { resolve } from '$app/paths';
 
 	/** UI **/
 	// Primitives
-	import * as Tabs from '$lib/primitives/ui/tabs';
+	import * as Tabs from '#lib/primitives/ui/tabs/index.js';
 	// Icons
 	import BoltIcon from '@lucide/svelte/icons/bolt';
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
@@ -16,25 +15,24 @@
 	// import WalletIcon from '@lucide/svelte/icons/wallet';
 	import XIcon from '@lucide/svelte/icons/x';
 	// Widgets
-	import GeneralSettings from '$lib/organizations/ui/GeneralSettings.svelte';
-	import DeleteOrganization from '$lib/organizations/ui/DeleteOrganization.svelte';
-	import MembersAndInvitations from '$lib/organizations/ui/MembersAndInvitations.svelte';
-	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
+	import GeneralSettings from '#lib/organizations/ui/GeneralSettings.svelte';
+	import DeleteOrganization from '#lib/organizations/ui/DeleteOrganization.svelte';
+	import MembersAndInvitations from '#lib/organizations/ui/MembersAndInvitations.svelte';
+	import LeaveOrganization from '#lib/organizations/ui/LeaveOrganization.svelte';
 	// Utils
-	import { useMobileState } from '$lib/primitives/utils/mobileState.svelte';
+	import { useMobileState } from '#lib/primitives/utils/mobileState.svelte.js';
 	const mobileState = useMobileState();
 
 	// API
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
 
 	// Types
-	import type { Pathname } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		GetActiveUserType,
 		ListInvitationsType,
 		Role
-	} from '$lib/auth/types';
+	} from '#lib/auth/types.js';
 
 	// Types
 	type OrganizationProfileProps = {
@@ -160,8 +158,9 @@
 		url.searchParams.set('tab', value);
 		// Ensure dialog stays present in the URL and state while navigating tabs inside the dialog
 		url.searchParams.set('dialog', 'organization-profile');
-		pushState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-			dialog: 'organization-profile'
+		gotoApp(url, {
+			shallow: true,
+			state: { dialog: 'organization-profile' }
 		});
 	}
 
@@ -172,8 +171,10 @@
 			url.searchParams.delete('tab');
 			// Keep dialog open in URL/state
 			url.searchParams.set('dialog', 'organization-profile');
-			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-				dialog: 'organization-profile'
+			gotoApp(url, {
+				shallow: true,
+				replace: true,
+				state: { dialog: 'organization-profile' }
 			});
 		}
 		activeMobileTab = '';
@@ -190,7 +191,10 @@
 				const url = new URL(window.location.href);
 				url.searchParams.delete('dialog');
 				url.searchParams.delete('tab');
-				replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {});
+				gotoApp(url, {
+					shallow: true,
+					replace: true
+				});
 				// Allow the dialog fade-out to complete, then reset flags.
 				setTimeout(() => {
 					suppressMobileTransition = false;
@@ -272,8 +276,10 @@
 			url.searchParams.set('tab', normalized);
 			// Ensure dialog param remains so OrganizationSwitcher keeps the dialog open on reload
 			url.searchParams.set('dialog', 'organization-profile');
-			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-				dialog: 'organization-profile'
+			gotoApp(url, {
+				shallow: true,
+				replace: true,
+				state: { dialog: 'organization-profile' }
 			});
 		}
 	});

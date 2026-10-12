@@ -1,9 +1,9 @@
 <script lang="ts">
 	// Context
-	import { setAuthContext } from '$lib/auth/context.svelte';
+	import { setAuthContext } from '#lib/auth/context.svelte.js';
 
 	// Types
-	import type { AuthContext } from '$lib/auth/types';
+	import type { AuthContext } from '#lib/auth/types.js';
 
 	type AuthProviderProps = AuthContext & {
 		/** Child content to render */

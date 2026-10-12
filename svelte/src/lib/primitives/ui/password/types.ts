@@ -1,6 +1,6 @@
 import type { Progress as ProgressPrimitive, Toggle as TogglePrimitive } from '@ark-ui/svelte';
 import type { HTMLAttributes, HTMLInputAttributes } from 'svelte/elements';
-import type { CopyButtonProps } from '$lib/primitives/ui/copy-button/types';
+import type { CopyButtonProps } from '#lib/primitives/ui/copy-button/types.js';
 import type { ZxcvbnResult } from '@zxcvbn-ts/core';
 import type { WithChildren, WithoutChildren } from 'svelte-toolbelt';
 

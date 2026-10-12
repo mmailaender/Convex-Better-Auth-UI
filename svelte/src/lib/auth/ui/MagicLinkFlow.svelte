@@ -3,7 +3,7 @@
 	import { toast } from 'svelte-sonner';
 
 	// API
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authClient } = getAuthContext();
 
 	interface MagicLinkFlowProps {

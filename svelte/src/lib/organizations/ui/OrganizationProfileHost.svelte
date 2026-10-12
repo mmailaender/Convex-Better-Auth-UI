@@ -2,28 +2,26 @@
 	// Svelte
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	// Components
-	import OrganizationProfile from '$lib/organizations/ui/OrganizationProfile.svelte';
+	import OrganizationProfile from '#lib/organizations/ui/OrganizationProfile.svelte';
 
 	// API
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Constants
-	import { DIALOG_KEY } from '$lib/organizations/utils/organization.constants';
+	import { DIALOG_KEY } from '#lib/organizations/utils/organization.constants.js';
 
 	// Types
-	import type { Pathname } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		GetActiveUserType,
 		ListInvitationsType,
 		Role
-	} from '$lib/auth/types';
+	} from '#lib/auth/types.js';
 
 	type OrganizationProfileHostProps = {
 		initialData?: {
@@ -119,13 +117,12 @@
 	function closeProfileModal() {
 		const hasDialog = page.url.searchParams.get('dialog') === DIALOG_KEY;
 		if (hasDialog) {
-			const url = new URL(page.url);
+			const url = new URL(page.url.href);
 			url.searchParams.delete('dialog');
 			url.searchParams.delete('tab');
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true
+			void gotoApp(url, {
+				replace: true,
+				reset: false
 			});
 		}
 		orgProfile.open = false;

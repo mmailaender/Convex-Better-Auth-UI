@@ -14,10 +14,4 @@ declare global {
 	}
 }
 
-declare module '$app/paths' {
-	import type { Pathname, ResolvedPathname } from '$app/types';
-
-	export function resolve(path: Pathname): ResolvedPathname;
-}
-
 export {};

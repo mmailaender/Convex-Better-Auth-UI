@@ -1,45 +1,43 @@
 <script lang="ts">
 	// Svelte
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	import { onMount } from 'svelte';
 
 	// Primitives
-	import * as Popover from '$lib/primitives/ui/popover';
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Avatar from '$lib/primitives/ui/avatar';
+	import * as Popover from '#lib/primitives/ui/popover/index.js';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
 	// Icons
 	import Building2Icon from '@lucide/svelte/icons/building-2';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	// Components
-	import CreateOrganization from '$lib/organizations/ui/CreateOrganization.svelte';
+	import CreateOrganization from '#lib/organizations/ui/CreateOrganization.svelte';
 
-	import LeaveOrganization from '$lib/organizations/ui/LeaveOrganization.svelte';
+	import LeaveOrganization from '#lib/organizations/ui/LeaveOrganization.svelte';
 
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { useRoles } from '$lib/organizations/api/roles.svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { useRoles } from '#lib/organizations/api/roles.svelte.js';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authConstants } = getAuthContext();
 	const client = useConvexClient();
 
 	// Constants
-	import { DIALOG_KEY } from '$lib/organizations/utils/organization.constants';
+	import { DIALOG_KEY } from '#lib/organizations/utils/organization.constants.js';
 
 	// Types
 	import type { PopoverRootProps } from '@ark-ui/svelte';
-	import type { Pathname } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		ListOrganizationsType,
 		GetActiveUserType,
 		ListInvitationsType,
 		Role
-	} from '$lib/auth/types';
+	} from '#lib/auth/types.js';
 
 	// Props
 	const {
@@ -114,13 +112,12 @@
 	// 3: Open via button — push history entry + open immediately for snappy UX
 	function openProfileModal() {
 		switcherPopoverOpen = false;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
-				replaceState: false,
-				noScroll: true,
-				keepFocus: true
+			void gotoApp(url, {
+				replace: false,
+				reset: false
 			});
 		}
 	}
@@ -140,10 +137,9 @@
 					/\/(active-organization|active-org)(?=\/|$)/g,
 					`/${initialSlug}`
 				);
-				void goto(resolve(`${newPathname}${page.url.search}${page.url.hash}` as Pathname), {
-					replaceState: true,
-					noScroll: true,
-					keepFocus: true
+				void gotoApp(`${newPathname}${page.url.search}${page.url.hash}`, {
+					replace: true,
+					reset: false
 				});
 			}
 		}
@@ -173,10 +169,9 @@
 				/\/(active-organization|active-org)(?=\/|$)/g,
 				`/${slug}`
 			);
-			void goto(resolve(`${newPathname}${search}${hash}` as Pathname), {
-				replaceState: true,
-				noScroll: true,
-				keepFocus: true
+			void gotoApp(`${newPathname}${search}${hash}`, {
+				replace: true,
+				reset: false
 			});
 		}
 	});
@@ -216,12 +211,10 @@
 				);
 
 				// Navigate to the new URL
-				await goto(resolve(newPathname as Pathname), { replaceState: true });
+				await gotoApp(newPathname, { replace: true });
 			} else {
 				// No slug replacement needed, just refresh current page
-				await goto(resolve((page.url.pathname + page.url.search) as Pathname), {
-					replaceState: true
-				});
+				await gotoApp(page.url.pathname + page.url.search, { replace: true });
 			}
 
 			// Close popover

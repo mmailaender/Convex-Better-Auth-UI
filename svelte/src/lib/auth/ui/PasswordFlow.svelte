@@ -3,10 +3,10 @@
 	import { toast } from 'svelte-sonner';
 
 	// Primitives
-	import * as Password from '$lib/primitives/ui/password';
+	import * as Password from '#lib/primitives/ui/password/index.js';
 
 	// API
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authClient, authConstants } = getAuthContext();
 
 	interface PasswordFlowProps {

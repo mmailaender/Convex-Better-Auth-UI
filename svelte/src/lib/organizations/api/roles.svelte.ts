@@ -1,10 +1,10 @@
 // API
 import { useQuery } from 'convex-svelte';
 import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-import { getAuthContext } from '$lib/auth/context.svelte';
+import { getAuthContext } from '#lib/auth/context.svelte.js';
 
 // Types
-import type { Role } from '$lib/auth/types';
+import type { Role } from '#lib/auth/types.js';
 
 type UseRolesArgs = {
 	orgId?: string;

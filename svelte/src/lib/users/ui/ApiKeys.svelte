@@ -3,9 +3,9 @@
 	import { SvelteDate } from 'svelte/reactivity';
 
 	// Primitives
-	import * as Dialog from '$lib/primitives/ui/dialog';
-	import * as Select from '$lib/primitives/ui/select';
-	import * as Menu from '$lib/primitives/ui/menu';
+	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
+	import * as Select from '#lib/primitives/ui/select/index.js';
+	import * as Menu from '#lib/primitives/ui/menu/index.js';
 	import { Toggle } from '@ark-ui/svelte/toggle';
 	import { createListCollection } from '@ark-ui/svelte/select';
 	import { toast } from 'svelte-sonner';
@@ -15,14 +15,14 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	// Types
 	import { Portal } from '@ark-ui/svelte';
-	import type { ListApiKeysType } from '$lib/auth/types';
+	import type { ListApiKeysType } from '#lib/auth/types.js';
 	type ListApiKeysResponse = NonNullable<ListApiKeysType>;
 	type ApiKeyType = ListApiKeysResponse['apiKeys'][number];
 
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient } = getAuthContext();
 
 	let { initialData }: { initialData?: { apiKeys?: ListApiKeysType } } = $props();
@@ -400,12 +400,12 @@
 					<Dialog.Title>Your new API key</Dialog.Title>
 				</Dialog.Header>
 				<p class="text-sm">Copy and store this key now. You won’t be able to see it again.</p>
-				<div class="input-group mt-4 grid-cols-[1fr_auto]">
-					<input class="ig-input" readonly value={newKey} />
+				<div class="field-group mt-4 grid-cols-[1fr_auto]">
+					<input class="input" readonly value={newKey} />
 					<Toggle.Root
 						bind:pressed={copied}
 						onclick={handleCopyClick}
-						class="ig-btn preset-filled-surface-200-800"
+						class="btn preset-filled-surface-200-800"
 						aria-label="Copy API key"
 					>
 						{#if copied}

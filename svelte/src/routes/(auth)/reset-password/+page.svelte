@@ -6,13 +6,13 @@
 
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Password from '$lib/primitives/ui/password';
+	import * as Password from '#lib/primitives/ui/password/index.js';
 
 	// Icons
 	import AlertTriangleIcon from '@lucide/svelte/icons/alert-triangle';
 
 	// API
-	import { authClient } from '$lib/auth/api/auth-client';
+	import { authClient } from '#lib/auth/api/auth-client.js';
 	import { onMount } from 'svelte';
 
 	type ResetState = 'loading' | 'valid-token' | 'invalid-token' | 'error';
@@ -73,7 +73,7 @@
 			toast.success('Password reset successfully!');
 
 			// Redirect immediately to sign in
-			goto(resolve('/signin'));
+			goto(resolve('signin'));
 		} catch (error) {
 			console.error('Reset password error:', error);
 			const errorMessage =
@@ -128,7 +128,7 @@
 							Please request a new password reset link.
 						</p>
 					</div>
-					<a href={resolve('/signin')} class="btn preset-filled">Back to Sign In</a>
+					<a href={resolve('signin')} class="btn preset-filled">Back to Sign In</a>
 				</div>
 			{:else if resetState === 'valid-token'}
 				<form onsubmit={handleSubmit} novalidate class="flex w-full flex-col gap-8">
@@ -179,7 +179,7 @@
 							{/if}
 						</button>
 
-						<a href={resolve('/signin')} class="btn">Back to Sign In</a>
+						<a href={resolve('signin')} class="btn">Back to Sign In</a>
 					</div>
 				</form>
 			{:else}
@@ -197,7 +197,7 @@
 						</p>
 					</div>
 					<div class="flex gap-2">
-						<a href={resolve('/signin')} class="btn preset-tonal">Back to Sign In</a>
+						<a href={resolve('signin')} class="btn preset-tonal">Back to Sign In</a>
 						<button type="button" class="btn preset-filled" onclick={handleTryAgain}>
 							Try Again
 						</button>

@@ -3,17 +3,17 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	// Primitives
 	import { toast } from 'svelte-sonner';
-	import * as Select from '$lib/primitives/ui/select';
+	import * as Select from '#lib/primitives/ui/select/index.js';
 	import { createListCollection } from '@ark-ui/svelte/select';
 
 	// API
 	import { useQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { api, authClient, authConstants } = getAuthContext();
 
 	// Types
-	import type { Role, GetActiveOrganizationType } from '$lib/auth/types';
+	import type { Role, GetActiveOrganizationType } from '#lib/auth/types.js';
 
 	// Props
 	let {
@@ -159,8 +159,7 @@
 					bind:value={emailInput}
 					placeholder="example@email.com, example2@email.com"
 					class="textarea min-h-24 grow"
-					required
-				></textarea>
+					required></textarea>
 			</label>
 			<p class="text-surface-600-400 px-1 text-xs">
 				You can invite multiple people by separating email addresses with commas, semicolons, or

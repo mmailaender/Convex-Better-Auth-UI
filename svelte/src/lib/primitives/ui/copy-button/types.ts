@@ -1,5 +1,5 @@
 import type { Snippet } from 'svelte';
-import type { UseClipboard } from '$lib/primitives/hooks/use-clipboard.svelte';
+import type { UseClipboard } from '#lib/primitives/hooks/use-clipboard.svelte.js';
 import type { HTMLAttributes } from 'svelte/elements';
 import type { WithChildren, WithoutChildren } from 'svelte-toolbelt';
 

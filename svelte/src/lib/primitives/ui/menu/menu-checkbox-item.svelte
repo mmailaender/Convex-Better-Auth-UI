@@ -2,7 +2,7 @@
 	import { Menu as MenuPrimitive } from '@ark-ui/svelte/menu';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import MinusIcon from '@lucide/svelte/icons/minus';
-	import { cn, type WithoutChildrenOrChild } from '$lib/primitives/utils';
+	import { cn, type WithoutChildrenOrChild } from '#lib/primitives/utils.js';
 	import type { Snippet } from 'svelte';
 
 	let {

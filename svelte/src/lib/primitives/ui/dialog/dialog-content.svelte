@@ -3,7 +3,7 @@
 	import { Portal as PortalPrimitive, type PortalProps } from '@ark-ui/svelte/portal';
 	import type { Snippet } from 'svelte';
 	import * as Dialog from './index.js';
-	import { cn, type WithoutChildrenOrChild } from '$lib/primitives/utils.js';
+	import { cn, type WithoutChildrenOrChild } from '#lib/primitives/utils.js';
 
 	let {
 		ref = $bindable(null),

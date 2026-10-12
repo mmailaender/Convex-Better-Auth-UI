@@ -6,7 +6,7 @@
 	import { resolve } from '$app/paths';
 
 	// Auth
-	import { authClient } from '$lib/auth/api/auth-client';
+	import { authClient } from '#lib/auth/api/auth-client.js';
 
 	// Icons
 	import CheckCircle2Icon from '@lucide/svelte/icons/check-circle-2';

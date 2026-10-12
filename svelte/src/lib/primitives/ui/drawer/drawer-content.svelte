@@ -3,7 +3,7 @@
 	import { Portal as PortalPrimitive, type PortalProps } from '@ark-ui/svelte/portal';
 	import type { Snippet } from 'svelte';
 	import DrawerBackdrop from './drawer-backdrop.svelte';
-	import { cn, type WithoutChildrenOrChild } from '$lib/primitives/utils.js';
+	import { cn, type WithoutChildrenOrChild } from '#lib/primitives/utils.js';
 
 	type Side = 'bottom' | 'top' | 'left' | 'right';
 

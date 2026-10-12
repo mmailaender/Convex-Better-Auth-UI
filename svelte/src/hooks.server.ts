@@ -1,8 +1,8 @@
-import { sequence } from '@sveltejs/kit/hooks';
-import { building } from '$app/environment';
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import { sequence, type Handle } from '@sveltejs/kit/hooks';
+import { building } from '$app/env';
 import { getSessionCookie } from 'better-auth/cookies';
-import { createRouteMatcher } from '$lib/primitives/utils/routeMatcher';
+import { createRouteMatcher } from '#lib/primitives/utils/routeMatcher.js';
 import { getToken } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import { withServerConvexToken } from 'convex-svelte/sveltekit/server';
 

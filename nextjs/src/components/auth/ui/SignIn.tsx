@@ -32,12 +32,7 @@ import { MagicLinkFlow } from './MagicLinkFlow';
 import { SocialFlow } from './SocialFlow';
 
 type AuthStep =
-	| 'email'
-	| 'password-flow'
-	| 'email-otp-flow'
-	| 'magic-link-flow'
-	| 'verify-email'
-	| 'success';
+	'email' | 'password-flow' | 'email-otp-flow' | 'magic-link-flow' | 'verify-email' | 'success';
 type AuthMethod = 'password' | 'emailOTP' | 'magicLink';
 
 interface SignInProps {

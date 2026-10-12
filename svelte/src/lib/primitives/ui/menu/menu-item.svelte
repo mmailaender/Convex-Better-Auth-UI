@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/primitives/utils';
+	import { cn } from '#lib/primitives/utils.js';
 	import { Menu as MenuPrimitive } from '@ark-ui/svelte';
 	let {
 		ref = $bindable(null),

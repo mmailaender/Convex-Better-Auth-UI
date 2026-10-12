@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Sveltekit
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	// Svelte
 	import { toast } from 'svelte-sonner';
 
@@ -18,22 +18,20 @@
 	import MailIcon from '@lucide/svelte/icons/mail';
 
 	// Utils
-	import { cn } from '$lib/primitives/utils';
-	import { safeRedirect } from '$lib/auth/utils/safeRedirect';
-	import { resolveSignInCallbackURL, resolveSignInRedirect } from '$lib/auth/utils/signInRedirect';
+	import { cn } from '#lib/primitives/utils.js';
+	import { safeRedirect } from '#lib/auth/utils/safeRedirect.js';
+	import {
+		resolveSignInCallbackURL,
+		resolveSignInRedirect
+	} from '#lib/auth/utils/signInRedirect.js';
 
 	// Context
-	import { getAuthContext } from '$lib/auth/context.svelte';
+	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	const { authConstants, authClient } = getAuthContext();
 
 	// Types
 	type AuthStep =
-		| 'email'
-		| 'password-flow'
-		| 'email-otp-flow'
-		| 'magic-link-flow'
-		| 'verify-email'
-		| 'success';
+		'email' | 'password-flow' | 'email-otp-flow' | 'magic-link-flow' | 'verify-email' | 'success';
 	type EmailAuthMethod = 'password' | 'emailOTP' | 'magicLink';
 
 	interface SignInProps {
@@ -117,8 +115,8 @@
 		const redirectURL = getRedirectURL();
 		if (!redirectURL) return;
 
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- safeRedirect returns a same-origin path; resolve() would read [name] in its query as a route parameter and collapse // in its hash
-		await goto(safeRedirect(redirectURL, '/', page.url.origin), { invalidateAll: true });
+		const target = safeRedirect(redirectURL, '/', page.url.origin);
+		await gotoApp(target, { refreshAll: true });
 	}
 
 	/**

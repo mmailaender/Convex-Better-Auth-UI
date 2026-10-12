@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { authClient } from '$lib/auth/api/auth-client';
+	import { authClient } from '#lib/auth/api/auth-client.js';
 	import { page } from '$app/state';
-	import { AUTH_CONSTANTS } from '$convex/auth.constants';
+	import { AUTH_CONSTANTS } from '#convex/auth.constants.js';
 
 	let userCode: string = $state('');
 	let verifyLoading = $state(true);
