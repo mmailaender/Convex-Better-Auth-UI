@@ -64,7 +64,7 @@
 	const client = useConvexClient();
 
 	// Types
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 	import type { ListAccountsType } from '$lib/auth/types';
 
 	let { initialData }: { initialData?: { accountList?: ListAccountsType } } = $props();
@@ -75,9 +75,7 @@
 	let accountListResponse = useQuery(
 		api.users.queries.listAccounts,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({
-			initialData: initialData?.accountList
-		})
+		() => ({ initialData: initialData?.accountList })
 	);
 	let accountList = $derived(accountListResponse?.data);
 
@@ -233,7 +231,7 @@
 		url.searchParams.delete('success');
 		url.searchParams.delete('error');
 		const path = `${url.pathname}${url.search}${url.hash}`;
-		void goto(resolve(path as Pathname), {
+		void goto(resolve(path as Path), {
 			replaceState: true,
 			noScroll: true,
 			keepFocus: true,
@@ -283,7 +281,7 @@
 			}
 
 			await authClient.linkSocial({
-				provider: provider,
+				provider,
 				callbackURL: successUrl.toString(),
 				errorCallbackURL: errorUrl.toString()
 			});

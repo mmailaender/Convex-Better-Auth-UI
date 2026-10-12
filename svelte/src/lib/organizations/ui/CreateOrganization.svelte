@@ -30,7 +30,7 @@
 
 	// Types
 	import type { GenericId } from 'convex/values';
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 
 	// Auth state
 	const auth = useAuth();
@@ -197,7 +197,7 @@
 					// Reconstruct the URL with the new organization ID
 					currentUrl.pathname = pathSegments.join('/');
 					const nextPath = `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`;
-					void goto(resolve(nextPath as Pathname), { invalidateAll: true });
+					void goto(resolve(nextPath as Path), { invalidateAll: true });
 				}
 			}
 		} catch (err: unknown) {

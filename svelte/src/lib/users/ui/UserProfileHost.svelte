@@ -19,7 +19,7 @@
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 
 	// Types
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 	import type { GetActiveUserType, ListAccountsType } from '$lib/auth/types';
 
 	type UserProfileHostProps = {
@@ -53,6 +53,7 @@
 	onMount(() => {
 		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
 		const ua = navigator.userAgent;
+
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
@@ -128,7 +129,7 @@
 		if (hasDialog) {
 			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
+			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				replaceState: true,
 				noScroll: true,
 				keepFocus: true
@@ -162,6 +163,7 @@
 			>
 				<UserProfile {initialData} />
 			</div>
+
 			<Dialog.CloseX />
 		</Dialog.Content>
 	</Dialog.Root>

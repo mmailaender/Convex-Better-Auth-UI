@@ -17,7 +17,7 @@
 	import { DIALOG_KEY } from '$lib/organizations/utils/organization.constants';
 
 	// Types
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		GetActiveUserType,
@@ -60,6 +60,7 @@
 	onMount(() => {
 		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
 		const ua = navigator.userAgent;
+
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
@@ -122,7 +123,7 @@
 			const url = new URL(page.url);
 			url.searchParams.delete('dialog');
 			url.searchParams.delete('tab');
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
+			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				replaceState: true,
 				noScroll: true,
 				keepFocus: true

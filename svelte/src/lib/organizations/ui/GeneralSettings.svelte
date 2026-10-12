@@ -28,7 +28,7 @@
 	const { api } = getAuthContext();
 
 	// Types
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 	import type { GetActiveOrganizationType, GetActiveUserType, Role } from '$lib/auth/types';
 
 	// Props
@@ -56,16 +56,13 @@
 	const userResponse = useQuery(
 		api.users.queries.getActiveUser,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({
-			initialData: initialData?.activeUser
-		})
+		() => ({ initialData: initialData?.activeUser })
 	);
+
 	const organizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({
-			initialData: initialData?.activeOrganization
-		})
+		() => ({ initialData: initialData?.activeOrganization })
 	);
 	const user = $derived(userResponse?.data);
 	const activeOrganization = $derived(organizationResponse?.data);
@@ -240,7 +237,8 @@
 					new RegExp(`/${currentSlug}(?=/|$)`, 'g'),
 					`/${trimmed}`
 				);
-				await goto(resolve(newPathname as Pathname), { replaceState: true });
+
+				await goto(resolve(newPathname as Path), { replaceState: true });
 			}
 
 			isEditingSlug = false;

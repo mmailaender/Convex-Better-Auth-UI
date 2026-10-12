@@ -28,7 +28,7 @@
 	import { useRoles } from '$lib/organizations/api/roles.svelte';
 
 	// Types
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		GetActiveUserType,
@@ -94,6 +94,7 @@
 	onMount(() => {
 		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
 		const ua = navigator.userAgent;
+
 		const isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
@@ -160,7 +161,8 @@
 		url.searchParams.set('tab', value);
 		// Ensure dialog stays present in the URL and state while navigating tabs inside the dialog
 		url.searchParams.set('dialog', 'organization-profile');
-		pushState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
+
+		pushState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 			dialog: 'organization-profile'
 		});
 	}
@@ -172,7 +174,8 @@
 			url.searchParams.delete('tab');
 			// Keep dialog open in URL/state
 			url.searchParams.set('dialog', 'organization-profile');
-			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
+
+			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				dialog: 'organization-profile'
 			});
 		}
@@ -190,7 +193,7 @@
 				const url = new URL(window.location.href);
 				url.searchParams.delete('dialog');
 				url.searchParams.delete('tab');
-				replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {});
+				replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {});
 				// Allow the dialog fade-out to complete, then reset flags.
 				setTimeout(() => {
 					suppressMobileTransition = false;
@@ -272,7 +275,8 @@
 			url.searchParams.set('tab', normalized);
 			// Ensure dialog param remains so OrganizationSwitcher keeps the dialog open on reload
 			url.searchParams.set('dialog', 'organization-profile');
-			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
+
+			replaceState(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				dialog: 'organization-profile'
 			});
 		}
@@ -310,6 +314,7 @@
 				</div>
 				<div>
 					<LeaveOrganization {initialData} />
+
 					<DeleteOrganization {onSuccessfulDelete} {initialData} />
 				</div>
 			</Tabs.Content>
@@ -389,7 +394,9 @@
 						<h6 class="h6 pb-12 pl-10">General settings</h6>
 						<GeneralSettings {initialData} />
 					</div>
+
 					<DeleteOrganization {onSuccessfulDelete} {initialData} />
+
 					<LeaveOrganization {initialData} />
 				{:else if activeMobileTab === 'members'}
 					<h6 class="h6 pb-6 pl-10">Members</h6>

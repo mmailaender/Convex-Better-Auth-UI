@@ -32,7 +32,7 @@
 
 	// Types
 	import type { PopoverRootProps } from '@ark-ui/svelte';
-	import type { Pathname } from '$app/types';
+	import type { Path } from '$app/types';
 	import type {
 		GetActiveOrganizationType,
 		ListOrganizationsType,
@@ -45,8 +45,9 @@
 	const {
 		popoverPlacement = 'bottom-end',
 		initialData
-	}: {
+
 		/** Placement of the popover relative to the trigger */
+	}: {
 		popoverPlacement?: NonNullable<PopoverRootProps['positioning']>['placement'];
 		initialData?: {
 			activeUser?: GetActiveUserType;
@@ -72,16 +73,13 @@
 	const organizationListResponse = useQuery(
 		api.organizations.queries.listOrganizations,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({
-			initialData: initialData?.organizationList
-		})
+		() => ({ initialData: initialData?.organizationList })
 	);
+
 	const activeOrganizationResponse = useQuery(
 		api.organizations.queries.getActiveOrganization,
 		() => (auth.isAuthenticated ? {} : 'skip'),
-		() => ({
-			initialData: initialData?.activeOrganization
-		})
+		() => ({ initialData: initialData?.activeOrganization })
 	);
 	const organizationList = $derived(organizationListResponse?.data);
 	const activeOrganization = $derived(activeOrganizationResponse?.data);
@@ -117,7 +115,7 @@
 		const url = new URL(page.url);
 		if (url.searchParams.get('dialog') !== DIALOG_KEY) {
 			url.searchParams.set('dialog', DIALOG_KEY);
-			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Pathname), {
+			void goto(resolve(`${url.pathname}${url.search}${url.hash}` as Path), {
 				replaceState: false,
 				noScroll: true,
 				keepFocus: true
@@ -129,18 +127,21 @@
 	onMount(() => {
 		// Detect iOS/iPadOS (including iPadOS 13+ which reports as Macintosh)
 		const ua = navigator.userAgent;
+
 		isIOS =
 			/iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
 
 		const initialSlug = activeOrganization?.slug;
 		if (initialSlug) {
 			const pathname = page.url.pathname;
+
 			if (/(?:^|\/)\b(active-organization|active-org)\b(?=\/|$)/.test(pathname)) {
 				const newPathname = pathname.replace(
 					/\/(active-organization|active-org)(?=\/|$)/g,
 					`/${initialSlug}`
 				);
-				void goto(resolve(`${newPathname}${page.url.search}${page.url.hash}` as Pathname), {
+
+				void goto(resolve(`${newPathname}${page.url.search}${page.url.hash}` as Path), {
 					replaceState: true,
 					noScroll: true,
 					keepFocus: true
@@ -168,12 +169,14 @@
 	$effect(() => {
 		const slug = activeOrganization?.slug;
 		const { pathname, search, hash } = page.url;
+
 		if (slug && /(?:^|\/)(active-organization|active-org)(?=\/|$)/.test(pathname)) {
 			const newPathname = pathname.replace(
 				/\/(active-organization|active-org)(?=\/|$)/g,
 				`/${slug}`
 			);
-			void goto(resolve(`${newPathname}${search}${hash}` as Pathname), {
+
+			void goto(resolve(`${newPathname}${search}${hash}` as Path), {
 				replaceState: true,
 				noScroll: true,
 				keepFocus: true
@@ -216,12 +219,10 @@
 				);
 
 				// Navigate to the new URL
-				await goto(resolve(newPathname as Pathname), { replaceState: true });
+				await goto(resolve(newPathname as Path), { replaceState: true });
 			} else {
 				// No slug replacement needed, just refresh current page
-				await goto(resolve((page.url.pathname + page.url.search) as Pathname), {
-					replaceState: true
-				});
+				await goto(resolve((page.url.pathname + page.url.search) as Path), { replaceState: true });
 			}
 
 			// Close popover
