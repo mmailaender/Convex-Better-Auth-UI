@@ -159,8 +159,7 @@
 					bind:value={emailInput}
 					placeholder="example@email.com, example2@email.com"
 					class="textarea min-h-24 grow"
-					required
-				></textarea>
+					required></textarea>
 			</label>
 			<p class="text-surface-600-400 px-1 text-xs">
 				You can invite multiple people by separating email addresses with commas, semicolons, or
