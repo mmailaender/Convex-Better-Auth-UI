@@ -67,7 +67,11 @@ export default defineConfig({
 								files: [
 									{ path: 'ConvexClientProvider.tsx' },
 									{ path: 'globals.css' },
-									{ path: 'layout.tsx' },
+									{
+										path: 'layout.tsx',
+										// The layout mounts the impersonation banner
+										registryDependencies: ['admin/lib']
+									},
 									{ path: 'page.tsx' }
 								]
 							},

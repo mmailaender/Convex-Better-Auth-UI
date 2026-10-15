@@ -54,7 +54,9 @@ export default defineConfig({
 									{
 										path: '+layout.svelte',
 										dependencyResolution: 'manual',
-										dependencies: ['@mmailaender/convex-better-auth-svelte']
+										dependencies: ['@mmailaender/convex-better-auth-svelte'],
+										// The layout mounts the impersonation banner
+										registryDependencies: ['admin/lib']
 									},
 									{
 										path: 'layout.css',
@@ -257,7 +259,8 @@ export default defineConfig({
 				registryDependencies: ['config', 'auth/lib', 'admin/lib'],
 				files: [
 					{
-						path: 'src/routes/admin/+page.svelte'
+						path: 'src/routes/admin/+page.svelte',
+						target: 'src/routes/admin/+page.svelte'
 					}
 				]
 			},

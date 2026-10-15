@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Shield } from 'lucide-react';
 
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
-import { useIsAppAdmin } from '@/lib/auth/hooks';
+import { useIsAppAdmin } from '@/components/admin/api/hooks';
 import { ADMIN_ROUTE } from '@/components/admin/utils/admin.constants';
 
 /**
