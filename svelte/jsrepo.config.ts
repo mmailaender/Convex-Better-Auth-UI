@@ -47,6 +47,7 @@ export default defineConfig({
 							{ path: 'app.html' },
 							{ path: 'app.d.ts' },
 							{ path: 'env.ts' },
+							{ path: 'hooks.ts' },
 							{
 								path: 'routes',
 								files: [
