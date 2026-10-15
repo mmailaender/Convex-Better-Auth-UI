@@ -4,6 +4,7 @@ import { fs, jsrepo } from 'jsrepo/providers';
 import {
 	betterAuthApiKeyDependency,
 	betterAuthDependency,
+	createAdminConvexItem,
 	createConfigItem,
 	createConvexBaseFiles,
 	createDeviceAuthorizationConvexItem,
@@ -53,7 +54,9 @@ export default defineConfig({
 									{
 										path: '+layout.svelte',
 										dependencyResolution: 'manual',
-										dependencies: ['@mmailaender/convex-better-auth-svelte']
+										dependencies: ['@mmailaender/convex-better-auth-svelte'],
+										// The layout mounts the impersonation banner
+										registryDependencies: ['admin/lib']
 									},
 									{
 										path: 'layout.css',
@@ -222,6 +225,42 @@ export default defineConfig({
 				files: [
 					{
 						path: 'src/routes/**/accept-invitation/*/+page.svelte'
+					}
+				]
+			},
+
+			// ── Admin ────────────────────────────────────────────────────────
+			createAdminConvexItem(),
+			{
+				name: 'admin/lib',
+				add: 'when-added',
+				type: 'lib',
+				registryDependencies: ['config', 'auth/lib', 'primitives', 'users/lib', 'admin/convex'],
+				files: [
+					{
+						path: 'src/lib/admin',
+						files: [
+							{ path: 'api' },
+							{
+								path: 'types.ts',
+								dependencyResolution: 'manual',
+								dependencies: ['convex']
+							},
+							{ path: 'ui' },
+							{ path: 'utils' }
+						]
+					}
+				]
+			},
+			{
+				name: 'admin/routes',
+				add: 'when-added',
+				type: 'routes',
+				registryDependencies: ['config', 'auth/lib', 'admin/lib'],
+				files: [
+					{
+						path: 'src/routes/admin/+page.svelte',
+						target: 'src/routes/admin/+page.svelte'
 					}
 				]
 			},

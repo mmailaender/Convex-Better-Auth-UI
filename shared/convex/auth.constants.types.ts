@@ -40,6 +40,7 @@ export type AuthConstants =
 			organizations?: false;
 			apiKeys?: boolean;
 			deviceAuthorization?: boolean;
+			admin?: boolean;
 			brandName?: string;
 			brandTagline?: string;
 			terms?: string;
@@ -55,6 +56,7 @@ export type AuthConstants =
 			organizations?: boolean;
 			apiKeys?: boolean;
 			deviceAuthorization?: boolean;
+			admin?: boolean;
 			brandName?: string;
 			brandTagline?: string;
 			terms?: string;

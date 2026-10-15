@@ -1,15 +1,16 @@
 import { type AuthFunctions, type GenericCtx, createClient } from '@convex-dev/better-auth';
-import { requireActionCtx } from '@convex-dev/better-auth/utils';
+import { isRunMutationCtx, requireActionCtx } from '@convex-dev/better-auth/utils';
 import { components, internal } from './_generated/api';
 import type { DataModel } from './_generated/dataModel';
 import authSchema from './betterAuth/schema';
 import authConfig from './auth.config';
 
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
-import { emailOTP, magicLink, organization, deviceAuthorization } from 'better-auth/plugins';
+import { admin, emailOTP, magicLink, organization, deviceAuthorization } from 'better-auth/plugins';
 import { apiKey } from '@better-auth/api-key';
 
 // Emails
@@ -25,6 +26,16 @@ import {
 // Constants
 import { AUTH_CONSTANTS } from './auth.constants';
 import { getBetterAuthBaseUrl, getBetterAuthFallbackUrl, resolveRequestBaseUrl } from './url';
+import { getAdminUserIds, isAppAdminUser } from './model/admin/roles';
+
+/**
+ * Admin plugin endpoints the browser may call over HTTP. Impersonation has to run there, since it
+ * swaps the session cookies; the hook below refuses to impersonate admins. Every other admin
+ * action goes through the `admin/*` Convex functions, which add the checks Better Auth lacks:
+ * admins can't act on other admins or on `ADMIN_USER_IDS` admins, and session tokens stay on the
+ * server.
+ */
+const ADMIN_HTTP_ENDPOINTS = ['/admin/impersonate-user', '/admin/stop-impersonating'];
 
 // Typesafe way to pass Convex functions defined in this file
 const authFunctions: AuthFunctions = internal.auth;
@@ -68,9 +79,27 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 				if (AUTH_CONSTANTS.organizations) {
 					await ctx.runMutation(components.betterAuth.organization.deleteUser, authUser);
 				}
+				// Even with apiKeys off: keys created before still verify once it's turned back on
+				await ctx.runMutation(components.betterAuth.user.deleteApiKeys, {
+					referenceId: authUser._id
+				});
 			}
 		},
 		session: {
+			// Better Auth refreshes sessions it finds in Convex mutations with the normal 7 day expiry. It
+			// skips that for an admin impersonation (1 hour) only when the browser sends its
+			// `dont_remember` cookie, which Convex's bearer token doesn't carry, so keep the original expiry
+			onUpdate: async (ctx, newSession, oldSession) => {
+				if (newSession.impersonatedBy && newSession.expiresAt > oldSession.expiresAt) {
+					await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+						input: {
+							model: 'session',
+							where: [{ field: '_id', value: newSession._id }],
+							update: { expiresAt: oldSession.expiresAt }
+						}
+					});
+				}
+			},
 			onCreate: async (ctx, session) => {
 				if (!session.activeOrganizationId && AUTH_CONSTANTS.organizations) {
 					await ctx.runMutation(components.betterAuth.organization.setActiveOrganization, {
@@ -86,7 +115,7 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
-  const betterAuthFallbackUrl = getBetterAuthFallbackUrl();
+	const betterAuthFallbackUrl = getBetterAuthFallbackUrl();
 	const deviceVerificationUri = betterAuthFallbackUrl
 		? new URL('/device', betterAuthFallbackUrl).toString()
 		: undefined;
@@ -255,6 +284,15 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 				clientSecret: process.env.ZOOM_CLIENT_SECRET as string
 			}
 		},
+		session: {
+			// Queries can't write, so the session refresh Better Auth attempts there fails, and so does
+			// the session lookup. The Convex plugin skips the refresh in queries with an injected
+			// `disableRefresh` query parameter, but endpoints that validate their query strip it (the
+			// api-key plugin's list endpoint, which 401'd for admin impersonation sessions, as those
+			// always look due for a refresh)
+			disableSessionRefresh: !isRunMutationCtx(ctx)
+		},
+
 		account: {
 			accountLinking: {
 				allowDifferentEmails: true
@@ -286,6 +324,33 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 					});
 				}
 			}
+		},
+
+		hooks: {
+			before: createAuthMiddleware(async (ctx) => {
+				// `ctx.request` is only set for HTTP requests, not for `auth.api.*` calls from Convex
+				if (
+					ctx.request &&
+					ctx.path.startsWith('/admin/') &&
+					!ADMIN_HTTP_ENDPOINTS.includes(ctx.path)
+				) {
+					throw new APIError('NOT_FOUND');
+				}
+				// Better Auth lets ADMIN_USER_IDS admins impersonate anyone, admins included
+				if (ctx.path === '/admin/impersonate-user') {
+					// Better Auth coerces any userId to a string later, ["<id>"] included, so check the exact
+					// value it will use
+					const userId = (ctx.body as { userId?: unknown } | undefined)?.userId;
+					if (typeof userId !== 'string') {
+						throw new APIError('BAD_REQUEST', { message: 'userId must be a string.' });
+					}
+					const target = await ctx.context.internalAdapter.findUserById(userId);
+					const role = (target as { role?: string | null } | null)?.role;
+					if (target && isAppAdminUser({ id: target.id, role })) {
+						throw new APIError('FORBIDDEN', { message: "You can't impersonate admins." });
+					}
+				}
+			})
 		},
 
 		plugins: [
@@ -357,11 +422,21 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 					]
 				: []),
 			...(AUTH_CONSTANTS.apiKeys ? [apiKey()] : []),
+			...(AUTH_CONSTANTS.admin
+				? [
+						admin({
+							// The very first admin must be bootstrapped via the ADMIN_USER_IDS env var
+							// (comma-separated Better Auth user ids). Once one admin exists, they can
+							// promote others from the admin dashboard. See model/admin/roles.ts.
+							adminUserIds: getAdminUserIds()
+						})
+					]
+				: []),
 			...(AUTH_CONSTANTS.deviceAuthorization
 				? [
 						deviceAuthorization({
 							expiresIn: '7d', // Device code expiration time
-              verificationUri: deviceVerificationUri
+							verificationUri: deviceVerificationUri
 						})
 					]
 				: [])
