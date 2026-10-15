@@ -358,7 +358,7 @@
 					{/each}
 				</tbody>
 			</table>
-			{#if searchQuery && users.length >= USERS_PAGE_SIZE}
+			{#if searchQuery && !isStale && users.length >= USERS_PAGE_SIZE}
 				<p class="text-surface-600-400 py-3 text-center text-xs">
 					Showing the first {USERS_PAGE_SIZE} matches. Refine your search to narrow them down.
 				</p>

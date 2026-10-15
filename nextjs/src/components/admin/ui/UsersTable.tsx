@@ -365,7 +365,7 @@ export default function UsersTable() {
 							))}
 						</tbody>
 					</table>
-					{searchQuery && users.length >= USERS_PAGE_SIZE ? (
+					{searchQuery && !isStale && users.length >= USERS_PAGE_SIZE ? (
 						<p className="text-surface-600-400 py-3 text-center text-xs">
 							Showing the first {USERS_PAGE_SIZE} matches. Refine your search to narrow them down.
 						</p>
