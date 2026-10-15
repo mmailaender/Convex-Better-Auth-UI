@@ -1,5 +1,5 @@
 import { type AuthFunctions, type GenericCtx, createClient } from '@convex-dev/better-auth';
-import { requireActionCtx } from '@convex-dev/better-auth/utils';
+import { isRunMutationCtx, requireActionCtx } from '@convex-dev/better-auth/utils';
 import { components, internal } from './_generated/api';
 import type { DataModel } from './_generated/dataModel';
 import authSchema from './betterAuth/schema';
@@ -79,11 +79,10 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 				if (AUTH_CONSTANTS.organizations) {
 					await ctx.runMutation(components.betterAuth.organization.deleteUser, authUser);
 				}
-				if (AUTH_CONSTANTS.apiKeys) {
-					await ctx.runMutation(components.betterAuth.user.deleteApiKeys, {
-						referenceId: authUser._id
-					});
-				}
+				// Even with apiKeys off: keys created before still verify once it's turned back on
+				await ctx.runMutation(components.betterAuth.user.deleteApiKeys, {
+					referenceId: authUser._id
+				});
 			}
 		},
 		session: {
@@ -271,6 +270,15 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 				clientSecret: process.env.ZOOM_CLIENT_SECRET as string
 			}
 		},
+		session: {
+			// Queries can't write, so the session refresh Better Auth attempts there fails, and so does
+			// the session lookup. The Convex plugin skips the refresh in queries with an injected
+			// `disableRefresh` query parameter, but endpoints that validate their query strip it (the
+			// api-key plugin's list endpoint, which 401'd for admin impersonation sessions, as those
+			// always look due for a refresh)
+			disableSessionRefresh: !isRunMutationCtx(ctx)
+		},
+
 		account: {
 			accountLinking: {
 				allowDifferentEmails: true
@@ -316,11 +324,13 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 				}
 				// Better Auth lets ADMIN_USER_IDS admins impersonate anyone, admins included
 				if (ctx.path === '/admin/impersonate-user') {
+					// Better Auth coerces any userId to a string later, ["<id>"] included, so check the exact
+					// value it will use
 					const userId = (ctx.body as { userId?: unknown } | undefined)?.userId;
-					const target =
-						typeof userId === 'string'
-							? await ctx.context.internalAdapter.findUserById(userId)
-							: null;
+					if (typeof userId !== 'string') {
+						throw new APIError('BAD_REQUEST', { message: 'userId must be a string.' });
+					}
+					const target = await ctx.context.internalAdapter.findUserById(userId);
 					const role = (target as { role?: string | null } | null)?.role;
 					if (target && isAppAdminUser({ id: target.id, role })) {
 						throw new APIError('FORBIDDEN', { message: "You can't impersonate admins." });

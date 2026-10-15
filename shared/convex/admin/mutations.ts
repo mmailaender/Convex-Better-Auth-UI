@@ -129,6 +129,17 @@ export const banUser = mutation({
 				},
 				headers: await authComponent.getHeaders(ctx)
 			});
+			// Better Auth leaves banExpires alone for a permanent ban, so an expired earlier ban
+			// would lift this one at the next sign-in
+			if (args.banExpiresIn === undefined) {
+				await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+					input: {
+						model: 'user',
+						where: [{ field: '_id', value: args.userId }],
+						update: { banExpires: null }
+					}
+				});
+			}
 			return null;
 		} catch (error) {
 			return toConvexError(error);
