@@ -10,6 +10,8 @@
 
 import type * as adapter from "../adapter.js";
 import type * as adminOrganizations from "../adminOrganizations.js";
+import type * as adminUsers from "../adminUsers.js";
+import type * as generatedSchema from "../generatedSchema.js";
 import type * as organization from "../organization.js";
 import type * as user from "../user.js";
 
@@ -23,6 +25,8 @@ import { anyApi, componentsGeneric } from "convex/server";
 const fullApi: ApiFromModules<{
   adapter: typeof adapter;
   adminOrganizations: typeof adminOrganizations;
+  adminUsers: typeof adminUsers;
+  generatedSchema: typeof generatedSchema;
   organization: typeof organization;
   user: typeof user;
 }> = anyApi as any;

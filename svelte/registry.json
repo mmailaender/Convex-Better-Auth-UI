@@ -233,7 +233,9 @@
 					"path": "src/routes/+layout.svelte",
 					"relativePath": "src/routes/+layout.svelte",
 					"_imports_": [],
-					"registryDependencies": [],
+					"registryDependencies": [
+						"admin/lib"
+					],
 					"dependencies": [
 						{
 							"ecosystem": "js",
@@ -406,9 +408,29 @@
 				{
 					"type": "base",
 					"role": "file",
+					"path": "src/convex/betterAuth/generatedSchema.ts",
+					"relativePath": "src/convex/betterAuth/generatedSchema.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
 					"path": "src/convex/betterAuth/schema.ts",
 					"relativePath": "src/convex/betterAuth/schema.ts",
-					"_imports_": [],
+					"_imports_": [
+						{
+							"import": "./generatedSchema",
+							"item": "base",
+							"file": {
+								"type": "base",
+								"path": "src/convex/betterAuth/generatedSchema.ts"
+							},
+							"meta": {}
+						}
+					],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -6260,6 +6282,7 @@
 							"meta": {}
 						}
 					],
+					"target": "src/routes/admin/+page.svelte",
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []

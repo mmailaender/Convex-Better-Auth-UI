@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from 'convex/react';
+import { useMutation, usePaginatedQuery } from 'convex/react';
 import { toast } from 'sonner';
 import { EllipsisVertical, Loader2, Search } from 'lucide-react';
 
@@ -14,7 +14,7 @@ import * as Password from '@/components/primitives/ui/password';
 import { authClient } from '@/lib/auth/api/auth-client';
 import { useActiveUserData } from '@/lib/auth/hooks';
 import CreateUser from '@/components/admin/ui/CreateUser';
-import { USERS_MAX, USERS_PAGE_SIZE } from '@/components/admin/utils/admin.constants';
+import { USERS_PAGE_SIZE } from '@/components/admin/utils/admin.constants';
 import type { AdminUser, AppRole } from '@/components/admin/types';
 
 const BAN_DURATIONS = [
@@ -46,7 +46,6 @@ export default function UsersTable() {
 	const activeUser = useActiveUserData();
 	const [searchInput, setSearchInput] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [limit, setLimit] = useState(USERS_PAGE_SIZE);
 
 	// Search runs 250ms after the last keystroke instead of on every one
 	useEffect(() => {
@@ -54,15 +53,15 @@ export default function UsersTable() {
 		return () => clearTimeout(timer);
 	}, [searchInput]);
 
-	const result = useQuery(api.admin.queries.listUsers, {
-		searchValue: searchQuery || undefined,
-		limit
-	});
-	// Keep showing the previous result while a new search or page loads
-	const [data, setData] = useState(result);
-	if (result !== undefined && result !== data) setData(result);
-	const isStale = result === undefined && data !== undefined;
-	const users = data?.users ?? [];
+	const { results, status, loadMore } = usePaginatedQuery(
+		api.admin.queries.listUsers,
+		{ searchValue: searchQuery || undefined },
+		{ initialNumItems: USERS_PAGE_SIZE }
+	);
+	// Keep showing the previous results, dimmed, while a new search loads
+	const [users, setUsers] = useState(results);
+	if (status !== 'LoadingFirstPage' && results !== users) setUsers(results);
+	const isStale = status === 'LoadingFirstPage' && users.length > 0;
 
 	// Mutations
 	const setRole = useMutation(api.admin.mutations.setRole);
@@ -214,15 +213,10 @@ export default function UsersTable() {
 						onChange={(e) => setSearchInput(e.target.value)}
 					/>
 				</div>
-				{data ? (
-					<span className="text-surface-600-400 hidden text-xs whitespace-nowrap sm:inline">
-						{data.total} {data.total === 1 ? 'user' : 'users'}
-					</span>
-				) : null}
 				<CreateUser />
 			</div>
 
-			{!data ? (
+			{status === 'LoadingFirstPage' && users.length === 0 ? (
 				<div className="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
 					<Loader2 className="size-4 animate-spin" aria-hidden="true" />
 					Loading users...
@@ -371,13 +365,18 @@ export default function UsersTable() {
 							))}
 						</tbody>
 					</table>
-					{data.hasMore && limit < USERS_MAX ? (
+					{searchQuery && users.length >= USERS_PAGE_SIZE ? (
+						<p className="text-surface-600-400 py-3 text-center text-xs">
+							Showing the first {USERS_PAGE_SIZE} matches. Refine your search to narrow them down.
+						</p>
+					) : null}
+					{status === 'CanLoadMore' || status === 'LoadingMore' ? (
 						<div className="flex justify-center py-3">
 							<button
 								type="button"
 								className="btn preset-tonal"
-								onClick={() => setLimit(Math.min(limit + USERS_PAGE_SIZE, USERS_MAX))}
-								disabled={isStale}
+								onClick={() => loadMore(USERS_PAGE_SIZE)}
+								disabled={status === 'LoadingMore'}
 							>
 								Load more
 							</button>

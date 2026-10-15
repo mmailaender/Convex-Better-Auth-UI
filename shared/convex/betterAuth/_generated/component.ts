@@ -2092,6 +2092,69 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         Name
       >;
     };
+    adminUsers: {
+      listUsers: FunctionReference<
+        "query",
+        "internal",
+        {
+          paginationOpts: {
+            cursor: string | null;
+            endCursor?: string | null;
+            id?: number;
+            maximumBytesRead?: number;
+            maximumRowsRead?: number;
+            numItems: number;
+          };
+        },
+        {
+          continueCursor: string;
+          isDone: boolean;
+          page: Array<{
+            _creationTime: number;
+            _id: string;
+            activeOrganizationId?: null | string;
+            banExpires?: null | number;
+            banReason?: null | string;
+            banned?: null | boolean;
+            createdAt: number;
+            email: string;
+            emailVerified: boolean;
+            image?: null | string;
+            imageId?: null | string;
+            name: string;
+            role?: null | string;
+            updatedAt: number;
+            userId?: null | string;
+          }>;
+          pageStatus?: "SplitRecommended" | "SplitRequired" | null;
+          splitCursor?: string | null;
+        },
+        Name
+      >;
+      searchUsers: FunctionReference<
+        "query",
+        "internal",
+        { limit: number; search: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          activeOrganizationId?: null | string;
+          banExpires?: null | number;
+          banReason?: null | string;
+          banned?: null | boolean;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageId?: null | string;
+          name: string;
+          role?: null | string;
+          updatedAt: number;
+          userId?: null | string;
+        }>,
+        Name
+      >;
+    };
     organization: {
       deleteUser: FunctionReference<
         "mutation",

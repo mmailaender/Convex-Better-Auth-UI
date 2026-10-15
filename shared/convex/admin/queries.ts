@@ -1,5 +1,5 @@
 import { query } from '../_generated/server';
-import { ConvexError, v } from 'convex/values';
+import { ConvexError, v, type Validator } from 'convex/values';
 import { paginationOptsValidator } from 'convex/server';
 import { APIError } from 'better-auth/api';
 
@@ -64,8 +64,19 @@ const adminUserValidator = v.object({
 	isBootstrapAdmin: v.boolean()
 });
 
-type BetterAuthUser = {
-	id: string;
+const paginatedValidator = <T extends Validator<unknown, 'required', string>>(item: T) =>
+	v.object({
+		page: v.array(item),
+		isDone: v.boolean(),
+		continueCursor: v.string(),
+		splitCursor: v.optional(v.union(v.string(), v.null())),
+		pageStatus: v.optional(
+			v.union(v.literal('SplitRecommended'), v.literal('SplitRequired'), v.null())
+		)
+	});
+
+type UserDoc = {
+	_id: string;
 	name: string;
 	email: string;
 	emailVerified: boolean;
@@ -73,111 +84,64 @@ type BetterAuthUser = {
 	role?: string | null;
 	banned?: boolean | null;
 	banReason?: string | null;
-	banExpires?: Date | number | string | null;
-	createdAt: Date | number | string;
+	banExpires?: number | null;
+	createdAt: number;
 };
 
 const toMillis = (value: Date | number | string | null | undefined): number | null =>
 	value == null ? null : new Date(value).getTime();
 
 /**
- * List users in the deployment, newest first (admin only). Wraps the Better Auth
- * admin `listUsers` endpoint.
+ * List users, newest first (admin only), in pages for `usePaginatedQuery`.
  *
- * `searchValue` matches users whose name or email contains it. The Convex
- * adapter compares case-sensitively and only supports one search field per
- * call, so this runs one search on the name as typed and one on the lowercased
- * email (Better Auth stores emails lowercased) and merges the results.
- *
- * Page by raising `limit` (capped at 1000): the Convex adapter doesn't support
- * offsets.
+ * With `searchValue`, returns the users whose name or email contains every
+ * word of it (each word starting a word there) as a single page of at most
+ * `paginationOpts.numItems` (capped at 100), best matches first. Search results
+ * don't page, so a full page means there may be more: refine the search.
  */
 export const listUsers = query({
 	args: {
-		searchValue: v.optional(v.string()),
-		limit: v.optional(v.number())
+		paginationOpts: paginationOptsValidator,
+		searchValue: v.optional(v.string())
 	},
-	returns: v.object({
-		users: v.array(adminUserValidator),
-		/** Number of matching users; a lower bound while `hasMore` is set during a search */
-		total: v.number(),
-		hasMore: v.boolean()
-	}),
+	returns: paginatedValidator(adminUserValidator),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
-		const auth = createAuth(ctx);
-		const headers = await authComponent.getHeaders(ctx);
-		const limit = Math.min(Math.max(args.limit ?? 50, 1), 1000);
 		const search = args.searchValue?.trim();
+		const result = search
+			? {
+					page: await ctx.runQuery(components.betterAuth.adminUsers.searchUsers, {
+						search,
+						limit: Math.min(args.paginationOpts.numItems, 100)
+					}),
+					isDone: true,
+					continueCursor: ''
+				}
+			: await ctx.runQuery(components.betterAuth.adminUsers.listUsers, {
+					paginationOpts: args.paginationOpts
+				});
 
-		const list = async (where?: { field: 'name' | 'email'; value: string }) => {
-			const result = await auth.api.listUsers({
-				query: {
-					...(where
-						? { searchField: where.field, searchOperator: 'contains', searchValue: where.value }
-						: {}),
-					limit,
-					sortBy: 'createdAt',
-					sortDirection: 'desc'
-				},
-				headers
-			});
-			return { users: result.users as BetterAuthUser[], total: result.total };
-		};
-
-		try {
-			let users: BetterAuthUser[];
-			let total: number;
-			let hasMore: boolean;
-
-			if (search) {
-				const [byName, byEmail] = await Promise.all([
-					list({ field: 'name', value: search }),
-					list({ field: 'email', value: search.toLowerCase() })
-				]);
-				const merged = new Map<string, BetterAuthUser>();
-				for (const user of [...byName.users, ...byEmail.users]) merged.set(user.id, user);
-				users = [...merged.values()]
-					.sort((a, b) => (toMillis(b.createdAt) ?? 0) - (toMillis(a.createdAt) ?? 0))
-					.slice(0, limit);
-				hasMore = merged.size > limit || byName.total > limit || byEmail.total > limit;
-				total = Math.max(merged.size, byName.total, byEmail.total);
-			} else {
-				({ users, total } = await list());
-				hasMore = total > users.length;
-			}
-
-			const bootstrapAdminIds = getAdminUserIds();
-			const now = Date.now();
+		const bootstrapAdminIds = getAdminUserIds();
+		const now = Date.now();
+		const toAdminUser = (user: UserDoc) => {
+			// Better Auth only lifts an expired ban when the user next signs in
+			const banned = Boolean(user.banned) && (user.banExpires == null || user.banExpires > now);
 			return {
-				users: users.map((user) => {
-					const banExpires = toMillis(user.banExpires);
-					// Better Auth only lifts an expired ban when the user next signs in
-					const banned = Boolean(user.banned) && (banExpires === null || banExpires > now);
-					return {
-						id: user.id,
-						name: user.name,
-						email: user.email,
-						emailVerified: Boolean(user.emailVerified),
-						image: user.image ?? null,
-						role: user.role ?? null,
-						banned,
-						banReason: banned ? (user.banReason ?? null) : null,
-						banExpires: banned ? banExpires : null,
-						createdAt: toMillis(user.createdAt) ?? 0,
-						isAppAdmin: isAppAdminUser({ id: user.id, role: user.role }),
-						isBootstrapAdmin: bootstrapAdminIds.includes(user.id)
-					};
-				}),
-				total,
-				hasMore
+				id: user._id,
+				name: user.name,
+				email: user.email,
+				emailVerified: user.emailVerified,
+				image: user.image ?? null,
+				role: user.role ?? null,
+				banned,
+				banReason: banned ? (user.banReason ?? null) : null,
+				banExpires: banned ? (user.banExpires ?? null) : null,
+				createdAt: user.createdAt,
+				isAppAdmin: isAppAdminUser({ id: user._id, role: user.role }),
+				isBootstrapAdmin: bootstrapAdminIds.includes(user._id)
 			};
-		} catch (error) {
-			if (error instanceof APIError) {
-				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
-			}
-			throw error;
-		}
+		};
+		return { ...result, page: result.page.map(toAdminUser) };
 	}
 });
 
@@ -253,15 +217,7 @@ const toAdminOrganization = (organization: {
  */
 export const listAllOrganizations = query({
 	args: { paginationOpts: paginationOptsValidator },
-	returns: v.object({
-		page: v.array(adminOrganizationValidator),
-		isDone: v.boolean(),
-		continueCursor: v.string(),
-		splitCursor: v.optional(v.union(v.string(), v.null())),
-		pageStatus: v.optional(
-			v.union(v.literal('SplitRecommended'), v.literal('SplitRequired'), v.null())
-		)
-	}),
+	returns: paginatedValidator(adminOrganizationValidator),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		if (!AUTH_CONSTANTS.organizations) {

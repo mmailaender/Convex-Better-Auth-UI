@@ -3,10 +3,9 @@
  * To regenerate the schema, from your project root:
  *
  *   cd src/convex/betterAuth
- *   npx auth generate
+ *   npx auth generate --output generatedSchema.ts
  *
- * To customize the schema, generate to an alternate file and import
- * the table definitions to your schema file. See
+ * Custom indexes go in schema.ts, which builds on these tables. See
  * https://labs.convex.dev/better-auth/features/local-install#adding-custom-indexes.
  */
 

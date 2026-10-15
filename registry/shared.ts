@@ -99,6 +99,9 @@ export function createConvexBaseFiles(path = 'src/convex') {
 						path: 'convex.config.ts'
 					},
 					{
+						path: 'generatedSchema.ts'
+					},
+					{
 						path: 'schema.ts'
 					}
 				]

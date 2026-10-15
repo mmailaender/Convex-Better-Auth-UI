@@ -16,12 +16,12 @@
 	// Components
 	import CreateUser from '#lib/admin/ui/CreateUser.svelte';
 	// API
-	import { useQuery, useConvexClient } from 'convex-svelte';
+	import { useQuery, useConvexClient, usePaginatedQuery } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	import { toast } from 'svelte-sonner';
 	// Constants
-	import { USERS_MAX, USERS_PAGE_SIZE } from '#lib/admin/utils/admin.constants.js';
+	import { USERS_PAGE_SIZE } from '#lib/admin/utils/admin.constants.js';
 	// Types
 	import type { AdminUser, AppRole } from '#lib/admin/types.js';
 
@@ -52,19 +52,20 @@
 		const timer = setTimeout(() => (searchQuery = value), 250);
 		return () => clearTimeout(timer);
 	});
-	let limit = $state(USERS_PAGE_SIZE);
 
 	const activeUserResponse = useQuery(api.users.queries.getActiveUser, () =>
 		auth.isAuthenticated ? {} : 'skip'
 	);
 	const activeUser = $derived(activeUserResponse?.data);
 
-	const usersResponse = useQuery(
+	const usersQuery = usePaginatedQuery(
 		api.admin.queries.listUsers,
-		() => ({ searchValue: searchQuery || undefined, limit }),
-		{ keepPreviousData: true }
+		() => ({ searchValue: searchQuery || undefined }),
+		() => ({ initialNumItems: USERS_PAGE_SIZE, keepPreviousData: true })
 	);
-	const users = $derived(usersResponse.data?.users ?? []);
+	const users = $derived(usersQuery.results);
+	// While a new search loads, the previous results stay on screen, dimmed
+	const isStale = $derived(usersQuery.status === 'LoadingFirstPage' && users.length > 0);
 
 	// Dialog state
 	let selectedUser = $state<AdminUser | null>(null);
@@ -212,18 +213,12 @@
 				bind:value={searchInput}
 			/>
 		</div>
-		{#if usersResponse.data}
-			<span class="text-surface-600-400 hidden text-xs whitespace-nowrap sm:inline">
-				{usersResponse.data.total}
-				{usersResponse.data.total === 1 ? 'user' : 'users'}
-			</span>
-		{/if}
 		<CreateUser />
 	</div>
 
-	{#if usersResponse.error}
-		<div class="text-error-600-400 p-4 text-sm">{usersResponse.error.message}</div>
-	{:else if !usersResponse.data}
+	{#if usersQuery.error}
+		<div class="text-error-600-400 p-4 text-sm">{usersQuery.error.message}</div>
+	{:else if usersQuery.status === 'LoadingFirstPage' && users.length === 0}
 		<div class="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
 			<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
 			Loading users...
@@ -235,7 +230,7 @@
 	{:else}
 		<div
 			class="max-h-[calc(80vh-12rem)] overflow-y-auto pb-12 transition-opacity"
-			class:opacity-60={usersResponse.isStale}
+			class:opacity-60={isStale}
 		>
 			<table class="table w-full">
 				<thead class="bg-surface-50-950 sticky top-0 z-20">
@@ -363,13 +358,18 @@
 					{/each}
 				</tbody>
 			</table>
-			{#if usersResponse.data.hasMore && limit < USERS_MAX}
+			{#if searchQuery && users.length >= USERS_PAGE_SIZE}
+				<p class="text-surface-600-400 py-3 text-center text-xs">
+					Showing the first {USERS_PAGE_SIZE} matches. Refine your search to narrow them down.
+				</p>
+			{/if}
+			{#if usersQuery.status === 'CanLoadMore' || usersQuery.status === 'LoadingMore'}
 				<div class="flex justify-center py-3">
 					<button
 						type="button"
 						class="btn preset-tonal"
-						onclick={() => (limit = Math.min(limit + USERS_PAGE_SIZE, USERS_MAX))}
-						disabled={usersResponse.isStale}
+						onclick={() => usersQuery.loadMore(USERS_PAGE_SIZE)}
+						disabled={usersQuery.status === 'LoadingMore'}
 					>
 						Load more
 					</button>

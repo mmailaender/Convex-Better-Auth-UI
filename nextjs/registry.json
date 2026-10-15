@@ -231,7 +231,9 @@
 					"path": "src/app/layout.tsx",
 					"relativePath": "src/app/layout.tsx",
 					"_imports_": [],
-					"registryDependencies": [],
+					"registryDependencies": [
+						"admin/lib"
+					],
 					"dependencies": [],
 					"devDependencies": []
 				},
@@ -345,6 +347,16 @@
 					"role": "file",
 					"path": "src/convex/betterAuth/convex.config.ts",
 					"relativePath": "src/convex/betterAuth/convex.config.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/convex/betterAuth/generatedSchema.ts",
+					"relativePath": "src/convex/betterAuth/generatedSchema.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -1597,6 +1609,16 @@
 			],
 			"devDependencies": [],
 			"files": [
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/api/hooks.ts",
+					"relativePath": "src/components/admin/api/hooks.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
 				{
 					"type": "components",
 					"role": "file",
