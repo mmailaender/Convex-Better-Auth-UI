@@ -6,6 +6,7 @@ import authSchema from './betterAuth/schema';
 import authConfig from './auth.config';
 
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 
 // Plugins
 import { convex } from '@convex-dev/better-auth/plugins';
@@ -25,6 +26,15 @@ import {
 // Constants
 import { AUTH_CONSTANTS } from './auth.constants';
 import { getBetterAuthBaseUrl, getBetterAuthFallbackUrl, resolveRequestBaseUrl } from './url';
+
+/**
+ * Admin plugin endpoints the browser may call over HTTP. Impersonation has to run there, since it
+ * swaps the session cookies, and Better Auth refuses to impersonate admins. Every other admin
+ * action goes through the `admin/*` Convex functions, which add the checks Better Auth lacks:
+ * admins can't act on other admins or on `ADMIN_USER_IDS` admins, and session tokens stay on the
+ * server.
+ */
+const ADMIN_HTTP_ENDPOINTS = ['/admin/impersonate-user', '/admin/stop-impersonating'];
 
 // Typesafe way to pass Convex functions defined in this file
 const authFunctions: AuthFunctions = internal.auth;
@@ -286,6 +296,19 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 					});
 				}
 			}
+		},
+
+		hooks: {
+			before: createAuthMiddleware(async (ctx) => {
+				// `ctx.request` is only set for HTTP requests, not for `auth.api.*` calls from Convex
+				if (
+					ctx.request &&
+					ctx.path.startsWith('/admin/') &&
+					!ADMIN_HTTP_ENDPOINTS.includes(ctx.path)
+				) {
+					throw new APIError('NOT_FOUND');
+				}
+			})
 		},
 
 		plugins: [

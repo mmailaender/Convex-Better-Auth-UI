@@ -1,6 +1,7 @@
 import { ConvexError, v } from 'convex/values';
 import { authComponent } from '../../auth';
 import { components } from '../../_generated/api';
+import { AUTH_CONSTANTS } from '../../auth.constants';
 
 // Types
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
@@ -61,11 +62,15 @@ export const getIsAppAdmin = async (ctx: QueryCtx | MutationCtx): Promise<boolea
 /**
  * Defense-in-depth guard used by **every** admin Convex function. UI gating only
  * hides the surface; this is the real authorization boundary. Throws if the
- * caller is not an application admin.
+ * admin feature is off or the caller is not an application admin.
  *
  * @returns The authenticated admin user document.
  */
 export const requireAppAdmin = async (ctx: QueryCtx | MutationCtx) => {
+	// Admins keep their role when the feature is turned off, so check the toggle here too
+	if (!AUTH_CONSTANTS.admin) {
+		throw new ConvexError('The admin feature is disabled');
+	}
 	const user = await authComponent.safeGetAuthUser(ctx);
 	if (!user) {
 		throw new ConvexError('Not authenticated');
