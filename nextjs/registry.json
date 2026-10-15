@@ -107,6 +107,21 @@
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
+				},
+				{
+					"type": "convex",
+					"role": "file",
+					"path": "model/admin/roles.ts",
+					"relativePath": "src/convex/model/admin/roles.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex"
+						}
+					],
+					"devDependencies": []
 				}
 			]
 		},
@@ -1553,6 +1568,25 @@
 					"role": "file",
 					"path": "betterAuth/adminOrganizations.ts",
 					"relativePath": "src/convex/betterAuth/adminOrganizations.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex"
+						},
+						{
+							"ecosystem": "js",
+							"name": "convex-helpers"
+						}
+					],
+					"devDependencies": []
+				},
+				{
+					"type": "convex",
+					"role": "file",
+					"path": "betterAuth/adminUsers.ts",
+					"relativePath": "src/convex/betterAuth/adminUsers.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [

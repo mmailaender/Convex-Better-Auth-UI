@@ -16,12 +16,12 @@
 	// Components
 	import CreateUser from '#lib/admin/ui/CreateUser.svelte';
 	// API
-	import { useQuery, useConvexClient, usePaginatedQuery } from 'convex-svelte';
+	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	import { toast } from 'svelte-sonner';
 	// Constants
-	import { USERS_PAGE_SIZE } from '#lib/admin/utils/admin.constants.js';
+	import { LIST_MAX, USERS_PAGE_SIZE } from '#lib/admin/utils/admin.constants.js';
 	// Types
 	import type { AdminUser, AppRole } from '#lib/admin/types.js';
 
@@ -47,9 +47,13 @@
 	// Search runs 250ms after the last keystroke instead of on every one
 	let searchInput = $state('');
 	let searchQuery = $state('');
+	let limit = $state(USERS_PAGE_SIZE);
 	$effect(() => {
 		const value = searchInput.trim();
-		const timer = setTimeout(() => (searchQuery = value), 250);
+		const timer = setTimeout(() => {
+			searchQuery = value;
+			limit = USERS_PAGE_SIZE;
+		}, 250);
 		return () => clearTimeout(timer);
 	});
 
@@ -58,14 +62,16 @@
 	);
 	const activeUser = $derived(activeUserResponse?.data);
 
-	const usersQuery = usePaginatedQuery(
+	// "Load more" raises the limit of one reactive list instead of adding cursor pages, so users
+	// created or deleted meanwhile can't show twice or drop out
+	const usersQuery = useQuery(
 		api.admin.queries.listUsers,
-		() => ({ searchValue: searchQuery || undefined }),
-		() => ({ initialNumItems: USERS_PAGE_SIZE, keepPreviousData: true })
+		() => ({ searchValue: searchQuery || undefined, limit }),
+		{ keepPreviousData: true }
 	);
-	const users = $derived(usersQuery.results);
-	// While a new search loads, the previous results stay on screen, dimmed
-	const isStale = $derived(usersQuery.status === 'LoadingFirstPage' && users.length > 0);
+	const users = $derived(usersQuery.data?.users ?? []);
+	// While a new search or page loads, the previous results stay on screen, dimmed
+	const isStale = $derived(usersQuery.isStale);
 
 	// Dialog state
 	let selectedUser = $state<AdminUser | null>(null);
@@ -218,7 +224,7 @@
 
 	{#if usersQuery.error}
 		<div class="text-error-600-400 p-4 text-sm">{usersQuery.error.message}</div>
-	{:else if usersQuery.status === 'LoadingFirstPage' && users.length === 0}
+	{:else if !usersQuery.data}
 		<div class="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
 			<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
 			Loading users...
@@ -363,13 +369,17 @@
 					Showing the first {USERS_PAGE_SIZE} matches. Refine your search to narrow them down.
 				</p>
 			{/if}
-			{#if usersQuery.status === 'CanLoadMore' || usersQuery.status === 'LoadingMore'}
+			{#if usersQuery.data.hasMore && limit >= LIST_MAX}
+				<p class="text-surface-600-400 py-3 text-center text-xs">
+					Showing the newest {LIST_MAX} users. Search to find the others.
+				</p>
+			{:else if usersQuery.data.hasMore}
 				<div class="flex justify-center py-3">
 					<button
 						type="button"
 						class="btn preset-tonal"
-						onclick={() => usersQuery.loadMore(USERS_PAGE_SIZE)}
-						disabled={usersQuery.status === 'LoadingMore'}
+						onclick={() => (limit = Math.min(limit + USERS_PAGE_SIZE, LIST_MAX))}
+						disabled={isStale}
 					>
 						Load more
 					</button>

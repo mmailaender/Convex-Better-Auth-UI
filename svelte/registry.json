@@ -105,6 +105,21 @@
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
+				},
+				{
+					"type": "convex",
+					"role": "file",
+					"path": "model/admin/roles.ts",
+					"relativePath": "src/convex/model/admin/roles.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex"
+						}
+					],
+					"devDependencies": []
 				}
 			]
 		},
@@ -5800,6 +5815,25 @@
 						}
 					],
 					"devDependencies": []
+				},
+				{
+					"type": "convex",
+					"role": "file",
+					"path": "betterAuth/adminUsers.ts",
+					"relativePath": "src/convex/betterAuth/adminUsers.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex"
+						},
+						{
+							"ecosystem": "js",
+							"name": "convex-helpers"
+						}
+					],
+					"devDependencies": []
 				}
 			]
 		},
@@ -6088,6 +6122,15 @@
 							"file": {
 								"type": "lib",
 								"path": "auth/context.svelte.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/admin/utils/admin.constants.js",
+							"item": "admin/lib",
+							"file": {
+								"type": "lib",
+								"path": "admin/utils/admin.constants.ts"
 							},
 							"meta": {}
 						},

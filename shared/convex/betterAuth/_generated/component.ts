@@ -2055,20 +2055,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       listAllOrganizations: FunctionReference<
         "query",
         "internal",
+        { limit: number },
         {
-          paginationOpts: {
-            cursor: string | null;
-            endCursor?: string | null;
-            id?: number;
-            maximumBytesRead?: number;
-            maximumRowsRead?: number;
-            numItems: number;
-          };
-        },
-        {
-          continueCursor: string;
-          isDone: boolean;
-          page: Array<{
+          hasMore: boolean;
+          organizations: Array<{
             _creationTime: number;
             _id: string;
             createdAt: number;
@@ -2079,8 +2069,6 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             plans?: null | Array<string>;
             slug: string;
           }>;
-          pageStatus?: "SplitRecommended" | "SplitRequired" | null;
-          splitCursor?: string | null;
         },
         Name
       >;
@@ -2096,20 +2084,10 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       listUsers: FunctionReference<
         "query",
         "internal",
+        { limit: number },
         {
-          paginationOpts: {
-            cursor: string | null;
-            endCursor?: string | null;
-            id?: number;
-            maximumBytesRead?: number;
-            maximumRowsRead?: number;
-            numItems: number;
-          };
-        },
-        {
-          continueCursor: string;
-          isDone: boolean;
-          page: Array<{
+          hasMore: boolean;
+          users: Array<{
             _creationTime: number;
             _id: string;
             activeOrganizationId?: null | string;
@@ -2126,8 +2104,6 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             updatedAt: number;
             userId?: null | string;
           }>;
-          pageStatus?: "SplitRecommended" | "SplitRequired" | null;
-          splitCursor?: string | null;
         },
         Name
       >;
@@ -2205,6 +2181,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       >;
     };
     user: {
+      deleteApiKeys: FunctionReference<
+        "mutation",
+        "internal",
+        { referenceId: string },
+        null,
+        Name
+      >;
       getUserByEmail: FunctionReference<
         "query",
         "internal",

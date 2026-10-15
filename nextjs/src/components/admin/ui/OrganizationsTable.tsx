@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, usePaginatedQuery, useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { toast } from 'sonner';
 import { EllipsisVertical, Loader2 } from 'lucide-react';
 
@@ -10,6 +10,7 @@ import * as Avatar from '@/components/primitives/ui/avatar';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import * as Menu from '@/components/primitives/ui/menu';
 import { Portal } from '@ark-ui/react/portal';
+import { LIST_MAX } from '@/components/admin/utils/admin.constants';
 import type { AdminOrganization } from '@/components/admin/types';
 
 const PAGE_SIZE = 25;
@@ -26,12 +27,13 @@ const ROLE_BADGE: Record<string, string> = {
  * and the server functions).
  */
 export default function OrganizationsTable() {
-	const { results, status, loadMore } = usePaginatedQuery(
-		api.admin.queries.listAllOrganizations,
-		{},
-		{ initialNumItems: PAGE_SIZE }
-	);
-	const organizations = results ?? [];
+	// "Load more" raises the limit of one reactive list, like the users table
+	const [limit, setLimit] = useState(PAGE_SIZE);
+	const result = useQuery(api.admin.queries.listAllOrganizations, { limit });
+	// Keep showing the previous result while the next page loads
+	const [data, setData] = useState(result);
+	if (result !== undefined && result !== data) setData(result);
+	const organizations = data?.organizations ?? [];
 
 	const deleteOrganization = useMutation(api.admin.mutations.deleteOrganizationAsAdmin);
 
@@ -68,7 +70,7 @@ export default function OrganizationsTable() {
 
 	return (
 		<div className="flex h-full flex-col py-4">
-			{status === 'LoadingFirstPage' ? (
+			{!data ? (
 				<div className="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
 					<Loader2 className="size-4 animate-spin" aria-hidden="true" />
 					Loading organizations...
@@ -148,13 +150,17 @@ export default function OrganizationsTable() {
 							))}
 						</tbody>
 					</table>
-					{status === 'CanLoadMore' || status === 'LoadingMore' ? (
+					{data.hasMore && limit >= LIST_MAX ? (
+						<p className="text-surface-600-400 py-3 text-center text-xs">
+							Showing the newest {LIST_MAX} organizations.
+						</p>
+					) : data.hasMore ? (
 						<div className="flex justify-center py-3">
 							<button
 								type="button"
 								className="btn preset-tonal"
-								onClick={() => loadMore(PAGE_SIZE)}
-								disabled={status === 'LoadingMore'}
+								onClick={() => setLimit(Math.min(limit + PAGE_SIZE, LIST_MAX))}
+								disabled={result === undefined}
 							>
 								Load more
 							</button>

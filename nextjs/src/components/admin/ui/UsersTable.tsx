@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useMutation, usePaginatedQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { toast } from 'sonner';
 import { EllipsisVertical, Loader2, Search } from 'lucide-react';
 
@@ -14,7 +14,7 @@ import * as Password from '@/components/primitives/ui/password';
 import { authClient } from '@/lib/auth/api/auth-client';
 import { useActiveUserData } from '@/lib/auth/hooks';
 import CreateUser from '@/components/admin/ui/CreateUser';
-import { USERS_PAGE_SIZE } from '@/components/admin/utils/admin.constants';
+import { LIST_MAX, USERS_PAGE_SIZE } from '@/components/admin/utils/admin.constants';
 import type { AdminUser, AppRole } from '@/components/admin/types';
 
 const BAN_DURATIONS = [
@@ -46,22 +46,28 @@ export default function UsersTable() {
 	const activeUser = useActiveUserData();
 	const [searchInput, setSearchInput] = useState('');
 	const [searchQuery, setSearchQuery] = useState('');
+	const [limit, setLimit] = useState(USERS_PAGE_SIZE);
 
 	// Search runs 250ms after the last keystroke instead of on every one
 	useEffect(() => {
-		const timer = setTimeout(() => setSearchQuery(searchInput.trim()), 250);
+		const timer = setTimeout(() => {
+			setSearchQuery(searchInput.trim());
+			setLimit(USERS_PAGE_SIZE);
+		}, 250);
 		return () => clearTimeout(timer);
 	}, [searchInput]);
 
-	const { results, status, loadMore } = usePaginatedQuery(
-		api.admin.queries.listUsers,
-		{ searchValue: searchQuery || undefined },
-		{ initialNumItems: USERS_PAGE_SIZE }
-	);
-	// Keep showing the previous results, dimmed, while a new search loads
-	const [users, setUsers] = useState(results);
-	if (status !== 'LoadingFirstPage' && results !== users) setUsers(results);
-	const isStale = status === 'LoadingFirstPage' && users.length > 0;
+	// "Load more" raises the limit of one reactive list instead of adding cursor pages, so users
+	// created or deleted meanwhile can't show twice or drop out
+	const result = useQuery(api.admin.queries.listUsers, {
+		searchValue: searchQuery || undefined,
+		limit
+	});
+	// Keep showing the previous result, dimmed, while a new search or page loads
+	const [data, setData] = useState(result);
+	if (result !== undefined && result !== data) setData(result);
+	const isStale = result === undefined && data !== undefined;
+	const users = data?.users ?? [];
 
 	// Mutations
 	const setRole = useMutation(api.admin.mutations.setRole);
@@ -216,7 +222,7 @@ export default function UsersTable() {
 				<CreateUser />
 			</div>
 
-			{status === 'LoadingFirstPage' && users.length === 0 ? (
+			{!data ? (
 				<div className="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
 					<Loader2 className="size-4 animate-spin" aria-hidden="true" />
 					Loading users...
@@ -370,13 +376,17 @@ export default function UsersTable() {
 							Showing the first {USERS_PAGE_SIZE} matches. Refine your search to narrow them down.
 						</p>
 					) : null}
-					{status === 'CanLoadMore' || status === 'LoadingMore' ? (
+					{data.hasMore && limit >= LIST_MAX ? (
+						<p className="text-surface-600-400 py-3 text-center text-xs">
+							Showing the newest {LIST_MAX} users. Search to find the others.
+						</p>
+					) : data.hasMore ? (
 						<div className="flex justify-center py-3">
 							<button
 								type="button"
 								className="btn preset-tonal"
-								onClick={() => loadMore(USERS_PAGE_SIZE)}
-								disabled={status === 'LoadingMore'}
+								onClick={() => setLimit(Math.min(limit + USERS_PAGE_SIZE, LIST_MAX))}
+								disabled={isStale}
 							>
 								Load more
 							</button>

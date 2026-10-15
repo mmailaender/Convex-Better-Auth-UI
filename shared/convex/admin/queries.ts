@@ -1,6 +1,5 @@
 import { query } from '../_generated/server';
-import { ConvexError, v, type Validator } from 'convex/values';
-import { paginationOptsValidator } from 'convex/server';
+import { ConvexError, v } from 'convex/values';
 import { APIError } from 'better-auth/api';
 
 import { authComponent, createAuth } from '../auth';
@@ -64,16 +63,10 @@ const adminUserValidator = v.object({
 	isBootstrapAdmin: v.boolean()
 });
 
-const paginatedValidator = <T extends Validator<unknown, 'required', string>>(item: T) =>
-	v.object({
-		page: v.array(item),
-		isDone: v.boolean(),
-		continueCursor: v.string(),
-		splitCursor: v.optional(v.union(v.string(), v.null())),
-		pageStatus: v.optional(
-			v.union(v.literal('SplitRecommended'), v.literal('SplitRequired'), v.null())
-		)
-	});
+/** Most users or organizations a list loads; past that, admins search. */
+const LIST_LIMIT = 1000;
+
+const clampLimit = (limit: number) => Math.min(Math.max(Math.floor(limit), 1), LIST_LIMIT);
 
 type UserDoc = {
 	_id: string;
@@ -92,34 +85,32 @@ const toMillis = (value: Date | number | string | null | undefined): number | nu
 	value == null ? null : new Date(value).getTime();
 
 /**
- * List users, newest first (admin only), in pages for `usePaginatedQuery`.
+ * The newest `limit` users (admin only, at most 1000). "Load more" raises `limit`.
  *
  * With `searchValue`, returns the users whose name or email contains every
- * word of it (each word starting a word there) as a single page of at most
- * `paginationOpts.numItems` (capped at 100), best matches first. Search results
- * don't page, so a full page means there may be more: refine the search.
+ * word of it (each word starting a word there), best matches first, at most
+ * `limit` of them and capped at 100. Search results don't grow with `limit`
+ * past that: a full list means there may be more, so refine the search.
  */
 export const listUsers = query({
 	args: {
-		paginationOpts: paginationOptsValidator,
+		limit: v.number(),
 		searchValue: v.optional(v.string())
 	},
-	returns: paginatedValidator(adminUserValidator),
+	returns: v.object({ users: v.array(adminUserValidator), hasMore: v.boolean() }),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
+		const limit = clampLimit(args.limit);
 		const search = args.searchValue?.trim();
 		const result = search
 			? {
-					page: await ctx.runQuery(components.betterAuth.adminUsers.searchUsers, {
+					users: await ctx.runQuery(components.betterAuth.adminUsers.searchUsers, {
 						search,
-						limit: Math.min(args.paginationOpts.numItems, 100)
+						limit: Math.min(limit, 100)
 					}),
-					isDone: true,
-					continueCursor: ''
+					hasMore: false
 				}
-			: await ctx.runQuery(components.betterAuth.adminUsers.listUsers, {
-					paginationOpts: args.paginationOpts
-				});
+			: await ctx.runQuery(components.betterAuth.adminUsers.listUsers, { limit });
 
 		const bootstrapAdminIds = getAdminUserIds();
 		const now = Date.now();
@@ -141,7 +132,7 @@ export const listUsers = query({
 				isBootstrapAdmin: bootstrapAdminIds.includes(user._id)
 			};
 		};
-		return { ...result, page: result.page.map(toAdminUser) };
+		return { users: result.users.map(toAdminUser), hasMore: result.hasMore };
 	}
 });
 
@@ -210,24 +201,31 @@ const toAdminOrganization = (organization: {
 });
 
 /**
- * List every organization in the deployment, newest first (admin only).
+ * The newest `limit` organizations in the deployment (admin only, at most 1000).
+ * "Load more" raises `limit`.
  *
  * Gated behind both the `admin` and `organizations` feature toggles. Returns an
- * empty page when organizations are disabled so callers can render safely.
+ * empty list when organizations are disabled so callers can render safely.
  */
 export const listAllOrganizations = query({
-	args: { paginationOpts: paginationOptsValidator },
-	returns: paginatedValidator(adminOrganizationValidator),
+	args: { limit: v.number() },
+	returns: v.object({
+		organizations: v.array(adminOrganizationValidator),
+		hasMore: v.boolean()
+	}),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		if (!AUTH_CONSTANTS.organizations) {
-			return { page: [], isDone: true, continueCursor: '' };
+			return { organizations: [], hasMore: false };
 		}
 		const result = await ctx.runQuery(
 			components.betterAuth.adminOrganizations.listAllOrganizations,
-			{ paginationOpts: args.paginationOpts }
+			{ limit: clampLimit(args.limit) }
 		);
-		return { ...result, page: result.page.map(toAdminOrganization) };
+		return {
+			organizations: result.organizations.map(toAdminOrganization),
+			hasMore: result.hasMore
+		};
 	}
 });
 

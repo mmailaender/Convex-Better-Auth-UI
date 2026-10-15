@@ -8,9 +8,11 @@
 	import EllipsisVerticalIcon from '@lucide/svelte/icons/ellipsis-vertical';
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
 	// API
-	import { useQuery, useConvexClient, usePaginatedQuery } from 'convex-svelte';
+	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	import { toast } from 'svelte-sonner';
+	// Constants
+	import { LIST_MAX } from '#lib/admin/utils/admin.constants.js';
 	// Types
 	import type { AdminOrganization } from '#lib/admin/types.js';
 
@@ -19,12 +21,12 @@
 	const { api } = getAuthContext();
 	const client = useConvexClient();
 
-	const orgsQuery = usePaginatedQuery(
-		api.admin.queries.listAllOrganizations,
-		() => ({}),
-		() => ({ initialNumItems: PAGE_SIZE })
-	);
-	const organizations = $derived(orgsQuery.results ?? []);
+	// "Load more" raises the limit of one reactive list, like the users table
+	let limit = $state(PAGE_SIZE);
+	const orgsQuery = useQuery(api.admin.queries.listAllOrganizations, () => ({ limit }), {
+		keepPreviousData: true
+	});
+	const organizations = $derived(orgsQuery.data?.organizations ?? []);
 
 	let selectedOrg = $state<AdminOrganization | null>(null);
 	let membersOpen = $state(false);
@@ -63,7 +65,7 @@
 <div class="flex h-full flex-col py-4">
 	{#if orgsQuery.error}
 		<div class="text-error-600-400 p-4 text-sm">{orgsQuery.error.message}</div>
-	{:else if orgsQuery.status === 'LoadingFirstPage'}
+	{:else if !orgsQuery.data}
 		<div class="text-surface-600-400 flex items-center gap-2 p-4 text-sm" role="status">
 			<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
 			Loading organizations...
@@ -134,13 +136,17 @@
 					{/each}
 				</tbody>
 			</table>
-			{#if orgsQuery.status === 'CanLoadMore' || orgsQuery.status === 'LoadingMore'}
+			{#if orgsQuery.data.hasMore && limit >= LIST_MAX}
+				<p class="text-surface-600-400 py-3 text-center text-xs">
+					Showing the newest {LIST_MAX} organizations.
+				</p>
+			{:else if orgsQuery.data.hasMore}
 				<div class="flex justify-center py-3">
 					<button
 						type="button"
 						class="btn preset-tonal"
-						onclick={() => orgsQuery.loadMore(PAGE_SIZE)}
-						disabled={orgsQuery.status === 'LoadingMore'}
+						onclick={() => (limit = Math.min(limit + PAGE_SIZE, LIST_MAX))}
+						disabled={orgsQuery.isStale}
 					>
 						Load more
 					</button>

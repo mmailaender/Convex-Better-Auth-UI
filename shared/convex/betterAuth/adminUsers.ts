@@ -2,41 +2,34 @@
  * Component-side user functions used exclusively by the application admin
  * dashboard. They read the `user` table directly instead of going through
  * Better Auth's `listUsers` endpoint, which counts and filters by scanning the
- * whole table and can't page with a cursor.
+ * whole table.
  *
  * Authorization is enforced by the public `admin/*` wrappers via
  * `requireAppAdmin` before any of these functions are reached.
  */
 import { v } from 'convex/values';
-import { paginationOptsValidator } from 'convex/server';
 import { query } from './_generated/server';
 import { withSystemFields } from 'convex-helpers/validators';
-import { paginator } from 'convex-helpers/server/pagination';
 import schema from './schema';
 import { type Doc } from './_generated/dataModel';
 
 const userValidator = v.object(withSystemFields('user', schema.tables.user.validator.fields));
 
 /**
- * Every user, newest first.
+ * The newest `limit` users. Pages grow by raising `limit` rather than with
+ * cursors: components can't use the built-in `.paginate()`, and convex-helpers'
+ * paginator needs page boundaries the clients don't keep, so a user created or
+ * deleted after "Load more" would show twice or not at all.
  */
 export const listUsers = query({
-	args: { paginationOpts: paginationOptsValidator },
-	returns: v.object({
-		page: v.array(userValidator),
-		isDone: v.boolean(),
-		continueCursor: v.string(),
-		splitCursor: v.optional(v.union(v.string(), v.null())),
-		pageStatus: v.optional(
-			v.union(v.literal('SplitRecommended'), v.literal('SplitRequired'), v.null())
-		)
-	}),
+	args: { limit: v.number() },
+	returns: v.object({ users: v.array(userValidator), hasMore: v.boolean() }),
 	handler: async (ctx, args) => {
-		// Components can't use the built-in `.paginate()`, so page with convex-helpers' stream reader
-		return await paginator(ctx.db, schema)
+		const users = await ctx.db
 			.query('user')
 			.order('desc')
-			.paginate(args.paginationOpts);
+			.take(args.limit + 1);
+		return { users: users.slice(0, args.limit), hasMore: users.length > args.limit };
 	}
 });
 

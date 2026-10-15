@@ -10,10 +10,8 @@
  * `requireAppAdmin` before any of these functions are reached.
  */
 import { v } from 'convex/values';
-import { paginationOptsValidator } from 'convex/server';
 import { mutation, query, type MutationCtx } from './_generated/server';
 import { withSystemFields } from 'convex-helpers/validators';
-import { paginator } from 'convex-helpers/server/pagination';
 import schema from './schema';
 import { type Id } from './_generated/dataModel';
 
@@ -49,29 +47,28 @@ async function moveOffOrganization(
 }
 
 /**
- * List every organization in the deployment, newest first. Unlike
+ * The newest `limit` organizations in the deployment. Unlike
  * `organizations/queries.listOrganizations` (scoped to the caller's
- * memberships), this returns all organizations for the admin dashboard.
+ * memberships), this covers every organization, for the admin dashboard. Pages
+ * grow by raising `limit`, like `adminUsers.listUsers`.
  */
 export const listAllOrganizations = query({
-	args: { paginationOpts: paginationOptsValidator },
+	args: { limit: v.number() },
 	returns: v.object({
-		page: v.array(
+		organizations: v.array(
 			v.object(withSystemFields('organization', schema.tables.organization.validator.fields))
 		),
-		isDone: v.boolean(),
-		continueCursor: v.string(),
-		splitCursor: v.optional(v.union(v.string(), v.null())),
-		pageStatus: v.optional(
-			v.union(v.literal('SplitRecommended'), v.literal('SplitRequired'), v.null())
-		)
+		hasMore: v.boolean()
 	}),
 	handler: async (ctx, args) => {
-		// Components can't use the built-in `.paginate()`, so page with convex-helpers' stream reader
-		return await paginator(ctx.db, schema)
+		const organizations = await ctx.db
 			.query('organization')
 			.order('desc')
-			.paginate(args.paginationOpts);
+			.take(args.limit + 1);
+		return {
+			organizations: organizations.slice(0, args.limit),
+			hasMore: organizations.length > args.limit
+		};
 	}
 });
 
