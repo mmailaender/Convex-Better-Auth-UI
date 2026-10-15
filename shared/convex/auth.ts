@@ -26,10 +26,11 @@ import {
 // Constants
 import { AUTH_CONSTANTS } from './auth.constants';
 import { getBetterAuthBaseUrl, getBetterAuthFallbackUrl, resolveRequestBaseUrl } from './url';
+import { getAdminUserIds, isAppAdminUser } from './model/admin/roles';
 
 /**
  * Admin plugin endpoints the browser may call over HTTP. Impersonation has to run there, since it
- * swaps the session cookies, and Better Auth refuses to impersonate admins. Every other admin
+ * swaps the session cookies; the hook below refuses to impersonate admins. Every other admin
  * action goes through the `admin/*` Convex functions, which add the checks Better Auth lacks:
  * admins can't act on other admins or on `ADMIN_USER_IDS` admins, and session tokens stay on the
  * server.
@@ -77,6 +78,11 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 				}
 				if (AUTH_CONSTANTS.organizations) {
 					await ctx.runMutation(components.betterAuth.organization.deleteUser, authUser);
+				}
+				if (AUTH_CONSTANTS.apiKeys) {
+					await ctx.runMutation(components.betterAuth.user.deleteApiKeys, {
+						referenceId: authUser._id
+					});
 				}
 			}
 		},
@@ -308,6 +314,18 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 				) {
 					throw new APIError('NOT_FOUND');
 				}
+				// Better Auth lets ADMIN_USER_IDS admins impersonate anyone, admins included
+				if (ctx.path === '/admin/impersonate-user') {
+					const userId = (ctx.body as { userId?: unknown } | undefined)?.userId;
+					const target =
+						typeof userId === 'string'
+							? await ctx.context.internalAdapter.findUserById(userId)
+							: null;
+					const role = (target as { role?: string | null } | null)?.role;
+					if (target && isAppAdminUser({ id: target.id, role })) {
+						throw new APIError('FORBIDDEN', { message: "You can't impersonate admins." });
+					}
+				}
 			})
 		},
 
@@ -385,11 +403,8 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 						admin({
 							// The very first admin must be bootstrapped via the ADMIN_USER_IDS env var
 							// (comma-separated Better Auth user ids). Once one admin exists, they can
-							// promote others from the admin dashboard. See model/admin/index.ts.
-							adminUserIds: (process.env.ADMIN_USER_IDS ?? '')
-								.split(',')
-								.map((id) => id.trim())
-								.filter(Boolean)
+							// promote others from the admin dashboard. See model/admin/roles.ts.
+							adminUserIds: getAdminUserIds()
 						})
 					]
 				: []),

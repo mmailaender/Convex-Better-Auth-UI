@@ -56,6 +56,22 @@ export function createConfigItem() {
 			},
 			{
 				path: 'src/convex/auth.constants.types.ts'
+			},
+			{
+				// Imported by auth.ts to configure and guard the admin plugin
+				path: 'src/convex/model',
+				files: [
+					{
+						path: 'admin',
+						files: [
+							{
+								path: 'roles.ts',
+								dependencyResolution: manual,
+								dependencies: ['convex']
+							}
+						]
+					}
+				]
 			}
 		]
 	};
@@ -268,6 +284,11 @@ export function createAdminConvexItem() {
 				files: [
 					{
 						path: 'adminOrganizations.ts',
+						dependencyResolution: manual,
+						dependencies: ['convex', 'convex-helpers']
+					},
+					{
+						path: 'adminUsers.ts',
 						dependencyResolution: manual,
 						dependencies: ['convex', 'convex-helpers']
 					}

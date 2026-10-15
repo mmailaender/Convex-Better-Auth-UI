@@ -141,7 +141,7 @@ export const getOrganizationWithMembers = query({
 
 /**
  * Force-delete an organization and all of its dependent records (members,
- * invitations) regardless of the caller's membership.
+ * invitations, API keys) regardless of the caller's membership.
  *
  * Members whose active organization this was switch to another organization
  * they belong to (or none), on their user record and on their sessions, so
@@ -166,6 +166,14 @@ export const adminDeleteOrganization = mutation({
 		for await (const member of members) {
 			await moveOffOrganization(ctx, member.userId, args.organizationId);
 			await ctx.db.delete('member', member._id);
+		}
+
+		// Remove its API keys, which would otherwise keep verifying
+		const apiKeys = ctx.db
+			.query('apikey')
+			.withIndex('referenceId', (q) => q.eq('referenceId', args.organizationId));
+		for await (const apiKey of apiKeys) {
+			await ctx.db.delete('apikey', apiKey._id);
 		}
 
 		// Remove pending invitations.
