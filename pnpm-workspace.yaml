@@ -23,3 +23,8 @@ peerDependencyRules:
     'eslint-plugin-import>eslint': '10'
     'eslint-plugin-jsx-a11y>eslint': '10'
     'eslint-plugin-react>eslint': '10'
+
+# Our own releases, published less than a day before we adopted them. Remove once they're older than the release-age window.
+minimumReleaseAgeExclude:
+  - '@mmailaender/convex-better-auth-svelte@0.10.0'
+  - convex-svelte@0.15.1

@@ -123,6 +123,11 @@
 				},
 				{
 					"ecosystem": "js",
+					"name": "convex-svelte",
+					"version": "^0.15.1"
+				},
+				{
+					"ecosystem": "js",
 					"name": "convex",
 					"version": "^1.46.0"
 				},
@@ -207,6 +212,16 @@
 					"role": "file",
 					"path": "src/env.ts",
 					"relativePath": "src/env.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "base",
+					"role": "file",
+					"path": "src/hooks.ts",
+					"relativePath": "src/hooks.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -416,12 +431,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.9.0"
+					"version": "^0.10.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-svelte",
-					"version": "^0.14.0"
+					"version": "^0.15.1"
 				}
 			],
 			"devDependencies": [],
@@ -3545,12 +3560,12 @@
 				{
 					"ecosystem": "js",
 					"name": "convex-svelte",
-					"version": "^0.14.0"
+					"version": "^0.15.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.9.0"
+					"version": "^0.10.0"
 				},
 				{
 					"ecosystem": "js",
@@ -3944,7 +3959,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.9.0"
+					"version": "^0.10.0"
 				}
 			],
 			"devDependencies": [
@@ -4127,12 +4142,12 @@
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.9.0"
+					"version": "^0.10.0"
 				},
 				{
 					"ecosystem": "js",
 					"name": "convex-svelte",
-					"version": "^0.14.0"
+					"version": "^0.15.1"
 				},
 				{
 					"ecosystem": "js",
@@ -4812,12 +4827,12 @@
 				{
 					"ecosystem": "js",
 					"name": "convex-svelte",
-					"version": "^0.14.0"
+					"version": "^0.15.1"
 				},
 				{
 					"ecosystem": "js",
 					"name": "@mmailaender/convex-better-auth-svelte",
-					"version": "^0.9.0"
+					"version": "^0.10.0"
 				},
 				{
 					"ecosystem": "js",
