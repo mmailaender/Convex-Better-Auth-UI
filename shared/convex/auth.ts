@@ -86,6 +86,20 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 			}
 		},
 		session: {
+			// Better Auth refreshes sessions it finds in Convex mutations with the normal 7 day expiry. It
+			// skips that for an admin impersonation (1 hour) only when the browser sends its
+			// `dont_remember` cookie, which Convex's bearer token doesn't carry, so keep the original expiry
+			onUpdate: async (ctx, newSession, oldSession) => {
+				if (newSession.impersonatedBy && newSession.expiresAt > oldSession.expiresAt) {
+					await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+						input: {
+							model: 'session',
+							where: [{ field: '_id', value: newSession._id }],
+							update: { expiresAt: oldSession.expiresAt }
+						}
+					});
+				}
+			},
 			onCreate: async (ctx, session) => {
 				if (!session.activeOrganizationId && AUTH_CONSTANTS.organizations) {
 					await ctx.runMutation(components.betterAuth.organization.setActiveOrganization, {
