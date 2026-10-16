@@ -56,12 +56,12 @@ export function paragraph(html: string): string {
 	return `<p style="${styles.text}">${html}</p>`;
 }
 
-/** Table-based so Outlook keeps the padding and rounded fill. */
+/** Table-based so Outlook keeps the fill; it ignores padding on links, so `mso-padding-alt` pads the cell there instead. */
 export function button(url: string, label: string): string {
 	return `
 		<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 8px 0 24px;">
 			<tr>
-				<td align="center" bgcolor="${colors.action}" style="border-radius: 8px; background-color: ${colors.action};">
+				<td align="center" bgcolor="${colors.action}" style="border-radius: 8px; background-color: ${colors.action}; mso-padding-alt: 12px 24px;">
 					<a href="${escapeHtml(url)}" target="_blank" style="display: inline-block; padding: 12px 24px; font-family: ${fontFamily}; font-size: 15px; line-height: 20px; font-weight: 600; color: ${colors.onAction}; text-decoration: none; border-radius: 8px;">${escapeHtml(label)}</a>
 				</td>
 			</tr>
