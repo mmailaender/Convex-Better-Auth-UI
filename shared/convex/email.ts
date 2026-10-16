@@ -90,7 +90,7 @@ export const sendMagicLink = async (
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
-		subject: 'Sign in to your account',
+		subject: `Sign in to ${BRAND_NAME}`,
 		html: renderMagicLink({
 			url,
 			brandName: BRAND_NAME,
@@ -146,7 +146,7 @@ export const sendChangeEmailVerification = async (
 	await resend.sendEmail(ctx, {
 		from: EMAIL_SEND_FROM,
 		to,
-		subject: 'Verify your new email address',
+		subject: 'Confirm your email address change',
 		html: renderChangeEmailVerification({
 			url,
 			newEmail,
