@@ -105,7 +105,7 @@ export function renderBaseEmail({
 		)
 		.join(' &middot; ');
 
-	const finalFooterText = escapeHtml(footerText ?? `${brandName} · ${brandTagline}`);
+	const finalFooterText = escapeHtml(footerText ?? `${brandName} — ${brandTagline}`);
 
 	// Invisible filler keeps the client from appending body text to the inbox preview.
 	const previewFiller = '&#847;&zwnj;&nbsp;'.repeat(40);

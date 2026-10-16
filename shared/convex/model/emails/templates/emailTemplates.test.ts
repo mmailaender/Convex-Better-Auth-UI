@@ -37,7 +37,7 @@ describe('email templates', () => {
 	it('keeps the tagline as written in the footer', () => {
 		const html = renderVerifyEmail({ url: 'https://example.com/verify', ...brand });
 
-		expect(html).toContain('Etesie · Own your auth. Own your design.');
+		expect(html).toContain('Etesie — Own your auth. Own your design.');
 	});
 
 	it('keeps style attributes intact, so the font stack applies', () => {
