@@ -1,179 +1,129 @@
-import { renderBaseEmail, styles } from './baseEmail';
+import {
+	BRAND_NAME,
+	button,
+	escapeHtml,
+	heading,
+	linkFallback,
+	note,
+	paragraph,
+	renderBaseEmail,
+	styles
+} from './baseEmail';
 
-export interface VerifyEmailProps {
-	url: string;
-	brandName?: string;
-	brandTagline?: string;
+// Name and tagline come from `AUTH_CONSTANTS` (see `baseEmail.ts`); the logo is a deployment variable.
+interface BrandProps {
 	brandLogoUrl?: string;
 }
 
-export function renderVerifyEmail({
-	url,
-	brandName,
-	brandTagline,
-	brandLogoUrl
-}: VerifyEmailProps): string {
+export interface VerifyEmailProps extends BrandProps {
+	url: string;
+}
+
+export function renderVerifyEmail({ url, ...brand }: VerifyEmailProps): string {
 	const content = `
-		<h1 style="${styles.h1}">Verify your email</h1>
-		<a href="${url}" target="_blank" style="${styles.link}; display: block; margin-bottom: 16px;">
-			Click here to verify your email address
-		</a>
-		<p style="${styles.text}; color: #ababab; margin-top: 14px; margin-bottom: 16px;">
-			If you didn't create an account, you can safely ignore this email.
-		</p>
+		${heading('Verify your email address')}
+		${paragraph(`Confirm your email address to finish setting up your ${escapeHtml(BRAND_NAME)} account.`)}
+		${button(url, 'Verify email address')}
+		${linkFallback(url)}
+		${note(`If you didn't sign up for ${BRAND_NAME}, you can ignore this email.`)}
 	`;
 
 	return renderBaseEmail({
 		children: content,
-		previewText: 'Verify your email address',
-		brandName,
-		brandTagline,
-		brandLogoUrl
+		previewText: `Confirm your email address to finish setting up your ${BRAND_NAME} account.`,
+		...brand
 	});
 }
 
-export interface MagicLinkProps {
+export interface MagicLinkProps extends BrandProps {
 	url: string;
-	brandName?: string;
-	brandTagline?: string;
-	brandLogoUrl?: string;
 }
 
-export function renderMagicLink({
-	url,
-	brandName,
-	brandTagline,
-	brandLogoUrl
-}: MagicLinkProps): string {
+export function renderMagicLink({ url, ...brand }: MagicLinkProps): string {
 	const content = `
-		<h1 style="${styles.h1}">Sign in to your account</h1>
-		<a href="${url}" target="_blank" style="${styles.link}; display: block; margin-bottom: 16px;">
-			Click here to sign in
-		</a>
-		<p style="${styles.text}; color: #ababab; margin-top: 14px; margin-bottom: 16px;">
-			If you didn't request this, you can safely ignore this email.
-		</p>
+		${heading(`Sign in to ${BRAND_NAME}`)}
+		${paragraph(`Use the button below to sign in to your ${escapeHtml(BRAND_NAME)} account.`)}
+		${button(url, 'Sign in')}
+		${linkFallback(url)}
+		${note("If you didn't ask to sign in, you can ignore this email.")}
 	`;
 
 	return renderBaseEmail({
 		children: content,
-		previewText: 'Sign in to your account',
-		brandName,
-		brandTagline,
-		brandLogoUrl
+		previewText: `Your sign-in link for ${BRAND_NAME}.`,
+		...brand
 	});
 }
 
-export interface VerifyOTPProps {
+export interface VerifyOTPProps extends BrandProps {
 	code: string;
-	brandName?: string;
-	brandTagline?: string;
-	brandLogoUrl?: string;
 }
 
-export function renderVerifyOTP({
-	code,
-	brandName,
-	brandTagline,
-	brandLogoUrl
-}: VerifyOTPProps): string {
+export function renderVerifyOTP({ code, ...brand }: VerifyOTPProps): string {
 	const content = `
-		<h1 style="${styles.h1}">Verify your email</h1>
-		<p style="${styles.text}">
-			Use the following verification code to complete your sign-up:
-		</p>
-		<div style="${styles.code}; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px;">
-			${code}
-		</div>
-		<p style="${styles.text}; color: #ababab; margin-top: 14px; margin-bottom: 16px;">
-			If you didn't create an account, you can safely ignore this email.
-		</p>
+		${heading('Your verification code')}
+		${paragraph('Enter this code to continue:')}
+		<div style="${styles.code}">${escapeHtml(code)}</div>
+		${note("If you didn't ask for this code, you can ignore this email.")}
 	`;
 
 	return renderBaseEmail({
 		children: content,
-		previewText: 'Verify your email address',
-		brandName,
-		brandTagline,
-		brandLogoUrl
+		previewText: `${code} is your verification code.`,
+		...brand
 	});
 }
 
-export interface ResetPasswordProps {
+export interface ResetPasswordProps extends BrandProps {
 	url: string;
-	brandName?: string;
-	brandTagline?: string;
-	brandLogoUrl?: string;
 }
 
-export function renderResetPassword({
-	url,
-	brandName,
-	brandTagline,
-	brandLogoUrl
-}: ResetPasswordProps): string {
+export function renderResetPassword({ url, ...brand }: ResetPasswordProps): string {
 	const content = `
-		<h1 style="${styles.h1}">Reset your password</h1>
-		<a href="${url}" target="_blank" style="${styles.link}; display: block; margin-bottom: 16px;">
-			Click here to reset your password
-		</a>
-		<p style="${styles.text}; color: #ababab; margin-top: 14px; margin-bottom: 16px;">
-			If you didn't request this, you can safely ignore this email.
-		</p>
+		${heading('Reset your password')}
+		${paragraph(`We received a request to reset the password of your ${escapeHtml(BRAND_NAME)} account. Choose a new one with the button below.`)}
+		${button(url, 'Reset password')}
+		${linkFallback(url)}
+		${note("If you didn't ask to reset your password, you can ignore this email. Your password stays the same.")}
 	`;
 
 	return renderBaseEmail({
 		children: content,
-		previewText: 'Reset your password',
-		brandName,
-		brandTagline,
-		brandLogoUrl
+		previewText: `Reset the password of your ${BRAND_NAME} account.`,
+		...brand
 	});
 }
 
-export interface ChangeEmailVerificationProps {
+export interface ChangeEmailVerificationProps extends BrandProps {
 	url: string;
 	newEmail: string;
 	userName?: string;
-	brandName?: string;
-	brandTagline?: string;
-	brandLogoUrl?: string;
 }
 
+/** Sent to the current address, which approves the move to `newEmail`. */
 export function renderChangeEmailVerification({
 	url,
 	newEmail,
 	userName,
-	brandName,
-	brandTagline,
-	brandLogoUrl
+	...brand
 }: ChangeEmailVerificationProps): string {
 	const content = `
-		<h1 style="${styles.h1}">Verify your new email address</h1>
-		<p style="${styles.text}">
-			${userName ? `Hi ${userName}, ` : ''}You've requested to change your email address to <strong>${newEmail}</strong>.
-		</p>
-		<p style="${styles.text}">
-			To complete this change, please verify your new email address by clicking the link below:
-		</p>
-		<a href="${url}" target="_blank" style="${styles.link}; display: block; margin-bottom: 16px;">
-			Verify new email address
-		</a>
-		<p style="${styles.text}; color: #ababab; margin-top: 14px; margin-bottom: 16px;">
-			If you didn't request this change, you can safely ignore this email. Your current email address will remain unchanged.
-		</p>
+		${heading('Confirm your email address change')}
+		${userName ? paragraph(`Hi ${escapeHtml(userName)},`) : ''}
+		${paragraph(`You asked to change the email address of your ${escapeHtml(BRAND_NAME)} account to <strong style="${styles.strong}">${escapeHtml(newEmail)}</strong>. Confirm the change with the button below.`)}
+		${button(url, 'Confirm change')}
+		${linkFallback(url)}
+		${note("If you didn't ask for this change, you can ignore this email. Your email address stays the same.")}
 	`;
 
 	return renderBaseEmail({
 		children: content,
-		previewText: 'Verify your new email address',
-		brandName,
-		brandTagline,
-		brandLogoUrl
+		previewText: `Confirm the change of your ${BRAND_NAME} email address to ${newEmail}.`,
+		...brand
 	});
 }
 
-export interface InviteMemberProps {
+export interface InviteMemberProps extends BrandProps {
 	url: string;
 	inviter: {
 		name: string;
@@ -184,58 +134,46 @@ export interface InviteMemberProps {
 		name: string;
 		logo?: string;
 	};
-	brandName?: string;
-	brandTagline?: string;
-	brandLogoUrl?: string;
 }
 
 export function renderInviteMember({
 	url,
 	inviter,
 	organization,
-	brandName,
-	brandTagline,
-	brandLogoUrl
+	...brand
 }: InviteMemberProps): string {
-	const inviterImageHtml = inviter.image
-		? `<img src="${inviter.image}" width="40" height="40" alt="${inviter.name}" style="border-radius: 50%; margin-right: 12px; vertical-align: middle;" />`
+	const orgLogoHtml = organization.logo
+		? `<img src="${escapeHtml(organization.logo)}" width="48" height="48" alt="" style="display: block; width: 48px; height: 48px; border: 0; border-radius: 10px; margin: 0 0 20px;">`
 		: '';
 
-	const orgLogoHtml = organization.logo
-		? `<img src="${organization.logo}" width="32" height="32" alt="${organization.name}" style="border-radius: 4px; margin-right: 8px; vertical-align: middle;" />`
-		: '';
+	const invitation = `<strong style="${styles.strong}">${escapeHtml(inviter.name)}</strong> (${escapeHtml(inviter.email)}) invited you to join <strong style="${styles.strong}">${escapeHtml(organization.name)}</strong> on ${escapeHtml(BRAND_NAME)}.`;
+
+	const invitationHtml = inviter.image
+		? `
+		<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 16px;">
+			<tr>
+				<td valign="top" style="padding: 0 12px 0 0;">
+					<img src="${escapeHtml(inviter.image)}" width="36" height="36" alt="" style="display: block; width: 36px; height: 36px; border: 0; border-radius: 50%;">
+				</td>
+				<td valign="middle">
+					<p style="${styles.text} margin: 0;">${invitation}</p>
+				</td>
+			</tr>
+		</table>`
+		: paragraph(invitation);
 
 	const content = `
-		<h1 style="${styles.h1}">You've been invited to join ${organization.name}</h1>
-		<div style="margin: 24px 0; padding: 16px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #2754C5;">
-			<div style="display: flex; align-items: center; margin-bottom: 12px;">
-				${inviterImageHtml}
-				<div>
-					<strong style="color: #333; font-size: 14px;">${inviter.name}</strong>
-					<div style="color: #666; font-size: 12px;">${inviter.email}</div>
-				</div>
-			</div>
-			<p style="margin: 0; color: #666; font-size: 14px;">
-				has invited you to join
-			</p>
-			<div style="display: flex; align-items: center; margin-top: 8px;">
-				${orgLogoHtml}
-				<strong style="color: #333; font-size: 16px;">${organization.name}</strong>
-			</div>
-		</div>
-		<a href="${url}" target="_blank" style="${styles.link}; display: inline-block; background-color: #2754C5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">
-			Accept Invitation
-		</a>
-		<p style="${styles.text}; color: #ababab; margin-top: 24px; margin-bottom: 16px;">
-			If you don't want to join this organization, you can safely ignore this email.
-		</p>
+		${orgLogoHtml}
+		${heading(`Join ${organization.name}`)}
+		${invitationHtml}
+		${button(url, 'Accept invitation')}
+		${linkFallback(url)}
+		${note("If you weren't expecting this invitation, you can ignore this email.")}
 	`;
 
 	return renderBaseEmail({
 		children: content,
-		previewText: `Join ${organization.name} on ${brandName}`,
-		brandName,
-		brandTagline,
-		brandLogoUrl
+		previewText: `${inviter.name} invited you to join ${organization.name} on ${BRAND_NAME}.`,
+		...brand
 	});
 }
