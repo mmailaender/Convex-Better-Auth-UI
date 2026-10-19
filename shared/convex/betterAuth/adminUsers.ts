@@ -33,6 +33,19 @@ export const listUsers = query({
 	}
 });
 
+/**
+ * A user by id, or `null` when there's none, including for a string that isn't a user id (the
+ * profile reads it from the URL).
+ */
+export const getUser = query({
+	args: { userId: v.string() },
+	returns: v.union(v.null(), userValidator),
+	handler: async (ctx, args) => {
+		const userId = ctx.db.normalizeId('user', args.userId);
+		return userId ? await ctx.db.get('user', userId) : null;
+	}
+});
+
 /** Search hits to consider before filtering; full-text search returns at most 1024. */
 export const SEARCH_CANDIDATES = 256;
 

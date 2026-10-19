@@ -15,6 +15,7 @@ import {
 
 // Types
 import type { Id } from '../_generated/dataModel';
+import type { MutationCtx } from '../_generated/server';
 
 /**
  * Translate Better Auth `APIError`s into `ConvexError`s, mirroring the
@@ -51,6 +52,32 @@ const assertOrganizationsEnabled = (): void => {
 	if (!AUTH_CONSTANTS.organizations) {
 		throw new ConvexError('Organizations are not enabled');
 	}
+};
+
+/**
+ * Throw unless the admin may change `userId`'s profile or memberships: their own, or another
+ * user's once that user isn't an admin anymore (see `assertCanManageUser`).
+ */
+const assertCanChangeUser = async (
+	ctx: MutationCtx,
+	adminId: string,
+	userId: string
+): Promise<void> => {
+	if (adminId !== userId) {
+		await assertCanManageUser(ctx, userId, 'manage');
+	}
+};
+
+/**
+ * The user a membership belongs to, for the checks of `assertCanChangeUser`. `null` once the
+ * membership is gone.
+ */
+const getMemberUserId = async (ctx: MutationCtx, memberId: string): Promise<string | null> => {
+	const member: { userId: string } | null = await ctx.runQuery(
+		components.betterAuth.adapter.findOne,
+		{ model: 'member', where: [{ field: '_id', value: memberId }] }
+	);
+	return member?.userId ?? null;
 };
 
 /**
@@ -105,22 +132,20 @@ export const createUser = mutation({
 });
 
 /**
- * Change a user's name and email (admin only). A new email counts as verified, like on
- * `createUser`. Other admins have to lose their admin role first, since a new email would let
- * whoever controls it reset their password.
+ * Change a user's name, email or both (admin only); leave out what stays. A new email counts as
+ * verified, like on `createUser`. Other admins have to lose their admin role first, since a new
+ * email would let whoever controls it reset their password.
  */
 export const updateUser = mutation({
 	args: {
 		userId: v.string(),
-		name: v.string(),
-		email: v.string()
+		name: v.optional(v.string()),
+		email: v.optional(v.string())
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
 		const admin = await requireAppAdmin(ctx);
-		if (admin._id !== args.userId) {
-			await assertCanManageUser(ctx, args.userId, 'manage');
-		}
+		await assertCanChangeUser(ctx, admin._id, args.userId);
 		const user: { name: string; email: string } | null = await ctx.runQuery(
 			components.betterAuth.adapter.findOne,
 			{ model: 'user', where: [{ field: '_id', value: args.userId }] }
@@ -128,14 +153,14 @@ export const updateUser = mutation({
 		if (!user) {
 			throw new ConvexError('User not found');
 		}
-		const name = args.name.trim();
-		const email = args.email.trim().toLowerCase();
-		if (!name) {
+		const name = args.name?.trim();
+		const email = args.email?.trim().toLowerCase();
+		if (name === '') {
 			throw new ConvexError('Name is required.');
 		}
 		const data: { name?: string; email?: string; emailVerified?: boolean } = {};
-		if (name !== user.name) data.name = name;
-		if (email !== user.email) {
+		if (name !== undefined && name !== user.name) data.name = name;
+		if (email !== undefined && email !== user.email) {
 			data.email = email;
 			data.emailVerified = true;
 		}
@@ -412,7 +437,8 @@ export const deleteOrganizationAsAdmin = mutation({
 });
 
 /**
- * Add a user to an organization (admin only), whether or not the admin is a member of it.
+ * Add a user to an organization (admin only), whether or not the admin is a member of it. Other
+ * admins have to lose their admin role first, like for `updateUser`.
  */
 export const addMember = mutation({
 	args: {
@@ -422,8 +448,9 @@ export const addMember = mutation({
 	},
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
+		const admin = await requireAppAdmin(ctx);
 		assertOrganizationsEnabled();
+		await assertCanChangeUser(ctx, admin._id, args.userId);
 		const auth = createAuth(ctx);
 		try {
 			await auth.api.addMember({
@@ -438,14 +465,19 @@ export const addMember = mutation({
 
 /**
  * Change a member's role in an organization to `admin` or `member` (admin only). The owner
- * keeps their role.
+ * keeps their role, and other admins have to lose their admin role first.
  */
 export const updateMemberRole = mutation({
 	args: { memberId: v.string(), role: organizationRoleValidator },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
+		const admin = await requireAppAdmin(ctx);
 		assertOrganizationsEnabled();
+		const userId = await getMemberUserId(ctx, args.memberId);
+		if (!userId) {
+			throw new ConvexError('Membership not found');
+		}
+		await assertCanChangeUser(ctx, admin._id, userId);
 		await ctx.runMutation(components.betterAuth.adminOrganizations.adminUpdateMemberRole, {
 			memberId: args.memberId,
 			role: args.role
@@ -455,14 +487,20 @@ export const updateMemberRole = mutation({
 });
 
 /**
- * Remove a member from an organization (admin only). The owner can't be removed.
+ * Remove a member from an organization (admin only). The owner can't be removed, and other
+ * admins have to lose their admin role first.
  */
 export const removeMember = mutation({
 	args: { memberId: v.string() },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
+		const admin = await requireAppAdmin(ctx);
 		assertOrganizationsEnabled();
+		const userId = await getMemberUserId(ctx, args.memberId);
+		if (!userId) {
+			return null;
+		}
+		await assertCanChangeUser(ctx, admin._id, userId);
 		await ctx.runMutation(components.betterAuth.adminOrganizations.adminRemoveMember, {
 			memberId: args.memberId
 		});

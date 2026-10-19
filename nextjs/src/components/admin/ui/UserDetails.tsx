@@ -35,8 +35,18 @@ function formatDateTime(epochMs: number): string {
 	return new Date(epochMs).toLocaleString();
 }
 
+/** A member's roles, which Better Auth stores comma-separated. */
+function rolesOf(membership: AdminMembership): string[] {
+	return membership.role.split(',').map((role) => role.trim());
+}
+
 function isOwner(membership: AdminMembership): boolean {
-	return membership.role.split(',').some((role) => role.trim() === 'owner');
+	return rolesOf(membership).includes('owner');
+}
+
+/** The role the role select shows: a member with several roles shows the highest. */
+function roleOf(membership: AdminMembership): OrganizationRole {
+	return rolesOf(membership).includes('admin') ? 'admin' : 'member';
 }
 
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -92,15 +102,19 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 
 	const [dialog, setDialog] = useState<UserDialog | null>(null);
 
-	// Profile form, filled from the user until edited
+	// Profile form. Fields the admin hasn't edited follow the user as it changes elsewhere
 	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [saving, setSaving] = useState(false);
-	const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
-	if (user && user.id !== loadedUserId) {
-		setLoadedUserId(user.id);
-		setName(user.name);
-		setEmail(user.email);
+	const [loaded, setLoaded] = useState<{ id: string; name: string; email: string } | null>(null);
+	if (
+		user &&
+		(user.id !== loaded?.id || user.name !== loaded.name || user.email !== loaded.email)
+	) {
+		const otherUser = user.id !== loaded?.id;
+		if (otherUser || name === loaded?.name) setName(user.name);
+		if (otherUser || email === loaded?.email) setEmail(user.email);
+		setLoaded({ id: user.id, name: user.name, email: user.email });
 	}
 	const isDirty =
 		Boolean(user) && (name.trim() !== user?.name || email.trim().toLowerCase() !== user?.email);
@@ -128,18 +142,25 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 		event.preventDefault();
 		if (!user) return;
 		setSaving(true);
+		// Only the edited fields, so a change made elsewhere meanwhile isn't overwritten
 		const done = await run(
-			() => updateUser({ userId: user.id, name, email }),
+			() =>
+				updateUser({
+					userId: user.id,
+					name: name.trim() !== user.name ? name : undefined,
+					email: email.trim().toLowerCase() !== user.email ? email : undefined
+				}),
 			'Saved the profile',
 			'Failed to save the profile'
 		);
 		// Show what the server stored, such as the lowercased email
-		if (done) setLoadedUserId(null);
+		if (done) setLoaded(null);
 		setSaving(false);
 	}
 
 	function handleRoleChange(membership: AdminMembership, role: OrganizationRole) {
 		if (role === membership.role) return;
+		// Selecting what a member with several roles already shows makes that their only role
 		void run(
 			() => updateMemberRole({ memberId: membership._id, role }),
 			`${user?.name} is now ${role === 'admin' ? 'an admin' : 'a member'} of ${membership.organization.name}`,
@@ -335,15 +356,22 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 						<section className="card border-surface-300-700 flex flex-col gap-3 border p-4">
 							<div className="flex items-center justify-between gap-3">
 								<h3 className="h6">Organizations</h3>
-								<button
-									type="button"
-									className="btn btn-sm preset-tonal gap-2"
-									onClick={openAddDialog}
-								>
-									<Plus className="size-4" aria-hidden="true" />
-									Add to organization
-								</button>
+								{canManage ? (
+									<button
+										type="button"
+										className="btn btn-sm preset-tonal gap-2"
+										onClick={openAddDialog}
+									>
+										<Plus className="size-4" aria-hidden="true" />
+										Add to organization
+									</button>
+								) : null}
 							</div>
+							{!canManage ? (
+								<p className="text-surface-600-400 text-xs">
+									Remove their admin role to change their organizations.
+								</p>
+							) : null}
 							{details.memberships.length === 0 ? (
 								<p className="text-surface-600-400 text-sm">Not a member of any organization.</p>
 							) : (
@@ -379,11 +407,18 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 													{/* Keeps the role column aligned with the rows that have a remove button */}
 													<span className="size-8 shrink-0" aria-hidden="true" />
 												</>
+											) : !canManage ? (
+												<>
+													<span className="badge preset-tonal capitalize">
+														{roleOf(membership)}
+													</span>
+													<span className="size-8 shrink-0" aria-hidden="true" />
+												</>
 											) : (
 												<>
 													<select
 														className="select w-32 shrink-0 cursor-pointer text-sm"
-														value={membership.role}
+														value={roleOf(membership)}
 														onChange={(e) =>
 															handleRoleChange(membership, e.target.value as OrganizationRole)
 														}

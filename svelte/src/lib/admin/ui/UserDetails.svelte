@@ -1,4 +1,6 @@
 <script lang="ts">
+	// Svelte
+	import { untrack } from 'svelte';
 	// Primitives
 	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
 	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
@@ -69,17 +71,20 @@
 
 	let dialog = $state<UserDialog | null>(null);
 
-	// Profile form, filled from the user until edited
+	// Profile form. Fields the admin hasn't edited follow the user as it changes elsewhere
 	let name = $state('');
 	let email = $state('');
 	let saving = $state(false);
-	let loadedUserId = $state<string | null>(null);
+	let loaded: { id: string; name: string; email: string } | null = null;
 	$effect(() => {
-		if (user && user.id !== loadedUserId) {
-			loadedUserId = user.id;
-			name = user.name;
-			email = user.email;
-		}
+		if (!user) return;
+		const next = { id: user.id, name: user.name, email: user.email };
+		untrack(() => {
+			const otherUser = loaded?.id !== next.id;
+			if (otherUser || name === loaded?.name) name = next.name;
+			if (otherUser || email === loaded?.email) email = next.email;
+			loaded = next;
+		});
 	});
 	const isDirty = $derived(
 		Boolean(user) && (name.trim() !== user?.name || email.trim().toLowerCase() !== user?.email)
@@ -108,8 +113,18 @@
 		return `Banned ${until}${user.banReason ? `: ${user.banReason}` : '.'}`;
 	});
 
+	/** A member's roles, which Better Auth stores comma-separated. */
+	function rolesOf(membership: AdminMembership): string[] {
+		return membership.role.split(',').map((role) => role.trim());
+	}
+
 	function isOwner(membership: AdminMembership): boolean {
-		return membership.role.split(',').some((role) => role.trim() === 'owner');
+		return rolesOf(membership).includes('owner');
+	}
+
+	/** The role the role select shows: a member with several roles shows the highest. */
+	function roleOf(membership: AdminMembership): OrganizationRole {
+		return rolesOf(membership).includes('admin') ? 'admin' : 'member';
 	}
 
 	async function run(action: () => Promise<unknown>, success: string, failure: string) {
@@ -127,18 +142,29 @@
 		event.preventDefault();
 		if (!user) return;
 		saving = true;
+		// Only the edited fields, so a change made elsewhere meanwhile isn't overwritten
 		const done = await run(
-			() => client.mutation(api.admin.mutations.updateUser, { userId: user.id, name, email }),
+			() =>
+				client.mutation(api.admin.mutations.updateUser, {
+					userId: user.id,
+					name: name.trim() !== user.name ? name : undefined,
+					email: email.trim().toLowerCase() !== user.email ? email : undefined
+				}),
 			'Saved the profile',
 			'Failed to save the profile'
 		);
 		// Show what the server stored, such as the lowercased email
-		if (done) loadedUserId = null;
+		if (done && user) {
+			name = user.name;
+			email = user.email;
+			loaded = { id: user.id, name: user.name, email: user.email };
+		}
 		saving = false;
 	}
 
 	function handleRoleChange(membership: AdminMembership, role: OrganizationRole) {
 		if (role === membership.role) return;
+		// Selecting what a member with several roles already shows makes that their only role
 		void run(
 			() =>
 				client.mutation(api.admin.mutations.updateMemberRole, {
@@ -318,11 +344,18 @@
 			<section class="card border-surface-300-700 flex flex-col gap-3 border p-4">
 				<div class="flex items-center justify-between gap-3">
 					<h3 class="h6">Organizations</h3>
-					<button type="button" class="btn btn-sm preset-tonal gap-2" onclick={openAddDialog}>
-						<PlusIcon class="size-4" aria-hidden="true" />
-						Add to organization
-					</button>
+					{#if canManage}
+						<button type="button" class="btn btn-sm preset-tonal gap-2" onclick={openAddDialog}>
+							<PlusIcon class="size-4" aria-hidden="true" />
+							Add to organization
+						</button>
+					{/if}
 				</div>
+				{#if !canManage}
+					<p class="text-surface-600-400 text-xs">
+						Remove their admin role to change their organizations.
+					</p>
+				{/if}
 				{#if details.memberships.length === 0}
 					<p class="text-surface-600-400 text-sm">Not a member of any organization.</p>
 				{:else}
@@ -355,11 +388,14 @@
 									</span>
 									<!-- Keeps the role column aligned with the rows that have a remove button -->
 									<span class="size-8 shrink-0" aria-hidden="true"></span>
+								{:else if !canManage}
+									<span class="badge preset-tonal capitalize">{roleOf(membership)}</span>
+									<span class="size-8 shrink-0" aria-hidden="true"></span>
 								{:else}
 									<div class="w-32 shrink-0">
 										<Select.Root
 											collection={roleCollection}
-											value={[membership.role]}
+											value={[roleOf(membership)]}
 											onSelect={(details) =>
 												handleRoleChange(membership, details.value as OrganizationRole)}
 										>

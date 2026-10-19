@@ -2134,6 +2134,29 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
       >;
     };
     adminUsers: {
+      getUser: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        null | {
+          _creationTime: number;
+          _id: string;
+          activeOrganizationId?: null | string;
+          banExpires?: null | number;
+          banReason?: null | string;
+          banned?: null | boolean;
+          createdAt: number;
+          email: string;
+          emailVerified: boolean;
+          image?: null | string;
+          imageId?: null | string;
+          name: string;
+          role?: null | string;
+          updatedAt: number;
+          userId?: null | string;
+        },
+        Name
+      >;
       listUsers: FunctionReference<
         "query",
         "internal",

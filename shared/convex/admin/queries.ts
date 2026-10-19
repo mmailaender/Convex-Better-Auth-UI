@@ -182,9 +182,8 @@ export const getUser = query({
 	),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
-		const user: UserDoc | null = await ctx.runQuery(components.betterAuth.adapter.findOne, {
-			model: 'user',
-			where: [{ field: '_id', value: args.userId }]
+		const user = await ctx.runQuery(components.betterAuth.adminUsers.getUser, {
+			userId: args.userId
 		});
 		if (!user) {
 			return null;
