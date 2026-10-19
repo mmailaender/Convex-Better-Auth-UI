@@ -1,16 +1,19 @@
+import { AUTH_CONSTANTS } from '../../../auth.constants';
+
 export interface BaseEmailProps {
 	/** Body HTML, built from the helpers below so every interpolated value is escaped. */
 	children: string;
 	previewText: string;
 	footerLinks?: Array<{ text: string; href: string }>;
 	footerText?: string;
-	brandName?: string;
-	brandTagline?: string;
 	brandLogoUrl?: string;
 }
 
-export const DEFAULT_BRAND_NAME = 'Better Auth';
-const DEFAULT_BRAND_TAGLINE = 'Simple, secure authentication for your applications';
+// The brand of `AUTH_CONSTANTS`, with the fallbacks the sign-in screen uses.
+export const BRAND_NAME = (AUTH_CONSTANTS.brandName ?? 'self hosted Auth').trim();
+export const BRAND_TAGLINE = (
+	AUTH_CONSTANTS.brandTagline ?? 'Plug & Play Auth Widgets for your application.'
+).trim();
 
 const colors = {
 	page: '#f4f4f5',
@@ -88,11 +91,9 @@ export function renderBaseEmail({
 	previewText,
 	footerLinks = [],
 	footerText,
-	brandName = DEFAULT_BRAND_NAME,
-	brandTagline = DEFAULT_BRAND_TAGLINE,
 	brandLogoUrl
 }: BaseEmailProps): string {
-	const safeBrandName = escapeHtml(brandName);
+	const safeBrandName = escapeHtml(BRAND_NAME);
 
 	const logoHtml = brandLogoUrl
 		? `<img src="${escapeHtml(brandLogoUrl)}" width="28" height="28" alt="" style="display: inline-block; width: 28px; height: 28px; border: 0; border-radius: 6px; vertical-align: middle; margin-right: 10px;">`
@@ -105,7 +106,7 @@ export function renderBaseEmail({
 		)
 		.join(' &middot; ');
 
-	const finalFooterText = escapeHtml(footerText ?? `${brandName} — ${brandTagline}`);
+	const finalFooterText = escapeHtml(footerText ?? `${BRAND_NAME} — ${BRAND_TAGLINE}`);
 
 	// Invisible filler keeps the client from appending body text to the inbox preview.
 	const previewFiller = '&#847;&zwnj;&nbsp;'.repeat(40);
