@@ -3,16 +3,18 @@
 import { useState } from 'react';
 import { useMutation } from 'convex/react';
 import { toast } from 'sonner';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, X } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
+import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import * as Password from '@/components/primitives/ui/password';
-import type { AppRole } from '@/components/admin/types';
+import OrganizationSelect from '@/components/admin/ui/OrganizationSelect';
+import type { AdminOrganization, OrganizationRole } from '@/components/admin/types';
 
 /**
- * Admin "create user" dialog. Creates a user with an email/password and an
- * initial application role.
+ * Admin "create user" dialog. Creates a user with an email/password, optionally as a member of
+ * an existing organization. New users are never admins: promote them from the actions menu.
  */
 export default function CreateUser() {
 	const createUser = useMutation(api.admin.mutations.createUser);
@@ -20,7 +22,8 @@ export default function CreateUser() {
 	const [name, setName] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-	const [role, setRole] = useState<AppRole>('user');
+	const [organization, setOrganization] = useState<AdminOrganization | null>(null);
+	const [organizationRole, setOrganizationRole] = useState<OrganizationRole>('member');
 	const [submitting, setSubmitting] = useState(false);
 
 	function handleOpenChange(nextOpen: boolean) {
@@ -30,7 +33,8 @@ export default function CreateUser() {
 			setName('');
 			setEmail('');
 			setPassword('');
-			setRole('user');
+			setOrganization(null);
+			setOrganizationRole('member');
 		}
 	}
 
@@ -38,7 +42,13 @@ export default function CreateUser() {
 		event.preventDefault();
 		setSubmitting(true);
 		try {
-			await createUser({ name: name.trim(), email: email.trim(), password, role });
+			await createUser({
+				name: name.trim(),
+				email: email.trim(),
+				password,
+				organizationId: organization?._id,
+				organizationRole: organization ? organizationRole : undefined
+			});
 			toast.success(`Created ${name.trim()}`);
 			handleOpenChange(false);
 		} catch (error) {
@@ -101,17 +111,47 @@ export default function CreateUser() {
 							</Password.Input>
 						</Password.Root>
 					</label>
-					<label className="label">
-						<span className="label-text">Role</span>
-						<select
-							className="select"
-							value={role}
-							onChange={(e) => setRole(e.target.value as AppRole)}
-						>
-							<option value="user">User</option>
-							<option value="admin">Admin</option>
-						</select>
-					</label>
+					{AUTH_CONSTANTS.organizations ? (
+						<div className="border-surface-300-700 mt-2 flex flex-col gap-3 border-t pt-4">
+							<div className="label">
+								<div className="flex items-center justify-between">
+									<label className="label-text" htmlFor="admin-create-user-organization">
+										Add to organization
+									</label>
+									{organization ? (
+										<button
+											type="button"
+											className="btn btn-sm hover:preset-tonal gap-1 px-2 text-xs"
+											onClick={() => setOrganization(null)}
+										>
+											<X className="size-3" aria-hidden="true" />
+											Clear
+										</button>
+									) : (
+										<span className="badge preset-tonal text-xs">Optional</span>
+									)}
+								</div>
+								<OrganizationSelect
+									id="admin-create-user-organization"
+									value={organization}
+									onChange={setOrganization}
+								/>
+							</div>
+							{organization ? (
+								<label className="label">
+									<span className="label-text">Role in {organization.name}</span>
+									<select
+										className="select"
+										value={organizationRole}
+										onChange={(e) => setOrganizationRole(e.target.value as OrganizationRole)}
+									>
+										<option value="member">Member</option>
+										<option value="admin">Admin</option>
+									</select>
+								</label>
+							) : null}
+						</div>
+					) : null}
 				</form>
 				<Dialog.Footer>
 					<Dialog.Close className="btn preset-tonal" disabled={submitting}>

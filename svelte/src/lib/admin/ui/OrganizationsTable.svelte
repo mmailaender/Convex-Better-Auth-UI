@@ -5,8 +5,11 @@
 	import * as Menu from '#lib/primitives/ui/menu/index.js';
 	import { Portal } from '@ark-ui/svelte/portal';
 	// Icons
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import EllipsisVerticalIcon from '@lucide/svelte/icons/ellipsis-vertical';
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
+	import TrashIcon from '@lucide/svelte/icons/trash';
+	import UsersIcon from '@lucide/svelte/icons/users';
 	// API
 	import { useQuery, useConvexClient } from 'convex-svelte';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
@@ -15,6 +18,13 @@
 	import { LIST_MAX } from '#lib/admin/utils/admin.constants.js';
 	// Types
 	import type { AdminOrganization } from '#lib/admin/types.js';
+
+	let {
+		onViewProfile
+	}: {
+		/** Opens the profile of a user */
+		onViewProfile: (userId: string) => void;
+	} = $props();
 
 	const PAGE_SIZE = 25;
 
@@ -87,7 +97,10 @@
 				</thead>
 				<tbody>
 					{#each organizations as org (org._id)}
-						<tr class="!border-surface-300-700 !border-t">
+						<tr
+							class="!border-surface-300-700 hover:bg-surface-100-900 cursor-pointer !border-t"
+							onclick={() => openDialog(org, 'members')}
+						>
 							<td class="max-w-0 !py-3 !pl-3">
 								<div class="flex items-center gap-2">
 									<Avatar.Root class="size-8 shrink-0 sm:size-6">
@@ -97,7 +110,17 @@
 										</Avatar.Fallback>
 									</Avatar.Root>
 									<div class="flex min-w-0 flex-col">
-										<span class="truncate text-sm">{org.name}</span>
+										<!-- The keyboard way to the members; the row handles pointer clicks -->
+										<button
+											type="button"
+											class="truncate text-left text-sm font-medium hover:underline"
+											onclick={(event) => {
+												event.stopPropagation();
+												openDialog(org, 'members');
+											}}
+										>
+											{org.name}
+										</button>
 										<span class="text-surface-700-300 truncate text-xs sm:hidden">{org.slug}</span>
 									</div>
 								</div>
@@ -108,7 +131,8 @@
 							<td class="text-surface-600-400 hidden text-sm md:table-cell">
 								{new Date(org.createdAt).toLocaleDateString()}
 							</td>
-							<td class="text-right">
+							<!-- Clicks on the menu don't open the members -->
+							<td class="text-right" onclick={(event) => event.stopPropagation()}>
 								<Menu.Root>
 									<Menu.Trigger
 										class="btn-icon hover:preset-tonal"
@@ -119,14 +143,17 @@
 									<Portal>
 										<Menu.Content class="bg-surface-50-950">
 											<Menu.Item value="members" onclick={() => openDialog(org, 'members')}>
+												<UsersIcon aria-hidden="true" />
 												View members
 											</Menu.Item>
+											<Menu.Separator />
 											<Menu.Item
 												value="delete"
 												variant="destructive"
 												onclick={() => openDialog(org, 'delete')}
 											>
-												Delete
+												<TrashIcon aria-hidden="true" />
+												Delete organization
 											</Menu.Item>
 										</Menu.Content>
 									</Portal>
@@ -169,7 +196,7 @@
 					{/if}
 				</Dialog.Description>
 			</Dialog.Header>
-			<div class="flex max-h-[60vh] w-full flex-col gap-3 overflow-y-auto">
+			<div class="flex max-h-[60vh] w-full flex-col gap-1 overflow-y-auto px-2">
 				{#if orgDetailResponse.error}
 					<div class="text-error-600-400 text-sm">{orgDetailResponse.error.message}</div>
 				{:else if !orgDetail}
@@ -181,16 +208,27 @@
 					<div class="text-surface-600-400 text-sm">No members.</div>
 				{:else}
 					{#each orgDetail.members as member (member._id)}
-						<div class="flex items-center gap-3">
+						{@const memberUser = member.user}
+						<!-- Members open their profile, where admins change their roles and memberships -->
+						<button
+							type="button"
+							class="hover:bg-surface-200-800 rounded-base -mx-2 flex items-center gap-3 p-2 text-left disabled:cursor-default disabled:hover:bg-transparent"
+							disabled={!memberUser}
+							onclick={() => {
+								if (!memberUser) return;
+								membersOpen = false;
+								onViewProfile(memberUser._id);
+							}}
+						>
 							<Avatar.Root class="size-8 shrink-0">
-								<Avatar.Image src={member.user?.image ?? undefined} alt={member.user?.name ?? ''} />
+								<Avatar.Image src={memberUser?.image ?? undefined} alt={memberUser?.name ?? ''} />
 								<Avatar.Fallback>
-									<Avatar.Marble name={member.user?.name ?? '?'} />
+									<Avatar.Marble name={memberUser?.name ?? '?'} />
 								</Avatar.Fallback>
 							</Avatar.Root>
 							<div class="flex min-w-0 flex-1 flex-col">
-								<span class="truncate text-sm">{member.user?.name ?? 'Deleted user'}</span>
-								<span class="text-surface-700-300 truncate text-xs">{member.user?.email}</span>
+								<span class="truncate text-sm">{memberUser?.name ?? 'Deleted user'}</span>
+								<span class="text-surface-700-300 truncate text-xs">{memberUser?.email}</span>
 							</div>
 							<span
 								class="badge h-6 shrink-0 border px-2 capitalize {member.role === 'owner'
@@ -201,7 +239,10 @@
 							>
 								{member.role}
 							</span>
-						</div>
+							{#if memberUser}
+								<ChevronRightIcon class="size-4 shrink-0 opacity-60" aria-hidden="true" />
+							{/if}
+						</button>
 					{/each}
 				{/if}
 			</div>

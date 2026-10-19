@@ -34,7 +34,20 @@ export const listUsers = query({
 });
 
 /** Search hits to consider before filtering; full-text search returns at most 1024. */
-const SEARCH_CANDIDATES = 256;
+export const SEARCH_CANDIDATES = 256;
+
+/**
+ * Whether `text` contains every whitespace-separated word of `search`, ignoring case.
+ * Full-text search ranks documents matching any word, so its hits are narrowed with this.
+ */
+export const containsEveryWord = (text: string, search: string): boolean => {
+	const lowerText = text.toLowerCase();
+	return search
+		.toLowerCase()
+		.split(/\s+/)
+		.filter(Boolean)
+		.every((word) => lowerText.includes(word));
+};
 
 /**
  * Users whose name or email contains every word of `search`, best matches
@@ -59,11 +72,9 @@ export const searchUsers = query({
 				.withSearchIndex('search_email', (q) => q.search('email', args.search))
 				.take(SEARCH_CANDIDATES)
 		]);
-		const words = args.search.toLowerCase().split(/\s+/).filter(Boolean);
 		const users = new Map<string, Doc<'user'>>();
 		for (const user of [...byName, ...byEmail]) {
-			const text = `${user.name} ${user.email}`.toLowerCase();
-			if (words.every((word) => text.includes(word))) users.set(user._id, user);
+			if (containsEveryWord(`${user.name} ${user.email}`, args.search)) users.set(user._id, user);
 		}
 		return [...users.values()].slice(0, args.limit);
 	}

@@ -5,26 +5,34 @@
 	// Icons
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
+	import XIcon from '@lucide/svelte/icons/x';
+	// Components
+	import OrganizationSelect from '#lib/admin/ui/OrganizationSelect.svelte';
 	// API
 	import { useConvexClient } from 'convex-svelte';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
 	import { toast } from 'svelte-sonner';
+	// Types
+	import type { AdminOrganization, OrganizationRole } from '#lib/admin/types.js';
 
-	const { api } = getAuthContext();
+	const { api, authConstants } = getAuthContext();
 	const client = useConvexClient();
+	const organizationsEnabled = Boolean(authConstants.organizations);
 
 	let open = $state(false);
 	let name = $state('');
 	let email = $state('');
 	let password = $state('');
-	let role = $state<'user' | 'admin'>('user');
+	let organization = $state<AdminOrganization | null>(null);
+	let organizationRole = $state<OrganizationRole>('member');
 	let submitting = $state(false);
 
 	function reset() {
 		name = '';
 		email = '';
 		password = '';
-		role = 'user';
+		organization = null;
+		organizationRole = 'member';
 	}
 
 	async function handleSubmit(event: SubmitEvent) {
@@ -35,7 +43,8 @@
 				name: name.trim(),
 				email: email.trim(),
 				password,
-				role
+				organizationId: organization?._id,
+				organizationRole: organization ? organizationRole : undefined
 			});
 			toast.success(`Created ${name.trim()}`);
 			open = false;
@@ -76,13 +85,39 @@
 					</Password.Input>
 				</Password.Root>
 			</label>
-			<label class="label">
-				<span class="label-text">Role</span>
-				<select class="select" bind:value={role}>
-					<option value="user">User</option>
-					<option value="admin">Admin</option>
-				</select>
-			</label>
+			{#if organizationsEnabled}
+				<div class="border-surface-300-700 mt-2 flex flex-col gap-3 border-t pt-4">
+					<div class="label">
+						<div class="flex items-center justify-between">
+							<label class="label-text" for="admin-create-user-organization">
+								Add to organization
+							</label>
+							{#if organization}
+								<button
+									type="button"
+									class="btn btn-sm hover:preset-tonal gap-1 px-2 text-xs"
+									onclick={() => (organization = null)}
+								>
+									<XIcon class="size-3" aria-hidden="true" />
+									Clear
+								</button>
+							{:else}
+								<span class="badge preset-tonal text-xs">Optional</span>
+							{/if}
+						</div>
+						<OrganizationSelect id="admin-create-user-organization" bind:value={organization} />
+					</div>
+					{#if organization}
+						<label class="label">
+							<span class="label-text">Role in {organization.name}</span>
+							<select class="select" bind:value={organizationRole}>
+								<option value="member">Member</option>
+								<option value="admin">Admin</option>
+							</select>
+						</label>
+					{/if}
+				</div>
+			{/if}
 		</form>
 		<Dialog.Footer>
 			<Dialog.Close class="btn preset-tonal" disabled={submitting}>Cancel</Dialog.Close>

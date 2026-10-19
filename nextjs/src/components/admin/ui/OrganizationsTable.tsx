@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { toast } from 'sonner';
-import { EllipsisVertical, Loader2 } from 'lucide-react';
+import { ChevronRight, EllipsisVertical, Loader2, Trash2, Users } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import * as Avatar from '@/components/primitives/ui/avatar';
@@ -20,13 +20,19 @@ const ROLE_BADGE: Record<string, string> = {
 	admin: 'preset-filled-warning-50-950 border-warning-200-800'
 };
 
+type OrganizationsTableProps = {
+	/** Opens the profile of a user */
+	onViewProfile: (userId: string) => void;
+};
+
 /**
  * Admin organizations management table. Lists every organization in the
- * deployment with a members view and force-delete. Only mounted when the
+ * deployment with a members view and force-delete. Members open their profile,
+ * where admins change their roles and memberships. Only mounted when the
  * `organizations` feature toggle is enabled (enforced by {@link AdminDashboard}
  * and the server functions).
  */
-export default function OrganizationsTable() {
+export default function OrganizationsTable({ onViewProfile }: OrganizationsTableProps) {
 	// "Load more" raises the limit of one reactive list, like the users table
 	const [limit, setLimit] = useState(PAGE_SIZE);
 	const result = useQuery(api.admin.queries.listAllOrganizations, { limit });
@@ -98,7 +104,11 @@ export default function OrganizationsTable() {
 						</thead>
 						<tbody>
 							{organizations.map((org) => (
-								<tr key={org._id} className="!border-surface-300-700 !border-t">
+								<tr
+									key={org._id}
+									className="!border-surface-300-700 hover:bg-surface-100-900 cursor-pointer !border-t"
+									onClick={() => openDialog(org, 'members')}
+								>
 									<td className="max-w-0 !py-3 !pl-3">
 										<div className="flex items-center gap-2">
 											<Avatar.Root className="size-8 shrink-0 sm:size-6">
@@ -108,7 +118,17 @@ export default function OrganizationsTable() {
 												</Avatar.Fallback>
 											</Avatar.Root>
 											<div className="flex min-w-0 flex-col">
-												<span className="truncate text-sm">{org.name}</span>
+												{/* The keyboard way to the members; the row handles pointer clicks */}
+												<button
+													type="button"
+													className="truncate text-left text-sm font-medium hover:underline"
+													onClick={(event) => {
+														event.stopPropagation();
+														openDialog(org, 'members');
+													}}
+												>
+													{org.name}
+												</button>
 												<span className="text-surface-700-300 truncate text-xs sm:hidden">
 													{org.slug}
 												</span>
@@ -121,7 +141,8 @@ export default function OrganizationsTable() {
 									<td className="text-surface-600-400 hidden text-sm md:table-cell">
 										{new Date(org.createdAt).toLocaleDateString()}
 									</td>
-									<td className="text-right">
+									{/* Clicks on the menu, portaled or not, bubble through React to the row: stop them here */}
+									<td className="text-right" onClick={(event) => event.stopPropagation()}>
 										<Menu.Root>
 											<Menu.Trigger
 												className="btn-icon hover:preset-tonal"
@@ -132,15 +153,23 @@ export default function OrganizationsTable() {
 											{/* Portaled so the table's scroll container doesn't clip the menu */}
 											<Portal>
 												<Menu.Content className="bg-surface-50-950">
-													<Menu.Item value="members" onClick={() => openDialog(org, 'members')}>
+													<Menu.Item
+														value="members"
+														className="gap-3"
+														onClick={() => openDialog(org, 'members')}
+													>
+														<Users className="size-4" aria-hidden="true" />
 														View members
 													</Menu.Item>
+													<Menu.Separator />
 													<Menu.Item
 														value="delete"
 														variant="destructive"
+														className="gap-3"
 														onClick={() => openDialog(org, 'delete')}
 													>
-														Delete
+														<Trash2 className="size-4" aria-hidden="true" />
+														Delete organization
 													</Menu.Item>
 												</Menu.Content>
 											</Portal>
@@ -180,7 +209,7 @@ export default function OrganizationsTable() {
 								: 'Members'}
 						</Dialog.Description>
 					</Dialog.Header>
-					<div className="flex max-h-[60vh] w-full flex-col gap-3 overflow-y-auto">
+					<div className="flex max-h-[60vh] w-full flex-col gap-1 overflow-y-auto px-2">
 						{!orgDetail ? (
 							<div className="text-surface-600-400 flex items-center gap-2 text-sm" role="status">
 								<Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -189,33 +218,50 @@ export default function OrganizationsTable() {
 						) : orgDetail.members.length === 0 ? (
 							<div className="text-surface-600-400 text-sm">No members.</div>
 						) : (
-							orgDetail.members.map((member) => (
-								<div key={member._id} className="flex items-center gap-3">
-									<Avatar.Root className="size-8 shrink-0">
-										<Avatar.Image
-											src={member.user?.image ?? undefined}
-											alt={member.user?.name ?? ''}
-										/>
-										<Avatar.Fallback>
-											<Avatar.Marble name={member.user?.name ?? '?'} />
-										</Avatar.Fallback>
-									</Avatar.Root>
-									<div className="flex min-w-0 flex-1 flex-col">
-										<span className="truncate text-sm">{member.user?.name ?? 'Deleted user'}</span>
-										<span className="text-surface-700-300 truncate text-xs">
-											{member.user?.email}
-										</span>
-									</div>
-									<span
-										className={`badge h-6 shrink-0 border px-2 capitalize ${
-											ROLE_BADGE[member.role] ??
-											'preset-filled-surface-300-700 border-surface-400-600'
-										}`}
+							orgDetail.members.map((member) => {
+								const memberUser = member.user;
+								return (
+									// Members open their profile, where admins change their roles and memberships
+									<button
+										key={member._id}
+										type="button"
+										className="hover:bg-surface-200-800 rounded-base -mx-2 flex items-center gap-3 p-2 text-left disabled:cursor-default disabled:hover:bg-transparent"
+										disabled={!memberUser}
+										onClick={() => {
+											if (!memberUser) return;
+											setMembersOpen(false);
+											onViewProfile(memberUser._id);
+										}}
 									>
-										{member.role}
-									</span>
-								</div>
-							))
+										<Avatar.Root className="size-8 shrink-0">
+											<Avatar.Image
+												src={memberUser?.image ?? undefined}
+												alt={memberUser?.name ?? ''}
+											/>
+											<Avatar.Fallback>
+												<Avatar.Marble name={memberUser?.name ?? '?'} />
+											</Avatar.Fallback>
+										</Avatar.Root>
+										<div className="flex min-w-0 flex-1 flex-col">
+											<span className="truncate text-sm">{memberUser?.name ?? 'Deleted user'}</span>
+											<span className="text-surface-700-300 truncate text-xs">
+												{memberUser?.email}
+											</span>
+										</div>
+										<span
+											className={`badge h-6 shrink-0 border px-2 capitalize ${
+												ROLE_BADGE[member.role] ??
+												'preset-filled-surface-300-700 border-surface-400-600'
+											}`}
+										>
+											{member.role}
+										</span>
+										{memberUser ? (
+											<ChevronRight className="size-4 shrink-0 opacity-60" aria-hidden="true" />
+										) : null}
+									</button>
+								);
+							})
 						)}
 					</div>
 					<Dialog.CloseX />

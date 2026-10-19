@@ -11,7 +11,11 @@ const schema = defineSchema({
 	// Name and email search for the admin users table (admin/convex)
 	user: tables.user
 		.searchIndex('search_name', { searchField: 'name' })
-		.searchIndex('search_email', { searchField: 'email' })
+		.searchIndex('search_email', { searchField: 'email' }),
+	// Name and slug search for the admin organization picker (admin/convex)
+	organization: tables.organization
+		.searchIndex('search_name', { searchField: 'name' })
+		.searchIndex('search_slug', { searchField: 'slug' })
 });
 
 export default schema;

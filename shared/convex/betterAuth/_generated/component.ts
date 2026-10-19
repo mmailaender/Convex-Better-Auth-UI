@@ -2022,6 +2022,20 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         null | string,
         Name
       >;
+      adminRemoveMember: FunctionReference<
+        "mutation",
+        "internal",
+        { memberId: string },
+        null,
+        Name
+      >;
+      adminUpdateMemberRole: FunctionReference<
+        "mutation",
+        "internal",
+        { memberId: string; role: "admin" | "member" },
+        null,
+        Name
+      >;
       getOrganizationWithMembers: FunctionReference<
         "query",
         "internal",
@@ -2077,6 +2091,45 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         "internal",
         { userId: string },
         Array<string>,
+        Name
+      >;
+      listUserMemberships: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        Array<{
+          _id: string;
+          createdAt: number;
+          organization: {
+            _creationTime: number;
+            _id: string;
+            createdAt: number;
+            logo?: null | string;
+            logoId?: null | string;
+            metadata?: null | string;
+            name: string;
+            plans?: null | Array<string>;
+            slug: string;
+          };
+          role: string;
+        }>,
+        Name
+      >;
+      searchOrganizations: FunctionReference<
+        "query",
+        "internal",
+        { limit: number; search: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          logo?: null | string;
+          logoId?: null | string;
+          metadata?: null | string;
+          name: string;
+          plans?: null | Array<string>;
+          slug: string;
+        }>,
         Name
       >;
     };

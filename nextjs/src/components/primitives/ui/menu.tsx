@@ -60,7 +60,10 @@ function Item({ className, variant = 'default', ...props }: ItemProps) {
 
 function Separator({ className, ...props }: React.ComponentProps<typeof MenuPrimitive.Separator>) {
 	return (
-		<MenuPrimitive.Separator className={cn('bg-surface-300-700 my-1 h-px', className)} {...props} />
+		<MenuPrimitive.Separator
+			className={cn('border-surface-300-700 -mx-1 my-1', className)}
+			{...props}
+		/>
 	);
 }
 

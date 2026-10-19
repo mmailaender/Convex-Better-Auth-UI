@@ -9,6 +9,7 @@ import {
 	appRoleValidator,
 	assertCanManageUser,
 	assertNotSelf,
+	organizationRoleValidator,
 	requireAppAdmin
 } from '../model/admin';
 
@@ -43,31 +44,108 @@ const assertPasswordLength = async (
 };
 
 /**
- * Create a new user (admin only). The email counts as verified, since an admin
- * vouches for it, so the user can sign in right away even when email
- * verification is required.
+ * Throw unless the organization feature is on. Admins can still list organizations while it's
+ * off (as empty), but not change them.
+ */
+const assertOrganizationsEnabled = (): void => {
+	if (!AUTH_CONSTANTS.organizations) {
+		throw new ConvexError('Organizations are not enabled');
+	}
+};
+
+/**
+ * Create a new user (admin only), optionally as a member of an existing organization. The email
+ * counts as verified, since an admin vouches for it, so the user can sign in right away even when
+ * email verification is required. New users are never admins: promote them with `setRole`.
+ *
+ * @returns The new user's id.
  */
 export const createUser = mutation({
 	args: {
 		email: v.string(),
 		password: v.string(),
 		name: v.string(),
-		role: v.optional(appRoleValidator)
+		organizationId: v.optional(v.string()),
+		organizationRole: v.optional(organizationRoleValidator)
 	},
-	returns: v.null(),
+	returns: v.string(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
+		if (args.organizationId) {
+			assertOrganizationsEnabled();
+		}
 		const auth = createAuth(ctx);
 		await assertPasswordLength(auth, args.password);
 		try {
-			await auth.api.createUser({
+			const { user } = await auth.api.createUser({
 				body: {
 					email: args.email,
 					password: args.password,
 					name: args.name,
-					role: args.role ?? 'user',
+					role: 'user',
 					data: { emailVerified: true }
 				},
+				headers: await authComponent.getHeaders(ctx)
+			});
+			// In the same transaction: if adding the member fails, the user isn't created either
+			if (args.organizationId) {
+				await auth.api.addMember({
+					body: {
+						userId: user.id,
+						organizationId: args.organizationId,
+						role: args.organizationRole ?? 'member'
+					}
+				});
+			}
+			return user.id;
+		} catch (error) {
+			return toConvexError(error);
+		}
+	}
+});
+
+/**
+ * Change a user's name and email (admin only). A new email counts as verified, like on
+ * `createUser`. Other admins have to lose their admin role first, since a new email would let
+ * whoever controls it reset their password.
+ */
+export const updateUser = mutation({
+	args: {
+		userId: v.string(),
+		name: v.string(),
+		email: v.string()
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const admin = await requireAppAdmin(ctx);
+		if (admin._id !== args.userId) {
+			await assertCanManageUser(ctx, args.userId, 'manage');
+		}
+		const user: { name: string; email: string } | null = await ctx.runQuery(
+			components.betterAuth.adapter.findOne,
+			{ model: 'user', where: [{ field: '_id', value: args.userId }] }
+		);
+		if (!user) {
+			throw new ConvexError('User not found');
+		}
+		const name = args.name.trim();
+		const email = args.email.trim().toLowerCase();
+		if (!name) {
+			throw new ConvexError('Name is required.');
+		}
+		const data: { name?: string; email?: string; emailVerified?: boolean } = {};
+		if (name !== user.name) data.name = name;
+		if (email !== user.email) {
+			data.email = email;
+			data.emailVerified = true;
+		}
+		if (Object.keys(data).length === 0) {
+			return null;
+		}
+		const auth = createAuth(ctx);
+		try {
+			await auth.api.adminUpdateUser({
+				body: { userId: args.userId, data },
 				headers: await authComponent.getHeaders(ctx)
 			});
 			return null;
@@ -321,9 +399,7 @@ export const deleteOrganizationAsAdmin = mutation({
 	returns: v.null(),
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
-		if (!AUTH_CONSTANTS.organizations) {
-			throw new ConvexError('Organizations are not enabled');
-		}
+		assertOrganizationsEnabled();
 		const logoId = await ctx.runMutation(
 			components.betterAuth.adminOrganizations.adminDeleteOrganization,
 			{ organizationId: args.organizationId }
@@ -331,6 +407,65 @@ export const deleteOrganizationAsAdmin = mutation({
 		if (logoId) {
 			await ctx.storage.delete(logoId as Id<'_storage'>);
 		}
+		return null;
+	}
+});
+
+/**
+ * Add a user to an organization (admin only), whether or not the admin is a member of it.
+ */
+export const addMember = mutation({
+	args: {
+		userId: v.string(),
+		organizationId: v.string(),
+		role: organizationRoleValidator
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		assertOrganizationsEnabled();
+		const auth = createAuth(ctx);
+		try {
+			await auth.api.addMember({
+				body: { userId: args.userId, organizationId: args.organizationId, role: args.role }
+			});
+			return null;
+		} catch (error) {
+			return toConvexError(error);
+		}
+	}
+});
+
+/**
+ * Change a member's role in an organization to `admin` or `member` (admin only). The owner
+ * keeps their role.
+ */
+export const updateMemberRole = mutation({
+	args: { memberId: v.string(), role: organizationRoleValidator },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		assertOrganizationsEnabled();
+		await ctx.runMutation(components.betterAuth.adminOrganizations.adminUpdateMemberRole, {
+			memberId: args.memberId,
+			role: args.role
+		});
+		return null;
+	}
+});
+
+/**
+ * Remove a member from an organization (admin only). The owner can't be removed.
+ */
+export const removeMember = mutation({
+	args: { memberId: v.string() },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		assertOrganizationsEnabled();
+		await ctx.runMutation(components.betterAuth.adminOrganizations.adminRemoveMember, {
+			memberId: args.memberId
+		});
 		return null;
 	}
 });

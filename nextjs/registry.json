@@ -1706,8 +1706,48 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "admin/ui/OrganizationSelect.tsx",
+					"relativePath": "src/components/admin/ui/OrganizationSelect.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "admin/ui/OrganizationsTable.tsx",
 					"relativePath": "src/components/admin/ui/OrganizationsTable.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/ui/UserActionsMenu.tsx",
+					"relativePath": "src/components/admin/ui/UserActionsMenu.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/ui/UserDetails.tsx",
+					"relativePath": "src/components/admin/ui/UserDetails.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/ui/UserDialogs.tsx",
+					"relativePath": "src/components/admin/ui/UserDialogs.tsx",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -1728,6 +1768,16 @@
 					"role": "file",
 					"path": "admin/utils/admin.constants.ts",
 					"relativePath": "src/components/admin/utils/admin.constants.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/utils/userAgent.ts",
+					"relativePath": "src/components/admin/utils/userAgent.ts",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],

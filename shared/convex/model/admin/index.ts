@@ -1,4 +1,4 @@
-import { ConvexError } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { authComponent } from '../../auth';
 import { components } from '../../_generated/api';
 import { AUTH_CONSTANTS } from '../../auth.constants';
@@ -9,6 +9,12 @@ import { getAdminUserIds, isAppAdminUser } from './roles';
 import type { MutationCtx, QueryCtx } from '../../_generated/server';
 
 export { appRoleValidator, getAdminUserIds, isAppAdminUser } from './roles';
+
+/**
+ * Organization roles an admin can give a member. Ownership changes hands through the owner
+ * leaving the organization, so `owner` isn't one of them.
+ */
+export const organizationRoleValidator = v.union(v.literal('admin'), v.literal('member'));
 
 /**
  * Resolve the current user and return whether they are an app admin. Safe to use

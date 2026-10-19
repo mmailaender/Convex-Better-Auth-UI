@@ -7,8 +7,9 @@ import { Building2, Users } from 'lucide-react';
 import * as Tabs from '@/components/primitives/ui/tabs';
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 import UsersTable from '@/components/admin/ui/UsersTable';
+import UserDetails from '@/components/admin/ui/UserDetails';
 import OrganizationsTable from '@/components/admin/ui/OrganizationsTable';
-import { TAB_ORGANIZATIONS, TAB_USERS } from '@/components/admin/utils/admin.constants';
+import { TAB_ORGANIZATIONS, TAB_USERS, USER_PARAM } from '@/components/admin/utils/admin.constants';
 
 /**
  * Admin dashboard body. Renders a Users tab always and an Organizations tab only
@@ -27,10 +28,24 @@ export default function AdminDashboard() {
 		return TAB_USERS;
 	}, [searchParams, organizationsEnabled]);
 
+	// The user whose profile shows instead of the users table, in `?adminUser=` like the tab
+	const profileUserId = searchParams.get(USER_PARAM);
+
 	function setActiveTab(tab: string) {
 		const params = new URLSearchParams(searchParams.toString());
 		params.set('adminTab', tab);
+		params.delete(USER_PARAM);
 		router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+	}
+
+	/** Shows the profile of `userId`, or the users table without one. */
+	function showProfile(userId: string | null) {
+		const params = new URLSearchParams(searchParams.toString());
+		params.set('adminTab', TAB_USERS);
+		if (userId) params.set(USER_PARAM, userId);
+		else params.delete(USER_PARAM);
+		// A new history entry, so the browser's back button returns to where the admin came from
+		router.push(`${pathname}?${params.toString()}`);
 	}
 
 	return (
@@ -49,12 +64,22 @@ export default function AdminDashboard() {
 			</Tabs.List>
 
 			<Tabs.Content value={TAB_USERS}>
-				<UsersTable />
+				{profileUserId ? (
+					<UserDetails
+						key={profileUserId}
+						userId={profileUserId}
+						onBack={() => showProfile(null)}
+					/>
+				) : null}
+				{/* Stays mounted behind a profile, so the search and loaded rows survive going back */}
+				<div className={profileUserId ? 'hidden' : undefined}>
+					<UsersTable onViewProfile={showProfile} />
+				</div>
 			</Tabs.Content>
 
 			{organizationsEnabled ? (
 				<Tabs.Content value={TAB_ORGANIZATIONS}>
-					<OrganizationsTable />
+					<OrganizationsTable onViewProfile={showProfile} />
 				</Tabs.Content>
 			) : null}
 		</Tabs.Root>

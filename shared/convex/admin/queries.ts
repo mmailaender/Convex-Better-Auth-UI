@@ -85,6 +85,28 @@ const toMillis = (value: Date | number | string | null | undefined): number | nu
 	value == null ? null : new Date(value).getTime();
 
 /**
+ * The admin dashboard's view of a user. Better Auth only lifts an expired ban when the user
+ * next signs in, so an expired ban shows as no ban.
+ */
+const toAdminUser = (user: UserDoc, now: number) => {
+	const banned = Boolean(user.banned) && (user.banExpires == null || user.banExpires > now);
+	return {
+		id: user._id,
+		name: user.name,
+		email: user.email,
+		emailVerified: user.emailVerified,
+		image: user.image ?? null,
+		role: user.role ?? null,
+		banned,
+		banReason: banned ? (user.banReason ?? null) : null,
+		banExpires: banned ? (user.banExpires ?? null) : null,
+		createdAt: user.createdAt,
+		isAppAdmin: isAppAdminUser({ id: user._id, role: user.role }),
+		isBootstrapAdmin: getAdminUserIds().includes(user._id)
+	};
+};
+
+/**
  * The newest `limit` users (admin only, at most 1000). "Load more" raises `limit`.
  *
  * With `searchValue`, returns the users whose name or email contains every
@@ -111,70 +133,8 @@ export const listUsers = query({
 					hasMore: false
 				}
 			: await ctx.runQuery(components.betterAuth.adminUsers.listUsers, { limit });
-
-		const bootstrapAdminIds = getAdminUserIds();
 		const now = Date.now();
-		const toAdminUser = (user: UserDoc) => {
-			// Better Auth only lifts an expired ban when the user next signs in
-			const banned = Boolean(user.banned) && (user.banExpires == null || user.banExpires > now);
-			return {
-				id: user._id,
-				name: user.name,
-				email: user.email,
-				emailVerified: user.emailVerified,
-				image: user.image ?? null,
-				role: user.role ?? null,
-				banned,
-				banReason: banned ? (user.banReason ?? null) : null,
-				banExpires: banned ? (user.banExpires ?? null) : null,
-				createdAt: user.createdAt,
-				isAppAdmin: isAppAdminUser({ id: user._id, role: user.role }),
-				isBootstrapAdmin: bootstrapAdminIds.includes(user._id)
-			};
-		};
-		return { users: result.users.map(toAdminUser), hasMore: result.hasMore };
-	}
-});
-
-/**
- * List the active sessions for a given user (admin only). Session tokens are
- * left out: they are bearer credentials, so they never leave the server.
- * Revoke a session by id with `admin/mutations.revokeUserSession`.
- */
-export const listUserSessions = query({
-	args: { userId: v.string() },
-	returns: v.array(
-		v.object({
-			id: v.string(),
-			createdAt: v.number(),
-			expiresAt: v.number(),
-			ipAddress: v.union(v.null(), v.string()),
-			userAgent: v.union(v.null(), v.string()),
-			impersonatedBy: v.union(v.null(), v.string())
-		})
-	),
-	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
-		const auth = createAuth(ctx);
-		try {
-			const { sessions } = await auth.api.listUserSessions({
-				body: { userId: args.userId },
-				headers: await authComponent.getHeaders(ctx)
-			});
-			return sessions.map((session) => ({
-				id: session.id,
-				createdAt: toMillis(session.createdAt) ?? 0,
-				expiresAt: toMillis(session.expiresAt) ?? 0,
-				ipAddress: session.ipAddress ?? null,
-				userAgent: session.userAgent ?? null,
-				impersonatedBy: (session as { impersonatedBy?: string | null }).impersonatedBy ?? null
-			}));
-		} catch (error) {
-			if (error instanceof APIError) {
-				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
-			}
-			throw error;
-		}
+		return { users: result.users.map((user) => toAdminUser(user, now)), hasMore: result.hasMore };
 	}
 });
 
@@ -198,6 +158,94 @@ const toAdminOrganization = (organization: {
 	slug: organization.slug,
 	logo: organization.logo ?? null,
 	createdAt: organization.createdAt
+});
+
+/**
+ * A single user with their organization memberships (admin only), for the user profile.
+ * `null` once the user is deleted. `memberships` is empty while organizations are disabled.
+ */
+export const getUser = query({
+	args: { userId: v.string() },
+	returns: v.union(
+		v.null(),
+		v.object({
+			user: adminUserValidator,
+			memberships: v.array(
+				v.object({
+					_id: v.string(),
+					role: v.string(),
+					createdAt: v.number(),
+					organization: adminOrganizationValidator
+				})
+			)
+		})
+	),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		const user: UserDoc | null = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+			model: 'user',
+			where: [{ field: '_id', value: args.userId }]
+		});
+		if (!user) {
+			return null;
+		}
+		const memberships = AUTH_CONSTANTS.organizations
+			? await ctx.runQuery(components.betterAuth.adminOrganizations.listUserMemberships, {
+					userId: user._id
+				})
+			: [];
+		return {
+			user: toAdminUser(user, Date.now()),
+			memberships: memberships.map((membership) => ({
+				...membership,
+				organization: toAdminOrganization(membership.organization)
+			}))
+		};
+	}
+});
+
+/**
+ * List the active sessions for a given user (admin only), newest first. Session tokens are
+ * left out: they are bearer credentials, so they never leave the server.
+ * Revoke a session by id with `admin/mutations.revokeUserSession`.
+ */
+export const listUserSessions = query({
+	args: { userId: v.string() },
+	returns: v.array(
+		v.object({
+			id: v.string(),
+			createdAt: v.number(),
+			expiresAt: v.number(),
+			ipAddress: v.union(v.null(), v.string()),
+			userAgent: v.union(v.null(), v.string()),
+			impersonatedBy: v.union(v.null(), v.string())
+		})
+	),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		const auth = createAuth(ctx);
+		try {
+			const { sessions } = await auth.api.listUserSessions({
+				body: { userId: args.userId },
+				headers: await authComponent.getHeaders(ctx)
+			});
+			return sessions
+				.map((session) => ({
+					id: session.id,
+					createdAt: toMillis(session.createdAt) ?? 0,
+					expiresAt: toMillis(session.expiresAt) ?? 0,
+					ipAddress: session.ipAddress ?? null,
+					userAgent: session.userAgent ?? null,
+					impersonatedBy: (session as { impersonatedBy?: string | null }).impersonatedBy ?? null
+				}))
+				.sort((a, b) => b.createdAt - a.createdAt);
+		} catch (error) {
+			if (error instanceof APIError) {
+				throw new ConvexError(`${error.statusCode} ${error.status} ${error.message}`);
+			}
+			throw error;
+		}
+	}
 });
 
 /**
@@ -226,6 +274,27 @@ export const listAllOrganizations = query({
 			organizations: result.organizations.map(toAdminOrganization),
 			hasMore: result.hasMore
 		};
+	}
+});
+
+/**
+ * At most 20 organizations whose name or slug contains every word of `search` (each word
+ * starting a word there), or the newest ones without `search` (admin only). For the
+ * organization picker. Empty while organizations are disabled.
+ */
+export const searchOrganizations = query({
+	args: { search: v.optional(v.string()) },
+	returns: v.array(adminOrganizationValidator),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		if (!AUTH_CONSTANTS.organizations) {
+			return [];
+		}
+		const organizations = await ctx.runQuery(
+			components.betterAuth.adminOrganizations.searchOrganizations,
+			{ search: args.search ?? '', limit: 20 }
+		);
+		return organizations.map(toAdminOrganization);
 	}
 });
 

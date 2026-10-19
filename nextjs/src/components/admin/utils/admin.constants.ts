@@ -7,6 +7,9 @@ export const USERS_PAGE_SIZE = 50;
 /** Most users or organizations a list loads; `admin/queries` caps `limit` at the same value. */
 export const LIST_MAX = 1000;
 
+/** Query parameter holding the id of the user whose profile the dashboard shows. */
+export const USER_PARAM = 'adminUser';
+
 /** Admin dashboard tab values. */
 export const TAB_USERS = 'users';
 export const TAB_ORGANIZATIONS = 'organizations';
