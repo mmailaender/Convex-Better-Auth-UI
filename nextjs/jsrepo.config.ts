@@ -275,7 +275,15 @@ export default defineConfig({
 				add: 'when-added',
 				type: 'components',
 				dependencyResolution: 'manual',
-				registryDependencies: ['config', 'auth/lib', 'primitives', 'users/lib', 'admin/convex'],
+				// users/lib calls the users backend
+				registryDependencies: [
+					'config',
+					'auth/lib',
+					'primitives',
+					'users/lib',
+					'users/convex',
+					'admin/convex'
+				],
 				dependencies: [
 					'@ark-ui/react',
 					'@convex-dev/better-auth',
@@ -295,7 +303,8 @@ export default defineConfig({
 				add: 'when-added',
 				type: 'routes',
 				dependencyResolution: 'manual',
-				registryDependencies: ['config', 'auth/lib', 'admin/lib'],
+				// The page sends signed-out visitors to the sign-in page
+				registryDependencies: ['config', 'auth/lib', 'auth/routes', 'admin/lib'],
 				files: [
 					{
 						path: 'src/app/admin/page.tsx',

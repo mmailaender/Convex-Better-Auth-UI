@@ -308,9 +308,11 @@ export const adminUpdateOrganization = mutation({
 			}
 		}
 		let replacedLogoId: string | null = null;
+		// Removing also clears a logo set as a URL, through Better Auth, without a file of ours
 		if (
-			args.logo !== undefined &&
-			(args.logo?.storageId ?? null) !== (organization.logoId ?? null)
+			args.logo === null
+				? Boolean(organization.logo || organization.logoId)
+				: args.logo !== undefined && args.logo.storageId !== organization.logoId
 		) {
 			replacedLogoId = organization.logoId ?? null;
 			patch.logo = args.logo?.url ?? null;
@@ -325,10 +327,11 @@ export const adminUpdateOrganization = mutation({
 
 /**
  * Return a single organization together with its first 200 members (each joined to a
- * lightweight user summary), the owner first. Used by the admin organization view.
+ * lightweight user summary), the owner first. Used by the admin organization view. `null`
+ * when it doesn't exist, also for an id that isn't one, like from an edited URL.
  */
 export const getOrganizationWithMembers = query({
-	args: { organizationId: v.id('organization') },
+	args: { organizationId: v.string() },
 	returns: v.union(
 		v.null(),
 		v.object({
@@ -355,15 +358,20 @@ export const getOrganizationWithMembers = query({
 		})
 	),
 	handler: async (ctx, args) => {
-		const organization = await ctx.db.get('organization', args.organizationId);
+		const organizationId = ctx.db.normalizeId('organization', args.organizationId);
+		const organization = organizationId && (await ctx.db.get('organization', organizationId));
 		if (!organization) {
 			return null;
 		}
 
 		const members = await ctx.db
 			.query('member')
-			.withIndex('organizationId', (q) => q.eq('organizationId', args.organizationId))
+			.withIndex('organizationId', (q) => q.eq('organizationId', organization._id))
 			.take(200);
+		// The owner may have joined after the first 200 members
+		if (!members.some(isOwner)) {
+			members.push(...(await getOwners(ctx, organization._id)));
+		}
 
 		const membersWithUsers = await Promise.all(
 			members.map(async (member) => {

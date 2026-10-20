@@ -6,6 +6,7 @@ import { Check, ChevronDown, Loader2, Search } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import * as Avatar from '@/components/primitives/ui/avatar';
+import QueryErrorBoundary from '@/components/admin/ui/QueryErrorBoundary';
 import type { AdminUser } from '@/components/admin/types';
 
 type UserSelectProps = {
@@ -41,7 +42,7 @@ function UserLabel({ user, detail = user.email }: { user: AdminUser; detail?: st
  * Picks a user, searching by name or email. The list expands inline rather than in a
  * popover: dialogs hide portaled content from screen readers and clip content that isn't portaled.
  */
-export default function UserSelect({
+function UserSelectPicker({
 	value,
 	onChange,
 	excludeIds = [],
@@ -162,5 +163,14 @@ export default function UserSelect({
 				</div>
 			) : null}
 		</div>
+	);
+}
+
+/** The picker, with a failed search of users showing in its place instead of failing the dialog. */
+export default function UserSelect(props: UserSelectProps) {
+	return (
+		<QueryErrorBoundary className="p-3">
+			<UserSelectPicker {...props} />
+		</QueryErrorBoundary>
 	);
 }

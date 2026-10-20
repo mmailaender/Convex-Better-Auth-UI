@@ -70,14 +70,16 @@
 		navigate(tab, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: null }, true);
 	}
 
+	// Closing a page replaces it in the history, so the browser's back button doesn't reopen it
+
 	/** Shows the profile of `userId` above the current tab, or closes the profile. */
 	function showProfile(userId: string | null) {
-		navigate(activeTab, { [USER_PARAM]: userId });
+		navigate(activeTab, { [USER_PARAM]: userId }, !userId);
 	}
 
 	/** Shows the page of `id` in the organizations tab, or the organizations table without one. */
 	function showOrganization(id: string | null) {
-		navigate(TAB_ORGANIZATIONS, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: id });
+		navigate(TAB_ORGANIZATIONS, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: id }, !id);
 	}
 </script>
 

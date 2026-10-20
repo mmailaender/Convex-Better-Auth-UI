@@ -12,6 +12,7 @@ import UsersTable from '@/components/admin/ui/UsersTable';
 import UserDetails from '@/components/admin/ui/UserDetails';
 import OrganizationsTable from '@/components/admin/ui/OrganizationsTable';
 import OrganizationDetails from '@/components/admin/ui/OrganizationDetails';
+import QueryErrorBoundary from '@/components/admin/ui/QueryErrorBoundary';
 import {
 	ORGANIZATION_PARAM,
 	TAB_ORGANIZATIONS,
@@ -45,13 +46,6 @@ export default function AdminDashboard() {
 	const organizationId =
 		activeTab === TAB_ORGANIZATIONS ? searchParams.get(ORGANIZATION_PARAM) : null;
 
-	// Names the organization on the back button of a member's profile. The organization page
-	// beneath subscribes to the same query, so this doesn't fetch it again
-	const organizationDetails = useQuery(
-		api.admin.queries.getOrganizationWithMembers,
-		organizationId && organizationsProfileId ? { organizationId } : 'skip'
-	);
-
 	/** Navigates within the dashboard to the given tab and query parameters. */
 	function navigate(
 		tab: string,
@@ -75,25 +69,32 @@ export default function AdminDashboard() {
 		navigate(tab, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: null }, true);
 	}
 
-	/** Shows the profile of `userId` above the current tab, or closes the profile. */
+	/**
+	 * Shows the profile of `userId` above the current tab, or closes the profile. Closing replaces
+	 * the profile's history entry, so the browser's back button doesn't open it again
+	 */
 	function showProfile(userId: string | null) {
-		navigate(activeTab, { [USER_PARAM]: userId });
+		navigate(activeTab, { [USER_PARAM]: userId }, !userId);
 	}
 
-	/** Shows the page of `id` in the organizations tab, or the organizations table without one. */
+	/**
+	 * Shows the page of `id` in the organizations tab, or the organizations table without one,
+	 * replacing the page's history entry like closing a profile
+	 */
 	function showOrganization(id: string | null) {
-		navigate(TAB_ORGANIZATIONS, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: id });
+		navigate(TAB_ORGANIZATIONS, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: id }, !id);
 	}
 
 	function profile(userId: string | null, backLabel: string) {
 		return userId ? (
-			<UserDetails
-				key={userId}
-				userId={userId}
-				backLabel={backLabel}
-				onBack={() => showProfile(null)}
-				onViewOrganization={showOrganization}
-			/>
+			<QueryErrorBoundary key={userId}>
+				<UserDetails
+					userId={userId}
+					backLabel={backLabel}
+					onBack={() => showProfile(null)}
+					onViewOrganization={showOrganization}
+				/>
+			</QueryErrorBoundary>
 		) : null;
 	}
 
@@ -116,34 +117,73 @@ export default function AdminDashboard() {
 				{profile(usersProfileId, 'Users')}
 				{/* Stays mounted behind a profile, so the search and loaded rows survive going back */}
 				<div className={usersProfileId ? 'hidden' : undefined}>
-					<UsersTable onViewProfile={showProfile} />
+					<QueryErrorBoundary>
+						<UsersTable onViewProfile={showProfile} />
+					</QueryErrorBoundary>
 				</div>
 			</Tabs.Content>
 
 			{organizationsEnabled ? (
 				<Tabs.Content value={TAB_ORGANIZATIONS}>
-					{profile(
-						organizationsProfileId,
-						organizationId
-							? (organizationDetails?.organization.name ?? 'Organization')
-							: 'Organizations'
+					{organizationId && organizationsProfileId ? (
+						<QueryErrorBoundary key={organizationsProfileId}>
+							<MemberProfile
+								organizationId={organizationId}
+								userId={organizationsProfileId}
+								onBack={() => showProfile(null)}
+								onViewOrganization={showOrganization}
+							/>
+						</QueryErrorBoundary>
+					) : (
+						profile(organizationsProfileId, 'Organizations')
 					)}
 					{/* Like the users table, these stay mounted behind what opens above them */}
 					{organizationId ? (
 						<div className={organizationsProfileId ? 'hidden' : undefined}>
-							<OrganizationDetails
-								key={organizationId}
-								organizationId={organizationId}
-								onBack={() => showOrganization(null)}
-								onViewProfile={showProfile}
-							/>
+							<QueryErrorBoundary key={organizationId}>
+								<OrganizationDetails
+									organizationId={organizationId}
+									onBack={() => showOrganization(null)}
+									onViewProfile={showProfile}
+								/>
+							</QueryErrorBoundary>
 						</div>
 					) : null}
 					<div className={organizationsProfileId || organizationId ? 'hidden' : undefined}>
-						<OrganizationsTable onViewOrganization={showOrganization} />
+						<QueryErrorBoundary>
+							<OrganizationsTable onViewOrganization={showOrganization} />
+						</QueryErrorBoundary>
 					</div>
 				</Tabs.Content>
 			) : null}
 		</Tabs.Root>
+	);
+}
+
+/**
+ * The profile of a member above their organization's page, its back button named after the
+ * organization. The page beneath subscribes to the same query, so this doesn't fetch it again
+ */
+function MemberProfile({
+	organizationId,
+	userId,
+	onBack,
+	onViewOrganization
+}: {
+	organizationId: string;
+	userId: string;
+	onBack: () => void;
+	onViewOrganization: (organizationId: string | null) => void;
+}) {
+	const organizationDetails = useQuery(api.admin.queries.getOrganizationWithMembers, {
+		organizationId
+	});
+	return (
+		<UserDetails
+			userId={userId}
+			backLabel={organizationDetails?.organization.name ?? 'Organization'}
+			onBack={onBack}
+			onViewOrganization={onViewOrganization}
+		/>
 	);
 }

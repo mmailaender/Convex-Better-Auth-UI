@@ -235,7 +235,15 @@ export default defineConfig({
 				name: 'admin/lib',
 				add: 'when-added',
 				type: 'lib',
-				registryDependencies: ['config', 'auth/lib', 'primitives', 'users/lib', 'admin/convex'],
+				// users/lib calls the users backend
+				registryDependencies: [
+					'config',
+					'auth/lib',
+					'primitives',
+					'users/lib',
+					'users/convex',
+					'admin/convex'
+				],
 				files: [
 					{
 						path: 'src/lib/admin',
@@ -256,7 +264,8 @@ export default defineConfig({
 				name: 'admin/routes',
 				add: 'when-added',
 				type: 'routes',
-				registryDependencies: ['config', 'auth/lib', 'admin/lib'],
+				// The page sends signed-out visitors to the sign-in page
+				registryDependencies: ['config', 'auth/lib', 'auth/routes', 'admin/lib'],
 				files: [
 					{
 						path: 'src/routes/admin/+page.svelte',

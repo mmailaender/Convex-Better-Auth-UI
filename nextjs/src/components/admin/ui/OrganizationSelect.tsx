@@ -6,6 +6,7 @@ import { Check, ChevronDown, Loader2, Search } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import * as Avatar from '@/components/primitives/ui/avatar';
+import QueryErrorBoundary from '@/components/admin/ui/QueryErrorBoundary';
 import type { AdminOrganization } from '@/components/admin/types';
 
 type OrganizationSelectProps = {
@@ -39,7 +40,7 @@ function OrganizationLabel({ organization }: { organization: AdminOrganization }
  * Picks an organization, searching by name or slug. The list expands inline rather than in a
  * popover: dialogs hide portaled content from screen readers and clip content that isn't portaled.
  */
-export default function OrganizationSelect({
+function OrganizationSelectPicker({
 	value,
 	onChange,
 	excludeIds = [],
@@ -157,5 +158,14 @@ export default function OrganizationSelect({
 				</div>
 			) : null}
 		</div>
+	);
+}
+
+/** The picker, with a failed search of organizations showing in its place instead of failing the dialog. */
+export default function OrganizationSelect(props: OrganizationSelectProps) {
+	return (
+		<QueryErrorBoundary className="p-3">
+			<OrganizationSelectPicker {...props} />
+		</QueryErrorBoundary>
 	);
 }

@@ -106,14 +106,17 @@ export default function OrganizationDetails({
 	 * first, like on their profile (see `assertCanManageUser`).
 	 */
 	function isLocked(member: AdminMember): boolean {
-		return !member.user || (member.user.isAppAdmin && member.user._id !== activeUserId);
+		return Boolean(member.user?.isAppAdmin && member.user._id !== activeUserId);
 	}
 
 	const owners = members.filter(isOwner);
 	// Ownership changes the previous owner's membership too, so they mustn't be locked
 	const canTransfer = !owners.some(isLocked);
-	const successors = members.filter((member) => !isOwner(member) && !isLocked(member));
-	const hasLockedMembers = members.some((member) => member.user && isLocked(member));
+	// A member whose account was deleted can be removed, but can't become the owner
+	const successors = members.filter(
+		(member) => member.user && !isOwner(member) && !isLocked(member)
+	);
+	const hasLockedMembers = members.some(isLocked);
 
 	// Profile form. Fields the admin hasn't edited follow the organization as it changes elsewhere
 	const [name, setName] = useState('');
@@ -240,7 +243,7 @@ export default function OrganizationDetails({
 	function handleRemove(member: AdminMember) {
 		void run(
 			() => removeMember({ memberId: member._id }),
-			`Removed ${member.user?.name} from ${organization?.name}`,
+			`Removed ${member.user?.name ?? 'the deleted user'} from ${organization?.name}`,
 			'Failed to remove the member'
 		);
 	}
@@ -338,9 +341,12 @@ export default function OrganizationDetails({
 								accept="image/*"
 								onCropped={handleCropped}
 							>
+								{/* Inert while a logo saves, so a second upload can't race the first */}
 								<ImageCropper.UploadTrigger
 									className="rounded-container block cursor-pointer"
 									aria-label="Upload a new logo"
+									aria-disabled={logoBusy}
+									inert={logoBusy}
 								>
 									<div className="relative">
 										<Avatar.Root className="rounded-container size-16">
@@ -557,7 +563,7 @@ export default function OrganizationDetails({
 													<td onClick={(event) => event.stopPropagation()}>
 														{owner ? (
 															<RoleBadge label="Owner" owner />
-														) : locked ? (
+														) : locked || !memberUser ? (
 															<RoleBadge label={roleOf(member)} />
 														) : (
 															<select
@@ -605,16 +611,20 @@ export default function OrganizationDetails({
 																		</Menu.Item>
 																	) : !locked ? (
 																		<>
-																			<Menu.Item
-																				value="make-owner"
-																				className={`gap-3 ${DISABLED_ITEM}`}
-																				disabled={!canTransfer}
-																				onClick={() => openTransfer(member)}
-																			>
-																				<Crown className="size-4" aria-hidden="true" />
-																				Make owner
-																			</Menu.Item>
-																			<Menu.Separator />
+																			{memberUser ? (
+																				<>
+																					<Menu.Item
+																						value="make-owner"
+																						className={`gap-3 ${DISABLED_ITEM}`}
+																						disabled={!canTransfer}
+																						onClick={() => openTransfer(member)}
+																					>
+																						<Crown className="size-4" aria-hidden="true" />
+																						Make owner
+																					</Menu.Item>
+																					<Menu.Separator />
+																				</>
+																			) : null}
 																			<Menu.Item
 																				value="remove"
 																				variant="destructive"

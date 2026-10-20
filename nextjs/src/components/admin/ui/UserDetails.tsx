@@ -14,6 +14,7 @@ import CopyButton from '@/components/admin/ui/CopyButton';
 import OrganizationSelect from '@/components/admin/ui/OrganizationSelect';
 import UserActionsMenu from '@/components/admin/ui/UserActionsMenu';
 import UserDialogs from '@/components/admin/ui/UserDialogs';
+import QueryErrorBoundary from '@/components/admin/ui/QueryErrorBoundary';
 import { describeUserAgent } from '@/components/admin/utils/userAgent';
 import type {
 	AdminMembership,
@@ -71,16 +72,11 @@ export default function UserDetails({
 	const activeUser = useActiveUserData();
 	const details = useQuery(api.admin.queries.getUser, { userId });
 	const user = details?.user ?? null;
-	const sessions = useQuery(
-		api.admin.queries.listUserSessions,
-		user ? { userId: user.id } : 'skip'
-	);
 
 	const updateUser = useMutation(api.admin.mutations.updateUser);
 	const updateMemberRole = useMutation(api.admin.mutations.updateMemberRole);
 	const removeMember = useMutation(api.admin.mutations.removeMember);
 	const addMember = useMutation(api.admin.mutations.addMember);
-	const revokeUserSession = useMutation(api.admin.mutations.revokeUserSession);
 	const unbanUser = useMutation(api.admin.mutations.unbanUser);
 
 	const isSelf = user?.id === activeUser?._id;
@@ -90,8 +86,6 @@ export default function UserDetails({
 
 	const [dialog, setDialog] = useState<UserDialog | null>(null);
 	const [unbanning, setUnbanning] = useState(false);
-	const [showAllSessions, setShowAllSessions] = useState(false);
-	const shownSessions = showAllSessions ? sessions : sessions?.slice(0, SESSIONS_SHOWN);
 
 	// Profile form. Fields the admin hasn't edited follow the user as it changes elsewhere
 	const [name, setName] = useState('');
@@ -193,14 +187,6 @@ export default function UserDetails({
 		setUnbanning(true);
 		await run(() => unbanUser({ userId: id }), `Unbanned ${name}`, 'Failed to unban user');
 		setUnbanning(false);
-	}
-
-	function handleRevokeSession(sessionId: string) {
-		void run(
-			() => revokeUserSession({ sessionId }),
-			'Signed out the session',
-			'Failed to sign out the session'
-		);
 	}
 
 	const banDescription = user?.banned
@@ -468,65 +454,13 @@ export default function UserDetails({
 
 					{/* Sessions */}
 					<section className="card border-surface-300-700 flex flex-col gap-3 border p-4">
-						<h3 className="h6">
-							Active sessions
-							{sessions?.length ? (
-								<span className="text-surface-600-400 font-normal"> ({sessions.length})</span>
-							) : null}
-						</h3>
-						{!sessions ? (
-							<p className="text-surface-600-400 flex items-center gap-2 text-sm" role="status">
-								<Loader2 className="size-4 animate-spin" aria-hidden="true" />
-								Loading sessions...
-							</p>
-						) : sessions.length === 0 ? (
-							<p className="text-surface-600-400 text-sm">Not signed in anywhere.</p>
-						) : (
-							<>
-								<ul className="flex flex-col">
-									{(shownSessions ?? []).map((session) => (
-										<li
-											key={session.id}
-											className="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
-										>
-											<div className="flex min-w-0 flex-1 flex-col">
-												<div className="flex items-center gap-2">
-													<span className="truncate text-sm">
-														{describeUserAgent(session.userAgent)}
-													</span>
-													{session.impersonatedBy ? (
-														<span className="badge preset-tonal shrink-0">Impersonation</span>
-													) : null}
-												</div>
-												<span className="text-surface-600-400 truncate text-xs">
-													{session.ipAddress ? `${session.ipAddress} · ` : ''}Signed in{' '}
-													{formatDateTime(session.createdAt)}
-												</span>
-											</div>
-											{canManage ? (
-												<button
-													type="button"
-													className="btn btn-sm hover:preset-tonal shrink-0 gap-2"
-													onClick={() => handleRevokeSession(session.id)}
-												>
-													<LogOut className="size-4" aria-hidden="true" />
-													Sign out
-												</button>
-											) : null}
-										</li>
-									))}
-								</ul>
-								{sessions.length > SESSIONS_SHOWN ? (
-									<button
-										type="button"
-										className="btn btn-sm hover:preset-tonal w-fit"
-										onClick={() => setShowAllSessions(!showAllSessions)}
-									>
-										{showAllSessions ? 'Show fewer' : `Show all ${sessions.length} sessions`}
-									</button>
-								) : null}
-							</>
-						)}
+						<QueryErrorBoundary
+							resetKey={user.id}
+							heading={<h3 className="h6">Active sessions</h3>}
+							className=""
+						>
+							<Sessions userId={user.id} canManage={canManage} />
+						</QueryErrorBoundary>
 					</section>
 				</>
 			)}
@@ -591,5 +525,84 @@ export default function UserDetails({
 				</Dialog.Content>
 			</Dialog.Root>
 		</div>
+	);
+}
+
+/** A user's active sessions, which admins can sign out unless the user is another admin. */
+function Sessions({ userId, canManage }: { userId: string; canManage: boolean }) {
+	const sessions = useQuery(api.admin.queries.listUserSessions, { userId });
+	const revokeUserSession = useMutation(api.admin.mutations.revokeUserSession);
+	const [showAllSessions, setShowAllSessions] = useState(false);
+	const shownSessions = showAllSessions ? sessions : sessions?.slice(0, SESSIONS_SHOWN);
+
+	async function handleRevokeSession(sessionId: string) {
+		try {
+			await revokeUserSession({ sessionId });
+			toast.success('Signed out the session');
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : 'Failed to sign out the session');
+		}
+	}
+
+	return (
+		<>
+			<h3 className="h6">
+				Active sessions
+				{sessions?.length ? (
+					<span className="text-surface-600-400 font-normal"> ({sessions.length})</span>
+				) : null}
+			</h3>
+			{!sessions ? (
+				<p className="text-surface-600-400 flex items-center gap-2 text-sm" role="status">
+					<Loader2 className="size-4 animate-spin" aria-hidden="true" />
+					Loading sessions...
+				</p>
+			) : sessions.length === 0 ? (
+				<p className="text-surface-600-400 text-sm">Not signed in anywhere.</p>
+			) : (
+				<>
+					<ul className="flex flex-col">
+						{(shownSessions ?? []).map((session) => (
+							<li
+								key={session.id}
+								className="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
+							>
+								<div className="flex min-w-0 flex-1 flex-col">
+									<div className="flex items-center gap-2">
+										<span className="truncate text-sm">{describeUserAgent(session.userAgent)}</span>
+										{session.impersonatedBy ? (
+											<span className="badge preset-tonal shrink-0">Impersonation</span>
+										) : null}
+									</div>
+									<span className="text-surface-600-400 truncate text-xs">
+										{session.ipAddress ? `${session.ipAddress} · ` : ''}Signed in{' '}
+										{formatDateTime(session.createdAt)}
+									</span>
+								</div>
+								{canManage ? (
+									<button
+										type="button"
+										className="btn btn-sm hover:preset-tonal shrink-0 gap-2"
+										onClick={() => void handleRevokeSession(session.id)}
+									>
+										<LogOut className="size-4" aria-hidden="true" />
+										Sign out
+									</button>
+								) : null}
+							</li>
+						))}
+					</ul>
+					{sessions.length > SESSIONS_SHOWN ? (
+						<button
+							type="button"
+							className="btn btn-sm hover:preset-tonal w-fit"
+							onClick={() => setShowAllSessions(!showAllSessions)}
+						>
+							{showAllSessions ? 'Show fewer' : `Show all ${sessions.length} sessions`}
+						</button>
+					) : null}
+				</>
+			)}
+		</>
 	);
 }

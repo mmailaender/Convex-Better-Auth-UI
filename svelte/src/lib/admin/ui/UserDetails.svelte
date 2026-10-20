@@ -298,7 +298,7 @@
 				<div class="text-surface-600-400 flex items-center gap-1 text-xs">
 					<span class="shrink-0">User ID</span>
 					<code class="truncate">{user.id}</code>
-					<CopyButton text={user.id} class="size-6" aria-label="Copy user ID" />
+					<CopyButton text={user.id} class="size-6" tabindex={0} aria-label="Copy user ID" />
 				</div>
 			</div>
 			<UserActionsMenu {user} {isSelf} onDialog={(next) => (dialog = next)} />

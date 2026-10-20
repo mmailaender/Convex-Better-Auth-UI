@@ -1612,6 +1612,7 @@
 				"auth/lib",
 				"primitives",
 				"users/lib",
+				"users/convex",
 				"admin/convex"
 			],
 			"dependencies": [
@@ -1756,6 +1757,16 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "admin/ui/QueryErrorBoundary.tsx",
+					"relativePath": "src/components/admin/ui/QueryErrorBoundary.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "admin/ui/UserActionsMenu.tsx",
 					"relativePath": "src/components/admin/ui/UserActionsMenu.tsx",
 					"_imports_": [],
@@ -1832,6 +1843,7 @@
 			"registryDependencies": [
 				"config",
 				"auth/lib",
+				"auth/routes",
 				"admin/lib"
 			],
 			"dependencies": [],

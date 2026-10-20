@@ -5846,6 +5846,7 @@
 				"auth/lib",
 				"primitives",
 				"users/lib",
+				"users/convex",
 				"admin/convex"
 			],
 			"dependencies": [
@@ -6688,6 +6689,7 @@
 			"registryDependencies": [
 				"config",
 				"auth/lib",
+				"auth/routes",
 				"admin/lib",
 				"primitives"
 			],

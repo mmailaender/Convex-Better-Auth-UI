@@ -228,6 +228,8 @@ export const listUserSessions = query({
 				body: { userId: args.userId },
 				headers: await authComponent.getHeaders(ctx)
 			});
+			// Better Auth lists expired sessions too, until they're cleaned up
+			const now = Date.now();
 			return sessions
 				.map((session) => ({
 					id: session.id,
@@ -237,6 +239,7 @@ export const listUserSessions = query({
 					userAgent: session.userAgent ?? null,
 					impersonatedBy: (session as { impersonatedBy?: string | null }).impersonatedBy ?? null
 				}))
+				.filter((session) => session.expiresAt > now)
 				.sort((a, b) => b.createdAt - a.createdAt);
 		} catch (error) {
 			if (error instanceof APIError) {

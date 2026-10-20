@@ -532,7 +532,8 @@ export const removeMember = mutation({
 		if (!userId) {
 			return null;
 		}
-		await assertCanChangeUser(ctx, admin._id, userId);
+		// The membership of a deleted account can always go
+		await assertCanChangeUser(ctx, admin._id, userId, { allowDeleted: true });
 		await ctx.runMutation(components.betterAuth.adminOrganizations.adminRemoveMember, {
 			memberId: args.memberId
 		});
@@ -610,8 +611,12 @@ export const transferOwnership = mutation({
 			components.betterAuth.adminOrganizations.listOwnerUserIds,
 			{ organizationId: member.organizationId }
 		);
-		for (const userId of new Set([member.userId, ...ownerUserIds])) {
-			await assertCanChangeUser(ctx, admin._id, userId);
+		// The new owner needs an account; a previous owner's may be gone
+		await assertCanChangeUser(ctx, admin._id, member.userId);
+		for (const userId of ownerUserIds) {
+			if (userId !== member.userId) {
+				await assertCanChangeUser(ctx, admin._id, userId, { allowDeleted: true });
+			}
 		}
 		await ctx.runMutation(components.betterAuth.adminOrganizations.adminTransferOwnership, {
 			memberId: args.memberId,

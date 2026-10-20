@@ -90,17 +90,20 @@
 
 	/**
 	 * Whether the admin can't change this membership: other admins have to lose their admin role
-	 * first, like on their profile (see `assertCanManageUser`).
+	 * first, like on their profile (see `assertCanManageUser`). The membership of a deleted account
+	 * can only be removed.
 	 */
 	function isLocked(member: AdminMember): boolean {
-		return !member.user || (member.user.isAppAdmin && member.user._id !== activeUserId);
+		return Boolean(member.user?.isAppAdmin && member.user._id !== activeUserId);
 	}
 
 	const owners = $derived(members.filter(isOwner));
 	// Ownership changes the previous owner's membership too, so they mustn't be locked
 	const canTransfer = $derived(!owners.some(isLocked));
-	const successors = $derived(members.filter((member) => !isOwner(member) && !isLocked(member)));
-	const hasLockedMembers = $derived(members.some((member) => member.user && isLocked(member)));
+	const successors = $derived(
+		members.filter((member) => member.user && !isOwner(member) && !isLocked(member))
+	);
+	const hasLockedMembers = $derived(members.some(isLocked));
 
 	// Profile form. Fields the admin hasn't edited follow the organization as it changes elsewhere
 	let name = $state('');
@@ -344,7 +347,12 @@
 				<div class="text-surface-600-400 flex items-center gap-1 text-xs">
 					<span class="shrink-0">Organization ID</span>
 					<code class="truncate">{organization._id}</code>
-					<CopyButton text={organization._id} class="size-6" aria-label="Copy organization ID" />
+					<CopyButton
+						text={organization._id}
+						class="size-6"
+						tabindex={0}
+						aria-label="Copy organization ID"
+					/>
 				</div>
 			</div>
 			<OrganizationActionsMenu {organization} onDeleted={onBack} />
@@ -355,9 +363,12 @@
 			<h3 class="h6">Profile</h3>
 			<div class="flex items-center gap-4">
 				<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
+					<!-- Unusable while a logo uploads, so uploads don't overlap -->
 					<ImageCropper.UploadTrigger
 						class="rounded-container block cursor-pointer"
 						aria-label="Upload a new logo"
+						inert={logoBusy}
+						aria-disabled={logoBusy}
 					>
 						<div class="relative">
 							<Avatar.Root class="rounded-container size-16">
@@ -559,7 +570,7 @@
 								<td onclick={(event) => event.stopPropagation()}>
 									{#if owner}
 										{@render roleBadge('Owner', true)}
-									{:else if locked}
+									{:else if locked || !memberUser}
 										{@render roleBadge(roleOf(member))}
 									{:else}
 										<!-- Re-created when a change fails, so it shows the stored role again -->
@@ -614,15 +625,17 @@
 														Transfer ownership
 													</Menu.Item>
 												{:else if !locked}
-													<Menu.Item
-														value="make-owner"
-														disabled={!canTransfer}
-														onclick={() => openTransfer(member)}
-													>
-														<CrownIcon aria-hidden="true" />
-														Make owner
-													</Menu.Item>
-													<Menu.Separator />
+													{#if memberUser}
+														<Menu.Item
+															value="make-owner"
+															disabled={!canTransfer}
+															onclick={() => openTransfer(member)}
+														>
+															<CrownIcon aria-hidden="true" />
+															Make owner
+														</Menu.Item>
+														<Menu.Separator />
+													{/if}
 													<Menu.Item
 														value="remove"
 														variant="destructive"
