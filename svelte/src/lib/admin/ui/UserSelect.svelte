@@ -119,6 +119,10 @@
 					aria-label="Search users by name or email"
 					bind:value={searchInput}
 					use:focusOnMount
+					onkeydown={(event) => {
+						// Enter would submit the dialog's form with the previous selection
+						if (event.key === 'Enter') event.preventDefault();
+					}}
 				/>
 			</div>
 			<div class="flex max-h-56 flex-col overflow-y-auto">

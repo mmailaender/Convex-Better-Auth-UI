@@ -116,6 +116,10 @@
 					aria-label="Search organizations"
 					bind:value={searchInput}
 					use:focusOnMount
+					onkeydown={(event) => {
+						// Enter would submit the dialog's form with the previous selection
+						if (event.key === 'Enter') event.preventDefault();
+					}}
 				/>
 			</div>
 			<div class="flex max-h-56 flex-col overflow-y-auto">

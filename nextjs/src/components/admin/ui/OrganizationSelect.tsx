@@ -118,6 +118,10 @@ export default function OrganizationSelect({
 							aria-label="Search organizations"
 							value={searchInput}
 							onChange={(e) => setSearchInput(e.target.value)}
+							// Enter would submit the dialog's form with the previous selection
+							onKeyDown={(e) => {
+								if (e.key === 'Enter') e.preventDefault();
+							}}
 							autoFocus
 						/>
 					</div>
