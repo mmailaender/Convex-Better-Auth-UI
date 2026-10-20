@@ -11,20 +11,23 @@ import { ConvexError } from 'convex/values';
  * * Delete Organizations membership where the user role is not owner
  * * Delete Invitations where the user is the invitee
  * * Delete Organizations where the user is the owner and only member (If there are other members, throw error)
+ *
+ * Returns the `logoId`s of the deleted organizations for the caller to delete: logos live in
+ * the app's file storage, which this component can't reach.
  */
 export const deleteUser = mutation({
 	args: v.object(withSystemFields('user', schema.tables.user.validator.fields)),
-	returns: v.null(),
+	returns: v.array(v.string()),
 	handler: async (ctx, args) => {
 		const ownerMemberships: Doc<'member'>[] = [];
+		const logoIds: string[] = [];
 
 		// 1) Delete organization memberships where the user is NOT the owner.
-		const memberships = ctx.db
-			.query('member')
-			.withIndex('userId', (q) => q.eq('userId', args._id));
+		const memberships = ctx.db.query('member').withIndex('userId', (q) => q.eq('userId', args._id));
 
 		for await (const membership of memberships) {
-			if (membership.role === 'owner') {
+			// Better Auth stores a member's roles as a comma-separated string
+			if (membership.role.split(',').some((role) => role.trim() === 'owner')) {
 				ownerMemberships.push(membership);
 			} else {
 				await ctx.db.delete('member', membership._id);
@@ -54,7 +57,7 @@ export const deleteUser = mutation({
 			const org = await ctx.db.get('organization', orgId);
 			if (org) {
 				if (org.logoId) {
-					await ctx.storage.delete(org.logoId);
+					logoIds.push(org.logoId);
 				}
 				await ctx.db.delete('organization', orgId);
 			}
@@ -69,7 +72,7 @@ export const deleteUser = mutation({
 			await ctx.db.delete('invitation', invitation._id);
 		}
 
-		return null;
+		return logoIds;
 	}
 });
 

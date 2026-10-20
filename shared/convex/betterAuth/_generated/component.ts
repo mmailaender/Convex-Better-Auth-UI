@@ -2257,7 +2257,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           updatedAt: number;
           userId?: null | string;
         },
-        null,
+        Array<string>,
         Name
       >;
       setActiveOrganization: FunctionReference<

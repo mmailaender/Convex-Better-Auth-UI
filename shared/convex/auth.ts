@@ -1,7 +1,7 @@
 import { type AuthFunctions, type GenericCtx, createClient } from '@convex-dev/better-auth';
 import { isRunMutationCtx, requireActionCtx } from '@convex-dev/better-auth/utils';
 import { components, internal } from './_generated/api';
-import type { DataModel } from './_generated/dataModel';
+import type { DataModel, Id } from './_generated/dataModel';
 import authSchema from './betterAuth/schema';
 import authConfig from './auth.config';
 
@@ -77,7 +77,13 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 					await ctx.storage.delete(authUser.imageId);
 				}
 				if (AUTH_CONSTANTS.organizations) {
-					await ctx.runMutation(components.betterAuth.organization.deleteUser, authUser);
+					const logoIds = await ctx.runMutation(
+						components.betterAuth.organization.deleteUser,
+						authUser
+					);
+					for (const logoId of logoIds) {
+						await ctx.storage.delete(logoId as Id<'_storage'>);
+					}
 				}
 				// Even with apiKeys off: keys created before still verify once it's turned back on
 				await ctx.runMutation(components.betterAuth.user.deleteApiKeys, {

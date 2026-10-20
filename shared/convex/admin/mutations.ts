@@ -62,11 +62,19 @@ const assertOrganizationsEnabled = (): void => {
 const assertCanChangeUser = async (
 	ctx: MutationCtx,
 	adminId: string,
-	userId: string
+	userId: string,
+	{ allowDeleted = false }: { allowDeleted?: boolean } = {}
 ): Promise<void> => {
-	if (adminId !== userId) {
-		await assertCanManageUser(ctx, userId, 'manage');
+	if (adminId === userId) return;
+	// A deleted account has no admin left to protect
+	if (allowDeleted) {
+		const user = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+			model: 'user',
+			where: [{ field: '_id', value: userId }]
+		});
+		if (!user) return;
 	}
+	await assertCanManageUser(ctx, userId, 'manage');
 };
 
 /**
@@ -223,6 +231,12 @@ export const banUser = mutation({
 		const admin = await requireAppAdmin(ctx);
 		assertNotSelf(admin._id, args.userId, 'ban');
 		await assertCanManageUser(ctx, args.userId, 'manage');
+		if (
+			args.banExpiresIn !== undefined &&
+			!(Number.isSafeInteger(args.banExpiresIn) && args.banExpiresIn > 0)
+		) {
+			throw new ConvexError('The ban duration has to be a positive number of seconds.');
+		}
 		const auth = createAuth(ctx);
 		try {
 			await auth.api.banUser({
@@ -418,14 +432,31 @@ export const revokeUserSessions = mutation({
 
 /**
  * Force-delete an organization (admin only). Gated behind the `organizations`
- * feature toggle in addition to `admin`.
+ * feature toggle in addition to `admin`. An organization owned by another admin
+ * can only be deleted once they're no longer an admin.
  */
 export const deleteOrganizationAsAdmin = mutation({
 	args: { organizationId: v.string() },
 	returns: v.null(),
 	handler: async (ctx, args) => {
-		await requireAppAdmin(ctx);
+		const admin = await requireAppAdmin(ctx);
 		assertOrganizationsEnabled();
+		// Like taking its ownership: another admin's organization stays until they lose their admin
+		// role. One whose owner's account is gone can always be deleted
+		const ownerUserIds = await ctx.runQuery(
+			components.betterAuth.adminOrganizations.listOwnerUserIds,
+			{ organizationId: args.organizationId }
+		);
+		for (const userId of ownerUserIds) {
+			try {
+				await assertCanChangeUser(ctx, admin._id, userId, { allowDeleted: true });
+			} catch (error) {
+				if (!(error instanceof ConvexError)) throw error;
+				throw new ConvexError(
+					"This organization's owner is an admin. It can be deleted once they're no longer one."
+				);
+			}
+		}
 		const logoId = await ctx.runMutation(
 			components.betterAuth.adminOrganizations.adminDeleteOrganization,
 			{ organizationId: args.organizationId }

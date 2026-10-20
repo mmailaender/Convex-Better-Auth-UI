@@ -459,7 +459,7 @@ export const listSharedOwnedOrganizations = query({
 			.query('member')
 			.withIndex('userId', (q) => q.eq('userId', args.userId));
 		for await (const membership of memberships) {
-			if (membership.role !== 'owner') continue;
+			if (!isOwner(membership)) continue;
 			const members = await ctx.db
 				.query('member')
 				.withIndex('organizationId', (q) => q.eq('organizationId', membership.organizationId))
