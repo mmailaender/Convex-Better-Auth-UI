@@ -368,9 +368,9 @@ export const getOrganizationWithMembers = query({
 			.query('member')
 			.withIndex('organizationId', (q) => q.eq('organizationId', organization._id))
 			.take(200);
-		// The owner may have joined after the first 200 members
-		if (!members.some(isOwner)) {
-			members.push(...(await getOwners(ctx, organization._id)));
+		// Owners may have joined after the first 200 members
+		for (const owner of await getOwners(ctx, organization._id)) {
+			if (!members.some((member) => member._id === owner._id)) members.push(owner);
 		}
 
 		const membersWithUsers = await Promise.all(

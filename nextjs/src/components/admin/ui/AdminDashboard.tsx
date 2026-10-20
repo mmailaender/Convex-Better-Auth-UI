@@ -126,7 +126,7 @@ export default function AdminDashboard() {
 			{organizationsEnabled ? (
 				<Tabs.Content value={TAB_ORGANIZATIONS}>
 					{organizationId && organizationsProfileId ? (
-						<QueryErrorBoundary key={organizationsProfileId}>
+						<QueryErrorBoundary key={`${organizationId}:${organizationsProfileId}`}>
 							<MemberProfile
 								organizationId={organizationId}
 								userId={organizationsProfileId}
