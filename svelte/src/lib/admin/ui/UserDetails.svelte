@@ -11,6 +11,7 @@
 	// Icons
 	import ArrowLeftIcon from '@lucide/svelte/icons/arrow-left';
 	import Loader2Icon from '@lucide/svelte/icons/loader-2';
+	import LockOpenIcon from '@lucide/svelte/icons/lock-open';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import XIcon from '@lucide/svelte/icons/x';
@@ -35,17 +36,24 @@
 
 	let {
 		userId,
-		onBack
+		backLabel = 'Users',
+		onBack,
+		onViewOrganization
 	}: {
 		userId: string;
-		/** Returns to the users table */
+		/** Label of the back button, naming where it returns to */
+		backLabel?: string;
+		/** Returns to where the admin came from */
 		onBack: () => void;
+		/** Opens the page of an organization */
+		onViewOrganization: (organizationId: string) => void;
 	} = $props();
 
 	const { api, authConstants } = getAuthContext();
 	const client = useConvexClient();
 	const auth = useAuth();
 	const organizationsEnabled = Boolean(authConstants.organizations);
+	const formId = $props.id();
 
 	const roleCollection = createListCollection({
 		items: [
@@ -70,6 +78,14 @@
 	const canManage = $derived(Boolean(user) && (isSelf || !user?.isAppAdmin));
 
 	let dialog = $state<UserDialog | null>(null);
+	let unbanning = $state(false);
+
+	// The newest sessions, until the admin asks for all of them
+	const SESSIONS_SHOWN = 5;
+	let showAllSessions = $state(false);
+	const sessions = $derived(
+		showAllSessions ? sessionsQuery.data : sessionsQuery.data?.slice(0, SESSIONS_SHOWN)
+	);
 
 	// Profile form. Fields the admin hasn't edited follow the user as it changes elsewhere
 	let name = $state('');
@@ -209,6 +225,18 @@
 		if (done) addOpen = false;
 	}
 
+	async function handleUnban() {
+		if (!user) return;
+		const { id, name } = user;
+		unbanning = true;
+		await run(
+			() => client.mutation(api.admin.mutations.unbanUser, { userId: id }),
+			`Unbanned ${name}`,
+			'Failed to unban user'
+		);
+		unbanning = false;
+	}
+
 	function handleRevokeSession(sessionId: string) {
 		void run(
 			() => client.mutation(api.admin.mutations.revokeUserSession, { sessionId }),
@@ -221,7 +249,7 @@
 <div class="flex flex-col gap-6 py-4">
 	<button type="button" class="btn hover:preset-tonal w-fit gap-2 px-2 text-sm" onclick={onBack}>
 		<ArrowLeftIcon class="size-4" aria-hidden="true" />
-		Users
+		{backLabel}
 	</button>
 
 	{#if detailsQuery.error}
@@ -273,8 +301,26 @@
 		</header>
 
 		{#if user.banned}
-			<div class="card preset-tonal-error border-error-200-800 border p-4 text-sm">
-				{banDescription}
+			<div
+				class="card preset-tonal-error border-error-200-800 flex flex-wrap items-center justify-between gap-3 border p-4 text-sm"
+			>
+				<p class="min-w-0">{banDescription}</p>
+				{#if !isSelf}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-surface-50-950 shrink-0 gap-2"
+						onclick={handleUnban}
+						disabled={unbanning}
+						aria-busy={unbanning}
+					>
+						{#if unbanning}
+							<Loader2Icon class="size-4 animate-spin" aria-hidden="true" />
+						{:else}
+							<LockOpenIcon class="size-4" aria-hidden="true" />
+						{/if}
+						Lift ban
+					</button>
+				{/if}
 			</div>
 		{/if}
 
@@ -364,25 +410,31 @@
 							<li
 								class="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
 							>
-								<Avatar.Root class="size-8 shrink-0">
+								<Avatar.Root class="rounded-container size-8 shrink-0">
 									<Avatar.Image
 										src={membership.organization.logo ?? undefined}
 										alt={membership.organization.name}
 									/>
-									<Avatar.Fallback>
+									<Avatar.Fallback class="rounded-container">
 										<Avatar.Marble name={membership.organization.name} />
 									</Avatar.Fallback>
 								</Avatar.Root>
-								<div class="flex min-w-0 flex-1 flex-col">
-									<span class="truncate text-sm">{membership.organization.name}</span>
-									<span class="text-surface-600-400 truncate text-xs">
+								<div class="flex min-w-0 flex-1 flex-col items-start">
+									<button
+										type="button"
+										class="max-w-full truncate text-left text-sm hover:underline"
+										onclick={() => onViewOrganization(membership.organization._id)}
+									>
+										{membership.organization.name}
+									</button>
+									<span class="text-surface-600-400 max-w-full truncate text-xs">
 										{membership.organization.slug}
 									</span>
 								</div>
 								{#if isOwner(membership)}
 									<span
 										class="badge preset-filled-primary-50-950 border-primary-200-800 border"
-										title="The owner keeps their role and can't be removed"
+										title="Hand over the ownership on the organization's page to change their role or remove them"
 									>
 										Owner
 									</span>
@@ -434,7 +486,12 @@
 
 		<!-- Sessions -->
 		<section class="card border-surface-300-700 flex flex-col gap-3 border p-4">
-			<h3 class="h6">Active sessions</h3>
+			<h3 class="h6">
+				Active sessions
+				{#if sessionsQuery.data?.length}
+					<span class="text-surface-600-400 font-normal">({sessionsQuery.data.length})</span>
+				{/if}
+			</h3>
 			{#if sessionsQuery.error}
 				<p class="text-error-600-400 text-sm">{sessionsQuery.error.message}</p>
 			{:else if !sessionsQuery.data}
@@ -446,7 +503,7 @@
 				<p class="text-surface-600-400 text-sm">Not signed in anywhere.</p>
 			{:else}
 				<ul class="flex flex-col">
-					{#each sessionsQuery.data as session (session.id)}
+					{#each sessions ?? [] as session (session.id)}
 						<li
 							class="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
 						>
@@ -476,6 +533,15 @@
 						</li>
 					{/each}
 				</ul>
+				{#if sessionsQuery.data.length > SESSIONS_SHOWN}
+					<button
+						type="button"
+						class="btn btn-sm hover:preset-tonal w-fit"
+						onclick={() => (showAllSessions = !showAllSessions)}
+					>
+						{showAllSessions ? 'Show fewer' : `Show all ${sessionsQuery.data.length} sessions`}
+					</button>
+				{/if}
 			{/if}
 		</section>
 	{/if}
@@ -483,19 +549,19 @@
 	<UserDialogs {user} bind:dialog onDeleted={onBack} />
 
 	<!-- Add to organization dialog -->
-	<Dialog.Root bind:open={addOpen}>
+	<Dialog.Root bind:open={addOpen} lazyMount unmountOnExit>
 		<Dialog.Content class="md:max-w-108">
-			<Dialog.Header>
+			<Dialog.Header class="pr-8">
 				<Dialog.Title>Add {user?.name} to an organization</Dialog.Title>
 				<Dialog.Description class="text-surface-700-300">
 					They become a member right away, without an invitation.
 				</Dialog.Description>
 			</Dialog.Header>
-			<form id="admin-add-membership" class="flex w-full flex-col gap-3" onsubmit={handleAdd}>
+			<form id={`${formId}-add`} class="flex w-full flex-col gap-3" onsubmit={handleAdd}>
 				<div class="label">
-					<label class="label-text" for="admin-add-membership-organization">Organization</label>
+					<label class="label-text" for={`${formId}-add-organization`}>Organization</label>
 					<OrganizationSelect
-						id="admin-add-membership-organization"
+						id={`${formId}-add-organization`}
 						bind:value={addOrganization}
 						excludeIds={memberOrganizationIds}
 					/>
@@ -512,7 +578,7 @@
 				<Dialog.Close class="btn preset-tonal" disabled={adding}>Cancel</Dialog.Close>
 				<button
 					type="submit"
-					form="admin-add-membership"
+					form={`${formId}-add`}
 					class="btn preset-filled-primary-500"
 					disabled={adding || !addOrganization}
 					aria-busy={adding}

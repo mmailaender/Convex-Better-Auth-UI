@@ -11,11 +11,18 @@
 	import UsersTable from '#lib/admin/ui/UsersTable.svelte';
 	import UserDetails from '#lib/admin/ui/UserDetails.svelte';
 	import OrganizationsTable from '#lib/admin/ui/OrganizationsTable.svelte';
+	import OrganizationDetails from '#lib/admin/ui/OrganizationDetails.svelte';
 	// Constants & API
+	import { useQuery } from 'convex-svelte';
 	import { getAuthContext } from '#lib/auth/context.svelte.js';
-	import { TAB_ORGANIZATIONS, TAB_USERS, USER_PARAM } from '#lib/admin/utils/admin.constants.js';
+	import {
+		ORGANIZATION_PARAM,
+		TAB_ORGANIZATIONS,
+		TAB_USERS,
+		USER_PARAM
+	} from '#lib/admin/utils/admin.constants.js';
 
-	const { authConstants } = getAuthContext();
+	const { api, authConstants } = getAuthContext();
 	const organizationsEnabled = Boolean(authConstants.organizations);
 
 	// Tab state lives in `?adminTab=` so the active tab survives reloads and can
@@ -26,27 +33,66 @@
 			: TAB_USERS
 	);
 
-	// The user whose profile shows instead of the users table, in `?adminUser=` like the tab
+	// What shows instead of a tab's table, in the URL like the tab: a user profile in either tab,
+	// and an organization in the organizations tab, with the profiles of its members above it
 	const profileUserId = $derived(page.url.searchParams.get(USER_PARAM));
+	// Ark renders the inactive tab's panel too, hidden, so each tab checks it's the active one
+	const usersProfileId = $derived(activeTab === TAB_USERS ? profileUserId : null);
+	const organizationsProfileId = $derived(activeTab === TAB_ORGANIZATIONS ? profileUserId : null);
+	const organizationId = $derived(
+		activeTab === TAB_ORGANIZATIONS ? page.url.searchParams.get(ORGANIZATION_PARAM) : null
+	);
+
+	// Names the organization on the back button of a member's profile. The organization page
+	// beneath subscribes to the same query, so this doesn't fetch it again
+	const organizationQuery = useQuery(api.admin.queries.getOrganizationWithMembers, () =>
+		organizationId && organizationsProfileId ? { organizationId } : 'skip'
+	);
+
+	/** Navigates within the dashboard to the given tab and query parameters. */
+	function navigate(
+		tab: string,
+		params: { [USER_PARAM]?: string | null; [ORGANIZATION_PARAM]?: string | null },
+		replace = false
+	) {
+		const url = new URL(page.url.href);
+		url.searchParams.set('adminTab', tab);
+		for (const [key, value] of Object.entries(params)) {
+			if (value) url.searchParams.set(key, value);
+			else url.searchParams.delete(key);
+		}
+		// Pages get a history entry, so the browser's back button returns to where the admin came from
+		void gotoApp(url, replace ? { replace: true, reset: false } : undefined);
+	}
 
 	function setActiveTab(tab: string | null) {
 		if (!tab || tab === activeTab) return;
-		const url = new URL(page.url.href);
-		url.searchParams.set('adminTab', tab);
-		url.searchParams.delete(USER_PARAM);
-		void gotoApp(url, { replace: true, reset: false });
+		navigate(tab, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: null }, true);
 	}
 
-	/** Shows the profile of `userId`, or the users table without one. */
+	/** Shows the profile of `userId` above the current tab, or closes the profile. */
 	function showProfile(userId: string | null) {
-		const url = new URL(page.url.href);
-		url.searchParams.set('adminTab', TAB_USERS);
-		if (userId) url.searchParams.set(USER_PARAM, userId);
-		else url.searchParams.delete(USER_PARAM);
-		// A new history entry, so the browser's back button returns to where the admin came from
-		void gotoApp(url);
+		navigate(activeTab, { [USER_PARAM]: userId });
+	}
+
+	/** Shows the page of `id` in the organizations tab, or the organizations table without one. */
+	function showOrganization(id: string | null) {
+		navigate(TAB_ORGANIZATIONS, { [USER_PARAM]: null, [ORGANIZATION_PARAM]: id });
 	}
 </script>
+
+{#snippet profile(userId: string | null, backLabel: string)}
+	{#if userId}
+		{#key userId}
+			<UserDetails
+				{userId}
+				{backLabel}
+				onBack={() => showProfile(null)}
+				onViewOrganization={showOrganization}
+			/>
+		{/key}
+	{/if}
+{/snippet}
 
 <Tabs.Root value={activeTab} onValueChange={(details) => setActiveTab(details.value)}>
 	<Tabs.List class="flex gap-2">
@@ -63,20 +109,36 @@
 	</Tabs.List>
 
 	<Tabs.Content value={TAB_USERS}>
-		{#if profileUserId}
-			{#key profileUserId}
-				<UserDetails userId={profileUserId} onBack={() => showProfile(null)} />
-			{/key}
-		{/if}
+		{@render profile(usersProfileId, 'Users')}
 		<!-- Stays mounted behind a profile, so the search and loaded rows survive going back -->
-		<div class:hidden={profileUserId}>
+		<div class:hidden={usersProfileId}>
 			<UsersTable onViewProfile={showProfile} />
 		</div>
 	</Tabs.Content>
 
 	{#if organizationsEnabled}
 		<Tabs.Content value={TAB_ORGANIZATIONS}>
-			<OrganizationsTable onViewProfile={showProfile} />
+			{@render profile(
+				organizationsProfileId,
+				organizationId
+					? (organizationQuery.data?.organization.name ?? 'Organization')
+					: 'Organizations'
+			)}
+			<!-- Like the users table, these stay mounted behind what opens above them -->
+			{#if organizationId}
+				<div class:hidden={organizationsProfileId}>
+					{#key organizationId}
+						<OrganizationDetails
+							{organizationId}
+							onBack={() => showOrganization(null)}
+							onViewProfile={showProfile}
+						/>
+					{/key}
+				</div>
+			{/if}
+			<div class:hidden={organizationsProfileId || organizationId}>
+				<OrganizationsTable onViewOrganization={showOrganization} />
+			</div>
 		</Tabs.Content>
 	{/if}
 </Tabs.Root>

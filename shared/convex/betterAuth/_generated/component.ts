@@ -2029,11 +2029,30 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         null,
         Name
       >;
+      adminTransferOwnership: FunctionReference<
+        "mutation",
+        "internal",
+        { memberId: string; previousOwner: "admin" | "member" | "remove" },
+        null,
+        Name
+      >;
       adminUpdateMemberRole: FunctionReference<
         "mutation",
         "internal",
         { memberId: string; role: "admin" | "member" },
         null,
+        Name
+      >;
+      adminUpdateOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          logo?: null | { storageId: string; url: string };
+          name?: string;
+          organizationId: string;
+          slug?: string;
+        },
+        null | string,
         Name
       >;
       getOrganizationWithMembers: FunctionReference<
@@ -2047,9 +2066,12 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             role: string;
             user: null | {
               _id: string;
+              banExpires: null | number;
+              banned: null | boolean;
               email: string;
               image: null | string;
               name: string;
+              role: null | string;
             };
           }>;
           organization: {
@@ -2084,6 +2106,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             slug: string;
           }>;
         },
+        Name
+      >;
+      listOwnerUserIds: FunctionReference<
+        "query",
+        "internal",
+        { organizationId: string },
+        Array<string>,
         Name
       >;
       listSharedOwnedOrganizations: FunctionReference<

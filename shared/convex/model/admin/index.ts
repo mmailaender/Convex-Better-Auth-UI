@@ -11,10 +11,17 @@ import type { MutationCtx, QueryCtx } from '../../_generated/server';
 export { appRoleValidator, getAdminUserIds, isAppAdminUser } from './roles';
 
 /**
- * Organization roles an admin can give a member. Ownership changes hands through the owner
- * leaving the organization, so `owner` isn't one of them.
+ * Organization roles an admin can give a member. Ownership changes hands through
+ * `admin/mutations.transferOwnership`, so `owner` isn't one of them.
  */
 export const organizationRoleValidator = v.union(v.literal('admin'), v.literal('member'));
+
+/** What the previous owner becomes when ownership changes hands: a role, or no member. */
+export const previousOwnerValidator = v.union(
+	v.literal('admin'),
+	v.literal('member'),
+	v.literal('remove')
+);
 
 /**
  * Resolve the current user and return whether they are an app admin. Safe to use

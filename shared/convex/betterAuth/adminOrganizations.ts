@@ -10,7 +10,7 @@
  * `requireAppAdmin` before any of these functions are reached.
  */
 import { ConvexError, v } from 'convex/values';
-import { mutation, query, type MutationCtx } from './_generated/server';
+import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server';
 import { withSystemFields } from 'convex-helpers/validators';
 import schema from './schema';
 import { containsEveryWord, SEARCH_CANDIDATES } from './adminUsers';
@@ -21,14 +21,32 @@ const organizationValidator = v.object(
 );
 
 /** Better Auth stores a member's roles as a comma-separated string. */
-const isOwner = (member: Doc<'member'>) =>
+const isOwner = (member: { role: string }) =>
 	member.role.split(',').some((role) => role.trim() === 'owner');
 
 /**
- * Organization roles the admin dashboard assigns. Ownership changes hands through the owner
- * leaving the organization (`organizations/members.leaveOrganization`), so it isn't one of them.
+ * Organization roles the admin dashboard assigns. Ownership changes hands through
+ * `adminTransferOwnership`, so it isn't one of them.
  */
 const assignableRoleValidator = v.union(v.literal('admin'), v.literal('member'));
+
+/** Lowercase letters, numbers and hyphens, like `model/organizations` accepts. */
+const SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+/** The owners of an organization: one, unless roles were changed outside the dashboard. */
+async function getOwners(
+	ctx: QueryCtx,
+	organizationId: Id<'organization'>
+): Promise<Doc<'member'>[]> {
+	const owners: Doc<'member'>[] = [];
+	const members = ctx.db
+		.query('member')
+		.withIndex('organizationId', (q) => q.eq('organizationId', organizationId));
+	for await (const member of members) {
+		if (isOwner(member)) owners.push(member);
+	}
+	return owners;
+}
 
 /**
  * Points a user's active organization, and that of each of their sessions, away
@@ -176,7 +194,7 @@ export const adminUpdateMemberRole = mutation({
 
 /**
  * Remove a member from an organization, regardless of the caller's membership. Owners can't be
- * removed: delete the organization instead. A member who had it active switches to another of
+ * removed: transfer the ownership (`adminTransferOwnership`) or delete the organization instead. A member who had it active switches to another of
  * their organizations.
  */
 export const adminRemoveMember = mutation({
@@ -189,7 +207,7 @@ export const adminRemoveMember = mutation({
 		}
 		if (isOwner(member)) {
 			throw new ConvexError(
-				"The owner can't be removed. Delete the organization, or have the owner leave it and pick a successor."
+				"The owner can't be removed. Make another member the owner first, or delete the organization."
 			);
 		}
 		await ctx.db.delete('member', member._id);
@@ -199,8 +217,115 @@ export const adminRemoveMember = mutation({
 });
 
 /**
- * Return a single organization together with its members (each joined to a
- * lightweight user summary). Used by the admin organization detail view.
+ * The user ids of an organization's owners, for the admin dashboard's checks before
+ * `adminTransferOwnership`.
+ */
+export const listOwnerUserIds = query({
+	args: { organizationId: v.id('organization') },
+	returns: v.array(v.string()),
+	handler: async (ctx, args) => {
+		const owners = await getOwners(ctx, args.organizationId);
+		return owners.map((owner) => owner.userId);
+	}
+});
+
+/**
+ * Make a member the owner of their organization, regardless of the caller's membership. The
+ * previous owner stays as `admin` or `member`, or leaves the organization with `remove`, and
+ * switches to another of their organizations if they had this one active.
+ */
+export const adminTransferOwnership = mutation({
+	args: {
+		memberId: v.id('member'),
+		previousOwner: v.union(v.literal('admin'), v.literal('member'), v.literal('remove'))
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const member = await ctx.db.get('member', args.memberId);
+		if (!member) {
+			throw new ConvexError('Membership not found');
+		}
+		if (isOwner(member)) {
+			throw new ConvexError('They already own this organization.');
+		}
+		const organizationId = member.organizationId as Id<'organization'>;
+		const owners = await getOwners(ctx, organizationId);
+		await ctx.db.patch('member', member._id, { role: 'owner' });
+		for (const owner of owners) {
+			if (args.previousOwner === 'remove') {
+				await ctx.db.delete('member', owner._id);
+				await moveOffOrganization(ctx, owner.userId, organizationId);
+			} else {
+				await ctx.db.patch('member', owner._id, { role: args.previousOwner });
+			}
+		}
+		return null;
+	}
+});
+
+/**
+ * Change an organization's name, slug or logo, regardless of the caller's membership; leave out
+ * what stays. `logo: null` removes the logo.
+ *
+ * Returns the storage id of the logo it replaced or removed, for the caller to delete: logos
+ * live in the app's file storage, which this component can't reach.
+ */
+export const adminUpdateOrganization = mutation({
+	args: {
+		organizationId: v.id('organization'),
+		name: v.optional(v.string()),
+		slug: v.optional(v.string()),
+		logo: v.optional(v.union(v.null(), v.object({ url: v.string(), storageId: v.string() })))
+	},
+	returns: v.union(v.null(), v.string()),
+	handler: async (ctx, args) => {
+		const organization = await ctx.db.get('organization', args.organizationId);
+		if (!organization) {
+			throw new ConvexError('Organization not found');
+		}
+		const patch: Partial<Doc<'organization'>> = {};
+		if (args.name !== undefined) {
+			const name = args.name.trim();
+			if (!name) {
+				throw new ConvexError('Name is required.');
+			}
+			if (name !== organization.name) patch.name = name;
+		}
+		if (args.slug !== undefined) {
+			const slug = args.slug.trim();
+			if (!SLUG_PATTERN.test(slug)) {
+				throw new ConvexError('The slug can only contain lowercase letters, numbers and hyphens.');
+			}
+			if (slug !== organization.slug) {
+				const taken = await ctx.db
+					.query('organization')
+					.withIndex('slug', (q) => q.eq('slug', slug))
+					.first();
+				if (taken) {
+					throw new ConvexError('Another organization already uses this slug.');
+				}
+				patch.slug = slug;
+			}
+		}
+		let replacedLogoId: string | null = null;
+		if (
+			args.logo !== undefined &&
+			(args.logo?.storageId ?? null) !== (organization.logoId ?? null)
+		) {
+			replacedLogoId = organization.logoId ?? null;
+			patch.logo = args.logo?.url ?? null;
+			patch.logoId = args.logo?.storageId ?? null;
+		}
+		if (Object.keys(patch).length > 0) {
+			await ctx.db.patch('organization', organization._id, patch);
+		}
+		return replacedLogoId;
+	}
+});
+
+/**
+ * Return a single organization together with its first 200 members (each joined to a
+ * lightweight user summary), the owner first. Used by the admin organization view.
  */
 export const getOrganizationWithMembers = query({
 	args: { organizationId: v.id('organization') },
@@ -219,7 +344,10 @@ export const getOrganizationWithMembers = query({
 							_id: v.id('user'),
 							name: v.string(),
 							email: v.string(),
-							image: v.union(v.null(), v.string())
+							image: v.union(v.null(), v.string()),
+							role: v.union(v.null(), v.string()),
+							banned: v.union(v.null(), v.boolean()),
+							banExpires: v.union(v.null(), v.number())
 						})
 					)
 				})
@@ -249,13 +377,20 @@ export const getOrganizationWithMembers = query({
 								_id: user._id,
 								name: user.name,
 								email: user.email,
-								image: user.image ?? null
+								image: user.image ?? null,
+								role: user.role ?? null,
+								banned: user.banned ?? null,
+								banExpires: user.banExpires ?? null
 							}
 						: null
 				};
 			})
 		);
 
+		// The owner first, then everyone else in the order they joined
+		membersWithUsers.sort(
+			(a, b) => Number(isOwner(b)) - Number(isOwner(a)) || a.createdAt - b.createdAt
+		);
 		return { organization, members: membersWithUsers };
 	}
 });

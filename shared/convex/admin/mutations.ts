@@ -10,6 +10,7 @@ import {
 	assertCanManageUser,
 	assertNotSelf,
 	organizationRoleValidator,
+	previousOwnerValidator,
 	requireAppAdmin
 } from '../model/admin';
 
@@ -503,6 +504,76 @@ export const removeMember = mutation({
 		await assertCanChangeUser(ctx, admin._id, userId);
 		await ctx.runMutation(components.betterAuth.adminOrganizations.adminRemoveMember, {
 			memberId: args.memberId
+		});
+		return null;
+	}
+});
+
+/**
+ * Change an organization's name, slug or logo (admin only), whether or not the admin is a member
+ * of it; leave out what stays. `logoId` takes a file uploaded through `storage.generateUploadUrl`,
+ * or `null` to remove the logo. The replaced logo's file is deleted.
+ */
+export const updateOrganization = mutation({
+	args: {
+		organizationId: v.string(),
+		name: v.optional(v.string()),
+		slug: v.optional(v.string()),
+		logoId: v.optional(v.union(v.null(), v.id('_storage')))
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		await requireAppAdmin(ctx);
+		assertOrganizationsEnabled();
+		let logo: { url: string; storageId: string } | null | undefined;
+		if (args.logoId === null) {
+			logo = null;
+		} else if (args.logoId) {
+			const url = await ctx.storage.getUrl(args.logoId);
+			if (!url) {
+				throw new ConvexError('The uploaded logo is missing. Upload it again.');
+			}
+			logo = { url, storageId: args.logoId };
+		}
+		const replacedLogoId = await ctx.runMutation(
+			components.betterAuth.adminOrganizations.adminUpdateOrganization,
+			{ organizationId: args.organizationId, name: args.name, slug: args.slug, logo }
+		);
+		if (replacedLogoId) {
+			await ctx.storage.delete(replacedLogoId as Id<'_storage'>);
+		}
+		return null;
+	}
+});
+
+/**
+ * Make a member the owner of their organization (admin only). The previous owner stays as an
+ * admin or member, or leaves the organization. Like the other membership changes, it needs the
+ * new and the previous owner to be the admin themself or not admins.
+ */
+export const transferOwnership = mutation({
+	args: { memberId: v.string(), previousOwner: previousOwnerValidator },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const admin = await requireAppAdmin(ctx);
+		assertOrganizationsEnabled();
+		const member: { userId: string; organizationId: string } | null = await ctx.runQuery(
+			components.betterAuth.adapter.findOne,
+			{ model: 'member', where: [{ field: '_id', value: args.memberId }] }
+		);
+		if (!member) {
+			throw new ConvexError('Membership not found');
+		}
+		const ownerUserIds = await ctx.runQuery(
+			components.betterAuth.adminOrganizations.listOwnerUserIds,
+			{ organizationId: member.organizationId }
+		);
+		for (const userId of new Set([member.userId, ...ownerUserIds])) {
+			await assertCanChangeUser(ctx, admin._id, userId);
+		}
+		await ctx.runMutation(components.betterAuth.adminOrganizations.adminTransferOwnership, {
+			memberId: args.memberId,
+			previousOwner: args.previousOwner
 		});
 		return null;
 	}

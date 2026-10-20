@@ -62,7 +62,7 @@
 		<span class="hidden sm:inline">New user</span>
 	</Dialog.Trigger>
 	<Dialog.Content class="md:max-w-108">
-		<Dialog.Header>
+		<Dialog.Header class="pr-8">
 			<Dialog.Title>Create user</Dialog.Title>
 			<Dialog.Description class="text-surface-700-300">
 				The user can sign in with this email and password right away.

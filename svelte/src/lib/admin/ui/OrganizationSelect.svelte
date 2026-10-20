@@ -68,9 +68,9 @@
 </script>
 
 {#snippet organizationLabel(organization: AdminOrganization)}
-	<Avatar.Root class="size-8 shrink-0">
+	<Avatar.Root class="rounded-container size-8 shrink-0">
 		<Avatar.Image src={organization.logo ?? undefined} alt={organization.name} />
-		<Avatar.Fallback>
+		<Avatar.Fallback class="rounded-container">
 			<Avatar.Marble name={organization.name} />
 		</Avatar.Fallback>
 	</Avatar.Root>

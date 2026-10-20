@@ -251,11 +251,14 @@ export const listUserSessions = query({
  * The newest `limit` organizations in the deployment (admin only, at most 1000).
  * "Load more" raises `limit`.
  *
+ * With `searchValue`, returns the organizations whose name or slug contains every word of it,
+ * at most `limit` of them and capped at 100, like `listUsers`.
+ *
  * Gated behind both the `admin` and `organizations` feature toggles. Returns an
  * empty list when organizations are disabled so callers can render safely.
  */
 export const listAllOrganizations = query({
-	args: { limit: v.number() },
+	args: { limit: v.number(), searchValue: v.optional(v.string()) },
 	returns: v.object({
 		organizations: v.array(adminOrganizationValidator),
 		hasMore: v.boolean()
@@ -265,10 +268,19 @@ export const listAllOrganizations = query({
 		if (!AUTH_CONSTANTS.organizations) {
 			return { organizations: [], hasMore: false };
 		}
-		const result = await ctx.runQuery(
-			components.betterAuth.adminOrganizations.listAllOrganizations,
-			{ limit: clampLimit(args.limit) }
-		);
+		const limit = clampLimit(args.limit);
+		const search = args.searchValue?.trim();
+		const result = search
+			? {
+					organizations: await ctx.runQuery(
+						components.betterAuth.adminOrganizations.searchOrganizations,
+						{ search, limit: Math.min(limit, 100) }
+					),
+					hasMore: false
+				}
+			: await ctx.runQuery(components.betterAuth.adminOrganizations.listAllOrganizations, {
+					limit
+				});
 		return {
 			organizations: result.organizations.map(toAdminOrganization),
 			hasMore: result.hasMore
@@ -298,7 +310,8 @@ export const searchOrganizations = query({
 });
 
 /**
- * Fetch a single organization with its members (admin only).
+ * Fetch a single organization with its first 200 members (admin only), the owner first.
+ * Members whose user is gone have `user: null`.
  */
 export const getOrganizationWithMembers = query({
 	args: { organizationId: v.string() },
@@ -317,7 +330,10 @@ export const getOrganizationWithMembers = query({
 							_id: v.string(),
 							name: v.string(),
 							email: v.string(),
-							image: v.union(v.null(), v.string())
+							image: v.union(v.null(), v.string()),
+							banned: v.boolean(),
+							isAppAdmin: v.boolean(),
+							isBootstrapAdmin: v.boolean()
 						})
 					)
 				})
@@ -333,6 +349,26 @@ export const getOrganizationWithMembers = query({
 			components.betterAuth.adminOrganizations.getOrganizationWithMembers,
 			{ organizationId: args.organizationId }
 		);
-		return result && { ...result, organization: toAdminOrganization(result.organization) };
+		if (!result) {
+			return null;
+		}
+		const now = Date.now();
+		const adminUserIds = getAdminUserIds();
+		return {
+			organization: toAdminOrganization(result.organization),
+			members: result.members.map(({ user, ...member }) => ({
+				...member,
+				user: user && {
+					_id: user._id,
+					name: user.name,
+					email: user.email,
+					image: user.image,
+					// An expired ban shows as no ban, like on `toAdminUser`
+					banned: Boolean(user.banned) && (user.banExpires == null || user.banExpires > now),
+					isAppAdmin: isAppAdminUser({ id: user._id, role: user.role }),
+					isBootstrapAdmin: adminUserIds.includes(user._id)
+				}
+			}))
+		};
 	}
 });
