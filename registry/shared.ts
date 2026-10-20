@@ -318,7 +318,11 @@ export function createEmailConvexItem() {
 							{ path: 'validateEmail.ts', dependencyResolution: manual },
 							{
 								path: 'templates',
-								files: [{ path: 'baseEmail.ts' }, { path: 'emailTemplates.ts' }]
+								files: [
+									// Imports auth.constants, which the config item installs
+									{ path: 'baseEmail.ts', dependencyResolution: manual },
+									{ path: 'emailTemplates.ts' }
+								]
 							}
 						]
 					}
