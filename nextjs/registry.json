@@ -1827,6 +1827,26 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "admin/utils/focus.ts",
+					"relativePath": "src/components/admin/utils/focus.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "test",
+					"path": "admin/utils/focus.test.ts",
+					"relativePath": "src/components/admin/utils/focus.test.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "admin/utils/userAgent.ts",
 					"relativePath": "src/components/admin/utils/userAgent.ts",
 					"_imports_": [],

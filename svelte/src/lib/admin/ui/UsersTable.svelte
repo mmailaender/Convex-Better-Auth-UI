@@ -139,6 +139,7 @@
 											<button
 												type="button"
 												class="truncate text-left text-sm font-medium hover:underline"
+												data-admin-focus={user.id}
 												onclick={(event) => {
 													event.stopPropagation();
 													onViewProfile(user.id);

@@ -255,7 +255,15 @@ export default defineConfig({
 								dependencies: ['convex']
 							},
 							{ path: 'ui' },
-							{ path: 'utils' }
+							{
+								path: 'utils',
+								files: [
+									{ path: 'admin.constants.ts' },
+									{ path: 'focus.ts' },
+									{ path: 'focus.test.ts', role: 'test' },
+									{ path: 'userAgent.ts' }
+								]
+							}
 						]
 					}
 				]

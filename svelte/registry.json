@@ -6029,6 +6029,15 @@
 								"path": "admin/utils/admin.constants.ts"
 							},
 							"meta": {}
+						},
+						{
+							"import": "#lib/admin/utils/focus.js",
+							"item": "admin/lib",
+							"file": {
+								"type": "lib",
+								"path": "admin/utils/focus.ts"
+							},
+							"meta": {}
 						}
 					],
 					"registryDependencies": [],
@@ -6669,6 +6678,42 @@
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "admin/utils/focus.ts",
+					"relativePath": "src/lib/admin/utils/focus.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "test",
+					"path": "admin/utils/focus.test.ts",
+					"relativePath": "src/lib/admin/utils/focus.test.ts",
+					"_imports_": [
+						{
+							"import": "./focus",
+							"item": "admin/lib",
+							"file": {
+								"type": "lib",
+								"path": "admin/utils/focus.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
 				},
 				{
 					"type": "lib",

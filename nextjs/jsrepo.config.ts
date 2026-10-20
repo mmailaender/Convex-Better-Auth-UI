@@ -294,7 +294,21 @@ export default defineConfig({
 				],
 				files: [
 					{
-						path: 'src/components/admin'
+						path: 'src/components/admin',
+						files: [
+							{ path: 'api' },
+							{ path: 'types.ts' },
+							{ path: 'ui' },
+							{
+								path: 'utils',
+								files: [
+									{ path: 'admin.constants.ts' },
+									{ path: 'focus.ts' },
+									{ path: 'focus.test.ts', role: 'test' },
+									{ path: 'userAgent.ts' }
+								]
+							}
+						]
 					}
 				]
 			},

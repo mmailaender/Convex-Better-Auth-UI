@@ -200,6 +200,7 @@ export default function UserDetails({
 			<button
 				type="button"
 				className="btn hover:preset-tonal w-fit gap-2 px-2 text-sm"
+				data-admin-back
 				onClick={onBack}
 			>
 				<ArrowLeft className="size-4" aria-hidden="true" />

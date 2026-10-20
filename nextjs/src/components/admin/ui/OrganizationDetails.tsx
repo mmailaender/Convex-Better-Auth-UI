@@ -294,6 +294,7 @@ export default function OrganizationDetails({
 			<button
 				type="button"
 				className="btn hover:preset-tonal w-fit gap-2 px-2 text-sm"
+				data-admin-back
 				onClick={onBack}
 			>
 				<ArrowLeft className="size-4" aria-hidden="true" />
@@ -328,7 +329,11 @@ export default function OrganizationDetails({
 								<CopyButton text={organization._id} label="Copy organization ID" />
 							</div>
 						</div>
-						<OrganizationActionsMenu organization={organization} onDeleted={onBack} />
+						<OrganizationActionsMenu
+							organization={organization}
+							deleteDisabled={!canTransfer}
+							onDeleted={onBack}
+						/>
 					</header>
 
 					{/* Profile */}
@@ -524,6 +529,7 @@ export default function OrganizationDetails({
 																		<button
 																			type="button"
 																			className="truncate text-left text-sm font-medium hover:underline"
+																			data-admin-focus={memberUser._id}
 																			onClick={(event) => {
 																				event.stopPropagation();
 																				onViewProfile(memberUser._id);
@@ -647,7 +653,8 @@ export default function OrganizationDetails({
 								</table>
 								{owners.length > 0 && !canTransfer ? (
 									<p className="text-surface-600-400 text-xs">
-										The owner is an app admin: remove their admin role to hand over the ownership.
+										The owner is an app admin: remove their admin role to hand over the ownership or
+										delete the organization.
 									</p>
 								) : owners.length > 0 && successors.length === 0 ? (
 									<p className="text-surface-600-400 text-xs">

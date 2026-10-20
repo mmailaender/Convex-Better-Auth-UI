@@ -110,6 +110,7 @@
 										<button
 											type="button"
 											class="truncate text-left text-sm font-medium hover:underline"
+											data-admin-focus={org._id}
 											onclick={(event) => {
 												event.stopPropagation();
 												onViewOrganization(org._id);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { Building2, Users } from 'lucide-react';
@@ -19,6 +19,7 @@ import {
 	TAB_USERS,
 	USER_PARAM
 } from '@/components/admin/utils/admin.constants';
+import { focusTarget, focusVisible, type AdminView } from '@/components/admin/utils/focus';
 
 /**
  * Admin dashboard body. Renders a Users tab always and an Organizations tab only
@@ -45,6 +46,17 @@ export default function AdminDashboard() {
 	const organizationsProfileId = activeTab === TAB_ORGANIZATIONS ? profileUserId : null;
 	const organizationId =
 		activeTab === TAB_ORGANIZATIONS ? searchParams.get(ORGANIZATION_PARAM) : null;
+
+	// Moves focus to a page that opens and back to its link once it closes, also when the browser's
+	// back and forward buttons open or close it. A reload keeps the browser's focus
+	const rootRef = useRef<HTMLDivElement>(null);
+	const lastView = useRef<AdminView | null>(null);
+	useEffect(() => {
+		const view: AdminView = { tab: activeTab, user: profileUserId, organization: organizationId };
+		const target = lastView.current && focusTarget(lastView.current, view);
+		lastView.current = view;
+		if (target && rootRef.current) focusVisible(rootRef.current, target);
+	}, [activeTab, profileUserId, organizationId]);
 
 	/** Navigates within the dashboard to the given tab and query parameters. */
 	function navigate(
@@ -99,7 +111,7 @@ export default function AdminDashboard() {
 	}
 
 	return (
-		<Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+		<Tabs.Root ref={rootRef} value={activeTab} onValueChange={setActiveTab}>
 			<Tabs.List className="flex gap-2">
 				<Tabs.Trigger value={TAB_USERS} className="flex items-center gap-2">
 					<Users className="size-4" />

@@ -113,6 +113,7 @@ export default function OrganizationsTable({ onViewOrganization }: Organizations
 												<button
 													type="button"
 													className="truncate text-left text-sm font-medium hover:underline"
+													data-admin-focus={org._id}
 													onClick={(event) => {
 														event.stopPropagation();
 														onViewOrganization(org._id);

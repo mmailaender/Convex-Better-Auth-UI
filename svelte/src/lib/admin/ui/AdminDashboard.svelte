@@ -1,6 +1,7 @@
 <script lang="ts">
 	// SvelteKit
 	import { page } from '$app/state';
+	import { afterNavigate } from '$app/navigation';
 	import { gotoApp } from '#lib/primitives/utils/navigation.js';
 	// Primitives
 	import * as Tabs from '#lib/primitives/ui/tabs/index.js';
@@ -21,6 +22,7 @@
 		TAB_USERS,
 		USER_PARAM
 	} from '#lib/admin/utils/admin.constants.js';
+	import { focusTarget, focusVisible, type AdminView } from '#lib/admin/utils/focus.js';
 
 	const { api, authConstants } = getAuthContext();
 	const organizationsEnabled = Boolean(authConstants.organizations);
@@ -61,9 +63,27 @@
 			if (value) url.searchParams.set(key, value);
 			else url.searchParams.delete(key);
 		}
-		// Pages get a history entry, so the browser's back button returns to where the admin came from
-		void gotoApp(url, replace ? { replace: true, reset: false } : undefined);
+		// Pages get a history entry, so the browser's back button returns to where the admin came from.
+		// Focus isn't reset to the top of the page: `afterNavigate` moves it
+		void gotoApp(url, { replace, reset: false });
 	}
+
+	// Moves focus to a page that opens and back to its link once it closes, also when the browser's
+	// back and forward buttons open or close it. A reload keeps the browser's focus
+	let root = $state<HTMLElement | null>(null);
+	const currentView = (): AdminView => ({
+		tab: activeTab,
+		user: profileUserId,
+		organization: organizationId
+	});
+	// From when the dashboard shows, which can be after the navigation to it, such as after signing in
+	let lastView = currentView();
+	afterNavigate(() => {
+		const view = currentView();
+		const target = focusTarget(lastView, view);
+		lastView = view;
+		if (target && root) focusVisible(root, target);
+	});
 
 	function setActiveTab(tab: string | null) {
 		if (!tab || tab === activeTab) return;
@@ -96,7 +116,11 @@
 	{/if}
 {/snippet}
 
-<Tabs.Root value={activeTab} onValueChange={(details) => setActiveTab(details.value)}>
+<Tabs.Root
+	bind:ref={root}
+	value={activeTab}
+	onValueChange={(details) => setActiveTab(details.value)}
+>
 	<Tabs.List class="flex gap-2">
 		<Tabs.Trigger value={TAB_USERS} class="flex items-center gap-2">
 			<UsersIcon class="size-4" />

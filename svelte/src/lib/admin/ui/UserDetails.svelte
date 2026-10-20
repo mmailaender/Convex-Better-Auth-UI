@@ -251,7 +251,12 @@
 </script>
 
 <div class="flex flex-col gap-6 py-4">
-	<button type="button" class="btn hover:preset-tonal w-fit gap-2 px-2 text-sm" onclick={onBack}>
+	<button
+		type="button"
+		class="btn hover:preset-tonal w-fit gap-2 px-2 text-sm"
+		data-admin-back
+		onclick={onBack}
+	>
 		<ArrowLeftIcon class="size-4" aria-hidden="true" />
 		{backLabel}
 	</button>

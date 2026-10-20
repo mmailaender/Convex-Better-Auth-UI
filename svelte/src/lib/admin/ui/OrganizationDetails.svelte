@@ -318,7 +318,12 @@
 {/snippet}
 
 <div class="flex flex-col gap-6 py-4">
-	<button type="button" class="btn hover:preset-tonal w-fit gap-2 px-2 text-sm" onclick={onBack}>
+	<button
+		type="button"
+		class="btn hover:preset-tonal w-fit gap-2 px-2 text-sm"
+		data-admin-back
+		onclick={onBack}
+	>
 		<ArrowLeftIcon class="size-4" aria-hidden="true" />
 		Organizations
 	</button>
@@ -355,7 +360,7 @@
 					/>
 				</div>
 			</div>
-			<OrganizationActionsMenu {organization} onDeleted={onBack} />
+			<OrganizationActionsMenu {organization} deleteDisabled={!canTransfer} onDeleted={onBack} />
 		</header>
 
 		<!-- Profile -->
@@ -531,6 +536,7 @@
 													<button
 														type="button"
 														class="truncate text-left text-sm font-medium hover:underline"
+														data-admin-focus={memberUser._id}
 														onclick={(event) => {
 															event.stopPropagation();
 															onViewProfile(memberUser._id);
@@ -655,7 +661,8 @@
 				</table>
 				{#if owners.length > 0 && !canTransfer}
 					<p class="text-surface-600-400 text-xs">
-						The owner is an app admin: remove their admin role to hand over the ownership.
+						The owner is an app admin: remove their admin role to hand over the ownership or delete
+						the organization.
 					</p>
 				{:else if owners.length > 0 && successors.length === 0}
 					<p class="text-surface-600-400 text-xs">

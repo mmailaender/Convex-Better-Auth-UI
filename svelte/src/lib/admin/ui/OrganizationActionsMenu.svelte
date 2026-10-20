@@ -19,11 +19,14 @@
 	let {
 		organization,
 		onView,
+		deleteDisabled = false,
 		onDeleted
 	}: {
 		organization: AdminOrganization;
 		/** Shows "View organization" when set */
 		onView?: () => void;
+		/** Disables "Delete organization", such as for one owned by another admin */
+		deleteDisabled?: boolean;
 		/** Called after the organization is deleted */
 		onDeleted?: () => void;
 	} = $props();
@@ -79,7 +82,12 @@
 				</Menu.Item>
 			{/if}
 			<Menu.Separator />
-			<Menu.Item value="delete" variant="destructive" onclick={() => (deleteOpen = true)}>
+			<Menu.Item
+				value="delete"
+				variant="destructive"
+				disabled={deleteDisabled}
+				onclick={() => (deleteOpen = true)}
+			>
 				<TrashIcon aria-hidden="true" />
 				Delete organization
 			</Menu.Item>

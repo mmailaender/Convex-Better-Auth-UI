@@ -15,6 +15,8 @@ type OrganizationActionsMenuProps = {
 	organization: AdminOrganization;
 	/** Shows "View organization" when set */
 	onView?: () => void;
+	/** Disables "Delete organization", such as for one owned by another admin */
+	deleteDisabled?: boolean;
 	/** Called after the organization is deleted */
 	onDeleted?: () => void;
 };
@@ -26,6 +28,7 @@ type OrganizationActionsMenuProps = {
 export default function OrganizationActionsMenu({
 	organization,
 	onView,
+	deleteDisabled = false,
 	onDeleted
 }: OrganizationActionsMenuProps) {
 	const deleteOrganization = useMutation(api.admin.mutations.deleteOrganizationAsAdmin);
@@ -82,7 +85,8 @@ export default function OrganizationActionsMenu({
 						<Menu.Item
 							value="delete"
 							variant="destructive"
-							className="gap-3"
+							className="gap-3 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+							disabled={deleteDisabled}
 							onClick={() => setDeleteOpen(true)}
 						>
 							<Trash2 className="size-4" aria-hidden="true" />

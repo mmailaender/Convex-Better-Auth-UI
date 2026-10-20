@@ -135,6 +135,7 @@ export default function UsersTable({ onViewProfile }: UsersTableProps) {
 													<button
 														type="button"
 														className="truncate text-left text-sm font-medium hover:underline"
+														data-admin-focus={user.id}
 														onClick={(event) => {
 															event.stopPropagation();
 															onViewProfile(user.id);
