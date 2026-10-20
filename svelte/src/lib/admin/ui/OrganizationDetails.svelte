@@ -231,6 +231,8 @@
 		logoBusy = false;
 	}
 
+	let roleResets = $state(0);
+
 	function handleRoleChange(member: AdminMember, role: OrganizationRole) {
 		if (role === member.role) return;
 		// Selecting what a member with several roles already shows makes that their only role
@@ -238,7 +240,9 @@
 			() => client.mutation(api.admin.mutations.updateMemberRole, { memberId: member._id, role }),
 			`${member.user?.name} is now ${role === 'admin' ? 'an admin' : 'a member'}`,
 			'Failed to change the role'
-		);
+		).then((done) => {
+			if (!done) roleResets++;
+		});
 	}
 
 	function handleRemove(member: AdminMember) {
@@ -558,27 +562,30 @@
 									{:else if locked}
 										{@render roleBadge(roleOf(member))}
 									{:else}
-										<Select.Root
-											collection={roleCollection}
-											value={[roleOf(member)]}
-											onSelect={(details) =>
-												handleRoleChange(member, details.value as OrganizationRole)}
-										>
-											<Select.Trigger
-												class="w-full text-sm"
-												aria-label={`Role of ${memberUser?.name}`}
-											/>
-											<Portal>
-												<Select.Content>
-													{#each roleCollection.items as item (item.value)}
-														<Select.Item {item}>
-															<Select.ItemText>{item.label}</Select.ItemText>
-															<Select.ItemIndicator>✓</Select.ItemIndicator>
-														</Select.Item>
-													{/each}
-												</Select.Content>
-											</Portal>
-										</Select.Root>
+										<!-- Re-created when a change fails, so it shows the stored role again -->
+										{#key roleResets}
+											<Select.Root
+												collection={roleCollection}
+												value={[roleOf(member)]}
+												onSelect={(details) =>
+													handleRoleChange(member, details.value as OrganizationRole)}
+											>
+												<Select.Trigger
+													class="w-full text-sm"
+													aria-label={`Role of ${memberUser?.name}`}
+												/>
+												<Portal>
+													<Select.Content>
+														{#each roleCollection.items as item (item.value)}
+															<Select.Item {item}>
+																<Select.ItemText>{item.label}</Select.ItemText>
+																<Select.ItemIndicator>✓</Select.ItemIndicator>
+															</Select.Item>
+														{/each}
+													</Select.Content>
+												</Portal>
+											</Select.Root>
+										{/key}
 									{/if}
 								</td>
 								<td class="text-right" onclick={(event) => event.stopPropagation()}>

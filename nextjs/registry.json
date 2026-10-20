@@ -1686,6 +1686,16 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "admin/ui/CopyButton.tsx",
+					"relativePath": "src/components/admin/ui/CopyButton.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "admin/ui/CreateUser.tsx",
 					"relativePath": "src/components/admin/ui/CreateUser.tsx",
 					"_imports_": [],
@@ -1698,6 +1708,26 @@
 					"role": "file",
 					"path": "admin/ui/ImpersonationBanner.tsx",
 					"relativePath": "src/components/admin/ui/ImpersonationBanner.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/ui/OrganizationActionsMenu.tsx",
+					"relativePath": "src/components/admin/ui/OrganizationActionsMenu.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/ui/OrganizationDetails.tsx",
+					"relativePath": "src/components/admin/ui/OrganizationDetails.tsx",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
@@ -1748,6 +1778,16 @@
 					"role": "file",
 					"path": "admin/ui/UserDialogs.tsx",
 					"relativePath": "src/components/admin/ui/UserDialogs.tsx",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "admin/ui/UserSelect.tsx",
+					"relativePath": "src/components/admin/ui/UserSelect.tsx",
 					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],

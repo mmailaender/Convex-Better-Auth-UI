@@ -178,6 +178,8 @@
 		saving = false;
 	}
 
+	let roleResets = $state(0);
+
 	function handleRoleChange(membership: AdminMembership, role: OrganizationRole) {
 		if (role === membership.role) return;
 		// Selecting what a member with several roles already shows makes that their only role
@@ -189,7 +191,9 @@
 				}),
 			`${user?.name} is now ${role === 'admin' ? 'an admin' : 'a member'} of ${membership.organization.name}`,
 			'Failed to change the role'
-		);
+		).then((done) => {
+			if (!done) roleResets++;
+		});
 	}
 
 	function handleRemoveMembership(membership: AdminMembership) {
@@ -445,27 +449,30 @@
 									<span class="size-8 shrink-0" aria-hidden="true"></span>
 								{:else}
 									<div class="w-32 shrink-0">
-										<Select.Root
-											collection={roleCollection}
-											value={[roleOf(membership)]}
-											onSelect={(details) =>
-												handleRoleChange(membership, details.value as OrganizationRole)}
-										>
-											<Select.Trigger
-												class="w-full text-sm"
-												aria-label={`Role in ${membership.organization.name}`}
-											/>
-											<Portal>
-												<Select.Content>
-													{#each roleCollection.items as item (item.value)}
-														<Select.Item {item}>
-															<Select.ItemText>{item.label}</Select.ItemText>
-															<Select.ItemIndicator>✓</Select.ItemIndicator>
-														</Select.Item>
-													{/each}
-												</Select.Content>
-											</Portal>
-										</Select.Root>
+										<!-- Re-created when a change fails, so it shows the stored role again -->
+										{#key roleResets}
+											<Select.Root
+												collection={roleCollection}
+												value={[roleOf(membership)]}
+												onSelect={(details) =>
+													handleRoleChange(membership, details.value as OrganizationRole)}
+											>
+												<Select.Trigger
+													class="w-full text-sm"
+													aria-label={`Role in ${membership.organization.name}`}
+												/>
+												<Portal>
+													<Select.Content>
+														{#each roleCollection.items as item (item.value)}
+															<Select.Item {item}>
+																<Select.ItemText>{item.label}</Select.ItemText>
+																<Select.ItemIndicator>✓</Select.ItemIndicator>
+															</Select.Item>
+														{/each}
+													</Select.Content>
+												</Portal>
+											</Select.Root>
+										{/key}
 									</div>
 									<button
 										type="button"

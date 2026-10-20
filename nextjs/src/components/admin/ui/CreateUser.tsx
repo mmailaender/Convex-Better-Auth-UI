@@ -68,7 +68,7 @@ export default function CreateUser() {
 				<span className="hidden sm:inline">New user</span>
 			</Dialog.Trigger>
 			<Dialog.Content className="md:max-w-108">
-				<Dialog.Header>
+				<Dialog.Header className="pr-8">
 					<Dialog.Title>Create user</Dialog.Title>
 					<Dialog.Description className="text-surface-700-300">
 						The user can sign in with this email and password right away.

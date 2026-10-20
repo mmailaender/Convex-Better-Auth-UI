@@ -10,6 +10,9 @@ export const LIST_MAX = 1000;
 /** Query parameter holding the id of the user whose profile the dashboard shows. */
 export const USER_PARAM = 'adminUser';
 
+/** Query parameter holding the id of the organization the dashboard shows. */
+export const ORGANIZATION_PARAM = 'adminOrganization';
+
 /** Admin dashboard tab values. */
 export const TAB_USERS = 'users';
 export const TAB_ORGANIZATIONS = 'organizations';

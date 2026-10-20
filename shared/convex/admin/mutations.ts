@@ -512,7 +512,8 @@ export const removeMember = mutation({
 /**
  * Change an organization's name, slug or logo (admin only), whether or not the admin is a member
  * of it; leave out what stays. `logoId` takes a file uploaded through `storage.generateUploadUrl`,
- * or `null` to remove the logo. The replaced logo's file is deleted.
+ * or `null` to remove the logo. The replaced logo's file is deleted. Once the organization is
+ * deleted, it changes nothing, and deletes the logo uploaded for it.
  */
 export const updateOrganization = mutation({
 	args: {
@@ -525,6 +526,16 @@ export const updateOrganization = mutation({
 	handler: async (ctx, args) => {
 		await requireAppAdmin(ctx);
 		assertOrganizationsEnabled();
+		// Deleted meanwhile, say by another admin: throwing would keep the logo uploaded for it,
+		// with nothing pointing at the file
+		const organization = await ctx.runQuery(components.betterAuth.adapter.findOne, {
+			model: 'organization',
+			where: [{ field: '_id', value: args.organizationId }]
+		});
+		if (!organization) {
+			if (args.logoId) await ctx.storage.delete(args.logoId);
+			return null;
+		}
 		let logo: { url: string; storageId: string } | null | undefined;
 		if (args.logoId === null) {
 			logo = null;

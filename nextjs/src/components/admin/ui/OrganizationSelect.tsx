@@ -21,9 +21,9 @@ type OrganizationSelectProps = {
 function OrganizationLabel({ organization }: { organization: AdminOrganization }) {
 	return (
 		<>
-			<Avatar.Root className="size-8 shrink-0">
+			<Avatar.Root className="rounded-container size-8 shrink-0">
 				<Avatar.Image src={organization.logo ?? undefined} alt={organization.name} />
-				<Avatar.Fallback>
+				<Avatar.Fallback className="rounded-container">
 					<Avatar.Marble name={organization.name} />
 				</Avatar.Fallback>
 			</Avatar.Root>

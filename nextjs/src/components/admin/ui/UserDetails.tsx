@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, Copy, Loader2, LogOut, Plus, X } from 'lucide-react';
+import { ArrowLeft, Loader2, LockOpen, LogOut, Plus, X } from 'lucide-react';
 
 import { api } from '@/convex/_generated/api';
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 import * as Avatar from '@/components/primitives/ui/avatar';
 import * as Dialog from '@/components/primitives/ui/dialog';
 import { useActiveUserData } from '@/lib/auth/hooks';
+import CopyButton from '@/components/admin/ui/CopyButton';
 import OrganizationSelect from '@/components/admin/ui/OrganizationSelect';
 import UserActionsMenu from '@/components/admin/ui/UserActionsMenu';
 import UserDialogs from '@/components/admin/ui/UserDialogs';
@@ -23,9 +24,16 @@ import type {
 
 type UserDetailsProps = {
 	userId: string;
-	/** Returns to the users table */
+	/** Label of the back button, naming where it returns to */
+	backLabel?: string;
+	/** Returns to where the admin came from */
 	onBack: () => void;
+	/** Opens the page of an organization */
+	onViewOrganization: (organizationId: string) => void;
 };
+
+/** Sessions the profile shows until the admin asks for all of them. */
+const SESSIONS_SHOWN = 5;
 
 function formatDate(epochMs: number): string {
 	return new Date(epochMs).toLocaleDateString();
@@ -49,38 +57,17 @@ function roleOf(membership: AdminMembership): OrganizationRole {
 	return rolesOf(membership).includes('admin') ? 'admin' : 'member';
 }
 
-function CopyButton({ text, label }: { text: string; label: string }) {
-	const [copied, setCopied] = useState(false);
-	async function copy() {
-		try {
-			await navigator.clipboard.writeText(text);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 1500);
-		} catch {
-			toast.error("Couldn't copy");
-		}
-	}
-	return (
-		<button
-			type="button"
-			className="hover:preset-tonal rounded-base flex size-6 shrink-0 items-center justify-center"
-			aria-label={copied ? 'Copied' : label}
-			onClick={copy}
-		>
-			{copied ? (
-				<Check className="size-4" aria-hidden="true" />
-			) : (
-				<Copy className="size-4" aria-hidden="true" />
-			)}
-		</button>
-	);
-}
-
 /**
  * The admin dashboard's profile of a user: their details, which admins can edit, their
  * organization memberships and their sessions, plus the actions of the users table.
  */
-export default function UserDetails({ userId, onBack }: UserDetailsProps) {
+export default function UserDetails({
+	userId,
+	backLabel = 'Users',
+	onBack,
+	onViewOrganization
+}: UserDetailsProps) {
+	const formId = useId();
 	const activeUser = useActiveUserData();
 	const details = useQuery(api.admin.queries.getUser, { userId });
 	const user = details?.user ?? null;
@@ -94,6 +81,7 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 	const removeMember = useMutation(api.admin.mutations.removeMember);
 	const addMember = useMutation(api.admin.mutations.addMember);
 	const revokeUserSession = useMutation(api.admin.mutations.revokeUserSession);
+	const unbanUser = useMutation(api.admin.mutations.unbanUser);
 
 	const isSelf = user?.id === activeUser?._id;
 	// Changing the profile or the sessions of another admin needs their admin role removed first:
@@ -101,6 +89,9 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 	const canManage = Boolean(user) && (isSelf || !user?.isAppAdmin);
 
 	const [dialog, setDialog] = useState<UserDialog | null>(null);
+	const [unbanning, setUnbanning] = useState(false);
+	const [showAllSessions, setShowAllSessions] = useState(false);
+	const shownSessions = showAllSessions ? sessions : sessions?.slice(0, SESSIONS_SHOWN);
 
 	// Profile form. Fields the admin hasn't edited follow the user as it changes elsewhere
 	const [name, setName] = useState('');
@@ -196,6 +187,14 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 		if (done) setAddOpen(false);
 	}
 
+	async function handleUnban() {
+		if (!user) return;
+		const { id, name } = user;
+		setUnbanning(true);
+		await run(() => unbanUser({ userId: id }), `Unbanned ${name}`, 'Failed to unban user');
+		setUnbanning(false);
+	}
+
 	function handleRevokeSession(sessionId: string) {
 		void run(
 			() => revokeUserSession({ sessionId }),
@@ -218,7 +217,7 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 				onClick={onBack}
 			>
 				<ArrowLeft className="size-4" aria-hidden="true" />
-				Users
+				{backLabel}
 			</button>
 
 			{details === undefined ? (
@@ -271,8 +270,24 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 					</header>
 
 					{user.banned ? (
-						<div className="card preset-tonal-error border-error-200-800 border p-4 text-sm">
-							{banDescription}
+						<div className="card preset-tonal-error border-error-200-800 flex flex-wrap items-center justify-between gap-3 border p-4 text-sm">
+							<p className="min-w-0">{banDescription}</p>
+							{!isSelf ? (
+								<button
+									type="button"
+									className="btn btn-sm preset-filled-surface-50-950 shrink-0 gap-2"
+									onClick={handleUnban}
+									disabled={unbanning}
+									aria-busy={unbanning}
+								>
+									{unbanning ? (
+										<Loader2 className="size-4 animate-spin" aria-hidden="true" />
+									) : (
+										<LockOpen className="size-4" aria-hidden="true" />
+									)}
+									Lift ban
+								</button>
+							) : null}
 						</div>
 					) : null}
 
@@ -381,18 +396,24 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 											key={membership._id}
 											className="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
 										>
-											<Avatar.Root className="size-8 shrink-0">
+											<Avatar.Root className="rounded-container size-8 shrink-0">
 												<Avatar.Image
 													src={membership.organization.logo ?? undefined}
 													alt={membership.organization.name}
 												/>
-												<Avatar.Fallback>
+												<Avatar.Fallback className="rounded-container">
 													<Avatar.Marble name={membership.organization.name} />
 												</Avatar.Fallback>
 											</Avatar.Root>
-											<div className="flex min-w-0 flex-1 flex-col">
-												<span className="truncate text-sm">{membership.organization.name}</span>
-												<span className="text-surface-600-400 truncate text-xs">
+											<div className="flex min-w-0 flex-1 flex-col items-start">
+												<button
+													type="button"
+													className="max-w-full truncate text-left text-sm hover:underline"
+													onClick={() => onViewOrganization(membership.organization._id)}
+												>
+													{membership.organization.name}
+												</button>
+												<span className="text-surface-600-400 max-w-full truncate text-xs">
 													{membership.organization.slug}
 												</span>
 											</div>
@@ -400,7 +421,7 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 												<>
 													<span
 														className="badge preset-filled-primary-50-950 border-primary-200-800 border"
-														title="The owner keeps their role and can't be removed"
+														title="Hand over the ownership on the organization's page to change their role or remove them"
 													>
 														Owner
 													</span>
@@ -447,7 +468,12 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 
 					{/* Sessions */}
 					<section className="card border-surface-300-700 flex flex-col gap-3 border p-4">
-						<h3 className="h6">Active sessions</h3>
+						<h3 className="h6">
+							Active sessions
+							{sessions?.length ? (
+								<span className="text-surface-600-400 font-normal"> ({sessions.length})</span>
+							) : null}
+						</h3>
 						{!sessions ? (
 							<p className="text-surface-600-400 flex items-center gap-2 text-sm" role="status">
 								<Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -456,39 +482,50 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 						) : sessions.length === 0 ? (
 							<p className="text-surface-600-400 text-sm">Not signed in anywhere.</p>
 						) : (
-							<ul className="flex flex-col">
-								{sessions.map((session) => (
-									<li
-										key={session.id}
-										className="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
-									>
-										<div className="flex min-w-0 flex-1 flex-col">
-											<div className="flex items-center gap-2">
-												<span className="truncate text-sm">
-													{describeUserAgent(session.userAgent)}
+							<>
+								<ul className="flex flex-col">
+									{(shownSessions ?? []).map((session) => (
+										<li
+											key={session.id}
+											className="border-surface-300-700 flex items-center gap-3 border-t py-3 first:border-t-0"
+										>
+											<div className="flex min-w-0 flex-1 flex-col">
+												<div className="flex items-center gap-2">
+													<span className="truncate text-sm">
+														{describeUserAgent(session.userAgent)}
+													</span>
+													{session.impersonatedBy ? (
+														<span className="badge preset-tonal shrink-0">Impersonation</span>
+													) : null}
+												</div>
+												<span className="text-surface-600-400 truncate text-xs">
+													{session.ipAddress ? `${session.ipAddress} · ` : ''}Signed in{' '}
+													{formatDateTime(session.createdAt)}
 												</span>
-												{session.impersonatedBy ? (
-													<span className="badge preset-tonal shrink-0">Impersonation</span>
-												) : null}
 											</div>
-											<span className="text-surface-600-400 truncate text-xs">
-												{session.ipAddress ? `${session.ipAddress} · ` : ''}Signed in{' '}
-												{formatDateTime(session.createdAt)}
-											</span>
-										</div>
-										{canManage ? (
-											<button
-												type="button"
-												className="btn btn-sm hover:preset-tonal shrink-0 gap-2"
-												onClick={() => handleRevokeSession(session.id)}
-											>
-												<LogOut className="size-4" aria-hidden="true" />
-												Sign out
-											</button>
-										) : null}
-									</li>
-								))}
-							</ul>
+											{canManage ? (
+												<button
+													type="button"
+													className="btn btn-sm hover:preset-tonal shrink-0 gap-2"
+													onClick={() => handleRevokeSession(session.id)}
+												>
+													<LogOut className="size-4" aria-hidden="true" />
+													Sign out
+												</button>
+											) : null}
+										</li>
+									))}
+								</ul>
+								{sessions.length > SESSIONS_SHOWN ? (
+									<button
+										type="button"
+										className="btn btn-sm hover:preset-tonal w-fit"
+										onClick={() => setShowAllSessions(!showAllSessions)}
+									>
+										{showAllSessions ? 'Show fewer' : `Show all ${sessions.length} sessions`}
+									</button>
+								) : null}
+							</>
 						)}
 					</section>
 				</>
@@ -497,25 +534,21 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 			<UserDialogs user={user} dialog={dialog} onDialogChange={setDialog} onDeleted={onBack} />
 
 			{/* Add to organization dialog */}
-			<Dialog.Root open={addOpen} onOpenChange={setAddOpen}>
+			<Dialog.Root open={addOpen} onOpenChange={setAddOpen} lazyMount unmountOnExit>
 				<Dialog.Content className="md:max-w-108">
-					<Dialog.Header>
+					<Dialog.Header className="pr-8">
 						<Dialog.Title>Add {user?.name} to an organization</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
 							They become a member right away, without an invitation.
 						</Dialog.Description>
 					</Dialog.Header>
-					<form
-						id="admin-add-membership"
-						className="flex w-full flex-col gap-3"
-						onSubmit={handleAdd}
-					>
+					<form id={`${formId}-add`} className="flex w-full flex-col gap-3" onSubmit={handleAdd}>
 						<div className="label">
-							<label className="label-text" htmlFor="admin-add-membership-organization">
+							<label className="label-text" htmlFor={`${formId}-add-organization`}>
 								Organization
 							</label>
 							<OrganizationSelect
-								id="admin-add-membership-organization"
+								id={`${formId}-add-organization`}
 								value={addOrganization}
 								onChange={setAddOrganization}
 								excludeIds={memberOrganizationIds}
@@ -539,7 +572,7 @@ export default function UserDetails({ userId, onBack }: UserDetailsProps) {
 						</Dialog.Close>
 						<button
 							type="submit"
-							form="admin-add-membership"
+							form={`${formId}-add`}
 							className="btn preset-filled-primary-500"
 							disabled={adding || !addOrganization}
 							aria-busy={adding}

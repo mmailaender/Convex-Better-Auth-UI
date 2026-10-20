@@ -149,7 +149,7 @@ export default function UserDialogs({ user, dialog, onDialogChange, onDeleted }:
 			{/* Make admin dialog */}
 			<Dialog.Root {...rootProps('make-admin')}>
 				<Dialog.Content className="md:max-w-108">
-					<Dialog.Header>
+					<Dialog.Header className="pr-8">
 						<Dialog.Title>Make {user?.name} an admin?</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
 							Admins can see and change every user and organization, and sign in as any user who
@@ -177,7 +177,7 @@ export default function UserDialogs({ user, dialog, onDialogChange, onDeleted }:
 			{/* Ban dialog */}
 			<Dialog.Root {...rootProps('ban')}>
 				<Dialog.Content className="md:max-w-108">
-					<Dialog.Header>
+					<Dialog.Header className="pr-8">
 						<Dialog.Title>Ban {user?.name}</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
 							They are signed out everywhere and can&apos;t sign in until the ban ends or you lift
@@ -231,7 +231,7 @@ export default function UserDialogs({ user, dialog, onDialogChange, onDeleted }:
 			{/* Set password dialog */}
 			<Dialog.Root {...rootProps('password')}>
 				<Dialog.Content className="md:max-w-108">
-					<Dialog.Header>
+					<Dialog.Header className="pr-8">
 						<Dialog.Title>Set password for {user?.name}</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
 							If they sign in without a password today, they can also use their email and this
@@ -275,7 +275,7 @@ export default function UserDialogs({ user, dialog, onDialogChange, onDeleted }:
 			{/* Delete dialog */}
 			<Dialog.Root {...rootProps('delete')}>
 				<Dialog.Content className="md:max-w-108">
-					<Dialog.Header>
+					<Dialog.Header className="pr-8">
 						<Dialog.Title>Delete {user?.name}</Dialog.Title>
 						<Dialog.Description className="text-surface-700-300">
 							This permanently deletes the account, its sessions and its organization memberships.
