@@ -14,8 +14,9 @@ const assertDeviceAuthorizationFallbackUrl = () => {
 };
 
 export const requestDeviceCode = mutation({
-	args: { clientId: v.string() },
-	async handler(ctx, { clientId }) {
+	// `scope` is the space-separated scope list your device client asks for, if it uses any
+	args: { clientId: v.string(), scope: v.optional(v.string()) },
+	async handler(ctx, { clientId, scope }) {
 		if (clientId != process.env.DEVICE_AUTHORIZATION_CLIENT_ID) {
 			throw new ConvexError('Invalid client_id');
 		}
@@ -24,7 +25,7 @@ export const requestDeviceCode = mutation({
 		const data = await auth.api.deviceCode({
 			body: {
 				client_id: clientId,
-				scope: 'read:orgs read:themes'
+				scope
 			}
 		});
 		return data;
