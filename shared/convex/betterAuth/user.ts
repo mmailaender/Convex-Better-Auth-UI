@@ -48,3 +48,21 @@ export const updateUser = mutation({
 		return ctx.db.patch('user', args.userId, args.data);
 	}
 });
+
+/**
+ * Delete the API keys of a user or organization (their `referenceId`). Better Auth
+ * leaves them behind when it deletes their owner, and they keep verifying.
+ */
+export const deleteApiKeys = mutation({
+	args: { referenceId: v.string() },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const keys = ctx.db
+			.query('apikey')
+			.withIndex('referenceId', (q) => q.eq('referenceId', args.referenceId));
+		for await (const key of keys) {
+			await ctx.db.delete('apikey', key._id);
+		}
+		return null;
+	}
+});

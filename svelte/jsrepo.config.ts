@@ -4,6 +4,7 @@ import { fs, jsrepo } from 'jsrepo/providers';
 import {
 	betterAuthApiKeyDependency,
 	betterAuthDependency,
+	createAdminConvexItem,
 	createConfigItem,
 	createConvexBaseFiles,
 	createDeviceAuthorizationConvexItem,
@@ -53,7 +54,9 @@ export default defineConfig({
 									{
 										path: '+layout.svelte',
 										dependencyResolution: 'manual',
-										dependencies: ['@mmailaender/convex-better-auth-svelte']
+										dependencies: ['@mmailaender/convex-better-auth-svelte'],
+										// The layout mounts the impersonation banner
+										registryDependencies: ['admin/lib']
 									},
 									{
 										path: 'layout.css',
@@ -222,6 +225,59 @@ export default defineConfig({
 				files: [
 					{
 						path: 'src/routes/**/accept-invitation/*/+page.svelte'
+					}
+				]
+			},
+
+			// ── Admin ────────────────────────────────────────────────────────
+			createAdminConvexItem(),
+			{
+				name: 'admin/lib',
+				add: 'when-added',
+				type: 'lib',
+				// users/lib calls the users backend
+				registryDependencies: [
+					'config',
+					'auth/lib',
+					'primitives',
+					'users/lib',
+					'users/convex',
+					'admin/convex'
+				],
+				files: [
+					{
+						path: 'src/lib/admin',
+						files: [
+							{ path: 'api' },
+							{
+								path: 'types.ts',
+								dependencyResolution: 'manual',
+								dependencies: ['convex']
+							},
+							{ path: 'ui' },
+							{
+								path: 'utils',
+								files: [
+									{ path: 'admin.constants.ts' },
+									{ path: 'focus.ts' },
+									{ path: 'focus.test.ts', role: 'test' },
+									{ path: 'userAgent.ts' }
+								]
+							}
+						]
+					}
+				]
+			},
+			{
+				name: 'admin/routes',
+				add: 'when-added',
+				type: 'routes',
+				// The page sends signed-out visitors to the sign-in page
+				registryDependencies: ['config', 'auth/lib', 'auth/routes', 'admin/lib'],
+				files: [
+					{
+						path: 'src/routes/admin/+page.svelte',
+						target: 'src/routes/admin/+page.svelte'
 					}
 				]
 			},

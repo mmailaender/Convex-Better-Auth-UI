@@ -14,6 +14,7 @@
 	import AuthProvider from '#lib/auth/ui/AuthProvider.svelte';
 	import UserProfileHost from '#lib/users/ui/UserProfileHost.svelte';
 	import OrganizationProfileHost from '#lib/organizations/ui/OrganizationProfileHost.svelte';
+	import ImpersonationBanner from '#lib/admin/ui/ImpersonationBanner.svelte';
 
 	let { children, data } = $props();
 
@@ -27,6 +28,9 @@
 <Toaster position="top-center" />
 <AuthProvider {api} {authClient} authConstants={AUTH_CONSTANTS}>
 	<div class="flex min-h-[100dvh] flex-col">
+		{#if AUTH_CONSTANTS.admin}
+			<ImpersonationBanner />
+		{/if}
 		<header class="flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4">
 			<a
 				href={resolve('/')}

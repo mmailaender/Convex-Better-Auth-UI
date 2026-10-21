@@ -4,6 +4,7 @@ import { fs, jsrepo } from 'jsrepo/providers';
 import {
 	betterAuthApiKeyDependency,
 	betterAuthDependency,
+	createAdminConvexItem,
 	createConfigItem,
 	createConvexBaseFiles,
 	createDeviceAuthorizationConvexItem,
@@ -66,7 +67,11 @@ export default defineConfig({
 								files: [
 									{ path: 'ConvexClientProvider.tsx' },
 									{ path: 'globals.css' },
-									{ path: 'layout.tsx' },
+									{
+										path: 'layout.tsx',
+										// The layout mounts the impersonation banner
+										registryDependencies: ['admin/lib']
+									},
 									{ path: 'page.tsx' }
 								]
 							},
@@ -259,6 +264,65 @@ export default defineConfig({
 					{
 						path: 'src/app/organization/create/page.tsx',
 						target: 'src/app/organization/create/page.tsx'
+					}
+				]
+			},
+
+			// ── Admin ────────────────────────────────────────────────────────
+			createAdminConvexItem(),
+			{
+				name: 'admin/lib',
+				add: 'when-added',
+				type: 'components',
+				dependencyResolution: 'manual',
+				// users/lib calls the users backend
+				registryDependencies: [
+					'config',
+					'auth/lib',
+					'primitives',
+					'users/lib',
+					'users/convex',
+					'admin/convex'
+				],
+				dependencies: [
+					'@ark-ui/react',
+					'@convex-dev/better-auth',
+					betterAuthDependency,
+					'convex',
+					'lucide-react',
+					'sonner'
+				],
+				files: [
+					{
+						path: 'src/components/admin',
+						files: [
+							{ path: 'api' },
+							{ path: 'types.ts' },
+							{ path: 'ui' },
+							{
+								path: 'utils',
+								files: [
+									{ path: 'admin.constants.ts' },
+									{ path: 'focus.ts' },
+									{ path: 'focus.test.ts', role: 'test' },
+									{ path: 'userAgent.ts' }
+								]
+							}
+						]
+					}
+				]
+			},
+			{
+				name: 'admin/routes',
+				add: 'when-added',
+				type: 'routes',
+				dependencyResolution: 'manual',
+				// The page sends signed-out visitors to the sign-in page
+				registryDependencies: ['config', 'auth/lib', 'auth/routes', 'admin/lib'],
+				files: [
+					{
+						path: 'src/app/admin/page.tsx',
+						target: 'src/app/admin/page.tsx'
 					}
 				]
 			},

@@ -56,6 +56,22 @@ export function createConfigItem() {
 			},
 			{
 				path: 'src/convex/auth.constants.types.ts'
+			},
+			{
+				// Imported by auth.ts to configure and guard the admin plugin
+				path: 'src/convex/model',
+				files: [
+					{
+						path: 'admin',
+						files: [
+							{
+								path: 'roles.ts',
+								dependencyResolution: manual,
+								dependencies: ['convex']
+							}
+						]
+					}
+				]
 			}
 		]
 	};
@@ -97,6 +113,9 @@ export function createConvexBaseFiles(path = 'src/convex') {
 					},
 					{
 						path: 'convex.config.ts'
+					},
+					{
+						path: 'generatedSchema.ts'
 					},
 					{
 						path: 'schema.ts'
@@ -224,6 +243,61 @@ export function createOrganizationsConvexItem() {
 	};
 }
 
+export function createAdminConvexItem() {
+	return {
+		name: 'admin/convex',
+		add: whenAdded,
+		type: 'convex',
+		files: [
+			{
+				path: 'src/convex/admin',
+				files: [
+					{
+						path: 'queries.ts',
+						dependencyResolution: manual,
+						dependencies: ['convex', betterAuthDependency]
+					},
+					{
+						path: 'mutations.ts',
+						dependencyResolution: manual,
+						dependencies: ['convex', betterAuthDependency]
+					}
+				]
+			},
+			{
+				path: 'src/convex/model',
+				files: [
+					{
+						path: 'admin',
+						files: [
+							{
+								path: 'index.ts',
+								dependencyResolution: manual,
+								dependencies: ['convex']
+							}
+						]
+					}
+				]
+			},
+			{
+				path: 'src/convex/betterAuth',
+				files: [
+					{
+						path: 'adminOrganizations.ts',
+						dependencyResolution: manual,
+						dependencies: ['convex', 'convex-helpers']
+					},
+					{
+						path: 'adminUsers.ts',
+						dependencyResolution: manual,
+						dependencies: ['convex', 'convex-helpers']
+					}
+				]
+			}
+		]
+	};
+}
+
 export function createEmailConvexItem() {
 	return {
 		name: 'email/convex',
@@ -244,7 +318,11 @@ export function createEmailConvexItem() {
 							{ path: 'validateEmail.ts', dependencyResolution: manual },
 							{
 								path: 'templates',
-								files: [{ path: 'baseEmail.ts' }, { path: 'emailTemplates.ts' }]
+								files: [
+									// Imports auth.constants, which the config item installs
+									{ path: 'baseEmail.ts', dependencyResolution: manual },
+									{ path: 'emailTemplates.ts' }
+								]
 							}
 						]
 					}

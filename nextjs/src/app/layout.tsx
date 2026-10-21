@@ -11,6 +11,7 @@ import OrganizationSwitcher from '@/components/organizations/ui/OrganizationSwit
 import OrganizationProfileHost from '@/components/organizations/ui/OrganizationProfileHost';
 import UserButton from '@/components/users/ui/UserButton';
 import UserProfileHost from '@/components/users/ui/UserProfileHost';
+import ImpersonationBanner from '@/components/admin/ui/ImpersonationBanner';
 import { AUTH_CONSTANTS } from '@/convex/auth.constants';
 import { api } from '@/convex/_generated/api';
 import { fetchAuthQuery, getToken } from '@/lib/auth/api/server';
@@ -68,6 +69,7 @@ export default async function RootLayout({
 			<body>
 				<ConvexClientProvider initialToken={initialToken ?? null} initialData={initialData}>
 					<div className="flex min-h-[100dvh] flex-col">
+						{AUTH_CONSTANTS.admin ? <ImpersonationBanner /> : null}
 						<header className="flex min-w-0 items-center justify-between gap-2 p-3 sm:gap-5 sm:p-4">
 							<Link
 								href="/"

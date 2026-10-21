@@ -11,6 +11,7 @@ export const AUTH_CONSTANTS: AuthConstants = {
 	sendEmails: true,
 	deviceAuthorization: true,
 	apiKeys: true,
+	admin: true,
 	brandName: 'self hosted Auth',
 	brandTagline: 'Plug & Play Auth Widgets for your application.'
 };
