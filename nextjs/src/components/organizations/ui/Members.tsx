@@ -112,9 +112,9 @@ export default function Members(): React.ReactNode {
 	};
 
 	/**
-	 * Check if current user can edit a member. Mirrors Better Auth's organization plugin: owners and
-	 * admins can change the role of and remove any member, other admins included, but only an owner
-	 * can change an owner.
+	 * Check if current user can edit a member. Owners and admins can change the role of and remove
+	 * any member, other admins included, as Better Auth's organization plugin allows. The list never
+	 * offers it for an owner or for yourself: that is this UI's choice, the server would allow more.
 	 */
 	const canEditMember = (member: Member): boolean => {
 		if (!isOwnerOrAdmin) return false;
