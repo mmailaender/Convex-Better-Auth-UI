@@ -157,6 +157,10 @@
 				},
 				{
 					"ecosystem": "js",
+					"name": "@tailwindcss/postcss"
+				},
+				{
+					"ecosystem": "js",
 					"name": "@types/node"
 				},
 				{
@@ -193,9 +197,10 @@
 				{
 					"type": "base",
 					"role": "file",
-					"path": "next.config.mjs",
-					"relativePath": "next.config.mjs",
+					"path": "next.config.dist.mjs",
+					"relativePath": "next.config.dist.mjs",
 					"_imports_": [],
+					"target": "next.config.mjs",
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []

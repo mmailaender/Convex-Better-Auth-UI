@@ -49,6 +49,8 @@ export default defineConfig({
 				devDependencies: [
 					'@skeletonlabs/skeleton',
 					'@tailwindcss/forms',
+					// postcss.config.mjs loads it
+					'@tailwindcss/postcss',
 					'@types/node',
 					'tailwindcss',
 					'tw-animate-css'
@@ -56,7 +58,8 @@ export default defineConfig({
 				files: [
 					{ path: 'convex.dist.json', target: 'convex.json' },
 					{ path: 'components.json' },
-					{ path: 'next.config.mjs' },
+					// next.config.mjs points Turbopack at this monorepo's root to reach ../shared
+					{ path: 'next.config.dist.mjs', target: 'next.config.mjs' },
 					{ path: 'postcss.config.mjs' },
 					{
 						path: 'src',
