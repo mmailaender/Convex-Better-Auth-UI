@@ -112,22 +112,14 @@ export default function Members(): React.ReactNode {
 	};
 
 	/**
-	 * Check if current user can edit a member
+	 * Check if current user can edit a member. Mirrors Better Auth's organization plugin: owners and
+	 * admins can change the role of and remove any member, other admins included, but only an owner
+	 * can change an owner.
 	 */
 	const canEditMember = (member: Member): boolean => {
 		if (!isOwnerOrAdmin) return false;
 		if (member.userId === activeUser?._id) return false;
-		if (member.role === 'owner') return false;
-
-		// If current user is admin, they can't edit other admins
-		if (activeUser && members) {
-			const currentUserMember = members.find((m) => m.userId === activeUser._id);
-			if (currentUserMember?.role === 'admin' && member.role === 'admin') {
-				return false;
-			}
-		}
-
-		return true;
+		return member.role !== 'owner';
 	};
 
 	/**
@@ -261,9 +253,7 @@ export default function Members(): React.ReactNode {
 										{/* Member Role */}
 										<td className="!w-32">
 											<div className="flex items-center">
-												{isOwnerOrAdmin &&
-												member.userId !== activeUser._id &&
-												member.role !== 'owner' ? (
+												{canEditMember(member) ? (
 													<select
 														value={member.role}
 														onChange={(e) => handleUpdateRole(member.id, e.target.value as Role)}
@@ -294,44 +284,42 @@ export default function Members(): React.ReactNode {
 										{/* Member Actions */}
 										<td className="!w-16">
 											<div className="flex justify-end space-x-2">
-												{isOwnerOrAdmin &&
-													member.userId !== activeUser?._id &&
-													member.role !== 'owner' && (
-														<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-															<Dialog.Trigger
-																className="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
-																onClick={() => setSelectedUserId(member.id)}
-															>
-																<Trash className="size-4 opacity-70" />
-															</Dialog.Trigger>
-															<Dialog.Content className="md:max-w-108">
-																<Dialog.Header className="flex-shrink-0">
-																	<Dialog.Title>Remove member</Dialog.Title>
-																</Dialog.Header>
-																<article className="flex-shrink-0">
-																	<p className="opacity-60">
-																		Are you sure you want to remove the member {member.user.name}?
-																	</p>
-																</article>
-																<Dialog.Footer className="flex-shrink-0">
-																	<button
-																		type="button"
-																		className="btn preset-tonal"
-																		onClick={() => setIsDialogOpen(false)}
-																	>
-																		Cancel
-																	</button>
-																	<button
-																		type="button"
-																		className="btn preset-filled-error-500"
-																		onClick={handleRemoveMember}
-																	>
-																		Confirm
-																	</button>
-																</Dialog.Footer>
-															</Dialog.Content>
-														</Dialog.Root>
-													)}
+												{canEditMember(member) && (
+													<Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+														<Dialog.Trigger
+															className="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"
+															onClick={() => setSelectedUserId(member.id)}
+														>
+															<Trash className="size-4 opacity-70" />
+														</Dialog.Trigger>
+														<Dialog.Content className="md:max-w-108">
+															<Dialog.Header className="flex-shrink-0">
+																<Dialog.Title>Remove member</Dialog.Title>
+															</Dialog.Header>
+															<article className="flex-shrink-0">
+																<p className="opacity-60">
+																	Are you sure you want to remove the member {member.user.name}?
+																</p>
+															</article>
+															<Dialog.Footer className="flex-shrink-0">
+																<button
+																	type="button"
+																	className="btn preset-tonal"
+																	onClick={() => setIsDialogOpen(false)}
+																>
+																	Cancel
+																</button>
+																<button
+																	type="button"
+																	className="btn preset-filled-error-500"
+																	onClick={handleRemoveMember}
+																>
+																	Confirm
+																</button>
+															</Dialog.Footer>
+														</Dialog.Content>
+													</Dialog.Root>
+												)}
 											</div>
 										</td>
 									</tr>
