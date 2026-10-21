@@ -13,6 +13,9 @@
 	import { toast } from 'svelte-sonner';
 	import { tick } from 'svelte';
 
+	// Constants
+	import { DIALOG_KEY } from '#lib/users/utils/user.constants.js';
+
 	// Types
 	import type { GetActiveUserType } from '#lib/auth/types.js';
 
@@ -63,12 +66,8 @@
 			isSubmitting = true;
 
 			const currentUrl = new URL(page.url.href);
-			if (
-				!currentUrl.searchParams.has('dialog') ||
-				currentUrl.searchParams.get('dialog') !== 'profile'
-			) {
-				currentUrl.searchParams.set('dialog', 'profile');
-			}
+			// Reopen the profile dialog when the user comes back from the verification link
+			currentUrl.searchParams.set('dialog', DIALOG_KEY);
 			await authClient.changeEmail({
 				newEmail,
 				callbackURL: currentUrl.toString()
