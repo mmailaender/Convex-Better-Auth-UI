@@ -1988,10 +1988,10 @@
 				{
 					"type": "routes",
 					"role": "file",
-					"path": "[code]/page.tsx",
-					"relativePath": "src/app/device-authorization/[code]/page.tsx",
+					"path": "page.tsx",
+					"relativePath": "src/app/device/page.tsx",
 					"_imports_": [],
-					"target": "src/app/device-authorization/[code]/page.tsx",
+					"target": "src/app/device/page.tsx",
 					"registryDependencies": [
 						"auth/lib",
 						"config"

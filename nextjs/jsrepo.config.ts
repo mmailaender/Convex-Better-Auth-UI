@@ -338,8 +338,8 @@ export default defineConfig({
 				type: 'routes',
 				files: [
 					{
-						path: 'src/app/device-authorization/[[]code[]]/page.tsx',
-						target: 'src/app/device-authorization/[code]/page.tsx',
+						path: 'src/app/device/page.tsx',
+						target: 'src/app/device/page.tsx',
 						dependencyResolution: 'manual',
 						registryDependencies: ['auth/lib', 'config']
 					}
