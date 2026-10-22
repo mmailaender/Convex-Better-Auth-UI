@@ -240,7 +240,7 @@
 			case 'magic-link-flow':
 				return 'Sign in with magic link';
 			default:
-				return `Sign in into ${brandName}`;
+				return `Sign in to ${brandName}`;
 		}
 	}
 

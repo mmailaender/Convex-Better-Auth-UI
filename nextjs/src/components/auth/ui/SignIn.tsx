@@ -273,7 +273,7 @@ export default function SignIn({
 			case 'magic-link-flow':
 				return 'Sign in with magic link';
 			default:
-				return `Sign in into ${(AUTH_CONSTANTS.brandName ?? 'self hosted Auth').trim()}`;
+				return `Sign in to ${(AUTH_CONSTANTS.brandName ?? 'self hosted Auth').trim()}`;
 		}
 	};
 
