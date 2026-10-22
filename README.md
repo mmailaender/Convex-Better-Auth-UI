@@ -2,86 +2,66 @@
   <picture>
     <source srcset="./bannerDark.webp" media="(prefers-color-scheme: dark)">
     <source srcset="./banner.webp" media="(prefers-color-scheme: light)">
-    <img src="./banner.webp" alt="Auth Logo">
+    <img src="./banner.webp" alt="Auth UI">
   </picture>
-  <h2 align="center">
-    Convex Better Auth UI
-  </h2>
+</p>
 
-  <p align="center">
-    Self-owned auth UI for Convex + Better Auth — copy the code, own the flow.
-    <br />
-    <a href="https://etesie.dev/docs/auth/getting-started"><strong>→ Get Started</strong></a>
-    <br /><br />
-    <a href="https://github.com/mmailaender/auth/issues">Issues</a>
-  </p>
+<h2 align="center">Convex Better Auth UI</h2>
+
+<p align="center">
+  Sign-in, user profiles, organizations and an admin dashboard for SvelteKit and Next.js apps on Convex and Better Auth, copied into your repository.
+  <br /><br />
+  <a href="https://etesie.com/docs/auth/overview/introduction"><strong>Documentation</strong></a>
+  ·
+  <a href="https://github.com/mmailaender/Convex-Better-Auth-UI/issues">Issues</a>
 </p>
 
 <p align="center">
-  <img src="./showcase.gif" alt="Auth UI preview" width="900" />
+  <picture>
+    <source srcset="./showcaseDark.webp" media="(prefers-color-scheme: dark)">
+    <source srcset="./showcase.webp" media="(prefers-color-scheme: light)">
+    <img src="./showcase.webp" alt="A tour of Auth UI: signing in with a password, the user profile dialog, the organization settings and members list, and the admin dashboard" width="900">
+  </picture>
 </p>
 
----
+Auth UI is the sign-in, user profile, organization and admin UI for SvelteKit and Next.js apps that run on [Convex](https://convex.dev) and [Better Auth](https://www.better-auth.com). The [jsrepo](https://jsrepo.dev) CLI copies the components, routes and Convex functions into your repository, shadcn-style, so they're your code from the first commit. There's no hosted auth service: users, sessions and organizations live in your own Convex deployment.
 
-## 🧩 What is Auth UI?
+## Get started
 
-**Auth UI** gives you full-ownership authentication and organization management for **SvelteKit** or **Nextjs** — built on  
-**Better Auth + Convex**, wrapped in an extensible UI layer you completely control.
+| Framework | Registry       | Guide                                                                                  |
+| --------- | -------------- | -------------------------------------------------------------------------------------- |
+| SvelteKit | `@auth/svelte` | [Install Auth UI in SvelteKit](https://etesie.com/docs/auth/getting-started/sveltekit) |
+| Next.js   | `@auth/nextjs` | [Install Auth UI in Next.js](https://etesie.com/docs/auth/getting-started/nextjs)      |
 
-You don’t integrate a service.  
-You **copy the components into your repo** — shadcn-style — and customize everything.
+Each guide creates the app, connects it to Convex and adds the registry with `jsrepo add`.
 
-- 🔐 **Own your code** – no lock-in, every line lives in your repo
-- ☁️ **Self-hosted** – powered by your Convex backend
-- 🎨 **Design system included** – theme it to match your brand
-- 🪄 **Polished UX** – dialogs, transitions, and responsive layouts out of the box
+## What ships
 
----
+Each feature is a flag in `src/convex/auth.constants.ts`. The default install turns on password sign-in only.
 
-## 🚀 Why Auth UI?
+| Feature              | What you get                                                                                                                            |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Sign-in              | One email-first form for sign-in and sign-up, with password, email verification code (OTP), magic link and 27 social providers.         |
+| User profile         | A user button and a profile dialog: name and avatar, email change, linked accounts, set or change password, delete account.             |
+| Organizations        | Organization switcher, create organization, organization profile with members, email invitations and the roles owner, admin and member. |
+| API keys             | Users create and delete their own API keys in the profile dialog.                                                                       |
+| Device authorization | Better Auth's device flow, for signing in a CLI or another device without a browser.                                                    |
+| Admin dashboard      | `/admin` to search, create, ban, impersonate and delete users, and to manage every organization and its members.                        |
+| Emails               | Verification, password reset, sign-in codes, magic links, email change and invitations, sent through Resend.                            |
 
-Adding auth is easy.  
-**Owning it** — design, data, and cost — isn’t.
+[Features](https://etesie.com/docs/auth/features) covers each one and the flags that turn it on.
 
-Auth gives you hosted-provider convenience **without losing control**:
+## What you take on
 
-- **You own the code.**  
-  No opaque SDKs or black-box UIs — everything is editable and local.
+The components are files in your repository, so you can change any of them. Updates arrive the way vendored code does: `jsrepo update <item>` shows the diff for each file, and you merge it with your own edits.
 
-- **Your user data stays with you.**  
-  No mirroring, no duplication — all stored in your Convex database.
+The runtime dependencies stay ordinary packages in your `package.json`: Convex, Better Auth, `@convex-dev/better-auth`, Skeleton and Ark UI. Nothing bills you per user: you pay for your Convex usage and, if you send email, Resend.
 
-- **You control the costs.**  
-  No per-user or per-org pricing. Scale freely on your own infrastructure.
+[Why Auth UI](https://etesie.com/docs/auth/overview/why-auth) makes the case for owning your auth code, and [Comparison](https://etesie.com/docs/auth/overview/comparison) sets Auth UI against Better Auth UI.
 
----
+## Repository
 
-## ⚡ Getting Started
-
-Start building now with pre-built SvelteKit or Nextjs components —  
-fully functional, fully editable, and ready for production.
-
-📘 **[Read the Getting Started Guide →](https://etesie.dev/docs/auth/getting-started)**
-
----
-
-## 🧠 Built With
-
-- **Convex** – Backend, auth data & real-time sync
-- **Better Auth** – Secure, framework-agnostic auth core
-- **SvelteKit / Nextjs** – First-class framework support
-
-### UI & Styling
-
-- **Tailwind CSS** – Utility-first styling
-- **Shadcn** – Copy-paste components you own
-- **Skeleton** – Design-system primitives & theming
-
----
-
-## 🪄 What You’ll Love
-
-- ✅ 100 % editable source — modify flows, styles, or logic anytime
-- 🎯 Consistent UI — pre-styled forms, dialogs, and menus
-- 🌙 Light / Dark ready — theme tokens built in
-- 📱 Mobile-first — gestures & transitions tuned for all platforms
+- `svelte/`: the `@auth/svelte` registry and the SvelteKit app it's built from.
+- `nextjs/`: the `@auth/nextjs` registry and the Next.js app it's built from.
+- `shared/convex/`: the Convex functions both apps deploy.
+- `.changeset/`: pending release notes. [`.changeset/README.md`](.changeset/README.md) explains how releases work.
