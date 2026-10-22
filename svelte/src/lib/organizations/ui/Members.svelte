@@ -157,22 +157,14 @@
 	}
 
 	/**
-	 * Check if current user can edit a member
+	 * Check if current user can edit a member. Owners and admins can change the role of and remove
+	 * any member, other admins included, as Better Auth's organization plugin allows. The list never
+	 * offers it for an owner or for yourself: that is this UI's choice, the server would allow more.
 	 */
 	function canEditMember(member: Member): boolean {
 		if (!isOwnerOrAdmin) return false;
-		if (member.id === activeUser?._id) return false;
-		if (member.role === 'owner') return false;
-
-		// If current user is admin, they can't edit other admins
-		if (activeUser && members) {
-			const currentUserMember = members.find((m) => m.id === activeUser._id);
-			if (currentUserMember?.role === 'admin' && member.role === 'admin') {
-				return false;
-			}
-		}
-
-		return true;
+		if (member.userId === activeUser?._id) return false;
+		return member.role !== 'owner';
 	}
 
 	/**
@@ -313,7 +305,7 @@
 									<!-- Member Role -->
 									<td class="!w-32">
 										<div class="flex items-center">
-											{#if isOwnerOrAdmin && member.id !== activeUser?._id && member.role !== 'owner'}
+											{#if canEditMember(member)}
 												<Select.Root
 													collection={rolesCollection}
 													value={[member.role]}
@@ -355,7 +347,7 @@
 									<!-- Member Actions -->
 									<td class="!w-16">
 										<div class="flex justify-end space-x-2">
-											{#if isOwnerOrAdmin && member.id !== activeUser?._id && member.role !== 'owner'}
+											{#if canEditMember(member)}
 												<button
 													type="button"
 													class="btn-icon preset-filled-surface-200-800 hover:preset-filled-error-300-700"

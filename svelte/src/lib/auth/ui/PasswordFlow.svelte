@@ -104,8 +104,10 @@
 						if (authConstants.sendEmails) {
 							onVerifyEmail?.();
 							toast.success('Verification email sent!');
+							onSubmittingChange(false);
+							return;
 						}
-						onSubmittingChange(false);
+						onSuccess();
 					},
 					onError: (ctx) => {
 						console.error('Sign up error:', ctx.error);

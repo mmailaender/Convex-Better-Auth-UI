@@ -4416,6 +4416,15 @@
 							"meta": {}
 						},
 						{
+							"import": "#lib/users/utils/user.constants.js",
+							"item": "users/lib",
+							"file": {
+								"type": "lib",
+								"path": "users/utils/user.constants.ts"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/auth/types.js",
 							"item": "auth/lib",
 							"file": {
