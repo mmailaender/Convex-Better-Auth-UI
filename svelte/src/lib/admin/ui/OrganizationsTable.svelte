@@ -50,12 +50,12 @@
 <div class="flex h-full flex-col">
 	<div class="flex shrink-0 items-center gap-3 py-4">
 		<div class="relative flex-1">
-			<div class="pointer-events-none absolute inset-y-0 flex items-center">
+			<div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
 				<SearchIcon class="text-surface-400-600 size-4" aria-hidden="true" />
 			</div>
 			<input
 				type="search"
-				class="input w-full !border-0 border-transparent pl-6 text-sm"
+				class="input w-full !border-0 border-transparent pl-9 text-sm"
 				placeholder="Search by name or slug..."
 				aria-label="Search organizations by name or slug"
 				bind:value={searchInput}

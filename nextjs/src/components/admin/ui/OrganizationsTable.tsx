@@ -50,12 +50,12 @@ export default function OrganizationsTable({ onViewOrganization }: Organizations
 		<div className="flex h-full flex-col">
 			<div className="flex shrink-0 items-center gap-3 py-4">
 				<div className="relative flex-1">
-					<div className="pointer-events-none absolute inset-y-0 flex items-center">
+					<div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
 						<Search className="text-surface-400-600 size-4" aria-hidden="true" />
 					</div>
 					<input
 						type="search"
-						className="input w-full !border-0 border-transparent pl-6 text-sm"
+						className="input w-full !border-0 border-transparent pl-9 text-sm"
 						placeholder="Search by name or slug..."
 						aria-label="Search organizations by name or slug"
 						value={searchInput}
