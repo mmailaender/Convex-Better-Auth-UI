@@ -145,12 +145,12 @@ export default function Members(): React.ReactNode {
 			{/* Search Section - Fixed at top */}
 			<div className="flex flex-shrink-0 items-center gap-3 py-4">
 				<div className="relative flex-1">
-					<div className="pointer-events-none absolute inset-y-0 flex items-center">
+					<div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
 						<Search className="text-surface-400-600 size-4" />
 					</div>
 					<input
 						type="text"
-						className="input w-hug w-full !border-0 border-transparent pl-6 text-sm"
+						className="input w-hug w-full !border-0 border-transparent pl-9 text-sm"
 						placeholder="Search members..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
