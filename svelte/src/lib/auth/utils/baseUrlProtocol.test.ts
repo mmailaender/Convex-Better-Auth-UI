@@ -14,8 +14,8 @@ describe('resolveBaseUrlProtocol', () => {
 		expect(resolveBaseUrlProtocol(undefined, 'https://app.example.com')).toBe('https');
 	});
 
-	it('takes http from an http fallback URL', () => {
-		expect(resolveBaseUrlProtocol(undefined, 'http://localhost:5173')).toBe('http');
+	it('leaves the protocol to each request with an http fallback URL', () => {
+		expect(resolveBaseUrlProtocol(undefined, 'http://localhost:5173')).toBe(undefined);
 	});
 
 	it('returns no protocol without a usable fallback URL', () => {
@@ -27,7 +27,7 @@ describe('resolveBaseUrlProtocol', () => {
 
 	it('uses the fallback URL when the explicit value is invalid', () => {
 		expect(resolveBaseUrlProtocol('HTTPS', 'https://app.example.com')).toBe('https');
-		expect(resolveBaseUrlProtocol('', 'http://localhost:5173')).toBe('http');
+		expect(resolveBaseUrlProtocol('', 'http://localhost:5173')).toBe(undefined);
 		expect(resolveBaseUrlProtocol('ws', undefined)).toBe(undefined);
 	});
 });

@@ -93,15 +93,11 @@ export const resolveBaseUrlProtocol = (
 	if (explicitProtocol) return explicitProtocol;
 	if (!fallbackUrl) return undefined;
 
+	// Only https is taken over. An http fallback (local development, or previews whose shared
+	// defaults point at localhost) leaves the protocol to each request, as before: forcing http
+	// would make Better Auth build http URLs for HTTPS hosts and trust only their http origins.
 	try {
-		switch (new URL(fallbackUrl).protocol) {
-			case 'https:':
-				return 'https';
-			case 'http:':
-				return 'http';
-			default:
-				return undefined;
-		}
+		return new URL(fallbackUrl).protocol === 'https:' ? 'https' : undefined;
 	} catch {
 		return undefined;
 	}
