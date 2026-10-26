@@ -1,10 +1,11 @@
 @import 'tailwindcss';
-@plugin '@tailwindcss/forms';
 @import 'tw-animate-css';
 
 @import '@skeletonlabs/skeleton';
 
 @import '../themes/auth.css';
+
+@plugin '@tailwindcss/forms';
 
 @theme {
 	--animate-fade-in-out: fade-in-out 0.3s ease-in-out;
