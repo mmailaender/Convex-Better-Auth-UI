@@ -2770,6 +2770,15 @@
 								"path": "primitives/utils.ts"
 							},
 							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/utils/passwordStrength.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/passwordStrength.ts"
+							},
+							"meta": {}
 						}
 					],
 					"registryDependencies": [],

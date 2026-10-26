@@ -4,6 +4,7 @@ import {
 	CHECKING_STRENGTH_MESSAGE,
 	TOO_WEAK_MESSAGE,
 	createPasswordCheckerLoader,
+	passwordStrengthText,
 	passwordValidityMessage,
 	type PasswordChecker
 } from './passwordStrength.ts';
@@ -73,5 +74,20 @@ describe('createPasswordCheckerLoader', () => {
 		assert.equal(loader.loaded(), null);
 		assert.equal(await loader.load(), checker);
 		assert.equal(calls, 2);
+	});
+});
+
+describe('passwordStrengthText', () => {
+	it('names each score in the words of its colour', () => {
+		assert.equal(passwordStrengthText(WEAK, 0), 'Weak');
+		assert.equal(passwordStrengthText(WEAK, 1), 'Weak');
+		assert.equal(passwordStrengthText(WEAK, 2), 'Fair');
+		assert.equal(passwordStrengthText(WEAK, 3), 'Good');
+		assert.equal(passwordStrengthText(STRONG, 4), 'Strong');
+	});
+
+	it('says nothing while the password is empty or the checker loads', () => {
+		assert.equal(passwordStrengthText('', 0), undefined);
+		assert.equal(passwordStrengthText(STRONG, null), undefined);
 	});
 });

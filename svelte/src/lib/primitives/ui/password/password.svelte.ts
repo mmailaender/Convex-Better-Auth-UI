@@ -3,6 +3,7 @@ import { Context, watch } from 'runed';
 import type { ReadableBoxedValues, WritableBoxedValues } from 'svelte-toolbelt';
 import {
 	createPasswordCheckerLoader,
+	passwordStrengthText,
 	passwordValidityMessage,
 	type PasswordChecker
 } from '#lib/primitives/utils/passwordStrength.js';
@@ -204,6 +205,11 @@ class PasswordStrengthState {
 	/** 0 until the checker has loaded */
 	get score() {
 		return this.root.score;
+	}
+
+	/** What the meter announces; undefined while the password is empty or the checker loads */
+	get text() {
+		return passwordStrengthText(this.root.passwordState.value, this.root.strength?.score ?? null);
 	}
 }
 
