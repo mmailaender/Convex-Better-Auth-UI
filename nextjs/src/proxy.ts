@@ -33,13 +33,17 @@ const withRedirect = (to: string, request: NextRequest) => {
  * Whether Better Auth accepts the session of this request's cookies, asked through the app's own
  * auth route. A session cookie alone proves nothing: `getSessionCookie()` also finds one Better
  * Auth no longer reads, such as `better-auth.session_token` once the cookies became `__Secure-`.
- * No session, an error or a failed request all count as signed out.
+ * No session, an error or a failed request all count as signed out. The check doesn't renew the
+ * session (`disableRefresh`): the redirect that follows would drop a renewed cookie.
  */
 const hasValidSession = async (request: NextRequest) => {
 	try {
-		const response = await fetch(new URL('/api/auth/get-session', request.url), {
-			headers: { cookie: request.headers.get('cookie') ?? '' }
-		});
+		const response = await fetch(
+			new URL('/api/auth/get-session?disableRefresh=true', request.url),
+			{
+				headers: { cookie: request.headers.get('cookie') ?? '' }
+			}
+		);
 		if (!response.ok) return false;
 		const data = (await response.json()) as { session?: unknown } | null;
 		return Boolean(data?.session);

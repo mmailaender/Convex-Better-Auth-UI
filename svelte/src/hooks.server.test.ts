@@ -47,7 +47,7 @@ describe('sign-in guard', () => {
 
 		expect(await redirectOf(request('/signin', STALE_COOKIE))).toBeUndefined();
 		expect(resolve).toHaveBeenCalledOnce();
-		expect(fetch).toHaveBeenCalledExactlyOnceWith('/api/auth/get-session');
+		expect(fetch).toHaveBeenCalledExactlyOnceWith('/api/auth/get-session?disableRefresh=true');
 	});
 
 	it('shows sign-in when the session check fails', async () => {

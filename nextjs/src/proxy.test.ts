@@ -45,7 +45,7 @@ describe('sign-in guard', () => {
 
 		assert.equal(fetchMock.mock.callCount(), 1);
 		const [url, init] = fetchMock.mock.calls[0].arguments;
-		assert.equal(String(url), `${ORIGIN}/api/auth/get-session`);
+		assert.equal(String(url), `${ORIGIN}/api/auth/get-session?disableRefresh=true`);
 		assert.equal(new Headers(init?.headers).get('cookie'), STALE_COOKIE);
 	});
 
