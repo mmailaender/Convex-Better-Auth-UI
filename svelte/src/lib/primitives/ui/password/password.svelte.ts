@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 import { Context, watch } from 'runed';
 import type { ReadableBoxedValues, WritableBoxedValues } from 'svelte-toolbelt';
 import {
@@ -97,13 +98,18 @@ class PasswordInputState {
 		);
 
 		$effect(() => {
-			if (!this.root.passwordState.strengthMounted) return;
+			// The score only counts while a meter is mounted. When the meter goes away, clear the
+			// message this field set, but leave a custom validity it didn't set alone.
+			const mounted = this.root.passwordState.strengthMounted;
+			if (!mounted && untrack(() => this.root.passwordState.validityMessage) === '') return;
 
-			const message = passwordValidityMessage(
-				this.root.passwordState.value,
-				this.root.opts.minScore.current,
-				this.root.strength?.score ?? null
-			);
+			const message = mounted
+				? passwordValidityMessage(
+						this.root.passwordState.value,
+						this.root.opts.minScore.current,
+						this.root.strength?.score ?? null
+					)
+				: '';
 			this.opts.ref.current?.setCustomValidity(message);
 			this.root.passwordState.validityMessage = message;
 		});
