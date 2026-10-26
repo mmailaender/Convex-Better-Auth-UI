@@ -620,6 +620,36 @@
 				{
 					"type": "components",
 					"role": "file",
+					"path": "primitives/utils/passwordChecker.ts",
+					"relativePath": "src/components/primitives/utils/passwordChecker.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
+					"path": "primitives/utils/passwordStrength.ts",
+					"relativePath": "src/components/primitives/utils/passwordStrength.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "test",
+					"path": "primitives/utils/passwordStrength.test.ts",
+					"relativePath": "src/components/primitives/utils/passwordStrength.test.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "components",
+					"role": "file",
 					"path": "primitives/utils/routeMatcher.ts",
 					"relativePath": "src/components/primitives/utils/routeMatcher.ts",
 					"_imports_": [],

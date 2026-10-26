@@ -107,7 +107,23 @@ export default defineConfig({
 				],
 				files: [
 					{
-						path: 'src/components/primitives'
+						path: 'src/components/primitives',
+						files: [
+							{ path: 'hooks' },
+							{ path: 'ui' },
+							{
+								path: 'utils',
+								files: [
+									{ path: 'focusScroll.ts' },
+									{ path: 'mobileState.ts' },
+									{ path: 'optimizeImage.ts' },
+									{ path: 'passwordChecker.ts' },
+									{ path: 'passwordStrength.ts' },
+									{ path: 'passwordStrength.test.ts', role: 'test' },
+									{ path: 'routeMatcher.ts' }
+								]
+							}
+						]
 					},
 					{
 						path: 'src/lib/utils.ts',

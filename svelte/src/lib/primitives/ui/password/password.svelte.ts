@@ -1,19 +1,20 @@
 import { Context, watch } from 'runed';
 import type { ReadableBoxedValues, WritableBoxedValues } from 'svelte-toolbelt';
-import { ZxcvbnFactory } from '@zxcvbn-ts/core';
-import * as zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
-import * as zxcvbnEnPackage from '@zxcvbn-ts/language-en';
+import {
+	createPasswordCheckerLoader,
+	passwordValidityMessage,
+	type PasswordChecker
+} from '#lib/primitives/utils/passwordStrength.js';
 
-const passwordOptions = {
-	translations: zxcvbnEnPackage.translations,
-	graphs: zxcvbnCommonPackage.adjacencyGraphs,
-	dictionary: {
-		...zxcvbnCommonPackage.dictionary,
-		...zxcvbnEnPackage.dictionary
+// One checker per page, imported in the browser only. `import.meta.env.SSR` is a build-time
+// constant, so the server build drops this `import()` and zxcvbn with it.
+const checkerLoader = createPasswordCheckerLoader(async () => {
+	if (!import.meta.env.SSR) {
+		const { passwordChecker } = await import('#lib/primitives/utils/passwordChecker.js');
+		return passwordChecker;
 	}
-};
-
-const zxcvbnInstance = new ZxcvbnFactory(passwordOptions);
+	throw new Error('The password strength checker loads in the browser only');
+});
 
 type PasswordRootStateProps = WritableBoxedValues<{
 	hidden: boolean;
@@ -29,6 +30,11 @@ type PasswordState = {
 	strengthMounted: boolean;
 	submitted: boolean;
 	inputRef: HTMLInputElement | null;
+	/**
+	 * The input's custom validity message. What derives from `validity` reads it, so it updates
+	 * when the input applies a new message, for example once the checker loads after a submit.
+	 */
+	validityMessage: string;
 };
 
 const defaultPasswordState: PasswordState = {
@@ -37,16 +43,32 @@ const defaultPasswordState: PasswordState = {
 	toggleMounted: false,
 	strengthMounted: false,
 	submitted: false,
-	inputRef: null
+	inputRef: null,
+	validityMessage: ''
 };
 
 class PasswordRootState {
 	passwordState = $state(defaultPasswordState);
 
-	constructor(readonly opts: PasswordRootStateProps) {}
+	// Null until the checker has loaded, and always during SSR
+	checker = $state.raw<PasswordChecker | null>(checkerLoader.loaded());
 
-	// only re-run when the password changes
-	strength = $derived.by(() => zxcvbnInstance.check(this.passwordState.value));
+	constructor(readonly opts: PasswordRootStateProps) {
+		// Load the checker as soon as the meter mounts, so it is usually ready before the first
+		// keystroke. Reading the value makes typing retry a load that failed.
+		$effect(() => {
+			if (!this.passwordState.strengthMounted || this.checker) return;
+			void this.passwordState.value;
+			checkerLoader.load().then(
+				(checker) => (this.checker = checker),
+				(error: unknown) => console.error('Could not load the password strength checker:', error)
+			);
+		});
+	}
+
+	// only re-run when the password or the checker changes; null while the checker loads
+	strength = $derived.by(() => this.checker?.check(this.passwordState.value) ?? null);
+	score = $derived(this.strength?.score ?? 0);
 }
 
 type PasswordInputStateProps = WritableBoxedValues<{
@@ -77,15 +99,13 @@ class PasswordInputState {
 		$effect(() => {
 			if (!this.root.passwordState.strengthMounted) return;
 
-			// if the password is empty, we let the `required` attribute handle the validation
-			if (
-				this.root.passwordState.value !== '' &&
-				this.root.strength.score < this.root.opts.minScore.current
-			) {
-				this.opts.ref.current?.setCustomValidity('Password is too weak');
-			} else {
-				this.opts.ref.current?.setCustomValidity('');
-			}
+			const message = passwordValidityMessage(
+				this.root.passwordState.value,
+				this.root.opts.minScore.current,
+				this.root.strength?.score ?? null
+			);
+			this.opts.ref.current?.setCustomValidity(message);
+			this.root.passwordState.validityMessage = message;
 		});
 
 		// Track the input element on the root so other primitives (e.g. Error) can read validity
@@ -122,6 +142,7 @@ class PasswordInputState {
 
 	props = $derived.by(() => {
 		const input = this.root.passwordState.inputRef;
+		void this.root.passwordState.validityMessage; // see `PasswordState.validityMessage`
 		let invalid = false;
 		if (input) {
 			const submitted = this.root.passwordState.submitted;
@@ -173,6 +194,11 @@ class PasswordStrengthState {
 	get strength() {
 		return this.root.strength;
 	}
+
+	/** 0 until the checker has loaded */
+	get score() {
+		return this.root.score;
+	}
 }
 
 class PasswordErrorState {
@@ -181,6 +207,7 @@ class PasswordErrorState {
 	// Message derived from the input's current validity. Does not trigger native UI.
 	message = $derived.by(() => {
 		const input = this.root.passwordState.inputRef;
+		const customMessage = this.root.passwordState.validityMessage;
 		if (!input) return null as string | null;
 
 		// Only show errors after the form has been submitted
@@ -198,7 +225,7 @@ class PasswordErrorState {
 				return 'Enter a password.';
 			}
 			// For other cases (pattern, tooShort, etc.) keep native/custom message fallback
-			return input.validationMessage || 'Invalid value';
+			return customMessage || input.validationMessage || 'Invalid value';
 		}
 
 		return null as string | null;

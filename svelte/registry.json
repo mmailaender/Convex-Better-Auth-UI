@@ -2866,7 +2866,26 @@
 					"role": "file",
 					"path": "primitives/ui/password/password.svelte.ts",
 					"relativePath": "src/lib/primitives/ui/password/password.svelte.ts",
-					"_imports_": [],
+					"_imports_": [
+						{
+							"import": "#lib/primitives/utils/passwordStrength.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/passwordStrength.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "#lib/primitives/utils/passwordChecker.js",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/passwordChecker.ts"
+							},
+							"meta": {}
+						}
+					],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -3553,6 +3572,71 @@
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/utils/passwordChecker.ts",
+					"relativePath": "src/lib/primitives/utils/passwordChecker.ts",
+					"_imports_": [
+						{
+							"import": "./passwordStrength",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/passwordStrength.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "primitives/utils/passwordStrength.ts",
+					"relativePath": "src/lib/primitives/utils/passwordStrength.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "test",
+					"path": "primitives/utils/passwordStrength.test.ts",
+					"relativePath": "src/lib/primitives/utils/passwordStrength.test.ts",
+					"_imports_": [
+						{
+							"import": "./passwordStrength",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/passwordStrength.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "./passwordChecker",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/utils/passwordChecker.ts"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
 				},
 				{
 					"type": "lib",
