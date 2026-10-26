@@ -75,36 +75,34 @@ export const parseBaseUrlProtocol = (value?: string): BaseUrlProtocol | undefine
 	}
 };
 
-/**
- * Resolve the protocol Better Auth uses with the dynamic baseURL.
- *
- * A valid explicit value (`http`, `https` or `auto`) wins. Otherwise the
- * protocol of the fallback URL applies. With a dynamic baseURL, Better Auth
- * decides once at startup whether cookies get the `__Secure-` prefix and the
- * `Secure` attribute, and without a protocol it decides by
- * `NODE_ENV === 'production'`, which is false on Convex deployments. Taking
- * the protocol from an https fallback URL keeps cookies Secure there.
- */
-export const resolveBaseUrlProtocol = (
-	explicit?: string,
-	fallbackUrl?: string
-): BaseUrlProtocol | undefined => {
-	const explicitProtocol = parseBaseUrlProtocol(explicit);
-	if (explicitProtocol) return explicitProtocol;
-	if (!fallbackUrl) return undefined;
+export const getBaseUrlProtocol = () =>
+	parseBaseUrlProtocol(process.env.BETTER_AUTH_BASE_URL_PROTOCOL);
 
-	// Only https is taken over. An http fallback (local development, or previews whose shared
-	// defaults point at localhost) leaves the protocol to each request, as before: forcing http
-	// would make Better Auth build http URLs for HTTPS hosts and trust only their http origins.
+/**
+ * Whether Better Auth's cookies are Secure, as `advanced.useSecureCookies`.
+ *
+ * With the dynamic baseURL, Better Auth decides once at startup whether cookies get the
+ * `__Secure-` prefix and the `Secure` attribute: from `baseURL.protocol` when one is set,
+ * otherwise from `NODE_ENV === 'production'`, which is false on Convex deployments. So without
+ * `BETTER_AUTH_BASE_URL_PROTOCOL`, an https `BETTER_AUTH_FALLBACK_URL` makes them Secure here.
+ * Only the cookies follow the fallback URL: URLs keep the protocol of each request, so an http
+ * host such as `localhost` keeps working next to an https fallback. A valid explicit protocol,
+ * an http fallback or none returns `undefined` and leaves the decision to Better Auth, as before.
+ */
+export const resolveSecureCookies = (
+	explicitProtocol?: string,
+	fallbackUrl?: string
+): true | undefined => {
+	if (parseBaseUrlProtocol(explicitProtocol) || !fallbackUrl) return undefined;
 	try {
-		return new URL(fallbackUrl).protocol === 'https:' ? 'https' : undefined;
+		return new URL(fallbackUrl).protocol === 'https:' ? true : undefined;
 	} catch {
 		return undefined;
 	}
 };
 
-export const getBaseUrlProtocol = () =>
-	resolveBaseUrlProtocol(
+export const getSecureCookies = () =>
+	resolveSecureCookies(
 		process.env.BETTER_AUTH_BASE_URL_PROTOCOL,
 		process.env.BETTER_AUTH_FALLBACK_URL
 	);
