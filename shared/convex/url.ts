@@ -75,8 +75,43 @@ export const parseBaseUrlProtocol = (value?: string): BaseUrlProtocol | undefine
 	}
 };
 
+/**
+ * Resolve the protocol Better Auth uses with the dynamic baseURL.
+ *
+ * A valid explicit value (`http`, `https` or `auto`) wins. Otherwise the
+ * protocol of the fallback URL applies. With a dynamic baseURL, Better Auth
+ * decides once at startup whether cookies get the `__Secure-` prefix and the
+ * `Secure` attribute, and without a protocol it decides by
+ * `NODE_ENV === 'production'`, which is false on Convex deployments. Taking
+ * the protocol from an https fallback URL keeps cookies Secure there.
+ */
+export const resolveBaseUrlProtocol = (
+	explicit?: string,
+	fallbackUrl?: string
+): BaseUrlProtocol | undefined => {
+	const explicitProtocol = parseBaseUrlProtocol(explicit);
+	if (explicitProtocol) return explicitProtocol;
+	if (!fallbackUrl) return undefined;
+
+	try {
+		switch (new URL(fallbackUrl).protocol) {
+			case 'https:':
+				return 'https';
+			case 'http:':
+				return 'http';
+			default:
+				return undefined;
+		}
+	} catch {
+		return undefined;
+	}
+};
+
 export const getBaseUrlProtocol = () =>
-	parseBaseUrlProtocol(process.env.BETTER_AUTH_BASE_URL_PROTOCOL);
+	resolveBaseUrlProtocol(
+		process.env.BETTER_AUTH_BASE_URL_PROTOCOL,
+		process.env.BETTER_AUTH_FALLBACK_URL
+	);
 
 /**
  * Better Auth baseURL config for dynamic host resolution.
