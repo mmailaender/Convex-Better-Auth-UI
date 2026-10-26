@@ -31,11 +31,28 @@ const isPublic = createRouteMatcher([
 const withRedirect = (to: string, event: Parameters<Handle>[0]['event']) =>
 	`${to}?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`;
 
+/**
+ * Whether Better Auth accepts the session of this request's cookies, asked through the app's own
+ * auth route. A session cookie alone proves nothing: `getSessionCookie()` also finds one Better
+ * Auth no longer reads, such as `better-auth.session_token` once the cookies became `__Secure-`.
+ * No session, an error or a failed request all count as signed out.
+ */
+const hasValidSession = async (event: Parameters<Handle>[0]['event']) => {
+	try {
+		const response = await event.fetch('/api/auth/get-session');
+		if (!response.ok) return false;
+		const data = (await response.json()) as { session?: unknown } | null;
+		return Boolean(data?.session);
+	} catch {
+		return false;
+	}
+};
+
 /* --------------------------------------------------------- */
 /* ---------------------- main handler --------------------- */
 /* --------------------------------------------------------- */
 
-const requireAuth: Handle = async ({ event, resolve }) => {
+export const requireAuth: Handle = async ({ event, resolve }) => {
 	// ⛑️ During build/prerender, skip all auth logic.
 	// This prevents "Cannot access url.search on a page with prerendering enabled".
 	if (building) {
@@ -47,14 +64,17 @@ const requireAuth: Handle = async ({ event, resolve }) => {
 
 	/* ---------- 1. Handle public routes first ---------- */
 	if (isPublic(pathname)) {
-		// Special case: redirect authenticated users away from signin
-		if (isLogin(pathname) && sessionCookie) {
+		// Special case: redirect signed-in users away from sign-in. Only here is the cookie
+		// checked against Better Auth, so a stale one can't keep anyone from signing in.
+		if (isLogin(pathname) && sessionCookie && (await hasValidSession(event))) {
 			throw redirect(307, '/');
 		}
 		return resolve(event);
 	}
 
 	/* ---------- 2. All other routes require authentication ---------- */
+	// Optimistic, as Better Auth recommends: the cookie's presence is enough here. Pages check the
+	// session itself; /admin sends a signed-out reader to /signin, and the header offers sign-in.
 	if (!sessionCookie) {
 		throw redirect(307, withRedirect('/signin', event));
 	}
