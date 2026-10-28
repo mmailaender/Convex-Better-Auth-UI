@@ -8,6 +8,8 @@ import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
 	createPasswordCheckerLoader,
+	PASSWORD_STRENGTH_LABEL,
+	passwordStrengthText,
 	passwordValidityMessage,
 	type PasswordChecker
 } from '@/components/primitives/utils/passwordStrength';
@@ -270,9 +272,10 @@ function Error() {
 }
 
 function Strength({ className }: { className?: string }) {
-	const { strength, setStrengthMounted } = React.useContext(PasswordContext);
+	const { value, strength, setStrengthMounted } = React.useContext(PasswordContext);
 	// 0 until the checker has loaded
 	const score = strength?.score ?? 0;
+	const text = passwordStrengthText(value, strength?.score ?? null);
 
 	React.useEffect(() => {
 		setStrengthMounted(true);
@@ -298,7 +301,12 @@ function Strength({ className }: { className?: string }) {
 				className
 			)}
 		>
-			<ProgressPrimitive.Track className="h-full w-full">
+			{/* The track is the progressbar: Ark gives it the role and the value attributes */}
+			<ProgressPrimitive.Track
+				className="h-full w-full"
+				aria-label={PASSWORD_STRENGTH_LABEL}
+				aria-valuetext={text}
+			>
 				<ProgressPrimitive.Range
 					className={cn('block h-full transition-all duration-500', color)}
 					style={{ width: `${(score / 4) * 100}%` }}

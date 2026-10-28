@@ -3,6 +3,7 @@ import {
 	CHECKING_STRENGTH_MESSAGE,
 	TOO_WEAK_MESSAGE,
 	createPasswordCheckerLoader,
+	passwordStrengthText,
 	passwordValidityMessage,
 	type PasswordChecker
 } from './passwordStrength';
@@ -73,5 +74,20 @@ describe('createPasswordCheckerLoader', () => {
 		expect(loader.loaded()).toBeNull();
 		await expect(loader.load()).resolves.toBe(checker);
 		expect(importChecker).toHaveBeenCalledTimes(2);
+	});
+});
+
+describe('passwordStrengthText', () => {
+	it('names each score in the words of its colour', () => {
+		expect(passwordStrengthText(WEAK, 0)).toBe('Weak');
+		expect(passwordStrengthText(WEAK, 1)).toBe('Weak');
+		expect(passwordStrengthText(WEAK, 2)).toBe('Fair');
+		expect(passwordStrengthText(WEAK, 3)).toBe('Good');
+		expect(passwordStrengthText(STRONG, 4)).toBe('Strong');
+	});
+
+	it('says nothing while the password is empty or the checker loads', () => {
+		expect(passwordStrengthText('', 0)).toBe(undefined);
+		expect(passwordStrengthText(STRONG, null)).toBe(undefined);
 	});
 });

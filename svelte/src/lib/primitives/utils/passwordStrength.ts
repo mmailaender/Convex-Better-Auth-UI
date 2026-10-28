@@ -57,3 +57,19 @@ export function passwordValidityMessage(
 	if (score === null) return CHECKING_STRENGTH_MESSAGE;
 	return score < minScore ? TOO_WEAK_MESSAGE : '';
 }
+
+/** The accessible name of the strength meter. */
+export const PASSWORD_STRENGTH_LABEL = 'Password strength';
+
+/**
+ * What the strength meter announces for a score, in the words its colours stand for. None while the
+ * password is empty or the checker loads, so the meter doesn't call a password weak before it has
+ * one or a score.
+ */
+export function passwordStrengthText(password: string, score: number | null): string | undefined {
+	if (password === '' || score === null) return undefined;
+	if (score <= 1) return 'Weak';
+	if (score === 2) return 'Fair';
+	if (score === 3) return 'Good';
+	return 'Strong';
+}
