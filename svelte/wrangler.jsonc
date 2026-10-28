@@ -1,0 +1,16 @@
+// The Cloudflare Workers deployment of this demo, built by Workers Builds (see ../cloudflare.sh).
+// The build uses @sveltejs/adapter-cloudflare only there, when WORKERS_CI is set (vite.config.ts).
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "convex-better-auth-ui-svelte",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_date": "2026-10-28",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"observability": {
+		"enabled": true
+	}
+}
