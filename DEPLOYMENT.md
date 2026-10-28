@@ -4,18 +4,25 @@ The demo apps `nextjs/` and `svelte/` deploy to Vercel and to Cloudflare Workers
 
 ## Convex backends
 
-| Build                          | Convex backend                                                                                          |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Vercel production (`main`)     | production, deployed by `vercel.sh`                                                                     |
-| Vercel preview                 | `<branch>-<app>`, deployed by `vercel.sh`                                                               |
-| Cloudflare production (`main`) | production, **not** deployed: `cloudflare.sh` only builds against it, so Vercel stays its only deployer |
-| Cloudflare preview             | `<branch>-<app>-cf`, deployed by `cloudflare.sh`                                                        |
+| Build                          | Convex backend                                                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Vercel production (`main`)     | production, deployed by `vercel.sh` in `auth-svelte` only; `auth-nextjs` builds against it                     |
+| Vercel preview                 | `<branch>-<app>`, deployed by `vercel.sh`                                                                      |
+| Cloudflare production (`main`) | production, **not** deployed: `cloudflare.sh` only builds against it, so `auth-svelte` stays its only deployer |
+| Cloudflare preview             | `<branch>-<app>-cf`, deployed by `cloudflare.sh`                                                               |
 
 Every app and platform has its own preview backend, so no two builds push to one backend at the same time.
 
 ## Vercel
 
-Two projects, `auth-nextjs` and `auth-svelte`, with root directories `nextjs` and `svelte`. Build command: `sh ../vercel.sh`. Variable: `CONVEX_DEPLOY_KEY`, the production deploy key for production and a preview deploy key for previews.
+Two projects, `auth-nextjs` and `auth-svelte`, with root directories `nextjs` and `svelte`. Build command: `sh ../vercel.sh`.
+
+| Variable                                                | `auth-svelte`                                                    | `auth-nextjs`                              |
+| ------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------ |
+| `CONVEX_DEPLOY_KEY`                                     | production deploy key (Production), preview deploy key (Preview) | preview deploy key (Preview) only          |
+| `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL` | —                                                                | the production backend's URLs (Production) |
+
+`auth-svelte` is the only build that deploys the production backend. `auth-nextjs` builds production against it, so two builds of one commit never push to it at the same time.
 
 ## Cloudflare Workers Builds
 
