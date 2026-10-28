@@ -126,6 +126,9 @@ export default defineConfig({
 									{ path: 'navigation.ts' },
 									{ path: 'navigation.test.ts', role: 'test' },
 									{ path: 'optimizeImage.ts' },
+									{ path: 'passwordChecker.ts' },
+									{ path: 'passwordStrength.ts' },
+									{ path: 'passwordStrength.test.ts', role: 'test' },
 									{ path: 'routeMatcher.ts' }
 								]
 							}

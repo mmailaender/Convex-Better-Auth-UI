@@ -2,20 +2,25 @@
 
 import * as React from 'react';
 import { Progress as ProgressPrimitive } from '@ark-ui/react/progress';
-import { ZxcvbnFactory, type ZxcvbnResult } from '@zxcvbn-ts/core';
-import * as zxcvbnCommonPackage from '@zxcvbn-ts/language-common';
-import * as zxcvbnEnPackage from '@zxcvbn-ts/language-en';
+import type { ZxcvbnResult } from '@zxcvbn-ts/core';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import {
+	createPasswordCheckerLoader,
+	passwordValidityMessage,
+	type PasswordChecker
+} from '@/components/primitives/utils/passwordStrength';
 
-const zxcvbnInstance = new ZxcvbnFactory({
-	translations: zxcvbnEnPackage.translations,
-	graphs: zxcvbnCommonPackage.adjacencyGraphs,
-	dictionary: {
-		...zxcvbnCommonPackage.dictionary,
-		...zxcvbnEnPackage.dictionary
+// One checker per page, imported in the browser only. Next.js replaces `typeof window` with a
+// constant in each build, so the server build drops this `import()` and zxcvbn with it.
+const checkerLoader = createPasswordCheckerLoader(async () => {
+	if (typeof window !== 'undefined') {
+		const { passwordChecker } = await import('@/components/primitives/utils/passwordChecker');
+		return passwordChecker;
 	}
+	// `globalThis`: this file's `Error` is the component below
+	throw new globalThis.Error('The password strength checker loads in the browser only');
 });
 
 const PasswordContext = React.createContext<{
@@ -24,7 +29,10 @@ const PasswordContext = React.createContext<{
 	value: string;
 	setValue: React.Dispatch<React.SetStateAction<string>>;
 	minScore: number;
-	strength: ZxcvbnResult;
+	/** Null while the checker loads, and always during SSR */
+	strength: ZxcvbnResult | null;
+	setStrengthMounted: React.Dispatch<React.SetStateAction<boolean>>;
+	setValidityMessage: React.Dispatch<React.SetStateAction<string>>;
 	submitted: boolean;
 	setSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 	inputEl: HTMLInputElement | null;
@@ -37,7 +45,9 @@ const PasswordContext = React.createContext<{
 	value: '',
 	setValue: () => {},
 	minScore: 3,
-	strength: zxcvbnInstance.check(''),
+	strength: null,
+	setStrengthMounted: () => {},
+	setValidityMessage: () => {},
 	submitted: false,
 	setSubmitted: () => {},
 	inputEl: null,
@@ -46,14 +56,18 @@ const PasswordContext = React.createContext<{
 	errorMessage: null
 });
 
-function getErrorMessage(input: HTMLInputElement | null, submitted: boolean) {
+function getErrorMessage(
+	input: HTMLInputElement | null,
+	submitted: boolean,
+	customMessage: string
+) {
 	if (!submitted || !input || input.validity.valid) return null;
 	const placeholder = input.getAttribute('placeholder')?.trim();
 	if (input.validity.valueMissing && placeholder) {
 		return placeholder.endsWith('.') ? placeholder : `${placeholder}.`;
 	}
 	if (input.validity.valueMissing) return 'Enter a password.';
-	return input.validationMessage || 'Invalid value';
+	return customMessage || input.validationMessage || 'Invalid value';
 }
 
 type RootProps = {
@@ -69,9 +83,27 @@ function Root({ children, hidden = true, minScore = 3, onerror }: RootProps) {
 	const [submitted, setSubmitted] = React.useState(false);
 	const [inputEl, setInputEl] = React.useState<HTMLInputElement | null>(null);
 	const errorId = React.useId();
-	const strength = React.useMemo(() => zxcvbnInstance.check(value), [value]);
-	const errorMessage = getErrorMessage(inputEl, submitted);
+	const [checker, setChecker] = React.useState<PasswordChecker | null>(checkerLoader.loaded);
+	const [strengthMounted, setStrengthMounted] = React.useState(false);
+	const strength = React.useMemo(() => checker?.check(value) ?? null, [checker, value]);
+	// The input's custom validity message. Keeping it in state re-renders the error once the input
+	// applies a new one, for example when the checker loads after a submit.
+	const [validityMessage, setValidityMessage] = React.useState('');
+	const errorMessage = getErrorMessage(inputEl, submitted, validityMessage);
 	const lastErrorRef = React.useRef<string | null>(null);
+
+	// Load the checker as soon as a part that needs a score mounts: the meter, or an input that
+	// enforces `minScore`. It is usually ready before the first keystroke. Typing retries a load
+	// that failed.
+	const needsChecker = strengthMounted || minScore > 0;
+	React.useEffect(() => {
+		if (!needsChecker || checker) return;
+		checkerLoader
+			.load()
+			.then(setChecker, (error: unknown) =>
+				console.error('Could not load the password strength checker:', error)
+			);
+	}, [needsChecker, checker, value]);
 
 	React.useEffect(() => {
 		if (!errorMessage) {
@@ -93,6 +125,8 @@ function Root({ children, hidden = true, minScore = 3, onerror }: RootProps) {
 				setValue,
 				minScore,
 				strength,
+				setStrengthMounted,
+				setValidityMessage,
 				submitted,
 				setSubmitted,
 				inputEl,
@@ -133,6 +167,7 @@ function Input({
 		value: passwordValue,
 		minScore,
 		strength,
+		setValidityMessage,
 		setSubmitted,
 		setInputEl,
 		errorId,
@@ -145,14 +180,10 @@ function Input({
 	}, [defaultValue, setValue, value]);
 
 	React.useEffect(() => {
-		const input = inputRef.current;
-		if (!input) return;
-		if (passwordValue !== '' && strength.score < minScore) {
-			input.setCustomValidity('Password is too weak');
-		} else {
-			input.setCustomValidity('');
-		}
-	}, [minScore, passwordValue, strength.score]);
+		const message = passwordValidityMessage(passwordValue, minScore, strength?.score ?? null);
+		inputRef.current?.setCustomValidity(message);
+		setValidityMessage(message);
+	}, [minScore, passwordValue, strength, setValidityMessage]);
 
 	React.useEffect(() => {
 		const form = inputRef.current?.form;
@@ -239,8 +270,15 @@ function Error() {
 }
 
 function Strength({ className }: { className?: string }) {
-	const { strength } = React.useContext(PasswordContext);
-	const score = strength.score;
+	const { strength, setStrengthMounted } = React.useContext(PasswordContext);
+	// 0 until the checker has loaded
+	const score = strength?.score ?? 0;
+
+	React.useEffect(() => {
+		setStrengthMounted(true);
+		return () => setStrengthMounted(false);
+	}, [setStrengthMounted]);
+
 	const color =
 		score <= 1
 			? 'bg-error-600-400'
