@@ -25,7 +25,12 @@ import {
 
 // Constants
 import { AUTH_CONSTANTS } from './auth.constants';
-import { getBetterAuthBaseUrl, getBetterAuthFallbackUrl, resolveRequestBaseUrl } from './url';
+import {
+	getBetterAuthBaseUrl,
+	getBetterAuthFallbackUrl,
+	getSecureCookies,
+	resolveRequestBaseUrl
+} from './url';
 import { getAdminUserIds, isAppAdminUser } from './model/admin/roles';
 
 /**
@@ -129,6 +134,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 	return {
 		// All auth requests will be proxied through your sveltekit server
 		baseURL: getBetterAuthBaseUrl(),
+		advanced: { useSecureCookies: getSecureCookies() },
 		database: authComponent.adapter(ctx),
 
 		emailVerification: {
