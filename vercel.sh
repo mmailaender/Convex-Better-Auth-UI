@@ -5,6 +5,16 @@ ln -sfn "$(pwd)/node_modules" ../shared/node_modules
 
 app="$(basename "$(pwd)")"
 
+# Deploy only for the two environments Vercel builds in. Anything else, such as VERCEL_ENV missing
+# because system variables are not exposed, would otherwise fall through to a production deploy.
+case "${VERCEL_ENV:-}" in
+preview | production) ;;
+*)
+	echo "vercel.sh: unsupported VERCEL_ENV '${VERCEL_ENV:-}', expected preview or production" >&2
+	exit 1
+	;;
+esac
+
 # The nextjs and svelte apps build as two Vercel projects from the same branch. Named by the
 # branch alone, both pushed to one Convex preview deployment at the same time, and a branch's
 # first build could fail with "RaceDetected: Component betterAuth was created by a concurrent
