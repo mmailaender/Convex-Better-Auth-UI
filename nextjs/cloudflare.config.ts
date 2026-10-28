@@ -6,6 +6,10 @@ export default defineConfig({
 		entrypoint: 'vinext/server/fetch-handler',
 		compatibilityDate: '2026-10-28',
 		compatibilityFlags: ['nodejs_compat'],
+		workersDev: true,
+		// Per-branch Preview URLs (`<branch>-convex-better-auth-ui-nextjs.<subdomain>.workers.dev`); set here
+		// so a production deploy cannot switch them off
+		previewUrls: true,
 		assets: {
 			htmlHandling: 'none',
 			notFoundHandling: 'none',

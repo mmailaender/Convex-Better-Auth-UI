@@ -10,6 +10,13 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
+	"workers_dev": true,
+	// Per-branch Preview URLs (`<branch>-convex-better-auth-ui-svelte.<subdomain>.workers.dev`); set here
+	// so a production deploy cannot switch them off
+	"preview_urls": true,
+	// `wrangler preview`, the Previews' deploy command, requires this block, even empty. The app has no
+	// bindings or variables besides the assets, which stay at the top level.
+	"previews": {},
 	"observability": {
 		"enabled": true
 	}
