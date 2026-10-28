@@ -1,0 +1,23 @@
+// The Cloudflare Workers deployment of this demo, built by Workers Builds (see ../cloudflare.sh).
+// The build uses @sveltejs/adapter-cloudflare only there, when WORKERS_CI is set (vite.config.ts).
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "convex-better-auth-ui-svelte",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_date": "2026-10-28",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"workers_dev": true,
+	// Per-branch Preview URLs (`<branch>-convex-better-auth-ui-svelte.<subdomain>.workers.dev`); set here
+	// so a production deploy cannot switch them off
+	"preview_urls": true,
+	// `wrangler preview`, the Previews' deploy command, requires this block, even empty. The app has no
+	// bindings or variables besides the assets, which stay at the top level.
+	"previews": {},
+	"observability": {
+		"enabled": true
+	}
+}
