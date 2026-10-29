@@ -14,13 +14,26 @@ const SESSION = { session: { id: 'session-1' }, user: { id: 'user-1' } };
 const fetch = vi.fn<typeof globalThis.fetch>();
 const resolve = vi.fn(async () => new Response('page'));
 
-const request = (path: string, cookie?: string) => {
+/** What a browser sends when a person opens a page. */
+const NAVIGATION = { 'sec-fetch-mode': 'navigate', accept: 'text/html,application/xhtml+xml' };
+
+const request = (
+	path: string,
+	cookie?: string,
+	{
+		headers = NAVIGATION,
+		method = 'GET',
+		isDataRequest = false
+	}: { headers?: Record<string, string>; method?: string; isDataRequest?: boolean } = {}
+) => {
 	const url = new URL(path, 'https://app.example');
 	const event = {
 		url,
-		request: new Request(url, { headers: cookie ? { cookie } : {} }),
+		request: new Request(url, { method, headers: { ...headers, ...(cookie ? { cookie } : {}) } }),
 		cookies: { get: () => undefined },
-		fetch
+		fetch,
+		isDataRequest,
+		isRemoteRequest: false
 	};
 	return requireAuth({ event, resolve } as unknown as Parameters<typeof requireAuth>[0]);
 };
@@ -87,5 +100,66 @@ describe('protected routes', () => {
 			status: 307,
 			location: '/signin?redirectTo=%2Fadmin%3Ftab%3Dusers'
 		});
+	});
+});
+
+/* A script, an image or a `fetch` can't show the sign-in page: given its HTML, a script throws
+   `SyntaxError: Unexpected token '<'`. Only a request that shows its answer as a page, or one
+   SvelteKit's router follows, is sent to sign-in. */
+describe('protected routes, signed out, for a request that is not a page', () => {
+	const SCRIPT = '/admin/widget.js';
+
+	it('answer a script request with 401, not the sign-in page', async () => {
+		const response = await request(SCRIPT, undefined, {
+			headers: { 'sec-fetch-mode': 'no-cors', 'sec-fetch-dest': 'script', accept: '*/*' }
+		});
+		expect(response.status).toBe(401);
+		expect(resolve).not.toHaveBeenCalled();
+	});
+
+	it('answer a fetch with 401 even when it asks for HTML', async () => {
+		const response = await request('/admin', undefined, {
+			headers: { 'sec-fetch-mode': 'cors', accept: 'text/html' }
+		});
+		expect(response.status).toBe(401);
+	});
+
+	it('without Fetch Metadata, redirect a request for HTML and answer any other with 401', async () => {
+		const page = await redirectOf(
+			request('/admin', undefined, { headers: { accept: 'text/html,*/*;q=0.8' } })
+		);
+		expect(page).toMatchObject({ status: 307 });
+		const script = await request(SCRIPT, undefined, { headers: { accept: '*/*' } });
+		expect(script.status).toBe(401);
+	});
+
+	/* SvelteKit answers a redirect thrown for its client's page data or an enhanced form action
+	   with JSON its router follows; a 401 there would end on an error page instead of sign-in. */
+	it("still redirect SvelteKit's page data and form action requests", async () => {
+		const data = await redirectOf(
+			request('/admin/__data.json', undefined, {
+				headers: { 'sec-fetch-mode': 'cors', accept: '*/*' },
+				isDataRequest: true
+			})
+		);
+		expect(data).toMatchObject({ status: 307 });
+		const action = await redirectOf(
+			request('/admin', undefined, {
+				method: 'POST',
+				headers: {
+					'sec-fetch-mode': 'cors',
+					accept: 'application/json',
+					'x-sveltekit-action': 'true'
+				}
+			})
+		);
+		expect(action).toMatchObject({ status: 307 });
+	});
+
+	it('let a script request with a session cookie through', async () => {
+		const response = await request(SCRIPT, VALID_COOKIE, {
+			headers: { 'sec-fetch-mode': 'no-cors', accept: '*/*' }
+		});
+		expect(await response.text()).toBe('page');
 	});
 });
