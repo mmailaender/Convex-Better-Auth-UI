@@ -76,7 +76,7 @@
 
 <div class="flex flex-col gap-8">
 	<div class="flex flex-col">
-		<label class="label" for=" email">Email</label>
+		<label class="label" for="email">Email</label>
 		<input
 			id="email"
 			name="email"
