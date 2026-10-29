@@ -1,7 +1,7 @@
 'use client';
 
 // React
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 // Primitives
 import { toast } from 'sonner';
@@ -33,6 +33,17 @@ export const EmailStep = ({
 	const checkEmailAvailabilityAndValidity = useAction(
 		api.users.actions.checkEmailAvailabilityAndValidity
 	);
+
+	// The server renders this field, so someone can type into it before the page hydrates.
+	// Hydration keeps that text in the field but not in `email`, and React's next render would
+	// reset the field to `email`. Take the text into state once mounted, before anything paints.
+	const emailInput = useRef<HTMLInputElement>(null);
+	useLayoutEffect(() => {
+		const typed = emailInput.current?.value;
+		if (typed && typed !== email) onEmailChange(typed);
+		// Only on mount: from then on, typing reaches `email` through `onChange`
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const getSingleMethodButtonText = () => {
 		if (availableMethods.length === 1) {
@@ -82,6 +93,7 @@ export const EmailStep = ({
 					Email
 				</label>
 				<input
+					ref={emailInput}
 					id="email"
 					name="email"
 					type="email"
