@@ -1,14 +1,20 @@
 import { expect, test, vi } from 'vitest';
 import { render } from 'svelte/server';
+import type { getAuthContext } from '#lib/auth/context.svelte.js';
 import UserButton from './UserButton.svelte';
 
 /* The server render, what a page shows before it hydrates: a press then reaches no handler
    and is lost, so the account button and "Sign in" are marked not ready (WaitsForHydration). */
 const session = vi.hoisted(() => ({ signedIn: true }));
 
-vi.mock('#lib/auth/context.svelte.js', async () => {
+vi.mock(import('#lib/auth/context.svelte.js'), async () => {
 	const { anyApi } = await import('convex/server');
-	return { getAuthContext: () => ({ api: anyApi, authClient: {}, authConstants: {} }) };
+	return {
+		getAuthContext: () =>
+			({ api: anyApi, authClient: {}, authConstants: {} }) as unknown as ReturnType<
+				typeof getAuthContext
+			>
+	};
 });
 
 vi.mock('@mmailaender/convex-better-auth-svelte/svelte', () => ({

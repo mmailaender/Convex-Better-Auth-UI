@@ -4311,6 +4311,26 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "users/utils/user.constants.ts",
+					"relativePath": "src/lib/users/utils/user.constants.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "users/utils/userProfile.ts",
+					"relativePath": "src/lib/users/utils/userProfile.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "users/ui/Accounts.svelte",
 					"relativePath": "src/lib/users/ui/Accounts.svelte",
 					"_imports_": [
@@ -4839,30 +4859,19 @@
 				},
 				{
 					"type": "lib",
-					"role": "file",
-					"path": "users/utils/user.constants.ts",
-					"relativePath": "src/lib/users/utils/user.constants.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "lib",
-					"role": "file",
-					"path": "users/utils/userProfile.ts",
-					"relativePath": "src/lib/users/utils/userProfile.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "lib",
 					"role": "test",
 					"path": "users/ui/UserButton.test.ts",
 					"relativePath": "src/lib/users/ui/UserButton.test.ts",
 					"_imports_": [
+						{
+							"import": "#lib/auth/context.svelte.js",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/context.svelte.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "./UserButton.svelte",
 							"item": "users/lib",
@@ -4873,7 +4882,9 @@
 							"meta": {}
 						}
 					],
-					"registryDependencies": [],
+					"registryDependencies": [
+						"auth/lib"
+					],
 					"dependencies": [
 						{
 							"ecosystem": "js",
@@ -5073,16 +5084,6 @@
 							"meta": {}
 						}
 					],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "lib",
-					"role": "file",
-					"path": "organizations/utils/organization.constants.ts",
-					"relativePath": "src/lib/organizations/utils/organization.constants.ts",
-					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5858,10 +5859,29 @@
 				},
 				{
 					"type": "lib",
+					"role": "file",
+					"path": "organizations/utils/organization.constants.ts",
+					"relativePath": "src/lib/organizations/utils/organization.constants.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
 					"role": "test",
 					"path": "organizations/ui/OrganizationSwitcher.test.ts",
 					"relativePath": "src/lib/organizations/ui/OrganizationSwitcher.test.ts",
 					"_imports_": [
+						{
+							"import": "#lib/auth/context.svelte.js",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/context.svelte.ts"
+							},
+							"meta": {}
+						},
 						{
 							"import": "./OrganizationSwitcher.svelte",
 							"item": "organizations/lib",
@@ -5872,7 +5892,9 @@
 							"meta": {}
 						}
 					],
-					"registryDependencies": [],
+					"registryDependencies": [
+						"auth/lib"
+					],
 					"dependencies": [
 						{
 							"ecosystem": "js",

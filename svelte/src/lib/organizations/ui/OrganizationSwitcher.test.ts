@@ -2,6 +2,7 @@ import { expect, test, vi } from 'vitest';
 import { render } from 'svelte/server';
 import { getFunctionName } from 'convex/server';
 import type { FunctionReference } from 'convex/server';
+import type { getAuthContext } from '#lib/auth/context.svelte.js';
 import OrganizationSwitcher from './OrganizationSwitcher.svelte';
 
 /* The server render, what a page shows before it hydrates: a press then reaches no handler
@@ -10,10 +11,15 @@ import OrganizationSwitcher from './OrganizationSwitcher.svelte';
 const organization = { id: 'org-1', name: 'Analytical Engines', slug: 'analytical-engines' };
 const data = vi.hoisted(() => ({ organizations: [] as unknown[] }));
 
-vi.mock('#lib/auth/context.svelte.js', async () => {
+vi.mock(import('#lib/auth/context.svelte.js'), async () => {
 	const { anyApi } = await import('convex/server');
 	return {
-		getAuthContext: () => ({ api: anyApi, authClient: {}, authConstants: { organizations: true } })
+		getAuthContext: () =>
+			({
+				api: anyApi,
+				authClient: {},
+				authConstants: { organizations: true }
+			}) as unknown as ReturnType<typeof getAuthContext>
 	};
 });
 
