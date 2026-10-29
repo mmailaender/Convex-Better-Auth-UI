@@ -4067,6 +4067,47 @@
 				},
 				{
 					"type": "lib",
+					"role": "test",
+					"path": "auth/ui/EmailStep.test.ts",
+					"relativePath": "src/lib/auth/ui/EmailStep.test.ts",
+					"_imports_": [
+						{
+							"import": "#lib/auth/context.svelte.js",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/context.svelte.ts"
+							},
+							"meta": {}
+						},
+						{
+							"import": "./EmailStep.svelte",
+							"item": "auth/lib",
+							"file": {
+								"type": "lib",
+								"path": "auth/ui/EmailStep.svelte"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex",
+							"version": "^1.46.0"
+						}
+					],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
+				},
+				{
+					"type": "lib",
 					"role": "file",
 					"path": "auth/utils/safeRedirect.ts",
 					"relativePath": "src/lib/auth/utils/safeRedirect.ts",
@@ -4308,26 +4349,6 @@
 				}
 			],
 			"files": [
-				{
-					"type": "lib",
-					"role": "file",
-					"path": "users/utils/user.constants.ts",
-					"relativePath": "src/lib/users/utils/user.constants.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
-				{
-					"type": "lib",
-					"role": "file",
-					"path": "users/utils/userProfile.ts",
-					"relativePath": "src/lib/users/utils/userProfile.ts",
-					"_imports_": [],
-					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
-				},
 				{
 					"type": "lib",
 					"role": "file",
@@ -4853,6 +4874,26 @@
 							"meta": {}
 						}
 					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "users/utils/user.constants.ts",
+					"relativePath": "src/lib/users/utils/user.constants.ts",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "users/utils/userProfile.ts",
+					"relativePath": "src/lib/users/utils/userProfile.ts",
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []

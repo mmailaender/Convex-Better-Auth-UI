@@ -169,7 +169,9 @@ export default defineConfig({
 								]
 							},
 							{
-								path: 'ui'
+								path: 'ui',
+								// Every file but tests, which install only with `--with test`
+								files: [{ path: '**/!(*.test).*' }, { path: 'EmailStep.test.ts', role: 'test' }]
 							},
 							{
 								path: 'utils',
