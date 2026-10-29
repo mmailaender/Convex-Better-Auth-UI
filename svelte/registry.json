@@ -623,6 +623,16 @@
 				{
 					"type": "lib",
 					"role": "file",
+					"path": "primitives/ui/WaitsForHydration.svelte",
+					"relativePath": "src/lib/primitives/ui/WaitsForHydration.svelte",
+					"_imports_": [],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
 					"path": "primitives/ui/avatar/avatar-fallback.svelte",
 					"relativePath": "src/lib/primitives/ui/avatar/avatar-fallback.svelte",
 					"_imports_": [
@@ -4621,6 +4631,15 @@
 							"meta": {}
 						},
 						{
+							"import": "#lib/primitives/ui/WaitsForHydration.svelte",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/WaitsForHydration.svelte"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/auth/ui/SignIn.svelte",
 							"item": "auth/lib",
 							"file": {
@@ -4837,6 +4856,38 @@
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "test",
+					"path": "users/ui/UserButton.test.ts",
+					"relativePath": "src/lib/users/ui/UserButton.test.ts",
+					"_imports_": [
+						{
+							"import": "./UserButton.svelte",
+							"item": "users/lib",
+							"file": {
+								"type": "lib",
+								"path": "users/ui/UserButton.svelte"
+							},
+							"meta": {}
+						}
+					],
+					"registryDependencies": [],
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex",
+							"version": "^1.46.0"
+						}
+					],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
 				}
 			]
 		},
@@ -5022,6 +5073,16 @@
 							"meta": {}
 						}
 					],
+					"registryDependencies": [],
+					"dependencies": [],
+					"devDependencies": []
+				},
+				{
+					"type": "lib",
+					"role": "file",
+					"path": "organizations/utils/organization.constants.ts",
+					"relativePath": "src/lib/organizations/utils/organization.constants.ts",
+					"_imports_": [],
 					"registryDependencies": [],
 					"dependencies": [],
 					"devDependencies": []
@@ -5728,6 +5789,15 @@
 							"meta": {}
 						},
 						{
+							"import": "#lib/primitives/ui/WaitsForHydration.svelte",
+							"item": "primitives",
+							"file": {
+								"type": "lib",
+								"path": "primitives/ui/WaitsForHydration.svelte"
+							},
+							"meta": {}
+						},
+						{
 							"import": "#lib/organizations/ui/CreateOrganization.svelte",
 							"item": "organizations/lib",
 							"file": {
@@ -5788,13 +5858,35 @@
 				},
 				{
 					"type": "lib",
-					"role": "file",
-					"path": "organizations/utils/organization.constants.ts",
-					"relativePath": "src/lib/organizations/utils/organization.constants.ts",
-					"_imports_": [],
+					"role": "test",
+					"path": "organizations/ui/OrganizationSwitcher.test.ts",
+					"relativePath": "src/lib/organizations/ui/OrganizationSwitcher.test.ts",
+					"_imports_": [
+						{
+							"import": "./OrganizationSwitcher.svelte",
+							"item": "organizations/lib",
+							"file": {
+								"type": "lib",
+								"path": "organizations/ui/OrganizationSwitcher.svelte"
+							},
+							"meta": {}
+						}
+					],
 					"registryDependencies": [],
-					"dependencies": [],
-					"devDependencies": []
+					"dependencies": [
+						{
+							"ecosystem": "js",
+							"name": "convex",
+							"version": "^1.46.0"
+						}
+					],
+					"devDependencies": [
+						{
+							"ecosystem": "js",
+							"name": "vitest",
+							"version": "^5.0.3"
+						}
+					]
 				}
 			]
 		},

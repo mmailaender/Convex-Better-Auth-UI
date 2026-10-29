@@ -3,6 +3,7 @@
 	import * as Popover from '#lib/primitives/ui/popover/index.js';
 	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import WaitsForHydration from '#lib/primitives/ui/WaitsForHydration.svelte';
 	// Icons
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	// Components
@@ -98,21 +99,23 @@
 			offset: { mainAxis: 8, crossAxis: 0 }
 		}}
 	>
-		<Popover.Trigger class="flex size-10 items-center justify-center rounded-full">
-			<Avatar.Root
-				class="ring-surface-100-900 size-9 ring-0 duration-200 ease-out ring-inset hover:ring-4"
-				onStatusChange={(details) => (avatarStatus = details.status)}
-			>
-				<Avatar.Image src={activeUser?.image} alt={activeUser?.name} />
-				<Avatar.Fallback>
-					{#if avatarStatus === 'loading'}
-						<div class="placeholder-circle size-full animate-pulse"></div>
-					{:else}
-						<Avatar.Marble name={activeUser?.name} />
-					{/if}
-				</Avatar.Fallback>
-			</Avatar.Root>
-		</Popover.Trigger>
+		<WaitsForHydration>
+			<Popover.Trigger class="flex size-10 items-center justify-center rounded-full">
+				<Avatar.Root
+					class="ring-surface-100-900 size-9 ring-0 duration-200 ease-out ring-inset hover:ring-4"
+					onStatusChange={(details) => (avatarStatus = details.status)}
+				>
+					<Avatar.Image src={activeUser?.image} alt={activeUser?.name} />
+					<Avatar.Fallback>
+						{#if avatarStatus === 'loading'}
+							<div class="placeholder-circle size-full animate-pulse"></div>
+						{:else}
+							<Avatar.Marble name={activeUser?.name} />
+						{/if}
+					</Avatar.Fallback>
+				</Avatar.Root>
+			</Popover.Trigger>
+		</WaitsForHydration>
 		<Popover.Content>
 			<div class="flex flex-col gap-1 p-0">
 				<button
@@ -147,9 +150,11 @@
 {:else if signInTrigger}
 	{@render signInTrigger({ open: () => (signInDialogOpen = true) })}
 {:else}
-	<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
-		Sign in
-	</button>
+	<WaitsForHydration>
+		<button class="btn preset-filled-primary-500" onclick={() => (signInDialogOpen = true)}>
+			Sign in
+		</button>
+	</WaitsForHydration>
 {/if}
 <!-- SignIn Dialog - Outside of auth wrappers to prevent disappearing during registration -->
 <Dialog.Root
