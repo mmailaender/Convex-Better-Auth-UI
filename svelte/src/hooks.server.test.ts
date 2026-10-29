@@ -23,8 +23,14 @@ const request = (
 	{
 		headers = NAVIGATION,
 		method = 'GET',
-		isDataRequest = false
-	}: { headers?: Record<string, string>; method?: string; isDataRequest?: boolean } = {}
+		isDataRequest = false,
+		isRemoteRequest = false
+	}: {
+		headers?: Record<string, string>;
+		method?: string;
+		isDataRequest?: boolean;
+		isRemoteRequest?: boolean;
+	} = {}
 ) => {
 	const url = new URL(path, 'https://app.example');
 	const event = {
@@ -33,7 +39,7 @@ const request = (
 		cookies: { get: () => undefined },
 		fetch,
 		isDataRequest,
-		isRemoteRequest: false
+		isRemoteRequest
 	};
 	return requireAuth({ event, resolve } as unknown as Parameters<typeof requireAuth>[0]);
 };
@@ -154,6 +160,16 @@ describe('protected routes, signed out, for a request that is not a page', () =>
 			})
 		);
 		expect(action).toMatchObject({ status: 307 });
+	});
+
+	/* A remote function's client ignores a redirect thrown in `handle` and resolves to nothing
+	   (`remote_request`), so it gets the 401 and fails visibly instead. */
+	it('answer a remote function request with 401', async () => {
+		const response = await request('/_app/remote/abc/query', undefined, {
+			headers: { 'sec-fetch-mode': 'cors', accept: '*/*' },
+			isRemoteRequest: true
+		});
+		expect(response.status).toBe(401);
 	});
 
 	it('let a script request with a session cookie through', async () => {

@@ -33,12 +33,14 @@ const withRedirect = (to: string, event: Parameters<Handle>[0]['event']) =>
 
 /**
  * Whether a redirect to the sign-in page reaches a person: a page navigation, or one of
- * SvelteKit's own client requests (page data, a remote function, an enhanced form action),
- * whose thrown redirect SvelteKit answers with JSON its router follows. A script, an image or a
- * `fetch` would receive the sign-in page's HTML as its content instead.
+ * SvelteKit's own client requests for page data or an enhanced form action, whose thrown
+ * redirect SvelteKit answers with JSON its router follows. A script, an image or a `fetch` would
+ * receive the sign-in page's HTML as its content instead. A remote function is not among them:
+ * its client ignores a redirect thrown here and resolves to nothing (SvelteKit 3.0.1,
+ * `remote_request`), so it gets the 401 and fails visibly.
  */
 const followsSignInRedirect = (event: Parameters<Handle>[0]['event']) => {
-	if (event.isDataRequest || event.isRemoteRequest) return true;
+	if (event.isDataRequest) return true;
 	const { headers } = event.request;
 	if (headers.get('x-sveltekit-action') === 'true') return true;
 	const mode = headers.get('sec-fetch-mode');
