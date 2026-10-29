@@ -204,7 +204,9 @@ export default defineConfig({
 				type: 'lib',
 				files: [
 					{
-						path: 'src/lib/users'
+						path: 'src/lib/users',
+						// Every file but tests, which install only with `--with test`
+						files: [{ path: '**/!(*.test).*' }, { path: 'ui/UserButton.test.ts', role: 'test' }]
 					}
 				]
 			},
@@ -217,7 +219,12 @@ export default defineConfig({
 				type: 'lib',
 				files: [
 					{
-						path: 'src/lib/organizations'
+						path: 'src/lib/organizations',
+						// Every file but tests, which install only with `--with test`
+						files: [
+							{ path: '**/!(*.test).*' },
+							{ path: 'ui/OrganizationSwitcher.test.ts', role: 'test' }
+						]
 					}
 				]
 			},

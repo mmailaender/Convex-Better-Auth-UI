@@ -8,6 +8,7 @@
 	import * as Popover from '#lib/primitives/ui/popover/index.js';
 	import * as Dialog from '#lib/primitives/ui/dialog/index.js';
 	import * as Avatar from '#lib/primitives/ui/avatar/index.js';
+	import WaitsForHydration from '#lib/primitives/ui/WaitsForHydration.svelte';
 	// Icons
 	import Building2Icon from '@lucide/svelte/icons/building-2';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
@@ -247,10 +248,12 @@
 {:else if organizationList && organizationList.length === 0}
 	<!-- Gate 4: No organizations - show create organization modal -->
 	<Dialog.Root bind:open={createOrganizationDialogOpen}>
-		<Dialog.Trigger class="btn preset-tonal flex items-center gap-2">
-			<PlusIcon class="size-4" />
-			<span>Create Organization</span>
-		</Dialog.Trigger>
+		<WaitsForHydration>
+			<Dialog.Trigger class="btn preset-tonal flex items-center gap-2">
+				<PlusIcon class="size-4" />
+				<span>Create Organization</span>
+			</Dialog.Trigger>
+		</WaitsForHydration>
 		<Dialog.Content class="max-w-md">
 			<CreateOrganization onSuccessfulCreate={closeCreateOrganization} />
 			<Dialog.CloseX />
@@ -259,26 +262,28 @@
 {:else if organizationList}
 	<!-- Gate 5: Has organizations - show the switcher -->
 	<Popover.Root bind:open={switcherPopoverOpen} positioning={{ placement: popoverPlacement }}>
-		<Popover.Trigger
-			class="border-surface-200-800 rounded-container flex w-32 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out sm:w-40"
-		>
-			<div class="flex w-full max-w-64 items-center gap-2 overflow-hidden sm:gap-3">
-				<Avatar.Root class="rounded-container size-8 shrink-0">
-					<Avatar.Image
-						src={activeOrganization?.logo}
-						alt={activeOrganization?.name}
-						class="rounded-container"
-					/>
-					<Avatar.Fallback class="rounded-container">
-						<Building2Icon class="size-5" />
-					</Avatar.Fallback>
-				</Avatar.Root>
-				<span class="text-surface-700-300 truncate text-sm">
-					{activeOrganization?.name}
-				</span>
-			</div>
-			<ChevronsUpDownIcon class="size-4 opacity-40" />
-		</Popover.Trigger>
+		<WaitsForHydration>
+			<Popover.Trigger
+				class="border-surface-200-800 rounded-container flex w-32 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out sm:w-40"
+			>
+				<div class="flex w-full max-w-64 items-center gap-2 overflow-hidden sm:gap-3">
+					<Avatar.Root class="rounded-container size-8 shrink-0">
+						<Avatar.Image
+							src={activeOrganization?.logo}
+							alt={activeOrganization?.name}
+							class="rounded-container"
+						/>
+						<Avatar.Fallback class="rounded-container">
+							<Building2Icon class="size-5" />
+						</Avatar.Fallback>
+					</Avatar.Root>
+					<span class="text-surface-700-300 truncate text-sm">
+						{activeOrganization?.name}
+					</span>
+				</div>
+				<ChevronsUpDownIcon class="size-4 opacity-40" />
+			</Popover.Trigger>
+		</WaitsForHydration>
 		<Popover.Content>
 			<div class="flex flex-col gap-1">
 				<div role="list" class="bg-surface-50-950 rounded-container flex flex-col overflow-hidden">
