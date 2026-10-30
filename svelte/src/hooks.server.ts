@@ -32,6 +32,24 @@ const withRedirect = (to: string, event: Parameters<Handle>[0]['event']) =>
 	`${to}?redirectTo=${encodeURIComponent(event.url.pathname + event.url.search)}`;
 
 /**
+ * Whether a redirect to the sign-in page reaches a person: a page navigation, or one of
+ * SvelteKit's own client requests for page data or an enhanced form action, whose thrown
+ * redirect SvelteKit answers with JSON its router follows. A script, an image or a `fetch` would
+ * receive the sign-in page's HTML as its content instead. A remote function is not among them:
+ * its client ignores a redirect thrown here and resolves to nothing (SvelteKit 3.0.1,
+ * `remote_request`), so it gets the 401 and fails visibly.
+ */
+const followsSignInRedirect = (event: Parameters<Handle>[0]['event']) => {
+	if (event.isDataRequest) return true;
+	const { headers } = event.request;
+	if (headers.get('x-sveltekit-action') === 'true') return true;
+	const mode = headers.get('sec-fetch-mode');
+	if (mode) return mode === 'navigate';
+	// a client without Fetch Metadata: a navigation is the request that asks for HTML
+	return headers.get('accept')?.includes('text/html') ?? false;
+};
+
+/**
  * Whether Better Auth accepts the session of this request's cookies, asked through the app's own
  * auth route. A session cookie alone proves nothing: `getSessionCookie()` also finds one Better
  * Auth no longer reads, such as `better-auth.session_token` once the cookies became `__Secure-`.
@@ -77,6 +95,13 @@ export const requireAuth: Handle = async ({ event, resolve }) => {
 	// Optimistic, as Better Auth recommends: the cookie's presence is enough here. Pages check the
 	// session itself; /admin sends a signed-out reader to /signin, and the header offers sign-in.
 	if (!sessionCookie) {
+		// 401: the request has no credentials; signing in, not other rights, would answer it.
+		if (!followsSignInRedirect(event)) {
+			return new Response('Sign-in required', {
+				status: 401,
+				headers: { 'content-type': 'text/plain; charset=utf-8' }
+			});
+		}
 		throw redirect(307, withRedirect('/signin', event));
 	}
 
