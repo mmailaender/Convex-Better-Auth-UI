@@ -30,6 +30,23 @@ const withRedirect = (to: string, request: NextRequest) => {
 };
 
 /**
+ * Whether a redirect to the sign-in page reaches a person: a page navigation, or the App Router's
+ * own request for a page on a client navigation or a prefetch, which follows the redirect and
+ * shows the page it lands on. Next.js hides that request's `RSC` header from the proxy; the
+ * `Next-Url` it also sends stays, and a server action, which sends one too, is told apart by its
+ * `Next-Action`. A script, an image, a `fetch` to a route handler or a server action would receive
+ * the sign-in page's HTML as its content instead.
+ */
+const followsSignInRedirect = (request: NextRequest) => {
+	const { headers } = request;
+	if (headers.has('next-url') && !headers.has('next-action')) return true;
+	const mode = headers.get('sec-fetch-mode');
+	if (mode) return mode === 'navigate';
+	// a client without Fetch Metadata: a navigation is the request that asks for HTML
+	return headers.get('accept')?.includes('text/html') ?? false;
+};
+
+/**
  * Whether Better Auth accepts the session of this request's cookies, asked through the app's own
  * auth route. A session cookie alone proves nothing: `getSessionCookie()` also finds one Better
  * Auth no longer reads, such as `better-auth.session_token` once the cookies became `__Secure-`.
@@ -71,6 +88,13 @@ export async function proxy(request: NextRequest) {
 	// Optimistic, as Better Auth recommends: the cookie's presence is enough here. Pages check the
 	// session itself; /admin sends a signed-out reader to /signin, and the header offers sign-in.
 	if (!sessionCookie) {
+		// 401: the request has no credentials; signing in, not other rights, would answer it.
+		if (!followsSignInRedirect(request)) {
+			return new NextResponse('Sign-in required', {
+				status: 401,
+				headers: { 'content-type': 'text/plain; charset=utf-8' }
+			});
+		}
 		return NextResponse.redirect(new URL(withRedirect('/signin', request), request.url));
 	}
 
