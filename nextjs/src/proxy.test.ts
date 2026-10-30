@@ -23,8 +23,25 @@ const VALID_COOKIE = '__Secure-better-auth.session_token=valid.signature';
 const SESSION = { session: { id: 'session-1' }, user: { id: 'user-1' } };
 const ORIGIN = 'https://app.example';
 
-const request = (path: string, cookie?: string) =>
-	proxy(new NextRequest(new URL(path, ORIGIN), { headers: cookie ? { cookie } : {} }));
+// The headers a browser sends with a page navigation
+const NAVIGATION = {
+	'sec-fetch-mode': 'navigate',
+	'sec-fetch-dest': 'document',
+	accept: 'text/html'
+};
+
+const request = (
+	path: string,
+	cookie?: string,
+	headers: Record<string, string> = NAVIGATION,
+	method = 'GET'
+) =>
+	proxy(
+		new NextRequest(new URL(path, ORIGIN), {
+			method,
+			headers: { ...headers, ...(cookie ? { cookie } : {}) }
+		})
+	);
 
 /** Where the proxy redirects to, or `undefined` when it lets the request through. */
 const redirectOf = (response: Response) => response.headers.get('location') ?? undefined;
@@ -84,5 +101,56 @@ describe('protected routes', () => {
 			redirectOf(await request('/admin?tab=users')),
 			`${ORIGIN}/signin?redirectTo=%2Fadmin%3Ftab%3Dusers`
 		);
+	});
+});
+
+describe('protected routes, signed out', () => {
+	const SIGN_IN = `${ORIGIN}/signin?redirectTo=%2Fadmin`;
+
+	it('answer a script with 401, not the sign-in page as its source', async () => {
+		const response = await request('/admin', undefined, {
+			'sec-fetch-mode': 'no-cors',
+			'sec-fetch-dest': 'script',
+			accept: '*/*'
+		});
+		assert.equal(response.status, 401);
+		assert.equal(redirectOf(response), undefined);
+		assert.equal(response.headers.get('content-type'), 'text/plain; charset=utf-8');
+	});
+
+	it('answer a fetch with 401, even one that asks for HTML', async () => {
+		const response = await request('/admin', undefined, {
+			'sec-fetch-mode': 'cors',
+			'sec-fetch-dest': 'empty',
+			accept: 'text/html'
+		});
+		assert.equal(response.status, 401);
+	});
+
+	// What reaches the proxy of the App Router's own requests: Next.js strips `RSC` and the other
+	// router headers before the proxy runs (next/dist/server/web/adapter.js, FLIGHT_HEADERS).
+	const ROUTER = { 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'next-url': '/' };
+
+	it('answer a server action with 401: its client cannot follow a redirect', async () => {
+		const action = { ...ROUTER, accept: 'text/x-component', 'next-action': 'action-id' };
+		assert.equal((await request('/admin', undefined, action, 'POST')).status, 401);
+	});
+
+	it('redirect the App Router navigation and prefetch, which follow it', async () => {
+		assert.equal(redirectOf(await request('/admin', undefined, ROUTER)), SIGN_IN);
+	});
+
+	it('without Fetch Metadata, redirect a request for HTML and answer others with 401', async () => {
+		assert.equal(redirectOf(await request('/admin', undefined, { accept: 'text/html' })), SIGN_IN);
+		assert.equal((await request('/admin', undefined, { accept: '*/*' })).status, 401);
+	});
+
+	it('let a script with a session cookie through', async () => {
+		const response = await request('/admin', STALE_COOKIE, {
+			'sec-fetch-mode': 'no-cors',
+			'sec-fetch-dest': 'script'
+		});
+		assert.equal(response.status, 200);
+		assert.equal(redirectOf(response), undefined);
 	});
 });
