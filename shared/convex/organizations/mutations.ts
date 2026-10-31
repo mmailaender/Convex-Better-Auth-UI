@@ -1,5 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { internalMutation, mutation } from '../_generated/server';
+import { components } from '../_generated/api';
 import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 import { createOrganizationModel, updateOrganizationProfileModel } from '../model/organizations';
@@ -65,11 +66,10 @@ export const setActiveOrganization = mutation({
 					headers: await authComponent.getHeaders(ctx)
 				});
 
-				await auth.api.updateUser({
-					body: {
-						activeOrganizationId: args.organizationId
-					},
-					headers: await authComponent.getHeaders(ctx)
+				// Server-only field (`input: false`), written once Better Auth has checked the membership
+				await ctx.runMutation(components.betterAuth.user.updateUser, {
+					userId: user._id,
+					data: { activeOrganizationId: args.organizationId }
 				});
 			} catch (error) {
 				if (error instanceof APIError) {
@@ -107,10 +107,9 @@ export const setActiveOrganization = mutation({
 						},
 						headers: await authComponent.getHeaders(ctx)
 					});
-					await auth.api.updateUser({
-						body: {
-							activeOrganizationId: betterAuthOrg.id
-						}
+					await ctx.runMutation(components.betterAuth.user.updateUser, {
+						userId: user._id,
+						data: { activeOrganizationId: betterAuthOrg.id }
 					});
 				}
 			} catch (error) {
@@ -174,12 +173,10 @@ export const deleteOrganization = mutation({
 			headers: await authComponent.getHeaders(ctx)
 		});
 
-		// Update user's active organization in the database
-		await auth.api.updateUser({
-			body: {
-				activeOrganizationId: nextActiveOrg.id
-			},
-			headers: await authComponent.getHeaders(ctx)
+		// Update user's active organization in the database (server-only field)
+		await ctx.runMutation(components.betterAuth.user.updateUser, {
+			userId: user._id,
+			data: { activeOrganizationId: nextActiveOrg.id }
 		});
 	}
 });

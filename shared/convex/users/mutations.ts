@@ -1,4 +1,5 @@
 import { mutation } from '../_generated/server';
+import { components } from '../_generated/api';
 import { authComponent, createAuth } from '../auth';
 
 import { ConvexError, v } from 'convex/values';
@@ -67,10 +68,10 @@ export const updateAvatar = mutation({
 			throw new ConvexError('Failed to get image URL');
 		}
 
-		const auth = createAuth(ctx);
-		await auth.api.updateUser({
-			body: { image: imageUrl, imageId: args.storageId },
-			headers: await authComponent.getHeaders(ctx)
+		// `imageId` is server-only (`input: false`), so the avatar is written through the component
+		await ctx.runMutation(components.betterAuth.user.updateUser, {
+			userId: user._id,
+			data: { image: imageUrl, imageId: args.storageId, updatedAt: Date.now() }
 		});
 
 		return imageUrl;
