@@ -1,5 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { mutation } from '../../_generated/server';
+import { components } from '../../_generated/api';
 import { authComponent, createAuth } from '../../auth';
 import { APIError } from 'better-auth/api';
 
@@ -79,12 +80,10 @@ export const leaveOrganization = mutation({
 				headers: await authComponent.getHeaders(ctx)
 			});
 
-			// Update user's active organization in the database
-			await auth.api.updateUser({
-				body: {
-					activeOrganizationId: nextActiveOrg.id
-				},
-				headers: await authComponent.getHeaders(ctx)
+			// Update user's active organization in the database (server-only field)
+			await ctx.runMutation(components.betterAuth.user.updateUser, {
+				userId: user._id,
+				data: { activeOrganizationId: nextActiveOrg.id }
 			});
 
 			return true;

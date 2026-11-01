@@ -312,14 +312,20 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 		},
 
 		user: {
+			// Server-only (`input: false`): `/update-user` and sign-up refuse them. `imageId` names the
+			// storage file the server deletes when the avatar changes or the account is deleted, and
+			// authorization reads `activeOrganizationId`. The `users` and `organizations` mutations
+			// write them through the component after their own checks.
 			additionalFields: {
 				imageId: {
 					type: 'string',
-					required: false
+					required: false,
+					input: false
 				},
 				activeOrganizationId: {
 					type: 'string',
-					required: false
+					required: false,
+					input: false
 				}
 			},
 			deleteUser: {
@@ -400,10 +406,15 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 						organization({
 							schema: {
 								organization: {
+									// Server-only (`input: false`): `/organization/create` and `/organization/update`
+									// drop it. It names the storage file the server deletes when the logo changes or
+									// the organization is deleted; the `organizations` mutations write it through the
+									// component.
 									additionalFields: {
 										logoId: {
 											type: 'string',
-											required: false
+											required: false,
+											input: false
 										}
 									}
 								}

@@ -115,10 +115,17 @@ export const createOrganizationModel = async (
 				userId: args.userId,
 				name,
 				slug: uniqueSlug,
-				logo: imageUrl ?? undefined,
-				logoId
+				logo: imageUrl ?? undefined
 			}
 		});
+
+		// `logoId` is server-only (`input: false`): Better Auth drops it from the create body
+		if (logoId) {
+			await ctx.runMutation(components.betterAuth.organization.updateOrganization, {
+				organizationId: org!.id,
+				data: { logoId }
+			});
+		}
 
 		await ctx.runMutation(components.betterAuth.user.updateUser, {
 			userId: args.userId,
@@ -232,16 +239,18 @@ export const updateOrganizationProfileModel = async (
 			if (convexOrgToUpdate.logoId) {
 				await ctx.storage.delete(convexOrgToUpdate.logoId);
 
+				// Better Auth checks the caller may update the organization and clears the URL;
+				// `logoId` is server-only (`input: false`) and cleared through the component afterwards
 				await auth.api.updateOrganization({
 					body: {
-						data: {
-							// In a single BA update we clear both the raw storage id and the public URL
-							logoId: undefined,
-							logo: undefined
-						},
+						data: { logo: null },
 						organizationId: convexOrgToUpdate.id
 					},
 					headers: await authComponent.getHeaders(ctx)
+				});
+				await ctx.runMutation(components.betterAuth.organization.updateOrganization, {
+					organizationId: convexOrgToUpdate.id,
+					data: { logoId: null }
 				});
 			}
 		}
@@ -259,17 +268,18 @@ export const updateOrganizationProfileModel = async (
 				await ctx.storage.delete(convexOrgToUpdate.logoId);
 			}
 
-			// Persist both the raw storage id and the public URL in a single BA update.
-			// This avoids a second update later and keeps the two fields in sync.
+			// Better Auth checks the caller may update the organization and stores the URL;
+			// `logoId` is server-only (`input: false`) and written through the component afterwards
 			await auth.api.updateOrganization({
 				body: {
-					data: {
-						logoId: logoId,
-						logo: logoUrl
-					},
+					data: { logo: logoUrl },
 					organizationId: convexOrgToUpdate.id
 				},
 				headers: await authComponent.getHeaders(ctx)
+			});
+			await ctx.runMutation(components.betterAuth.organization.updateOrganization, {
+				organizationId: convexOrgToUpdate.id,
+				data: { logoId }
 			});
 		}
 	}

@@ -414,6 +414,9 @@ importers:
       concurrently:
         specifier: ^10.0.6
         version: 10.0.6
+      convex-test:
+        specifier: ^0.0.66
+        version: 0.0.66(convex@1.46.0(react@19.3.1))
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
@@ -3158,6 +3161,11 @@ packages:
     peerDependenciesMeta:
       '@sveltejs/kit':
         optional: true
+
+  convex-test@0.0.66:
+    resolution: {integrity: sha512-d70YxtlUqL6w37EmcxAYSQPRZ6lWF7PQ4q/KrbUrn6bfbxPG4eafLl5386UNrjCb8U1kX7mRCanrB4Bv8uB5Cg==}
+    peerDependencies:
+      convex: ^1.43.0
 
   convex@1.46.0:
     resolution: {integrity: sha512-dhBwDQTZDOhi5SUGAX17EWNehCdNq6/UFrSL0eLZuGfMkdsQbCVWVRZCzbZ5CF+/pgvoGxtApbEoTSipqL4JTw==}
@@ -8399,6 +8407,10 @@ snapshots:
       svelte: 5.57.2(@typescript-eslint/types@8.71.1)
     optionalDependencies:
       '@sveltejs/kit': 3.0.1(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.2(@typescript-eslint/types@8.71.1))(vite@8.3.4(@types/node@24.19.2)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(svelte@5.57.2(@typescript-eslint/types@8.71.1))(typescript@6.0.3)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.27.0)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
+
+  convex-test@0.0.66(convex@1.46.0(react@19.3.1)):
+    dependencies:
+      convex: 1.46.0(react@19.3.1)
 
   convex@1.46.0(react@19.3.1):
     dependencies:
