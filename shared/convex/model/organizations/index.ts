@@ -58,15 +58,14 @@ export const getUniqueOrganizationSlug = async (
  *   the organization in Better Auth.
  * - Persists a Convex-side organization record with the Better Auth `id` and
  *   the raw `logoId` for storage management.
- * - Updates the Convex user document (`users.activeOrganizationId`) to the
- *   newly created organization's id.
+ * - Makes the newly created organization the user's active organization, on the user
+ *   (`user.activeOrganizationId`) and on each of the user's sessions.
  * - Optionally sets the active organization for the Better Auth session (see below).
  *
  * Important note on `skipActiveOrganization`:
  * - When `skipActiveOrganization` is `true`, only the Better Auth session update
- *   (via `auth.api.setActiveOrganization`) is skipped. The Convex user document is
- *   still updated to reference the newly created organization in
- *   `users.activeOrganizationId`.
+ *   (via `auth.api.setActiveOrganization`) is skipped. The user and their existing
+ *   sessions still move to the newly created organization.
  * - This is an intentional workaround for the current limitation mentioned in the
  *   TODO that session-based active organization cannot be set during user creation.
  *
@@ -77,8 +76,8 @@ export const getUniqueOrganizationSlug = async (
  * @param args.slug - Desired organization slug (will be uniquified if necessary).
  * @param args.logoId - Optional Convex storage id for the organization logo.
  * @param args.skipActiveOrganization - If `true`, skip setting the active
- *   organization in the Better Auth session. The Convex user document is still
- *   updated.
+ *   organization in the Better Auth session. The user and their existing sessions
+ *   still move to the new organization.
  *
  * @returns The Better Auth organization id cast as `Id<'organizations'>`.
  *
@@ -127,11 +126,9 @@ export const createOrganizationModel = async (
 			});
 		}
 
-		await ctx.runMutation(components.betterAuth.user.updateUser, {
+		await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
 			userId: args.userId,
-			data: {
-				activeOrganizationId: org!.id
-			}
+			organizationId: org!.id
 		});
 	} catch (error) {
 		console.error('Unexpected error creating organization:', error);

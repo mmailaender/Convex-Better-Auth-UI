@@ -96,11 +96,16 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 				});
 			}
 		},
+		// The user's `activeOrganizationId` is the one source of the active organization; each session
+		// holds a copy for Better Auth's organization endpoints. A new session takes the user's. A
+		// session Better Auth switches itself (accepting an invitation, leaving or deleting the active
+		// organization) moves the user and their other sessions along. Clients can't write the
+		// session's copy: the organization plugin declares it `input: false`.
 		session: {
-			// Better Auth refreshes sessions it finds in Convex mutations with the normal 7 day expiry. It
-			// skips that for an admin impersonation (1 hour) only when the browser sends its
-			// `dont_remember` cookie, which Convex's bearer token doesn't carry, so keep the original expiry
 			onUpdate: async (ctx, newSession, oldSession) => {
+				// Better Auth refreshes sessions it finds in Convex mutations with the normal 7 day expiry. It
+				// skips that for an admin impersonation (1 hour) only when the browser sends its
+				// `dont_remember` cookie, which Convex's bearer token doesn't carry, so keep the original expiry
 				if (newSession.impersonatedBy && newSession.expiresAt > oldSession.expiresAt) {
 					await ctx.runMutation(components.betterAuth.adapter.updateOne, {
 						input: {
@@ -110,9 +115,19 @@ export const authComponent = createClient<DataModel, typeof authSchema>(componen
 						}
 					});
 				}
+				const organizationId = newSession.activeOrganizationId ?? null;
+				if (
+					AUTH_CONSTANTS.organizations &&
+					organizationId !== (oldSession.activeOrganizationId ?? null)
+				) {
+					await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
+						userId: newSession.userId,
+						organizationId
+					});
+				}
 			},
 			onCreate: async (ctx, session) => {
-				if (!session.activeOrganizationId && AUTH_CONSTANTS.organizations) {
+				if (AUTH_CONSTANTS.organizations) {
 					await ctx.runMutation(components.betterAuth.organization.setActiveOrganization, {
 						userId: session.userId,
 						sessionId: session._id
