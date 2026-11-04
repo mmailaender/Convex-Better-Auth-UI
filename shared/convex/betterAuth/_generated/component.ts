@@ -2267,6 +2267,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         null,
         Name
       >;
+      setUserActiveOrganization: FunctionReference<
+        "mutation",
+        "internal",
+        { organizationId: null | string; userId: string },
+        null,
+        Name
+      >;
       updateOrganization: FunctionReference<
         "mutation",
         "internal",

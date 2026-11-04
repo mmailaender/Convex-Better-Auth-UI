@@ -127,7 +127,8 @@
 
 		const { error } = await authClient.organization.updateMemberRole({
 			role: [newRole],
-			memberId
+			memberId,
+			organizationId: activeOrganization?.id
 		});
 		if (error) {
 			toast.error(error.statusText);

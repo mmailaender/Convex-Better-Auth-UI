@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { mutation } from './_generated/server';
+import { mutation, type MutationCtx } from './_generated/server';
 import { partial, withSystemFields } from 'convex-helpers/validators';
 import { omit } from 'convex-helpers';
 import schema from './schema';
@@ -76,9 +76,70 @@ export const deleteUser = mutation({
 	}
 });
 
+/** Whether the organization still exists and the user is still one of its members. */
+async function belongsTo(ctx: MutationCtx, userId: Id<'user'>, organizationId: string) {
+	const id = ctx.db.normalizeId('organization', organizationId);
+	if (!id || !(await ctx.db.get('organization', id))) return false;
+	const member = await ctx.db
+		.query('member')
+		.withIndex('organizationId_userId', (q) =>
+			q.eq('organizationId', organizationId).eq('userId', userId)
+		)
+		.first();
+	return member !== null;
+}
+
 /**
- * Sets the active organization for a user in a session.
- * If the user has no active organization, it will set the first organization they are a member of.
+ * The user's `activeOrganizationId` is the one source of the active organization. Each session
+ * keeps a copy because Better Auth's organization endpoints fall back to it when a call names no
+ * organization; writing both here, in one transaction, keeps every session of the user on the
+ * user's organization.
+ *
+ * The membership is checked here, in the writing transaction: Better Auth checks it in an
+ * earlier one, so a member who left `requested` in between would otherwise make it active
+ * again. A requested organization the user no longer belongs to leaves the current one, if the
+ * user still belongs to that, and otherwise none.
+ */
+async function writeActiveOrganization(
+	ctx: MutationCtx,
+	userId: Id<'user'>,
+	requested: string | null
+): Promise<void> {
+	const user = await ctx.db.get('user', userId);
+	if (!user) return;
+	const current = user.activeOrganizationId ?? null;
+	let organizationId: string | null = null;
+	if (requested !== null && (await belongsTo(ctx, userId, requested))) organizationId = requested;
+	else if (requested !== null && current !== null && (await belongsTo(ctx, userId, current)))
+		organizationId = current;
+
+	if (current !== organizationId) {
+		await ctx.db.patch('user', userId, { activeOrganizationId: organizationId });
+	}
+	const sessions = ctx.db.query('session').withIndex('userId', (q) => q.eq('userId', userId));
+	for await (const session of sessions) {
+		if (session.activeOrganizationId !== organizationId) {
+			await ctx.db.patch('session', session._id, { activeOrganizationId: organizationId });
+		}
+	}
+}
+
+/**
+ * Makes `organizationId` the user's active organization, on the user and on every one of the
+ * user's sessions, if the user belongs to it (see `writeActiveOrganization`).
+ */
+export const setUserActiveOrganization = mutation({
+	args: { userId: v.id('user'), organizationId: v.union(v.null(), v.string()) },
+	returns: v.null(),
+	handler: async (ctx, { userId, organizationId }) => {
+		await writeActiveOrganization(ctx, userId, organizationId);
+		return null;
+	}
+});
+
+/**
+ * Gives a new session the user's active organization. A user without one, or with one they no
+ * longer belong to, gets their first membership, on the user and all of their sessions.
  */
 export const setActiveOrganization = mutation({
 	args: { userId: v.id('user'), sessionId: v.id('session') },
@@ -87,26 +148,22 @@ export const setActiveOrganization = mutation({
 		const user = await ctx.db.get('user', userId);
 		if (!user) return null;
 
-		// 2) Decide the activeOrgId: prefer the user's current one; otherwise first membership.
-		let activeOrgId = user.activeOrganizationId;
-
-		if (!activeOrgId) {
-			const membership = await ctx.db
-				.query('member')
-				.withIndex('userId', (q) => q.eq('userId', userId))
-				.first(); // Note: no guaranteed ordering; see note below.
-			if (!membership) return null;
-			activeOrgId = membership.organizationId;
-		}
-
-		// 3) Only patch the session if needed and if the session belongs to this user.
 		const session = await ctx.db.get('session', sessionId);
 		if (!session || session.userId !== userId) return null;
 
-		if (session.activeOrganizationId !== activeOrgId) {
-			await ctx.db.patch('session', sessionId, { activeOrganizationId: activeOrgId });
+		const current = user.activeOrganizationId;
+		if (current && (await belongsTo(ctx, userId, current))) {
+			if (session.activeOrganizationId !== current) {
+				await ctx.db.patch('session', sessionId, { activeOrganizationId: current });
+			}
+			return null;
 		}
 
+		const membership = await ctx.db
+			.query('member')
+			.withIndex('userId', (q) => q.eq('userId', userId))
+			.first(); // Note: no guaranteed ordering.
+		await writeActiveOrganization(ctx, userId, membership?.organizationId ?? null);
 		return null;
 	}
 });

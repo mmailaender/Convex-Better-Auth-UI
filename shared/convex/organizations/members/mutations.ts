@@ -81,9 +81,9 @@ export const leaveOrganization = mutation({
 			});
 
 			// Update user's active organization in the database (server-only field)
-			await ctx.runMutation(components.betterAuth.user.updateUser, {
+			await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
 				userId: user._id,
-				data: { activeOrganizationId: nextActiveOrg.id }
+				organizationId: nextActiveOrg.id
 			});
 
 			return true;

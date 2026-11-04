@@ -66,10 +66,11 @@ export const setActiveOrganization = mutation({
 					headers: await authComponent.getHeaders(ctx)
 				});
 
-				// Server-only field (`input: false`), written once Better Auth has checked the membership
-				await ctx.runMutation(components.betterAuth.user.updateUser, {
+				// Server-only field (`input: false`), written once Better Auth has checked the membership,
+				// on the user and all of their sessions
+				await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
 					userId: user._id,
-					data: { activeOrganizationId: args.organizationId }
+					organizationId: args.organizationId
 				});
 			} catch (error) {
 				if (error instanceof APIError) {
@@ -92,11 +93,9 @@ export const setActiveOrganization = mutation({
 						})
 					).find((org) => org.id === user.activeOrganizationId);
 					if (org) {
-						await auth.api.setActiveOrganization({
-							body: {
-								organizationId: org.id
-							},
-							headers: await authComponent.getHeaders(ctx)
+						await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
+							userId: user._id,
+							organizationId: org.id
 						});
 					}
 				} else {
@@ -107,9 +106,9 @@ export const setActiveOrganization = mutation({
 						},
 						headers: await authComponent.getHeaders(ctx)
 					});
-					await ctx.runMutation(components.betterAuth.user.updateUser, {
+					await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
 						userId: user._id,
-						data: { activeOrganizationId: betterAuthOrg.id }
+						organizationId: betterAuthOrg.id
 					});
 				}
 			} catch (error) {
@@ -174,9 +173,9 @@ export const deleteOrganization = mutation({
 		});
 
 		// Update user's active organization in the database (server-only field)
-		await ctx.runMutation(components.betterAuth.user.updateUser, {
+		await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
 			userId: user._id,
-			data: { activeOrganizationId: nextActiveOrg.id }
+			organizationId: nextActiveOrg.id
 		});
 	}
 });

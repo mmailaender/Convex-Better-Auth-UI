@@ -85,7 +85,7 @@ async function seedMember(
 			name: email,
 			email,
 			emailVerified: true,
-			...(options.activeOnUser === false ? {} : { activeOrganizationId: organizationId }),
+			activeOrganizationId: organizationId,
 			createdAt: now,
 			updatedAt: now
 		}
@@ -103,6 +103,13 @@ async function seedMember(
 			activeOrganizationId: organizationId
 		}
 	});
+	if (options.activeOnUser === false) {
+		// After the session: its `onCreate` trigger would record the membership on the user again
+		await ctx.runMutation(components.betterAuth.user.updateUser, {
+			userId: user._id,
+			data: { activeOrganizationId: null }
+		});
+	}
 	return { organizationId, identity: { subject: user._id, sessionId: session._id } };
 }
 
