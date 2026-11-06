@@ -269,7 +269,7 @@ export default function Accounts() {
 		if (unlinkingAccountId) return;
 		setUnlinkingAccountId(accountId);
 
-		const { error } = await authClient.unlinkAccount({ providerId: provider, accountId });
+		const { error } = await authClient.unlinkAccount({ accountId });
 		if (error) toast.error(error.message || error.statusText);
 		else toast.success(`${getProviderLabel(provider)} account unlinked successfully`);
 		setUnlinkingAccountId(null);
@@ -376,7 +376,7 @@ export default function Accounts() {
 												<button
 													className="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
 													disabled={unlinkingAccountId === account.id}
-													onClick={() => void unlinkAccount(account.accountId, account.providerId)}
+													onClick={() => void unlinkAccount(account.id, account.providerId)}
 												>
 													{unlinkingAccountId === account.id ? (
 														'Unlinking...'

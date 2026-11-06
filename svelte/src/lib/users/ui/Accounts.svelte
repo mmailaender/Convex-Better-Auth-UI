@@ -320,10 +320,7 @@
 		unlinkingAccountId = accountId;
 
 		// try {
-		const { error } = await authClient.unlinkAccount({
-			providerId: provider,
-			accountId
-		});
+		const { error } = await authClient.unlinkAccount({ accountId });
 		if (error) {
 			if (error.message) {
 				toast.error(error.message);
@@ -435,7 +432,7 @@
 									<button
 										class="btn-icon preset-faded-surface-50-950 hover:bg-error-300-700 hover:text-error-950-50"
 										disabled={unlinkingAccountId === account.id}
-										onclick={() => unlinkAccount(account.accountId, account.providerId)}
+										onclick={() => unlinkAccount(account.id, account.providerId)}
 									>
 										{#if unlinkingAccountId === account.id}
 											Unlinking...
