@@ -36,6 +36,7 @@ Two Workers. Each Worker's name must match its configuration, `nextjs/cloudflare
 | Preview command (Previews Base) | `npx vinext-cloudflare previews deploy --skip-build`                                   | `npx wrangler preview`                                                           |
 | Production variables            | `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`: the production backend's URLs | `PUBLIC_CONVEX_URL`, `PUBLIC_CONVEX_SITE_URL`: the production backend's URLs     |
 | Previews Base secret            | `CONVEX_DEPLOY_KEY`: a preview deploy key                                              | `CONVEX_DEPLOY_KEY`: a preview deploy key                                        |
+| Previews Base variable          | `WORKERS_SUBDOMAIN`: the account's `workers.dev` subdomain, such as `acme.workers.dev` | `WORKERS_SUBDOMAIN`: the same                                                    |
 | Preview URLs                    | on (Settings → Domains & Routes)                                                       | on                                                                               |
 | Build watch paths               | `nextjs/*`, `shared/*`, `cloudflare.sh`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`       | `svelte/*`, `shared/*`, `cloudflare.sh`, `pnpm-lock.yaml`, `pnpm-workspace.yaml` |
 
@@ -46,5 +47,5 @@ Better Auth accepts requests only from the hosts in `BETTER_AUTH_ALLOWED_HOSTS`.
 - **Production deployment:** the production domains, including the two Workers' `workers.dev` hosts if sign-in should work there.
 - **Preview defaults** (Project Settings → Environment Variable Defaults → Preview), which each new preview backend copies when it's created:
   - `BETTER_AUTH_ALLOWED_HOSTS`: the Vercel preview hosts, plus `*-convex-better-auth-ui-nextjs.<subdomain>.workers.dev,*-convex-better-auth-ui-svelte.<subdomain>.workers.dev`.
-  - `BETTER_AUTH_FALLBACK_URL`: any URL, for example `http://localhost:5173`. Without it, server-rendered pages of a signed-in user fail.
+  - `BETTER_AUTH_FALLBACK_URL`: any URL, for example `http://localhost:5173`. Without it, server-rendered pages of a signed-in user fail. Each preview build then replaces it on its own backend with the preview's URL (`scripts/preview-origin.mjs`): Vercel's branch URL, and on Cloudflare the Preview's alias, which needs `WORKERS_SUBDOMAIN`. Better Auth builds email links and OAuth callbacks on the browser's origin only when that origin is the fallback URL or a host listed without a wildcard; any other preview URL, such as a Vercel deployment URL, gets the backend's `.convex.site` URL instead.
   - `BETTER_AUTH_BASE_URL_PROTOCOL="https"`, so previews get Secure cookies.

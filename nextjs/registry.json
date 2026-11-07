@@ -46,7 +46,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -62,7 +62,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -702,7 +702,7 @@
 				{
 					"ecosystem": "js",
 					"name": "@better-auth/api-key",
-					"version": "1.6.16"
+					"version": "1.7.17"
 				},
 				{
 					"ecosystem": "js",
@@ -716,7 +716,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.16"
+					"version": "1.7.17"
 				},
 				{
 					"ecosystem": "js",
@@ -781,7 +781,7 @@
 						{
 							"ecosystem": "js",
 							"name": "@better-auth/api-key",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						},
 						{
 							"ecosystem": "js",
@@ -790,7 +790,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1015,7 +1015,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1035,7 +1035,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1086,7 +1086,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.16"
+					"version": "1.7.17"
 				},
 				{
 					"ecosystem": "js",
@@ -1228,7 +1228,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1273,7 +1273,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1293,7 +1293,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1339,7 +1339,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.16"
+					"version": "1.7.17"
 				},
 				{
 					"ecosystem": "js",
@@ -1558,7 +1558,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1578,7 +1578,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []
@@ -1662,7 +1662,7 @@
 				{
 					"ecosystem": "js",
 					"name": "better-auth",
-					"version": "1.6.16"
+					"version": "1.7.17"
 				},
 				{
 					"ecosystem": "js",
@@ -2005,7 +2005,7 @@
 						{
 							"ecosystem": "js",
 							"name": "better-auth",
-							"version": "1.6.16"
+							"version": "1.7.17"
 						}
 					],
 					"devDependencies": []

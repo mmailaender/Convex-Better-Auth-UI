@@ -21,12 +21,16 @@ case "$app" in
 nextjs)
 	# vinext builds the Next.js app for Workers.
 	build='pnpm build:vinext'
+	# The Worker's name, as nextjs/cloudflare.config.ts declares it
+	worker='convex-better-auth-ui-nextjs'
 	url_vars='NEXT_PUBLIC_CONVEX_URL NEXT_PUBLIC_CONVEX_SITE_URL'
 	;;
 svelte)
 	# WORKERS_CI selects @sveltejs/adapter-cloudflare in vite.config.ts.
 	build='pnpm build'
 	url_vars='PUBLIC_CONVEX_URL PUBLIC_CONVEX_SITE_URL'
+	# The Worker's name, as svelte/wrangler.jsonc declares it
+	worker='convex-better-auth-ui-svelte'
 	;;
 *) fail "run it from nextjs/ or svelte/, not $app/" ;;
 esac
@@ -48,5 +52,15 @@ else
 	# vinext writes Preview build output only with this set, and `vinext-cloudflare previews deploy`
 	# refuses any other output.
 	export CLOUDFLARE_PREVIEW_BUILD=true
-	pnpm exec convex deploy --cmd="$build" --preview-name "${WORKERS_CI_BRANCH}-${app}-cf"
+	preview_name="${WORKERS_CI_BRANCH}-${app}-cf"
+	pnpm exec convex deploy --cmd="$build" --preview-name "$preview_name"
+	# Better Auth builds links and OAuth callbacks on the preview's own origin only when it is the
+	# fallback URL (scripts/preview-origin.mjs). WORKERS_SUBDOMAIN is the account's workers.dev
+	# subdomain, for example `acme.workers.dev`.
+	origin="$(node ../scripts/preview-origin.mjs cloudflare "$worker")"
+	if [ -n "$origin" ]; then
+		pnpm exec convex env set BETTER_AUTH_FALLBACK_URL "$origin" --preview-name "$preview_name"
+	else
+		echo "cloudflare.sh: WORKERS_SUBDOMAIN is not set, so the preview backend keeps its default BETTER_AUTH_FALLBACK_URL" >&2
+	fi
 fi

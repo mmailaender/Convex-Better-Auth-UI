@@ -63,6 +63,7 @@ export const tables = {
 	})
 		.index('accountId', ['accountId'])
 		.index('accountId_providerId', ['accountId', 'providerId'])
+		.index('accountId_providerId_userId', ['accountId', 'providerId', 'userId'])
 		.index('providerId_userId', ['providerId', 'userId'])
 		.index('userId', ['userId']),
 	verification: defineTable({
@@ -78,7 +79,9 @@ export const tables = {
 		publicKey: v.string(),
 		privateKey: v.string(),
 		createdAt: v.number(),
-		expiresAt: v.optional(v.union(v.null(), v.number()))
+		expiresAt: v.optional(v.union(v.null(), v.number())),
+		alg: v.optional(v.union(v.null(), v.string())),
+		crv: v.optional(v.union(v.null(), v.string()))
 	}),
 	organization: defineTable({
 		name: v.string(),
