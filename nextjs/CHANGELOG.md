@@ -1,5 +1,43 @@
 # @auth/nextjs
 
+## 0.4.0
+
+### Minor Changes
+
+- 1ea5b45: Better Auth 1.7 with `@convex-dev/better-auth` 0.13. The registry now installs `better-auth` and `@better-auth/api-key` 1.7.17 and component 0.13.0, which supports only Better Auth 1.7. Before, a new install got the component's latest release, 0.13.0, next to Better Auth 1.6.16, outside the component's peer range.
+  
+  `config` follows the component's upgrade guide: `betterAuth/adapter.ts` exports the new atomic adapter operations `consumeOne` and `incrementOne`, which Better Auth 1.7 uses for single-use verification values, and `betterAuth/generatedSchema.ts` declares 1.7's `account` index, which Better Auth reads when a user sets, changes or resets a password, and the `jwks` fields `alg` and `crv`. Both are additive, so existing data stays valid.
+  
+  `users/lib`: unlinking an account on the Accounts page sends the account's Better Auth id, which Better Auth 1.7's `unlinkAccount` takes instead of the provider id and the provider's account id. The unlink button now also shows its busy state, which it compared with that id.
+
+### Patch Changes
+
+- 4d37e62: **Upgrading from 0.3.0:** Make the manual changes below, then update the items you installed with the one command at the end. The entries after this one describe each change and don't need their own update.
+  
+  #### Migration
+  
+  1. Upgrade Better Auth and the Convex component together: `better-auth` and `@better-auth/api-key` to 1.7.17, `@convex-dev/better-auth` to 0.13.0. The component's 0.13 requires Better Auth 1.7.16 or later.
+  2. If you changed `betterAuth/adapter.ts` or `betterAuth/generatedSchema.ts` (`config`), merge the update into them: the adapter exports Better Auth 1.7's `consumeOne` and `incrementOne`, and the schema adds the `accountId_providerId_userId` index on `account` and the optional `alg` and `crv` fields on `jwks`. If you added Better Auth plugins of your own, regenerate `generatedSchema.ts` from `src/convex/betterAuth` with `npx auth@1.7 generate --output generatedSchema.ts` instead and keep its additions; see the component's [upgrade guide](https://labs.convex.dev/better-auth/upgrading/from-0-12).
+  3. Check `BETTER_AUTH_ALLOWED_HOSTS` and `BETTER_AUTH_FALLBACK_URL`: with component 0.13, Better Auth builds its links and OAuth callbacks from your app's origin only when that origin is listed without a wildcard or is the fallback URL's origin. On a host that matches only a wildcard, such as a preview deployment's, it uses your deployment's `.convex.site` URL instead, so email links and OAuth callbacks leave your app. For previews with their own Convex preview deployment, set that deployment's `BETTER_AUTH_FALLBACK_URL` to the preview's URL in your build, after `convex deploy`: `npx convex env set BETTER_AUTH_FALLBACK_URL <preview URL> --preview-name <preview name>`.
+  4. If you changed `auth.ts` (`config`), merge the update into it instead of overwriting it: the `imageId` and `activeOrganizationId` user fields and, with organizations, the `logoId` organization field get `input: false`.
+  5. If you changed `auth.ts` (`config`), also merge its new session triggers: `onCreate` gives every new session the user's active organization, and `onUpdate` calls `setUserActiveOrganization` when a session's active organization changes.
+  6. Run the update. Leave out items you haven't installed, but update `config` together with `users/convex` and, with organizations, `organizations/convex`: with the new `auth.ts`, Better Auth refuses the writes the previous `users/convex` and `organizations/convex` made, so avatar uploads and organization switching would fail, and its session trigger calls `setUserActiveOrganization` from the new `organizations/convex`.
+  7. Optional, with organizations: sessions signed in before the update keep their own active organization until the user next switches, leaves, creates or deletes an organization, or signs in again. To align them at once, run `components.betterAuth.organization.setUserActiveOrganization` once for each user that has an `activeOrganizationId`, with that value, from an internal mutation of your app that pages through the users.
+  
+  → `jsrepo update 'config' 'users/convex' 'organizations/convex' 'organizations/lib' 'users/lib'`
+- 0c389bd: fix(organizations): Every session of a user now shows the same active organization. The active organization was stored twice, on the user (`activeOrganizationId`, which new sessions copy and server code reads) and on each session (which Better Auth's organization endpoints read when a call names no organization), and a switch wrote only the user and the session that made it. A user signed in twice saw one organization in one session and another in the second, and server code that reads the user acted on an organization the second session didn't show. The user's `activeOrganizationId` is now the one source: `setUserActiveOrganization` (`betterAuth/organization.ts`) writes it and every session's copy in one transaction, and switching, leaving, deleting and creating an organization use it. A new session takes the user's organization, also when Better Auth created it with another one. When Better Auth switches a session itself (accepting an invitation, leaving or deleting the active organization), the new session `onUpdate` trigger in `auth.ts` moves the user and their other sessions along; clients can't write the session's copy, as Better Auth's organization plugin declares it `input: false`.
+  
+  `setUserActiveOrganization` checks in the same transaction that the organization still exists and the user still belongs to it. Better Auth checks the membership in an earlier transaction than the one that writes the session, so a member who left an organization in between could make it active again; now the user keeps their current organization if they still belong to it, and otherwise gets none. A new session whose user's organization no longer has them takes their first membership.
+  
+  Changing a member's role in `Members` names the organization explicitly instead of relying on the session's copy.
+- 4d37e62: fix(security): Clients can no longer set the Better Auth fields the server trusts. `auth.ts` (`config`) declared the user fields `imageId` and `activeOrganizationId` and the organization field `logoId` without `input: false`, so Better Auth's own endpoints accepted them from the browser. Any signed-in user could call `/api/auth/update-user` with an `activeOrganizationId` of an organization they don't belong to, which the server copies into each new session as its active organization without checking the membership, or point their `imageId` at another user's file, which the server then deleted on their next avatar change or when their account was deleted. `/api/auth/organization/create` and `/api/auth/organization/update` did the same for an organization's `logoId`. The three fields are now `input: false`: `/update-user` and sign-up refuse them, and the organization endpoints drop them.
+  
+  The server keeps writing them, through the Better Auth component, after its own checks: `updateAvatar` (`users/convex`) stores `imageId`, `setActiveOrganization`, `deleteOrganization` and `leaveOrganization` (`organizations/convex`) store `activeOrganizationId` once Better Auth has accepted the switch, and `createOrganization` and `updateOrganizationProfile` store `logoId` once Better Auth has created the organization or accepted the update. The admin dashboard already wrote the logo through the component and changes nothing.
+  
+  Two bugs in the same paths are fixed too. `setActiveOrganization` without an `organizationId`, for a user with no active organization yet, failed with `401 UNAUTHORIZED`: it saved the choice through `auth.api.updateUser` without the session headers. And removing a logo through `updateOrganizationProfileModel` with `logoId: null` deleted the file but left `logo` and `logoId` pointing at it.
+  
+  If you copied `auth.ts` into your app instead of updating it with jsrepo, add `input: false` to those three `additionalFields` yourself, and to any field of your own that your server trusts, and update `users/convex` and `organizations/convex` with it (see the upgrade entry).
+
 ## 0.3.0
 
 ### Minor Changes
