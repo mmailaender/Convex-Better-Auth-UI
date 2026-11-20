@@ -25,6 +25,7 @@ export type ImageCropperRootProps = WritableBoxedValues<{
 
 class ImageCropperRootState {
 	#createdUrls = $state<string[]>([]);
+	#disposed = false;
 	open = $state(false);
 	tempUrl = $state<string>();
 	pixelCrop = $state<CropArea>();
@@ -55,12 +56,18 @@ class ImageCropperRootState {
 
 	async onCrop() {
 		if (!this.pixelCrop || !this.tempUrl) return;
+		/* A crop answers to the callback of the moment it was confirmed, and to nothing once the
+		   cropper is gone, so a caller that binds the callback to what it crops for never has a
+		   crop land on something else. */
+		const onCropped = this.opts.onCropped.current;
 
-		this.opts.src.current = await getCroppedImg(this.tempUrl, this.pixelCrop);
+		const cropped = await getCroppedImg(this.tempUrl, this.pixelCrop);
+		if (this.#disposed) return;
+		this.opts.src.current = cropped;
 
 		this.open = false;
 
-		this.opts.onCropped.current(this.opts.src.current);
+		onCropped(cropped);
 	}
 
 	get src() {
@@ -72,6 +79,7 @@ class ImageCropperRootState {
 	}
 
 	dispose() {
+		this.#disposed = true;
 		for (const url of this.#createdUrls) {
 			URL.revokeObjectURL(url);
 		}

@@ -136,11 +136,14 @@ export function Root({
 	const [open, setOpen] = useState(false);
 	const [tempUrl, setTempUrl] = useState<string>();
 	const [pixelCrop, setPixelCrop] = useState<Area>();
+	const disposedRef = useRef(false);
 	void src;
 
 	useEffect(() => {
+		disposedRef.current = false;
 		const createdUrls = createdUrlsRef.current;
 		return () => {
+			disposedRef.current = true;
 			for (const url of createdUrls) {
 				URL.revokeObjectURL(url);
 			}
@@ -172,6 +175,13 @@ export function Root({
 		if (!pixelCrop || !tempUrl) return;
 
 		const croppedUrl = await getCroppedImg(tempUrl, pixelCrop);
+		/* A crop answers to the callback of the moment it was confirmed, and to nothing once the
+		   cropper is gone, so a caller that binds the callback to what it crops for never has a crop
+		   land on something else. */
+		if (disposedRef.current) {
+			URL.revokeObjectURL(croppedUrl);
+			return;
+		}
 		createdUrlsRef.current.push(croppedUrl);
 		onSrcChange(croppedUrl);
 		setOpen(false);
