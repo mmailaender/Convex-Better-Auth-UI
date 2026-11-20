@@ -1,9 +1,28 @@
 'use client';
 
-import { useConvexAuth, useQuery } from 'convex/react';
+import { useMemo } from 'react';
+import { useConvexAuth, useQueries, useQuery } from 'convex/react';
+import type { FunctionReference, FunctionReturnType } from 'convex/server';
 
 import { api } from '@/convex/_generated/api';
 import { preferInitialData, useInitialAuthData } from '@/lib/auth/initial-data';
+
+/**
+ * A query's answer, or `undefined` while it loads or after its lookup failed. The organization
+ * queries throw on a failed lookup, so a caller can tell it from a confirmed absence (`null`,
+ * `[]`); `useQuery` would rethrow it into the nearest error boundary, while these widgets show it
+ * as loading or keep what they show.
+ */
+function useQueryUnlessFailed<
+	Query extends FunctionReference<'query', 'public', Record<string, never>>
+>(query: Query, skip: boolean): FunctionReturnType<Query> | undefined {
+	const queries = useMemo(
+		(): Parameters<typeof useQueries>[0] => (skip ? {} : { answer: { query, args: {} } }),
+		[query, skip]
+	);
+	const answer: unknown = useQueries(queries).answer;
+	return answer instanceof Error ? undefined : (answer as FunctionReturnType<Query> | undefined);
+}
 
 export function useActiveUserData() {
 	const { isAuthenticated } = useConvexAuth();
@@ -24,9 +43,9 @@ export function useAccountListData() {
 export function useActiveOrganizationData() {
 	const { isAuthenticated } = useConvexAuth();
 	const initialData = useInitialAuthData();
-	const activeOrganization = useQuery(
+	const activeOrganization = useQueryUnlessFailed(
 		api.organizations.queries.getActiveOrganization,
-		isAuthenticated ? {} : 'skip'
+		!isAuthenticated
 	);
 
 	return preferInitialData(activeOrganization, initialData?.activeOrganization);
@@ -35,9 +54,9 @@ export function useActiveOrganizationData() {
 export function useOrganizationListData() {
 	const { isAuthenticated } = useConvexAuth();
 	const initialData = useInitialAuthData();
-	const organizationList = useQuery(
+	const organizationList = useQueryUnlessFailed(
 		api.organizations.queries.listOrganizations,
-		isAuthenticated ? {} : 'skip'
+		!isAuthenticated
 	);
 
 	return preferInitialData(organizationList, initialData?.organizationList);

@@ -94,8 +94,9 @@ export default function OrganizationSwitcher({
 		[activeOrganization?.slug, organizations, pathname, router, setActiveOrganization]
 	);
 
+	// Only on a confirmed absence (null): not while the active organization loads or after its lookup failed
 	useEffect(() => {
-		if (organizations && organizations.length > 0 && !activeOrganization) {
+		if (organizations && organizations.length > 0 && activeOrganization === null) {
 			void updateActiveOrg();
 		}
 	}, [organizations, activeOrganization, updateActiveOrg]);

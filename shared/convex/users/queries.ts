@@ -4,7 +4,8 @@ import { authComponent, createAuth } from '../auth';
 import { APIError } from 'better-auth/api';
 
 /**
- * Return the currently authenticated user
+ * Return the currently authenticated user: null only when no one is signed in on the request or
+ * its session or user no longer exists; a failed read throws
  */
 export const getActiveUser = query({
 	args: {},
