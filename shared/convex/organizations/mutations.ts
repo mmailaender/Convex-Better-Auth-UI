@@ -46,14 +46,18 @@ export const _createOrganization = internalMutation({
 
 /**
  * Sets the active organization for the current user. If no organizationId is provided, try getting the activeOrganization from user table, if not found, the first organization in the list will be set as active.
+ * Answers whether the user's active organization changed, so a caller that only filled in a
+ * missing organization can leave the page alone when nothing moved.
  */
 export const setActiveOrganization = mutation({
 	args: {
 		organizationId: v.optional(v.string())
 	},
+	returns: v.object({ changed: v.boolean() }),
 	handler: async (ctx, args) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) throw new ConvexError('Not authenticated');
+		const before = user.activeOrganizationId ?? null;
 
 		const auth = createAuth(ctx);
 
@@ -117,6 +121,8 @@ export const setActiveOrganization = mutation({
 				}
 			}
 		}
+		const after = await authComponent.safeGetAuthUser(ctx);
+		return { changed: (after?.activeOrganizationId ?? null) !== before };
 	}
 });
 

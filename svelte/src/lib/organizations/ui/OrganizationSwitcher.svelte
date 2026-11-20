@@ -193,7 +193,13 @@
 					currentPathname.includes(`/${currentActiveOrgSlug}`));
 
 			// Execute the mutation to set new active organization
-			await client.mutation(api.organizations.mutations.setActiveOrganization, { organizationId });
+			const { changed } = await client.mutation(api.organizations.mutations.setActiveOrganization, {
+				organizationId
+			});
+			// Filling in a missing organization (no id: the effect below) that moved nothing leaves
+			// the page as it is. The active organization can answer empty for a moment, and the
+			// refresh below would drop the URL's hash and move focus out of an open dialog.
+			if (!organizationId && !changed) return;
 
 			// Get the new active organization data
 			const newActiveOrgSlug = activeOrganization?.slug;

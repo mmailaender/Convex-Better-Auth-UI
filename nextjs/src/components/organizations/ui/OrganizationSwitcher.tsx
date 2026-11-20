@@ -69,7 +69,10 @@ export default function OrganizationSwitcher({
 					(pathname.includes(`/${currentActiveOrgSlug}/`) ||
 						pathname.endsWith(`/${currentActiveOrgSlug}`));
 
-				await setActiveOrganization({ organizationId });
+				const { changed } = await setActiveOrganization({ organizationId });
+				// Filling in a missing organization (no id) that moved nothing leaves the page alone:
+				// the active organization can answer empty for a moment, and the server kept it.
+				if (!organizationId && !changed) return;
 
 				if (urlContainsCurrentSlug && currentActiveOrgSlug) {
 					const nextOrg = organizations?.find((org) => org?.id === organizationId);

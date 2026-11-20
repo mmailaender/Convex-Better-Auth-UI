@@ -343,7 +343,7 @@ describe('user activeOrganizationId is server-only', () => {
 			return { owner, second };
 		});
 
-		await t
+		const result = await t
 			.withIdentity(owner.identity)
 			.mutation(api.organizations.mutations.setActiveOrganization, { organizationId: second });
 
@@ -351,6 +351,7 @@ describe('user activeOrganizationId is server-only', () => {
 			user: second,
 			session: second
 		});
+		expect(result).toEqual({ changed: true });
 	});
 
 	it('setActiveOrganization refuses an organization the user does not belong to', async () => {
@@ -378,10 +379,23 @@ describe('user activeOrganizationId is server-only', () => {
 			seedMember(ctx, 'unset@example.com', { activeOnUser: false })
 		);
 
-		await t
+		const result = await t
 			.withIdentity(owner.identity)
 			.mutation(api.organizations.mutations.setActiveOrganization, {});
 
+		expect((await readActiveOrganization(t, owner.identity)).user).toBe(owner.organizationId);
+		expect(result).toEqual({ changed: true });
+	});
+
+	it('setActiveOrganization without an id answers unchanged when the recorded organization stays', async () => {
+		const t = setup();
+		const owner = await t.run((ctx) => seedMember(ctx, 'kept@example.com'));
+
+		const result = await t
+			.withIdentity(owner.identity)
+			.mutation(api.organizations.mutations.setActiveOrganization, {});
+
+		expect(result).toEqual({ changed: false });
 		expect((await readActiveOrganization(t, owner.identity)).user).toBe(owner.organizationId);
 	});
 
