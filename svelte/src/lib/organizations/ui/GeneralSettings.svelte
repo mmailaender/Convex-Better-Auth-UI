@@ -65,14 +65,37 @@
 			initialData: initialData?.activeOrganization
 		})
 	);
-	const user = $derived(userResponse?.data);
-	const activeOrganization = $derived(organizationResponse?.data);
+
+	/* Both queries answer null only for an absence that lasts: the session or the user is gone,
+	   the user has no active organization, or is no longer its member. A lookup that fails answers
+	   an error instead. Holding the last answer through an error, or a query still loading, keeps
+	   the form mounted with a name being typed and its focus; null drops it, which closes any edit
+	   open on it. A signed-out session skips the queries and holds nothing; another organization's
+	   answer replaces the held one. isAuthenticated is false while auth reloads too: only a
+	   settled sign-out drops what is held. */
+	const signedOut = $derived(!auth.isLoading && !auth.isAuthenticated);
+	let heldUser: NonNullable<GetActiveUserType> | undefined;
+	let heldOrganization: NonNullable<GetActiveOrganizationType> | undefined;
+	const user = $derived.by(() => {
+		const live = userResponse.data;
+		if (signedOut) heldUser = undefined;
+		else if (live !== undefined) heldUser = live ?? undefined;
+		return heldUser;
+	});
+	const activeOrganization = $derived.by(() => {
+		const live = organizationResponse.data;
+		if (signedOut) heldOrganization = undefined;
+		else if (live !== undefined) heldOrganization = live ?? undefined;
+		return heldOrganization;
+	});
 
 	// Avatar State
 	let imageLoadingStatus: 'loading' | 'loaded' | 'error' = $state('loaded');
-	let isUploading: boolean = $state(false);
+	let uploadingFor: string | null = $state(null);
 	let logoKey: number = $state(0);
 	let cropSrc: string = $state('');
+	// The crop dialog's state, so a switch can close it (a remount would leave it stuck open)
+	let cropOpen: boolean = $state(false);
 
 	// Inline name editing state
 	let isEditingName: boolean = $state(false);
@@ -85,17 +108,64 @@
 	let isSavingSlug: boolean = $state(false);
 	let slugInputEl: HTMLInputElement | null = $state(null);
 
-	// Initialize state when organization data is available
-	$effect(() => {
-		if (activeOrganization) {
-			if (!isEditingName) {
-				name = activeOrganization.name;
-			}
-			if (!isEditingSlug) {
-				slug = activeOrganization.slug || '';
+	// Where focus goes, and what is announced, when another organization closes an edit
+	let rootEl: HTMLDivElement | null = $state(null);
+	let nameFormEl: HTMLFormElement | null = $state(null);
+	let slugFormEl: HTMLFormElement | null = $state(null);
+	let nameEditButtonEl: HTMLButtonElement | null = $state(null);
+	let slugEditButtonEl: HTMLButtonElement | null = $state(null);
+	let logoTriggerEl: HTMLLabelElement | null = $state(null);
+	let organizationChange: string = $state('');
+
+	/* Initialize state when organization data is available. Before the DOM updates, so a switch
+	   still sees where focus was in the name and slug forms. */
+	let shownOrganizationId: string | undefined;
+	$effect.pre(() => {
+		if (!activeOrganization) {
+			// signed out, or the organization is gone: no edit stays open for it
+			shownOrganizationId = undefined;
+			isEditingName = false;
+			isEditingSlug = false;
+			return;
+		}
+		if (activeOrganization.id !== shownOrganizationId) {
+			const previous = shownOrganizationId;
+			shownOrganizationId = activeOrganization.id;
+			if (previous !== undefined) {
+				// a logo preview, or one still uploading, belongs to the organization before
+				cropSrc = activeOrganization.logo ?? '';
+				closeEditsForSwitch(activeOrganization.name);
 			}
 		}
+		if (!isEditingName) {
+			name = activeOrganization.name;
+		}
+		if (!isEditingSlug) {
+			slug = activeOrganization.slug || '';
+		}
 	});
+
+	/** Another organization is active: an edit in progress belonged to the one before. It closes,
+	 * and so does the crop dialog; focus in either moves to its control in the settings, and the
+	 * change is announced. */
+	function closeEditsForSwitch(organizationName: string): void {
+		const focused = document.activeElement;
+		// the crop dialog is modal: while it is open, focus is in it
+		const fromCrop = cropOpen;
+		if (!isEditingName && !isEditingSlug && !fromCrop) return;
+		const fromName = isEditingName && !!nameFormEl?.contains(focused);
+		const fromSlug = isEditingSlug && !!slugFormEl?.contains(focused);
+		isEditingName = false;
+		isEditingSlug = false;
+		cropOpen = false;
+		organizationChange = `The active organization changed to ${organizationName}. Your edit was closed.`;
+		if (!fromName && !fromSlug && !fromCrop) return;
+		void tick().then(() => {
+			// without the edit right in the new organization, focus stays in the settings
+			const control = fromCrop ? logoTriggerEl : fromName ? nameEditButtonEl : slugEditButtonEl;
+			(control ?? rootEl)?.focus();
+		});
+	}
 
 	// Keep crop preview in sync with org logo
 	$effect(() => {
@@ -106,12 +176,20 @@
 
 	// Handlers
 
-	async function handleCropped(url: string): Promise<void> {
-		if (!activeOrganization) return;
+	/** The crop callback for the organization shown: each crop carries the organization it was
+	 * made for, never one shown later (the cropper reads it when Upload is pressed). */
+	function croppedFor(organizationId: string): (url: string) => void {
+		return (url) => void handleCropped(url, organizationId);
+	}
+
+	async function handleCropped(url: string, organizationId: string): Promise<void> {
+		// a crop for an organization no longer shown is dropped: its dialog closed on the switch
+		if (activeOrganization?.id !== organizationId) return;
+		const stillShown = () => activeOrganization?.id === organizationId;
 		const previousLogo = activeOrganization.logo ?? '';
 		try {
 			cropSrc = url;
-			isUploading = true;
+			uploadingFor = organizationId;
 			const croppedFile = await getFileFromUrl(url, 'logo.png');
 			const optimizedFile = await optimizeImage(croppedFile, {
 				maxWidth: 512,
@@ -133,32 +211,38 @@
 			const { storageId } = await response.json();
 			await updateOrganization({ logoId: storageId });
 
-			imageLoadingStatus = 'loaded';
+			if (stillShown()) imageLoadingStatus = 'loaded';
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
-			cropSrc = previousLogo;
-			imageLoadingStatus = 'error';
+			if (stillShown()) {
+				cropSrc = previousLogo;
+				imageLoadingStatus = 'error';
+			}
 		} finally {
-			isUploading = false;
+			if (uploadingFor === organizationId) uploadingFor = null;
 		}
 	}
 
 	const displayedLogoSrc = $derived(cropSrc || activeOrganization?.logo || undefined);
 	const showLogoOverlay = $derived(
 		!cropSrc.startsWith('blob:') &&
-			(isUploading || (imageLoadingStatus as 'loading' | 'loaded' | 'error') === 'loading')
+			((uploadingFor !== null && uploadingFor === activeOrganization?.id) ||
+				(imageLoadingStatus as 'loading' | 'loaded' | 'error') === 'loading')
 	);
 
 	async function handleNameSubmit(e: SubmitEvent): Promise<void> {
 		e.preventDefault();
-		if (!activeOrganization) return;
+		/* The organization shown is the one the edit was opened on: another organization's answer
+		   closes the edit. The optimistic update touches only it. */
+		const target = activeOrganization;
+		if (!target) return;
 
 		const trimmed = name.trim();
 
 		try {
-			if (!trimmed || trimmed === activeOrganization.name.trim()) {
+			if (!trimmed || trimmed === target.name.trim()) {
 				isEditingName = false;
 				return;
 			}
@@ -168,20 +252,17 @@
 				{ name: trimmed },
 				{
 					optimisticUpdate: (store) => {
-						const activeOrganization = store.getQuery(
-							api.organizations.queries.getActiveOrganization,
-							{}
-						);
-						if (!activeOrganization) return;
-
-						store.setQuery(
-							api.organizations.queries.getActiveOrganization,
-							{},
-							{
-								...activeOrganization,
-								name: trimmed
-							}
-						);
+						const cached = store.getQuery(api.organizations.queries.getActiveOrganization, {});
+						if (cached?.id === target.id) {
+							store.setQuery(
+								api.organizations.queries.getActiveOrganization,
+								{},
+								{
+									...cached,
+									name: trimmed
+								}
+							);
+						}
 
 						const organizations = store.getQuery(api.organizations.queries.listOrganizations, {});
 						if (organizations !== undefined) {
@@ -189,9 +270,7 @@
 								api.organizations.queries.listOrganizations,
 								{},
 								organizations.map((organization) =>
-									organization.id === activeOrganization.id
-										? { ...organization, name: trimmed }
-										: organization
+									organization.id === target.id ? { ...organization, name: trimmed } : organization
 								)
 							);
 						}
@@ -212,11 +291,13 @@
 
 	async function handleSlugSubmit(e: SubmitEvent): Promise<void> {
 		e.preventDefault();
-		if (!activeOrganization || isSavingSlug) return;
+		// the organization the edit was opened on, as for the name
+		const target = activeOrganization;
+		if (!target || isSavingSlug) return;
 
 		try {
 			const trimmed = slug.trim();
-			const currentSlug = activeOrganization.slug || '';
+			const currentSlug = target.slug || '';
 			if (trimmed === '' || trimmed === currentSlug) {
 				isEditingSlug = false;
 				return;
@@ -258,9 +339,16 @@
 </script>
 
 {#if user && activeOrganization}
-	<div class="flex w-full flex-col items-start gap-6">
-		<ImageCropper.Root bind:src={cropSrc} accept="image/*" onCropped={handleCropped}>
-			<ImageCropper.UploadTrigger>
+	<div bind:this={rootEl} tabindex="-1" class="flex w-full flex-col items-start gap-6">
+		<p class="sr-only" role="status">{organizationChange}</p>
+		<!-- a crop belongs to the organization it was opened on: a switch closes its dialog -->
+		<ImageCropper.Root
+			bind:src={cropSrc}
+			bind:open={cropOpen}
+			accept="image/*"
+			onCropped={croppedFor(activeOrganization.id)}
+		>
+			<ImageCropper.UploadTrigger bind:ref={logoTriggerEl}>
 				<div class="rounded-container relative cursor-pointer transition-all duration-200">
 					{#key logoKey}
 						<Avatar.Root
@@ -278,7 +366,6 @@
 							</Avatar.Fallback>
 						</Avatar.Root>
 					{/key}
-
 					{#if showLogoOverlay}
 						<div
 							class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
@@ -348,7 +435,11 @@
 							inert={!isEditingName}
 						>
 							<div class="overflow-hidden">
-								<form onsubmit={handleNameSubmit} class="flex w-full flex-col gap-3">
+								<form
+									bind:this={nameFormEl}
+									onsubmit={handleNameSubmit}
+									class="flex w-full flex-col gap-3"
+								>
 									<input
 										bind:this={nameInputEl}
 										type="text"
@@ -388,6 +479,7 @@
 							</span>
 						</div>
 						<button
+							bind:this={nameEditButtonEl}
 							class="absolute inset-0 h-full w-full"
 							aria-label="Edit organization name"
 							type="button"
@@ -445,7 +537,11 @@
 							inert={!isEditingSlug}
 						>
 							<div class="overflow-hidden">
-								<form onsubmit={handleSlugSubmit} class="flex w-full flex-col gap-3">
+								<form
+									bind:this={slugFormEl}
+									onsubmit={handleSlugSubmit}
+									class="flex w-full flex-col gap-3"
+								>
 									<input
 										bind:this={slugInputEl}
 										type="text"
@@ -487,6 +583,7 @@
 							</span>
 						</div>
 						<button
+							bind:this={slugEditButtonEl}
 							class="absolute inset-0 h-full w-full"
 							aria-label="Edit organization slug"
 							type="button"

@@ -1,8 +1,8 @@
 'use client';
 
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMutation } from 'convex/react';
+import { useConvexAuth, useMutation } from 'convex/react';
 import { ConvexError, GenericId } from 'convex/values';
 import { Building2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,11 +14,33 @@ import { api } from '@/convex/_generated/api';
 import { useRoles } from '@/components/organizations/api/hooks';
 import { useActiveOrganizationData, useActiveUserData } from '@/lib/auth/hooks';
 
+/**
+ * The last answer held through a lookup that failed or still loads (`undefined`); `null`, a
+ * confirmed absence, and a signed-out session drop it.
+ */
+function useHeldAnswer<T>(live: T | null | undefined, signedOut: boolean): T | undefined {
+	const [held, setHeld] = useState<T | undefined>(undefined);
+	const current = signedOut ? undefined : live === undefined ? held : (live ?? undefined);
+	if (current !== held) setHeld(current);
+	return current;
+}
+
+type SwitchFocusTarget = 'logo' | 'name' | 'slug';
+
 export default function GeneralSettings() {
 	const router = useRouter();
 	const pathname = usePathname();
-	const user = useActiveUserData();
-	const activeOrganization = useActiveOrganizationData();
+	const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
+	/* Both queries answer null only for an absence that lasts: the session or the user is gone,
+	   the user has no active organization, or is no longer its member. A lookup that fails reads
+	   as undefined, like one still loading. Holding the last answer through those keeps the form
+	   mounted with a name being typed and its focus; null drops it, which closes any edit open on
+	   it. Another organization's answer replaces the held one. Convex reports isAuthenticated
+	   false while auth reloads too (a token refresh, a reconnect): only a settled sign-out drops
+	   it. */
+	const signedOut = !isAuthLoading && !isAuthenticated;
+	const user = useHeldAnswer(useActiveUserData(), signedOut);
+	const activeOrganization = useHeldAnswer(useActiveOrganizationData(), signedOut);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 	const updateOrganization = useMutation(
 		api.organizations.mutations.updateOrganizationProfile
@@ -57,9 +79,11 @@ export default function GeneralSettings() {
 	const [imageLoadingStatus, setImageLoadingStatus] = useState<'loading' | 'loaded' | 'error'>(
 		'loaded'
 	);
-	const [isUploading, setIsUploading] = useState(false);
+	const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 	const [logoKey] = useState(0);
 	const [cropSrc, setCropSrc] = useState('');
+	// The crop dialog's state, so a switch can close it in place
+	const [cropOpen, setCropOpen] = useState(false);
 	const [isEditingName, setIsEditingName] = useState(false);
 	const [name, setName] = useState('');
 	const [isEditingSlug, setIsEditingSlug] = useState(false);
@@ -67,6 +91,65 @@ export default function GeneralSettings() {
 	const [isSavingSlug, setIsSavingSlug] = useState(false);
 	const nameInputRef = useRef<HTMLInputElement | null>(null);
 	const slugInputRef = useRef<HTMLInputElement | null>(null);
+
+	// Where focus goes, and what is announced, when another organization closes an edit
+	const rootRef = useRef<HTMLDivElement | null>(null);
+	const logoTriggerRef = useRef<HTMLLabelElement | null>(null);
+	const nameEditButtonRef = useRef<HTMLButtonElement | null>(null);
+	const slugEditButtonRef = useRef<HTMLButtonElement | null>(null);
+	const [organizationChange, setOrganizationChange] = useState('');
+	const [focusAfterSwitch, setFocusAfterSwitch] = useState<SwitchFocusTarget | null>(null);
+
+	// The organization the settings show, for work that finishes after another one is active
+	const shownOrganizationIdRef = useRef<string | undefined>(undefined);
+	const activeOrganizationId = activeOrganization?.id;
+
+	/* Another organization is active: an edit in progress belonged to the one before. It closes,
+	   and so does the crop dialog; focus in either moves to its control in the settings, and the
+	   change is announced. Before paint, while the name and slug forms still hold their focus. */
+	useLayoutEffect(() => {
+		const previous = shownOrganizationIdRef.current;
+		shownOrganizationIdRef.current = activeOrganizationId;
+		if (!activeOrganizationId) {
+			// signed out, or the organization is gone: no edit stays open for it
+			setIsEditingName(false);
+			setIsEditingSlug(false);
+			return;
+		}
+		if (previous === undefined || previous === activeOrganizationId) return;
+
+		const focused = document.activeElement;
+		// the crop dialog is modal: while it is open, focus is in it
+		const fromCrop = cropOpen;
+		const fromName = isEditingName && !!nameInputRef.current?.form?.contains(focused);
+		const fromSlug = isEditingSlug && !!slugInputRef.current?.form?.contains(focused);
+		setCropSrc('');
+		if (!isEditingName && !isEditingSlug && !fromCrop) return;
+		setIsEditingName(false);
+		setIsEditingSlug(false);
+		setCropOpen(false);
+		setOrganizationChange(
+			`The active organization changed to ${activeOrganization?.name ?? ''}. Your edit was closed.`
+		);
+		if (fromCrop) setFocusAfterSwitch('logo');
+		else if (fromName) setFocusAfterSwitch('name');
+		else if (fromSlug) setFocusAfterSwitch('slug');
+		// the edit closes on the organization before: its values give way to this one's below
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activeOrganizationId]);
+
+	useEffect(() => {
+		if (!focusAfterSwitch) return;
+		// without the edit right in the new organization, focus stays in the settings
+		const control = {
+			// the trigger is a label: its file input is the control that takes focus
+			logo: logoTriggerRef.current?.querySelector<HTMLInputElement>('input[type="file"]'),
+			name: nameEditButtonRef.current,
+			slug: slugEditButtonRef.current
+		}[focusAfterSwitch];
+		(control ?? rootRef.current)?.focus();
+		setFocusAfterSwitch(null);
+	}, [focusAfterSwitch]);
 
 	useEffect(() => {
 		if (activeOrganization) {
@@ -81,12 +164,14 @@ export default function GeneralSettings() {
 		}
 	}, [activeOrganization?.logo, cropSrc]);
 
-	async function handleCropped(url: string) {
-		if (!activeOrganization) return;
-		const previousLogo = activeOrganization.logo ?? '';
+	/** Each crop carries the organization its cropper was opened on, never one shown later. */
+	async function handleCropped(url: string, organizationId: string, previousLogo: string) {
+		const stillShown = () => shownOrganizationIdRef.current === organizationId;
+		// a crop for an organization no longer shown is dropped: its dialog closed on the switch
+		if (!stillShown()) return;
 		try {
 			setCropSrc(url);
-			setIsUploading(true);
+			setUploadingFor(organizationId);
 			const croppedFile = await ImageCropper.getFileFromUrl(url, 'logo.png');
 			const optimizedFile = await optimizeImage(croppedFile, {
 				maxWidth: 512,
@@ -105,15 +190,17 @@ export default function GeneralSettings() {
 			if (!response.ok) throw new Error('Failed to upload file');
 			const { storageId } = (await response.json()) as { storageId: GenericId<'_storage'> };
 			await updateOrganization({ logoId: storageId });
-			setImageLoadingStatus('loaded');
+			if (stillShown()) setImageLoadingStatus('loaded');
 			toast.success('Organization logo updated successfully');
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'An unknown error occurred';
 			toast.error(`Failed to update logo: ${message}`);
-			setCropSrc(previousLogo);
-			setImageLoadingStatus('error');
+			if (stillShown()) {
+				setCropSrc(previousLogo);
+				setImageLoadingStatus('error');
+			}
 		} finally {
-			setIsUploading(false);
+			setUploadingFor((current) => (current === organizationId ? null : current));
 		}
 	}
 
@@ -179,18 +266,27 @@ export default function GeneralSettings() {
 
 	if (!user || !activeOrganization) return null;
 	const displayedLogoSrc = cropSrc || activeOrganization.logo || undefined;
+	const croppedOrganizationId = activeOrganization.id;
+	const croppedPreviousLogo = activeOrganization.logo ?? '';
 	const showLogoOverlay =
-		!cropSrc.startsWith('blob:') && (isUploading || imageLoadingStatus === 'loading');
+		!cropSrc.startsWith('blob:') &&
+		(uploadingFor === activeOrganization.id || imageLoadingStatus === 'loading');
 
 	return (
-		<div className="flex w-full flex-col items-start gap-6">
+		<div ref={rootRef} tabIndex={-1} className="flex w-full flex-col items-start gap-6">
+			<p className="sr-only" role="status">
+				{organizationChange}
+			</p>
+			{/* a crop belongs to the organization it was opened on: a switch closes its dialog */}
 			<ImageCropper.Root
+				open={cropOpen}
+				onOpenChange={setCropOpen}
 				src={cropSrc}
 				onSrcChange={setCropSrc}
 				accept="image/*"
-				onCropped={handleCropped}
+				onCropped={(url) => handleCropped(url, croppedOrganizationId, croppedPreviousLogo)}
 			>
-				<ImageCropper.UploadTrigger>
+				<ImageCropper.UploadTrigger ref={logoTriggerRef}>
 					<div className="rounded-container relative cursor-pointer transition-all duration-200">
 						<Avatar.Root
 							key={logoKey}
@@ -234,6 +330,7 @@ export default function GeneralSettings() {
 					setIsEditing={setIsEditingName}
 					canEdit={isOwnerOrAdmin}
 					inputRef={nameInputRef}
+					editButtonRef={nameEditButtonRef}
 					onSubmit={handleNameSubmit}
 					ariaLabel="Edit organization name"
 				/>
@@ -246,6 +343,7 @@ export default function GeneralSettings() {
 					setIsEditing={setIsEditingSlug}
 					canEdit={isOwnerOrAdmin}
 					inputRef={slugInputRef}
+					editButtonRef={slugEditButtonRef}
 					onSubmit={handleSlugSubmit}
 					ariaLabel="Edit organization slug"
 					isSubmitting={isSavingSlug}
@@ -264,6 +362,7 @@ function InlineEditableField({
 	setIsEditing,
 	canEdit,
 	inputRef,
+	editButtonRef,
 	onSubmit,
 	ariaLabel,
 	isSubmitting = false
@@ -276,6 +375,7 @@ function InlineEditableField({
 	setIsEditing: (value: boolean) => void;
 	canEdit: boolean;
 	inputRef: React.RefObject<HTMLInputElement | null>;
+	editButtonRef: React.RefObject<HTMLButtonElement | null>;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 	ariaLabel: string;
 	isSubmitting?: boolean;
@@ -360,6 +460,7 @@ function InlineEditableField({
 							</span>
 						</div>
 						<button
+							ref={editButtonRef}
 							className="absolute inset-0 h-full w-full"
 							aria-label={ariaLabel}
 							type="button"
