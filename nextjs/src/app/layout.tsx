@@ -37,11 +37,13 @@ export default async function RootLayout({
 				await Promise.all([
 					fetchAuthQuery(api.users.queries.getActiveUser),
 					fetchAuthQuery(api.users.queries.listAccounts),
+					// A failed organization lookup throws: the page then loads it in the browser,
+					// and keeps the rest of the preload
 					organizationsEnabled
-						? fetchAuthQuery(api.organizations.queries.getActiveOrganization)
+						? fetchAuthQuery(api.organizations.queries.getActiveOrganization).catch(() => undefined)
 						: Promise.resolve(undefined),
 					organizationsEnabled
-						? fetchAuthQuery(api.organizations.queries.listOrganizations)
+						? fetchAuthQuery(api.organizations.queries.listOrganizations).catch(() => undefined)
 						: Promise.resolve(undefined),
 					organizationsEnabled
 						? fetchAuthQuery(api.organizations.invitations.queries.listInvitations)
