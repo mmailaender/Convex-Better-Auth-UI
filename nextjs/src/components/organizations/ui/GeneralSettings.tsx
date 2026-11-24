@@ -82,6 +82,8 @@ export default function GeneralSettings() {
 	const [uploadingFor, setUploadingFor] = useState<string | null>(null);
 	const [logoKey] = useState(0);
 	const [cropSrc, setCropSrc] = useState('');
+	// The crop dialog's state, so a switch can close it in place
+	const [cropOpen, setCropOpen] = useState(false);
 	const [isEditingName, setIsEditingName] = useState(false);
 	const [name, setName] = useState('');
 	const [isEditingSlug, setIsEditingSlug] = useState(false);
@@ -95,7 +97,6 @@ export default function GeneralSettings() {
 	const logoTriggerRef = useRef<HTMLLabelElement | null>(null);
 	const nameEditButtonRef = useRef<HTMLButtonElement | null>(null);
 	const slugEditButtonRef = useRef<HTMLButtonElement | null>(null);
-	const lastFocusedRef = useRef<Element | null>(null);
 	const [organizationChange, setOrganizationChange] = useState('');
 	const [focusAfterSwitch, setFocusAfterSwitch] = useState<SwitchFocusTarget | null>(null);
 
@@ -103,19 +104,9 @@ export default function GeneralSettings() {
 	const shownOrganizationIdRef = useRef<string | undefined>(undefined);
 	const activeOrganizationId = activeOrganization?.id;
 
-	useEffect(() => {
-		// The crop dialog, keyed by the organization, is gone by the time a switch is seen
-		const onFocusIn = (event: FocusEvent) => {
-			lastFocusedRef.current = event.target as Element | null;
-		};
-		document.addEventListener('focusin', onFocusIn);
-		return () => document.removeEventListener('focusin', onFocusIn);
-	}, []);
-
 	/* Another organization is active: an edit in progress belonged to the one before. It closes,
-	   and so does the crop dialog (keyed by the organization); focus in either moves to its
-	   control in the settings, and the change is announced. Before paint, while the name and slug
-	   forms still hold their focus. */
+	   and so does the crop dialog; focus in either moves to its control in the settings, and the
+	   change is announced. Before paint, while the name and slug forms still hold their focus. */
 	useLayoutEffect(() => {
 		const previous = shownOrganizationIdRef.current;
 		shownOrganizationIdRef.current = activeOrganizationId;
@@ -128,18 +119,15 @@ export default function GeneralSettings() {
 		if (previous === undefined || previous === activeOrganizationId) return;
 
 		const focused = document.activeElement;
-		const lastFocused = lastFocusedRef.current;
-		const fromCrop =
-			!!lastFocused &&
-			!lastFocused.isConnected &&
-			!!lastFocused.closest('[role="dialog"]') &&
-			(focused === null || focused === document.body);
+		// the crop dialog is modal: while it is open, focus is in it
+		const fromCrop = cropOpen;
 		const fromName = isEditingName && !!nameInputRef.current?.form?.contains(focused);
 		const fromSlug = isEditingSlug && !!slugInputRef.current?.form?.contains(focused);
 		setCropSrc('');
 		if (!isEditingName && !isEditingSlug && !fromCrop) return;
 		setIsEditingName(false);
 		setIsEditingSlug(false);
+		setCropOpen(false);
 		setOrganizationChange(
 			`The active organization changed to ${activeOrganization?.name ?? ''}. Your edit was closed.`
 		);
@@ -154,7 +142,8 @@ export default function GeneralSettings() {
 		if (!focusAfterSwitch) return;
 		// without the edit right in the new organization, focus stays in the settings
 		const control = {
-			logo: logoTriggerRef.current,
+			// the trigger is a label: its file input is the control that takes focus
+			logo: logoTriggerRef.current?.querySelector<HTMLInputElement>('input[type="file"]'),
 			name: nameEditButtonRef.current,
 			slug: slugEditButtonRef.current
 		}[focusAfterSwitch];
@@ -288,9 +277,10 @@ export default function GeneralSettings() {
 			<p className="sr-only" role="status">
 				{organizationChange}
 			</p>
-			{/* a crop belongs to the organization it was opened on: another one closes it */}
+			{/* a crop belongs to the organization it was opened on: a switch closes its dialog */}
 			<ImageCropper.Root
-				key={activeOrganization.id}
+				open={cropOpen}
+				onOpenChange={setCropOpen}
 				src={cropSrc}
 				onSrcChange={setCropSrc}
 				accept="image/*"

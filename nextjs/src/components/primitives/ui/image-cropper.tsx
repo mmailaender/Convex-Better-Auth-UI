@@ -122,7 +122,9 @@ export function Root({
 	onSrcChange,
 	accept = 'image/*',
 	onCropped,
-	onUnsupportedFile
+	onUnsupportedFile,
+	open: openProp,
+	onOpenChange
 }: {
 	children: ReactNode;
 	src: string;
@@ -130,14 +132,30 @@ export function Root({
 	accept?: string;
 	onCropped: (url: string) => void | Promise<void>;
 	onUnsupportedFile?: (file: File) => void;
+	/** Whether the crop dialog is open, to close it from outside; uncontrolled when left out */
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }) {
 	const inputId = useId();
 	const createdUrlsRef = useRef<string[]>([]);
-	const [open, setOpen] = useState(false);
+	const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+	const open = openProp ?? uncontrolledOpen;
+	const openRef = useRef(open);
+	const setOpen = useCallback(
+		(value: boolean) => {
+			if (openProp === undefined) setUncontrolledOpen(value);
+			onOpenChange?.(value);
+		},
+		[onOpenChange, openProp]
+	);
 	const [tempUrl, setTempUrl] = useState<string>();
 	const [pixelCrop, setPixelCrop] = useState<Area>();
 	const disposedRef = useRef(false);
 	void src;
+
+	useEffect(() => {
+		openRef.current = open;
+	}, [open]);
 
 	useEffect(() => {
 		disposedRef.current = false;
@@ -154,7 +172,7 @@ export function Root({
 		setTempUrl(undefined);
 		setPixelCrop(undefined);
 		setOpen(false);
-	}, []);
+	}, [setOpen]);
 
 	const handleUpload = useCallback(
 		(file: File) => {
@@ -168,7 +186,7 @@ export function Root({
 			setTempUrl(nextTempUrl);
 			setOpen(true);
 		},
-		[onUnsupportedFile]
+		[onUnsupportedFile, setOpen]
 	);
 
 	const handleCrop = useCallback(async () => {
@@ -176,9 +194,9 @@ export function Root({
 
 		const croppedUrl = await getCroppedImg(tempUrl, pixelCrop);
 		/* A crop answers to the callback of the moment it was confirmed, and to nothing once the
-		   cropper is gone, so a caller that binds the callback to what it crops for never has a crop
-		   land on something else. */
-		if (disposedRef.current) {
+		   cropper is gone or its dialog was closed from outside meanwhile, so a caller that binds the
+		   callback to what it crops for never has a crop land on something else. */
+		if (disposedRef.current || !openRef.current) {
 			URL.revokeObjectURL(croppedUrl);
 			return;
 		}
@@ -186,7 +204,7 @@ export function Root({
 		onSrcChange(croppedUrl);
 		setOpen(false);
 		await onCropped(croppedUrl);
-	}, [onCropped, onSrcChange, pixelCrop, tempUrl]);
+	}, [onCropped, onSrcChange, pixelCrop, setOpen, tempUrl]);
 
 	const contextValue = useMemo<ImageCropperContextValue>(
 		() => ({
@@ -200,7 +218,7 @@ export function Root({
 			handleCrop,
 			setPixelCrop
 		}),
-		[accept, handleCancel, handleCrop, handleUpload, inputId, open, tempUrl]
+		[accept, handleCancel, handleCrop, handleUpload, inputId, open, setOpen, tempUrl]
 	);
 
 	return (
