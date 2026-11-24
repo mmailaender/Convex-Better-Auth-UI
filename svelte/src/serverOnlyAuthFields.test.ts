@@ -343,7 +343,7 @@ describe('user activeOrganizationId is server-only', () => {
 			return { owner, second };
 		});
 
-		await t
+		const result = await t
 			.withIdentity(owner.identity)
 			.mutation(api.organizations.mutations.setActiveOrganization, { organizationId: second });
 
@@ -351,6 +351,7 @@ describe('user activeOrganizationId is server-only', () => {
 			user: second,
 			session: second
 		});
+		expect(result).toEqual({ changed: true });
 	});
 
 	it('setActiveOrganization refuses an organization the user does not belong to', async () => {
@@ -378,11 +379,54 @@ describe('user activeOrganizationId is server-only', () => {
 			seedMember(ctx, 'unset@example.com', { activeOnUser: false })
 		);
 
-		await t
+		const result = await t
 			.withIdentity(owner.identity)
 			.mutation(api.organizations.mutations.setActiveOrganization, {});
 
 		expect((await readActiveOrganization(t, owner.identity)).user).toBe(owner.organizationId);
+		expect(result).toEqual({ changed: true });
+	});
+
+	it('setActiveOrganization without an id answers unchanged when the recorded organization stays', async () => {
+		const t = setup();
+		const owner = await t.run((ctx) => seedMember(ctx, 'kept@example.com'));
+
+		const result = await t
+			.withIdentity(owner.identity)
+			.mutation(api.organizations.mutations.setActiveOrganization, {});
+
+		expect(result).toEqual({ changed: false });
+		expect((await readActiveOrganization(t, owner.identity)).user).toBe(owner.organizationId);
+	});
+
+	it('setActiveOrganization without an id replaces a recorded organization the user was removed from', async () => {
+		const t = setup();
+		const { owner, second } = await t.run(async (ctx) => {
+			const owner = await seedMember(ctx, 'removed@example.com');
+			const second = await createOrganization(ctx);
+			await addMember(ctx, second, owner.identity.subject, 'member');
+			// Removed by another owner: Better Auth's removeMember leaves the user's record alone
+			await ctx.runMutation(components.betterAuth.adapter.deleteOne, {
+				input: {
+					model: 'member',
+					where: [
+						{ field: 'organizationId', value: owner.organizationId },
+						{ field: 'userId', value: owner.identity.subject, connector: 'AND' }
+					]
+				}
+			});
+			return { owner, second };
+		});
+
+		const result = await t
+			.withIdentity(owner.identity)
+			.mutation(api.organizations.mutations.setActiveOrganization, {});
+
+		expect(result).toEqual({ changed: true });
+		expect(await readActiveOrganization(t, owner.identity)).toEqual({
+			user: second,
+			session: second
+		});
 	});
 
 	it('leaveOrganization moves the user to a remaining organization', async () => {

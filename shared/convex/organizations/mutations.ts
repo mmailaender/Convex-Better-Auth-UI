@@ -46,14 +46,18 @@ export const _createOrganization = internalMutation({
 
 /**
  * Sets the active organization for the current user. If no organizationId is provided, try getting the activeOrganization from user table, if not found, the first organization in the list will be set as active.
+ * Answers whether the user's active organization changed, so a caller that only filled in a
+ * missing organization can leave the page alone when nothing moved.
  */
 export const setActiveOrganization = mutation({
 	args: {
 		organizationId: v.optional(v.string())
 	},
+	returns: v.object({ changed: v.boolean() }),
 	handler: async (ctx, args) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 		if (!user) throw new ConvexError('Not authenticated');
+		const before = user.activeOrganizationId ?? null;
 
 		const auth = createAuth(ctx);
 
@@ -86,18 +90,14 @@ export const setActiveOrganization = mutation({
 					throw new ConvexError('No organizations found');
 				}
 
-				if (user.activeOrganizationId) {
-					const org = (
-						await auth.api.listOrganizations({
-							headers: await authComponent.getHeaders(ctx)
-						})
-					).find((org) => org.id === user.activeOrganizationId);
-					if (org) {
-						await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
-							userId: user._id,
-							organizationId: org.id
-						});
-					}
+				// The recorded organization stays while the user is still its member. One they were
+				// removed from (an owner's `removeMember` leaves it recorded) gives way to the first.
+				const recorded = organizations.find((org) => org.id === user.activeOrganizationId);
+				if (recorded) {
+					await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
+						userId: user._id,
+						organizationId: recorded.id
+					});
 				} else {
 					const betterAuthOrg = organizations[0];
 					await auth.api.setActiveOrganization({
@@ -117,6 +117,8 @@ export const setActiveOrganization = mutation({
 				}
 			}
 		}
+		const after = await authComponent.safeGetAuthUser(ctx);
+		return { changed: (after?.activeOrganizationId ?? null) !== before };
 	}
 });
 
