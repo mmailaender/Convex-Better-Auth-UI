@@ -23,69 +23,43 @@ function withRedirect(to: string, originalPath: string, searchParams: URLSearchP
  * Migrated from middleware due to Better Auth not supporting middleware API calls
  */
 export default async function ActiveOrgPage({ params, searchParams }: ActiveOrgPageProps) {
-	try {
-		// Await the params and searchParams
-		const resolvedParams = await params;
-		const resolvedSearchParams = await searchParams;
+	// Await the params and searchParams
+	const resolvedParams = await params;
+	const resolvedSearchParams = await searchParams;
 
-		// Fetch the active organization using Convex HTTP client for server components
-		const activeOrganization = await fetchAuthQuery(
-			api.organizations.queries.getActiveOrganization
+	// Build the original path from params
+	const pathSegments = resolvedParams.all || [];
+	const originalPath = `/active-organization/${pathSegments.join('/')}`;
+
+	// Convert searchParams to URLSearchParams for easier handling
+	const urlSearchParams = new URLSearchParams();
+	Object.entries(resolvedSearchParams).forEach(([key, value]) => {
+		if (Array.isArray(value)) {
+			value.forEach((v) => urlSearchParams.append(key, v));
+		} else if (value !== undefined) {
+			urlSearchParams.set(key, value);
+		}
+	});
+
+	/* `null` is a confirmed absence: no one signed in, or no active organization. A lookup that
+	   fails throws, and the error reaches Next.js's error page: sending a user who has an
+	   organization to create one would take the failure for "none". */
+	const activeOrganization = await fetchAuthQuery(api.organizations.queries.getActiveOrganization);
+
+	if (activeOrganization) {
+		// Replace /active-organization with the organization slug
+		const newPath = originalPath.replace(
+			/^\/active-organization(?=\/|$)/,
+			`/${activeOrganization.slug}`
 		);
 
-		// Build the original path from params
-		const pathSegments = resolvedParams.all || [];
-		const originalPath = `/active-organization/${pathSegments.join('/')}`;
+		// Include query parameters if they exist
+		const fullUrl = newPath + (urlSearchParams.toString() ? `?${urlSearchParams.toString()}` : '');
 
-		// Convert searchParams to URLSearchParams for easier handling
-		const urlSearchParams = new URLSearchParams();
-		Object.entries(resolvedSearchParams).forEach(([key, value]) => {
-			if (Array.isArray(value)) {
-				value.forEach((v) => urlSearchParams.append(key, v));
-			} else if (value !== undefined) {
-				urlSearchParams.set(key, value);
-			}
-		});
-
-		if (activeOrganization) {
-			// Replace /active-organization with the organization slug
-			const newPath = originalPath.replace(
-				/^\/active-organization(?=\/|$)/,
-				`/${activeOrganization.slug}`
-			);
-
-			// Include query parameters if they exist
-			const fullUrl =
-				newPath + (urlSearchParams.toString() ? `?${urlSearchParams.toString()}` : '');
-
-			// Redirect to the organization-specific URL
-			redirect(fullUrl);
-		}
-
-		// If no active organization, redirect to create one
-		redirect(withRedirect('/organization/create', originalPath, urlSearchParams));
-	} catch (error) {
-		// Re-throw Next.js redirect errors (they're not actual errors)
-		if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-			throw error;
-		}
-
-		console.error('Error in active org redirect:', error);
-
-		// On actual error, redirect to org creation as fallback
-		const resolvedParams = await params;
-		const resolvedSearchParams = await searchParams;
-		const pathSegments = resolvedParams.all || [];
-		const originalPath = `/active-organization/${pathSegments.join('/')}`;
-		const urlSearchParams = new URLSearchParams();
-		Object.entries(resolvedSearchParams).forEach(([key, value]) => {
-			if (Array.isArray(value)) {
-				value.forEach((v) => urlSearchParams.append(key, v));
-			} else if (value !== undefined) {
-				urlSearchParams.set(key, value);
-			}
-		});
-
-		redirect(withRedirect('/organization/create', originalPath, urlSearchParams));
+		// Redirect to the organization-specific URL
+		redirect(fullUrl);
 	}
+
+	// If no active organization, redirect to create one
+	redirect(withRedirect('/organization/create', originalPath, urlSearchParams));
 }

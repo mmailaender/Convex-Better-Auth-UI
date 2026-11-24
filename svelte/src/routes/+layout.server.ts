@@ -30,10 +30,13 @@ export const load = (async ({ locals }) => {
 	] = await Promise.all([
 		client.query(api.users.queries.getActiveUser),
 		client.query(api.users.queries.listAccounts),
+		// A failed organization lookup throws: the page then loads it in the browser instead
 		orgs
-			? client.query(api.organizations.queries.getActiveOrganization)
+			? client.query(api.organizations.queries.getActiveOrganization).catch(() => undefined)
 			: Promise.resolve(undefined),
-		orgs ? client.query(api.organizations.queries.listOrganizations) : Promise.resolve(undefined),
+		orgs
+			? client.query(api.organizations.queries.listOrganizations).catch(() => undefined)
+			: Promise.resolve(undefined),
 		orgs
 			? client.query(api.organizations.invitations.queries.listInvitations)
 			: Promise.resolve(undefined),

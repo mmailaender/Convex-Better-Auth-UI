@@ -226,8 +226,9 @@
 	}
 
 	// Check on mount if there is an active organization and if not, use the first organization from listOrganizations and call setActiveOrg (We use effect instead of useMount as organizations and activeOrganization are loaded async)
+	// Only on a confirmed absence (null): not while the active organization loads or after its lookup failed
 	$effect(() => {
-		if (organizationList && organizationList.length > 0 && !activeOrganization) {
+		if (organizationList && organizationList.length > 0 && activeOrganization === null) {
 			updateActiveOrg();
 		}
 	});
