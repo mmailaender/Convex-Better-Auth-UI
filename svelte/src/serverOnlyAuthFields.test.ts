@@ -399,6 +399,36 @@ describe('user activeOrganizationId is server-only', () => {
 		expect((await readActiveOrganization(t, owner.identity)).user).toBe(owner.organizationId);
 	});
 
+	it('setActiveOrganization without an id replaces a recorded organization the user was removed from', async () => {
+		const t = setup();
+		const { owner, second } = await t.run(async (ctx) => {
+			const owner = await seedMember(ctx, 'removed@example.com');
+			const second = await createOrganization(ctx);
+			await addMember(ctx, second, owner.identity.subject, 'member');
+			// Removed by another owner: Better Auth's removeMember leaves the user's record alone
+			await ctx.runMutation(components.betterAuth.adapter.deleteOne, {
+				input: {
+					model: 'member',
+					where: [
+						{ field: 'organizationId', value: owner.organizationId },
+						{ field: 'userId', value: owner.identity.subject, connector: 'AND' }
+					]
+				}
+			});
+			return { owner, second };
+		});
+
+		const result = await t
+			.withIdentity(owner.identity)
+			.mutation(api.organizations.mutations.setActiveOrganization, {});
+
+		expect(result).toEqual({ changed: true });
+		expect(await readActiveOrganization(t, owner.identity)).toEqual({
+			user: second,
+			session: second
+		});
+	});
+
 	it('leaveOrganization moves the user to a remaining organization', async () => {
 		const t = setup();
 		const { owner, second } = await t.run(async (ctx) => {

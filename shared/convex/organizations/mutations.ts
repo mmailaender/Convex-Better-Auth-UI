@@ -90,18 +90,14 @@ export const setActiveOrganization = mutation({
 					throw new ConvexError('No organizations found');
 				}
 
-				if (user.activeOrganizationId) {
-					const org = (
-						await auth.api.listOrganizations({
-							headers: await authComponent.getHeaders(ctx)
-						})
-					).find((org) => org.id === user.activeOrganizationId);
-					if (org) {
-						await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
-							userId: user._id,
-							organizationId: org.id
-						});
-					}
+				// The recorded organization stays while the user is still its member. One they were
+				// removed from (an owner's `removeMember` leaves it recorded) gives way to the first.
+				const recorded = organizations.find((org) => org.id === user.activeOrganizationId);
+				if (recorded) {
+					await ctx.runMutation(components.betterAuth.organization.setUserActiveOrganization, {
+						userId: user._id,
+						organizationId: recorded.id
+					});
 				} else {
 					const betterAuthOrg = organizations[0];
 					await auth.api.setActiveOrganization({
