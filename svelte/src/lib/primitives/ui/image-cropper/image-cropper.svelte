@@ -7,6 +7,7 @@
 	let {
 		id = crypto.randomUUID(),
 		src = $bindable(''),
+		open = $bindable(false),
 		onCropped = () => {},
 		onUnsupportedFile = () => {},
 		children,
@@ -18,6 +19,10 @@
 		src: box.with(
 			() => src,
 			(v) => (src = v)
+		),
+		open: box.with(
+			() => open,
+			(v) => (open = v)
 		),
 		onCropped: box.with(() => onCropped),
 		onUnsupportedFile: box.with(() => onUnsupportedFile)

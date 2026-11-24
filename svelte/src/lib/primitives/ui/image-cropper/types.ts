@@ -22,6 +22,8 @@ export type WithoutChild<T> = Omit<T, 'child'>;
 export type ImageCropperRootPropsWithoutHTML = WithChildren<{
 	id?: string;
 	src?: string;
+	/** Whether the crop dialog is open: bind it to close the dialog from outside */
+	open?: boolean;
 	onCropped?: (url: string) => void;
 	onUnsupportedFile?: (file: File) => void;
 }>;

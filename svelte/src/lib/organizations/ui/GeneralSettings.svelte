@@ -94,6 +94,8 @@
 	let uploadingFor: string | null = $state(null);
 	let logoKey: number = $state(0);
 	let cropSrc: string = $state('');
+	// The crop dialog's state, so a switch can close it (a remount would leave it stuck open)
+	let cropOpen: boolean = $state(false);
 
 	// Inline name editing state
 	let isEditingName: boolean = $state(false);
@@ -116,7 +118,7 @@
 	let organizationChange: string = $state('');
 
 	/* Initialize state when organization data is available. Before the DOM updates, so a switch
-	   still sees where focus was before the crop dialog, keyed by the organization, goes. */
+	   still sees where focus was in the name and slug forms. */
 	let shownOrganizationId: string | undefined;
 	$effect.pre(() => {
 		if (!activeOrganization) {
@@ -144,18 +146,18 @@
 	});
 
 	/** Another organization is active: an edit in progress belonged to the one before. It closes,
-	 * and so does the crop dialog (keyed by the organization); focus in either moves to its control
-	 * in the settings, and the change is announced. */
+	 * and so does the crop dialog; focus in either moves to its control in the settings, and the
+	 * change is announced. */
 	function closeEditsForSwitch(organizationName: string): void {
 		const focused = document.activeElement;
-		// the settings may sit in a dialog of their own; focus in another dialog is in the crop dialog
-		const focusedDialog = focused?.closest('[role="dialog"]');
-		const fromCrop = !!focusedDialog && !!rootEl && !focusedDialog.contains(rootEl);
+		// the crop dialog is modal: while it is open, focus is in it
+		const fromCrop = cropOpen;
 		if (!isEditingName && !isEditingSlug && !fromCrop) return;
 		const fromName = isEditingName && !!nameFormEl?.contains(focused);
 		const fromSlug = isEditingSlug && !!slugFormEl?.contains(focused);
 		isEditingName = false;
 		isEditingSlug = false;
+		cropOpen = false;
 		organizationChange = `The active organization changed to ${organizationName}. Your edit was closed.`;
 		if (!fromName && !fromSlug && !fromCrop) return;
 		void tick().then(() => {
@@ -174,7 +176,7 @@
 
 	// Handlers
 
-	/** The crop callback of one organization's cropper: each crop carries the organization it was
+	/** The crop callback for the organization shown: each crop carries the organization it was
 	 * made for, never one shown later (the cropper reads it when Upload is pressed). */
 	function croppedFor(organizationId: string): (url: string) => void {
 		return (url) => void handleCropped(url, organizationId);
@@ -339,58 +341,56 @@
 {#if user && activeOrganization}
 	<div bind:this={rootEl} tabindex="-1" class="flex w-full flex-col items-start gap-6">
 		<p class="sr-only" role="status">{organizationChange}</p>
-		<!-- a crop belongs to the organization it was opened on: another one closes it -->
-		{#key activeOrganization.id}
-			<ImageCropper.Root
-				bind:src={cropSrc}
-				accept="image/*"
-				onCropped={croppedFor(activeOrganization.id)}
-			>
-				<ImageCropper.UploadTrigger bind:ref={logoTriggerEl}>
-					<div class="rounded-container relative cursor-pointer transition-all duration-200">
-						{#key logoKey}
-							<Avatar.Root
-								class="rounded-container size-20"
-								onStatusChange={(e) => (imageLoadingStatus = e.status)}
-							>
-								<Avatar.Image
-									src={displayedLogoSrc}
-									alt={activeOrganization.name || 'Organization'}
-								/>
-								<Avatar.Fallback
-									class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
-								>
-									<Building2Icon class="text-surface-700-300 size-10" />
-								</Avatar.Fallback>
-							</Avatar.Root>
-						{/key}
-
-						{#if showLogoOverlay}
-							<div
-								class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
-							>
-								<div
-									class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
-								></div>
-							</div>
-						{/if}
-
-						<div
-							class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
+		<!-- a crop belongs to the organization it was opened on: a switch closes its dialog -->
+		<ImageCropper.Root
+			bind:src={cropSrc}
+			bind:open={cropOpen}
+			accept="image/*"
+			onCropped={croppedFor(activeOrganization.id)}
+		>
+			<ImageCropper.UploadTrigger bind:ref={logoTriggerEl}>
+				<div class="rounded-container relative cursor-pointer transition-all duration-200">
+					{#key logoKey}
+						<Avatar.Root
+							class="rounded-container size-20"
+							onStatusChange={(e) => (imageLoadingStatus = e.status)}
 						>
-							<PencilIcon class="size-4" />
+							<Avatar.Image
+								src={displayedLogoSrc}
+								alt={activeOrganization.name || 'Organization'}
+							/>
+							<Avatar.Fallback
+								class="bg-surface-300-700 hover:bg-surface-400-600/80 rounded-container duration-150 ease-in-out"
+							>
+								<Building2Icon class="text-surface-700-300 size-10" />
+							</Avatar.Fallback>
+						</Avatar.Root>
+					{/key}
+					{#if showLogoOverlay}
+						<div
+							class="bg-surface-50-950 rounded-container pointer-events-none absolute inset-0 flex items-center justify-center"
+						>
+							<div
+								class="h-6 w-6 animate-spin rounded-full border-2 border-white border-b-transparent"
+							></div>
 						</div>
+					{/if}
+
+					<div
+						class="badge-icon preset-filled-surface-300-700 ring-surface-50-950 dark:ring-surface-100-900 absolute -right-1.5 -bottom-1.5 size-3 rounded-full ring-4"
+					>
+						<PencilIcon class="size-4" />
 					</div>
-				</ImageCropper.UploadTrigger>
-				<ImageCropper.Dialog>
-					<ImageCropper.Cropper cropShape="rect" />
-					<ImageCropper.Controls>
-						<ImageCropper.Cancel />
-						<ImageCropper.Crop>Upload</ImageCropper.Crop>
-					</ImageCropper.Controls>
-				</ImageCropper.Dialog>
-			</ImageCropper.Root>
-		{/key}
+				</div>
+			</ImageCropper.UploadTrigger>
+			<ImageCropper.Dialog>
+				<ImageCropper.Cropper cropShape="rect" />
+				<ImageCropper.Controls>
+					<ImageCropper.Cancel />
+					<ImageCropper.Crop>Upload</ImageCropper.Crop>
+				</ImageCropper.Controls>
+			</ImageCropper.Dialog>
+		</ImageCropper.Root>
 
 		<!-- Inline editable organization name -->
 		<div class="flex w-full flex-col gap-3">

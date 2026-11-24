@@ -16,6 +16,7 @@ export const VALID_IMAGE_TYPES = [
 
 export type ImageCropperRootProps = WritableBoxedValues<{
 	src: string;
+	open: boolean;
 }> &
 	ReadableBoxedValues<{
 		id: string;
@@ -26,7 +27,6 @@ export type ImageCropperRootProps = WritableBoxedValues<{
 class ImageCropperRootState {
 	#createdUrls = $state<string[]>([]);
 	#disposed = false;
-	open = $state(false);
 	tempUrl = $state<string>();
 	pixelCrop = $state<CropArea>();
 
@@ -57,17 +57,29 @@ class ImageCropperRootState {
 	async onCrop() {
 		if (!this.pixelCrop || !this.tempUrl) return;
 		/* A crop answers to the callback of the moment it was confirmed, and to nothing once the
-		   cropper is gone, so a caller that binds the callback to what it crops for never has a
-		   crop land on something else. */
+		   cropper is gone or its dialog was closed from outside meanwhile, so a caller that binds
+		   the callback to what it crops for never has a crop land on something else. */
 		const onCropped = this.opts.onCropped.current;
 
 		const cropped = await getCroppedImg(this.tempUrl, this.pixelCrop);
-		if (this.#disposed) return;
+		if (this.#disposed || !this.open) {
+			URL.revokeObjectURL(cropped);
+			return;
+		}
 		this.opts.src.current = cropped;
 
 		this.open = false;
 
 		onCropped(cropped);
+	}
+
+	/** Whether the crop dialog is open; a caller can bind it to close the dialog itself */
+	get open() {
+		return this.opts.open.current;
+	}
+
+	set open(value: boolean) {
+		this.opts.open.current = value;
 	}
 
 	get src() {
