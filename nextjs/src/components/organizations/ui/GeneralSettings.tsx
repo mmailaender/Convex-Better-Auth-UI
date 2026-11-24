@@ -18,9 +18,9 @@ import { useActiveOrganizationData, useActiveUserData } from '@/lib/auth/hooks';
  * The last answer held through a lookup that failed or still loads (`undefined`); `null`, a
  * confirmed absence, and a signed-out session drop it.
  */
-function useHeldAnswer<T>(live: T | null | undefined, signedIn: boolean): T | undefined {
+function useHeldAnswer<T>(live: T | null | undefined, signedOut: boolean): T | undefined {
 	const [held, setHeld] = useState<T | undefined>(undefined);
-	const current = !signedIn ? undefined : live === undefined ? held : (live ?? undefined);
+	const current = signedOut ? undefined : live === undefined ? held : (live ?? undefined);
 	if (current !== held) setHeld(current);
 	return current;
 }
@@ -30,14 +30,17 @@ type SwitchFocusTarget = 'logo' | 'name' | 'slug';
 export default function GeneralSettings() {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { isAuthenticated } = useConvexAuth();
+	const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
 	/* Both queries answer null only for an absence that lasts: the session or the user is gone,
 	   the user has no active organization, or is no longer its member. A lookup that fails reads
 	   as undefined, like one still loading. Holding the last answer through those keeps the form
 	   mounted with a name being typed and its focus; null drops it, which closes any edit open on
-	   it. Another organization's answer replaces the held one. */
-	const user = useHeldAnswer(useActiveUserData(), isAuthenticated);
-	const activeOrganization = useHeldAnswer(useActiveOrganizationData(), isAuthenticated);
+	   it. Another organization's answer replaces the held one. Convex reports isAuthenticated
+	   false while auth reloads too (a token refresh, a reconnect): only a settled sign-out drops
+	   it. */
+	const signedOut = !isAuthLoading && !isAuthenticated;
+	const user = useHeldAnswer(useActiveUserData(), signedOut);
+	const activeOrganization = useHeldAnswer(useActiveOrganizationData(), signedOut);
 	const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 	const updateOrganization = useMutation(
 		api.organizations.mutations.updateOrganizationProfile

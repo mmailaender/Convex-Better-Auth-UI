@@ -71,18 +71,20 @@
 	   an error instead. Holding the last answer through an error, or a query still loading, keeps
 	   the form mounted with a name being typed and its focus; null drops it, which closes any edit
 	   open on it. A signed-out session skips the queries and holds nothing; another organization's
-	   answer replaces the held one. */
+	   answer replaces the held one. isAuthenticated is false while auth reloads too: only a
+	   settled sign-out drops what is held. */
+	const signedOut = $derived(!auth.isLoading && !auth.isAuthenticated);
 	let heldUser: NonNullable<GetActiveUserType> | undefined;
 	let heldOrganization: NonNullable<GetActiveOrganizationType> | undefined;
 	const user = $derived.by(() => {
 		const live = userResponse.data;
-		if (!auth.isAuthenticated) heldUser = undefined;
+		if (signedOut) heldUser = undefined;
 		else if (live !== undefined) heldUser = live ?? undefined;
 		return heldUser;
 	});
 	const activeOrganization = $derived.by(() => {
 		const live = organizationResponse.data;
-		if (!auth.isAuthenticated) heldOrganization = undefined;
+		if (signedOut) heldOrganization = undefined;
 		else if (live !== undefined) heldOrganization = live ?? undefined;
 		return heldOrganization;
 	});
