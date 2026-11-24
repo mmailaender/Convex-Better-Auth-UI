@@ -2,7 +2,12 @@
 
 import { useMemo } from 'react';
 import { useConvexAuth, useQueries, useQuery } from 'convex/react';
-import type { FunctionReference, FunctionReturnType } from 'convex/server';
+import {
+	getFunctionName,
+	makeFunctionReference,
+	type FunctionReference,
+	type FunctionReturnType
+} from 'convex/server';
 
 import { api } from '@/convex/_generated/api';
 import { preferInitialData, useInitialAuthData } from '@/lib/auth/initial-data';
@@ -16,9 +21,14 @@ import { preferInitialData, useInitialAuthData } from '@/lib/auth/initial-data';
 function useQueryUnlessFailed<
 	Query extends FunctionReference<'query', 'public', Record<string, never>>
 >(query: Query, skip: boolean): FunctionReturnType<Query> | undefined {
+	/* Keyed by the function's name, as `useQuery` does: `api.x.y` is a proxy that hands out a new
+	   reference on every access, and a new request on every render makes `useQueries` set state
+	   during render, which React stops as an infinite loop. */
+	const name = getFunctionName(query);
 	const queries = useMemo(
-		(): Parameters<typeof useQueries>[0] => (skip ? {} : { answer: { query, args: {} } }),
-		[query, skip]
+		(): Parameters<typeof useQueries>[0] =>
+			skip ? {} : { answer: { query: makeFunctionReference<'query'>(name), args: {} } },
+		[name, skip]
 	);
 	const answer: unknown = useQueries(queries).answer;
 	return answer instanceof Error ? undefined : (answer as FunctionReturnType<Query> | undefined);
