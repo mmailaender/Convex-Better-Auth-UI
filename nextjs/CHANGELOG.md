@@ -1,5 +1,12 @@
 # @auth/nextjs
 
+## 0.4.1
+
+### Patch Changes
+
+- 811d72c: fix(emails): The email check now gives the external email verifier 8 seconds. Before, its request had no time limit, so one slow answer kept the sign-in or sign-up screen waiting with no feedback. When the limit passes, the check reports its existing "Error processing email verification" result, and the person sees the existing error state and can try again. Results, messages and the behaviour without a verifier token are unchanged.
+- 47d37b0: fix(organizations): The organization switcher's button now always has an accessible name. Its only name came from the active organization's name, so while that was loading, screen readers met an unnamed button, and axe reported `button-name`. It now reads "Switch organization" while loading and "Organization: <name>" once the name is known. The visible text is unchanged.
+
 ## 0.4.0
 
 ### Minor Changes
