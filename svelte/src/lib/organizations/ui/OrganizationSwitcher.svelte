@@ -270,8 +270,12 @@
 	<!-- Gate 5: Has organizations - show the switcher -->
 	<Popover.Root bind:open={switcherPopoverOpen} positioning={{ placement: popoverPlacement }}>
 		<WaitsForHydration>
+			<!-- Named on its own: while the active organization loads, the button has no text. -->
 			<Popover.Trigger
 				class="border-surface-200-800 rounded-container flex w-32 flex-row items-center justify-between border p-1 pr-2 duration-200 ease-in-out sm:w-40"
+				aria-label={activeOrganization?.name
+					? `Organization: ${activeOrganization.name}`
+					: 'Switch organization'}
 			>
 				<div class="flex w-full max-w-64 items-center gap-2 overflow-hidden sm:gap-3">
 					<Avatar.Root class="rounded-container size-8 shrink-0">
