@@ -11,6 +11,13 @@ export interface VerifyEmailReturnData {
 }
 
 /**
+ * How long the check waits for the email verifier. Its answers usually take well under a second;
+ * a request that hangs would otherwise keep the sign-in or sign-up screen waiting with no feedback.
+ * When the limit passes, the check reports the verification error and the person can try again.
+ */
+export const EMAIL_VERIFIER_TIME_LIMIT_MS = 8_000;
+
+/**
  * Function to verify an email address
  * Validates format and deliverability using an external service
  */
@@ -31,7 +38,8 @@ export default async function validateEmail(
 		}
 
 		const response = await fetch(
-			`https://emailverifier.reoon.com/api/v1/verify?email=${encodeURIComponent(email)}&key=${verifierToken}&mode=quick`
+			`https://emailverifier.reoon.com/api/v1/verify?email=${encodeURIComponent(email)}&key=${verifierToken}&mode=quick`,
+			{ signal: AbortSignal.timeout(EMAIL_VERIFIER_TIME_LIMIT_MS) }
 		);
 
 		if (!response.ok) {
